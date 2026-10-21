@@ -1,0 +1,124 @@
+"""Step 6 (CODE): compare with the previous run. Changes, no-changes and zeros are all reported."""
+
+from __future__ import annotations
+
+import json
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from airtime.agents.visibility.verify import Counts
+
+CHANNEL_LABELS = {"api": "API", "app_pasted": "pasted from app"}
+PROVIDER_LABELS = {"gemini": "Gemini", "chatgpt": "ChatGPT", "claude": "Claude",
+                   "mixed": "ChatGPT/Gemini/Claude", "fake": "Fake"}
+
+
+def scope_label(provider: str, channel: str) -> str:
+    return f"{PROVIDER_LABELS.get(provider, provider)} ({CHANNEL_LABELS.get(channel, channel)})"
+
+
+def pct(num: int, den: int) -> str:
+    return "n/a" if den == 0 else f"{round(100 * num / den)}%"
+
+
+def save_counts(conn, *, store_id: int, date: str, provider: str, channel: str,
+                run_id: int | None, counts: Counts, note: str | None = None) -> None:
+    """Upsert the day's counts. A re-run on the same day replaces that day's row."""
+    conn.execute(
+        """INSERT INTO daily_summary (store_id, date, provider, channel, run_id, asked, no_answer,
+               needs_review, our_mentions, total_answers, top_competitor, top_competitor_mentions,
+               area_mentions, area_answers, area_rate, no_area_mentions, no_area_answers,
+               no_area_rate, web_search_answers, competitors, our_answer_ids, note)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT (store_id, date, provider, channel) DO UPDATE SET
+               run_id=excluded.run_id, asked=excluded.asked, no_answer=excluded.no_answer,
+               needs_review=excluded.needs_review, our_mentions=excluded.our_mentions,
+               total_answers=excluded.total_answers, top_competitor=excluded.top_competitor,
+               top_competitor_mentions=excluded.top_competitor_mentions,
+               area_mentions=excluded.area_mentions, area_answers=excluded.area_answers,
+               area_rate=excluded.area_rate, no_area_mentions=excluded.no_area_mentions,
+               no_area_answers=excluded.no_area_answers, no_area_rate=excluded.no_area_rate,
+               web_search_answers=excluded.web_search_answers, competitors=excluded.competitors,
+               our_answer_ids=excluded.our_answer_ids, note=excluded.note,
+               text=NULL, text_source=NULL""",
+        (store_id, date, provider, channel, run_id, counts.asked, counts.no_answer,
+         counts.needs_review, counts.our_mentions, counts.total_answers, counts.top_competitor,
+         counts.top_competitor_mentions, counts.area_mentions, counts.area_answers,
+         counts.area_rate, counts.no_area_mentions, counts.no_area_answers, counts.no_area_rate,
+         counts.web_search_answers, json.dumps(counts.competitors),
+         json.dumps(counts.our_answer_ids), note),
+    )
+    conn.commit()
+
+
+def _direction(now_num, now_den, prev_num, prev_den) -> str:
+    if now_den == 0 or prev_den == 0:
+        return "not comparable (no counted answers on one of the days)"
+    a, b = now_num / now_den, prev_num / prev_den
+    if a == b:
+        return "no change"
+    points = round(100 * (a - b))
+    return f"higher by {points} points" if a > b else f"lower by {-points} points"
+
+
+def compare_days(today: dict, previous: dict | None, store_name: str) -> list[str]:
+    """Plain-language lines comparing two daily_summary rows of the same provider and channel."""
+    t = today
+    if previous is None:
+        return [f"First run for {scope_label(t['provider'], t['channel'])}: nothing earlier to compare with."]
+    p = previous
+    lines = [f"Compared with the previous run on {p['date']}:"]
+    lines.append(
+        f"{store_name} named in {t['our_mentions']} of {t['total_answers']} answers "
+        f"({pct(t['our_mentions'], t['total_answers'])}), previously {p['our_mentions']} of "
+        f"{p['total_answers']} ({pct(p['our_mentions'], p['total_answers'])}): "
+        f"{_direction(t['our_mentions'], t['total_answers'], p['our_mentions'], p['total_answers'])}."
+    )
+    same_top = t["top_competitor"] == p["top_competitor"]
+    lines.append(
+        f"Top competitor {t['top_competitor'] or 'none'} in {t['top_competitor_mentions']} of "
+        f"{t['total_answers']}; previously {p['top_competitor'] or 'none'} in "
+        f"{p['top_competitor_mentions']} of {p['total_answers']}"
+        + (" (same store)." if same_top else " (different store).")
+    )
+    lines.append(
+        f"Questions naming an area: {t['area_mentions']} of {t['area_answers']}, previously "
+        f"{p['area_mentions']} of {p['area_answers']}: "
+        f"{_direction(t['area_mentions'], t['area_answers'], p['area_mentions'], p['area_answers'])}."
+    )
+    lines.append(
+        f"Questions not naming an area: {t['no_area_mentions']} of {t['no_area_answers']}, previously "
+        f"{p['no_area_mentions']} of {p['no_area_answers']}: "
+        f"{_direction(t['no_area_mentions'], t['no_area_answers'], p['no_area_mentions'], p['no_area_answers'])}."
+    )
+    lines.append(
+        f"No answer: {t['no_answer']} of {t['asked']} asked (previously {p['no_answer']} of {p['asked']}); "
+        f"set aside for review: {t['needs_review']} (previously {p['needs_review']})."
+    )
+    return lines
+
+
+def mention_range(rows: list[dict], days: int = 7) -> dict | None:
+    """Range of our mention rate over the last `days` runs: report ranges, not single-day verdicts."""
+    rows = [r for r in rows if r["total_answers"] > 0][-days:]
+    if not rows:
+        return None
+    rates = [r["our_mentions"] / r["total_answers"] for r in rows]
+    return {"runs": len(rows), "from": rows[0]["date"], "to": rows[-1]["date"],
+            "min_pct": round(100 * min(rates)), "max_pct": round(100 * max(rates))}
+
+
+def step_compare(ctx) -> dict:
+    row = ctx.conn.execute(
+        "SELECT * FROM daily_summary WHERE run_id = ?", (ctx.run_id,)).fetchone()
+    prev = ctx.conn.execute(
+        """SELECT * FROM daily_summary WHERE store_id = ? AND provider = ? AND channel = ?
+           AND date < ? ORDER BY date DESC LIMIT 1""",
+        (ctx.store_id, row["provider"], row["channel"], row["date"])).fetchone()
+    lines = compare_days(dict(row), dict(prev) if prev else None, ctx.store.name)
+    history = ctx.conn.execute(
+        "SELECT * FROM daily_summary WHERE store_id = ? AND provider = ? AND channel = ? ORDER BY date",
+        (ctx.store_id, row["provider"], row["channel"])).fetchall()
+    rng = mention_range([dict(h) for h in history])
+    ctx.data["_previous"] = dict(prev) if prev else None
+    return {"lines": lines, "previous_date": prev["date"] if prev else None, "range": rng}

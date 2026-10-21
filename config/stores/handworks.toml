@@ -1,0 +1,51 @@
+# Store config for the Visibility agent.
+# Only public facts go here: everything in this file may be sent to the AI provider.
+
+[store]
+name = "Handworks"
+domain = "handworks.com.au"
+areas = ["Prahran", "Brighton"]
+categories = ["stationery", "greeting cards", "wrapping paper", "journals", "notebooks", "gifts"]
+# Other spellings that count as our store when an answer names it.
+aliases = ["Handworks Stationery", "Hand Works"]
+
+# Spellings that should be counted as the same competitor.
+[competitor_aliases]
+"Milligram" = ["Milligram Studio", "Milligram Stationery"]
+"kikki.K" = ["kikki K", "Kikki.K Melbourne"]
+
+[questions]
+# "fixed": use the list below (validated every run by step 2).
+# "generate": step 1 asks the AI for ~target_count questions on first run or when this file changes.
+# Handworks uses the 6 questions from the manual run of 14 Oct 2026 so results compare with that baseline.
+mode = "fixed"
+target_count = 6
+list = [
+  "Best stationery shops in Melbourne",
+  "Where can I buy greeting cards and wrapping paper in Melbourne?",
+  "Unique gift shops in Prahran or Brighton Melbourne",
+  "Best place to buy journals and notebooks in Melbourne",
+  "Birthday gift ideas under $30 in Melbourne",
+  "Online stationery store in Australia with fast shipping",
+]
+
+[run]
+attempts_per_day = 3
+timezone = "Australia/Melbourne"
+
+[provider]
+name = "gemini"
+# Model that answers the buyer questions (stands in for the consumer app).
+ask_model = "gemini-2.5-flash"
+# Model that does the agent's own language work (question writing, extraction, summary).
+# A separate model keeps it on a separate free-tier quota.
+work_model = "gemini-2.5-flash-lite"
+# false = plain model answer, no Google Search grounding. The report states which was used.
+use_search = false
+# Free-tier limits are not published in a fixed place: check AI Studio (Dashboard -> Rate limits)
+# for both models and keep these well under the requests-per-minute and per-day figures shown.
+min_seconds_between_calls = 7.0
+max_ask_calls_per_run = 24      # 6 questions x 3 attempts = 18, plus room for rate-limit retries
+max_work_calls_per_run = 60     # 18 extractions + up to 18 re-tries + 2 summary attempts
+max_retries = 4
+backoff_base_seconds = 5.0
