@@ -50,6 +50,8 @@ def test_daily_run_end_to_end(conn, cfg, fake_work, tmp_path):
     assert len(answers) == 18  # 6 questions x 3 attempts, nothing dropped
     assert {a["provider"] for a in answers} == {"fake"} and {a["channel"] for a in answers} == {"api"}
     assert sum(a["status"] == "no_answer" for a in answers) == 3
+    retried = [json.loads(a["raw"])["retries"] for a in answers if a["raw"] and json.loads(a["raw"])["retries"]]
+    assert len(retried) == 1 and retried[0][0]["error"] == "429"  # the rate-limited ask is explained
 
     s = conn.execute("SELECT * FROM daily_summary").fetchone()
     assert (s["asked"], s["no_answer"], s["total_answers"]) == (18, 3, 15)

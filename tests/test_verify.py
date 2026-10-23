@@ -58,10 +58,11 @@ def test_tone_must_match_presence():
     assert any("tone is none" in p for p in verify_extraction(TEXT, e, ALIASES))
 
 
-def test_duplicate_ranks_reported():
+def test_repeated_ranks_allowed_for_separate_lists():
+    # A real Gemini answer listed Prahran shops 1..n and then Brighton shops 1..n.
     e = ex([{"name": "Milligram", "rank": 1, "quote": "Milligram"},
             {"name": "Handworks", "rank": 1, "quote": "Handworks"}])
-    assert any("same rank" in p for p in verify_extraction(TEXT, e, ALIASES))
+    assert verify_extraction(TEXT, e, ALIASES) == []
 
 
 def test_parse_extraction_is_strict():

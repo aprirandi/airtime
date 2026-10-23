@@ -44,9 +44,7 @@ def verify_extraction(text: str, extraction: dict, aliases: tuple[str, ...]) -> 
         problems.append("our store is listed but our_store_tone is none")
     if not ours_listed and tone != "none":
         problems.append("our store is not listed but our_store_tone is not none")
-    ranks = [s["rank"] for s in stores if s.get("rank") is not None]
-    if len(ranks) != len(set(ranks)):
-        problems.append("two stores share the same rank")
+    # Repeated ranks are allowed: an answer can hold several numbered lists (one per suburb).
     return problems
 
 

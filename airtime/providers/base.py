@@ -96,8 +96,12 @@ class Provider(ABC):
 
 
 def call_with_backoff(fn: Callable[[], Any], *, max_retries: int, base_delay: float,
-                      sleep: Callable[[float], None] = time.sleep) -> Any:
-    """Run `fn`, retrying RateLimitError with exponential backoff. Other errors propagate."""
+                      sleep: Callable[[float], None] = time.sleep,
+                      on_retry: Callable[[RateLimitError, float], None] | None = None) -> Any:
+    """Run `fn`, retrying RateLimitError with exponential backoff. Other errors propagate.
+
+    `on_retry(error, delay)` is called before each wait, so callers can record why.
+    """
     attempt = 0
     while True:
         try:
@@ -106,5 +110,7 @@ def call_with_backoff(fn: Callable[[], Any], *, max_retries: int, base_delay: fl
             if attempt >= max_retries:
                 raise
             delay = max(exc.retry_after or 0.0, base_delay * (2 ** attempt))
+            if on_retry:
+                on_retry(exc, delay)
             sleep(delay)
             attempt += 1

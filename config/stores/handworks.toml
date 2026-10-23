@@ -54,4 +54,5 @@ min_seconds_between_calls = 7.0
 max_ask_calls_per_run = 24      # 6 questions x 3 attempts = 18, plus room for rate-limit retries
 max_work_calls_per_run = 60     # 18 extractions + up to 18 re-tries + 2 summary attempts
 max_retries = 4
-backoff_base_seconds = 5.0
+# Waits 30s, 60s, 120s, 240s. Short waits used up the call budget in the first live run.
+backoff_base_seconds = 30.0

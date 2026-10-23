@@ -46,8 +46,10 @@ def test_backoff_retries_rate_limits_then_gives_up():
             raise RateLimitError("429")
         return "ok"
 
-    assert call_with_backoff(flaky, max_retries=4, base_delay=1, sleep=slept.append) == "ok"
-    assert slept == [1, 2]
+    seen = []
+    assert call_with_backoff(flaky, max_retries=4, base_delay=1, sleep=slept.append,
+                             on_retry=lambda e, d: seen.append((str(e), d))) == "ok"
+    assert slept == [1, 2] and seen == [("429", 1), ("429", 2)]
     with pytest.raises(RateLimitError):
         call_with_backoff(lambda: (_ for _ in ()).throw(RateLimitError("429")),
                           max_retries=1, base_delay=1, sleep=lambda s: None)

@@ -24,7 +24,7 @@ class ProviderConfig:
     max_ask_calls_per_run: int = 24
     max_work_calls_per_run: int = 60
     max_retries: int = 4
-    backoff_base_seconds: float = 5.0
+    backoff_base_seconds: float = 30.0
 
 
 @dataclass(frozen=True)
