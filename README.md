@@ -100,7 +100,9 @@ then fails so it is visible. One-time setup:
 - **Free-tier limits:** not published in one fixed place and changed in the past. Read the
   real per-model figures in AI Studio (Dashboard > Rate limits) and set
   `min_seconds_between_calls`, `max_ask_calls_per_run` and `max_work_calls_per_run` well below
-  them. A normal day uses 18 calls on the ask model and about 20 on the work model.
+  them. A normal day uses 18 calls on the ask model (`gemini-3.8-flash`) and about 20 on the work
+  model (`gemini-3.5-flash-lite`). Free-tier answers took 2-4 minutes each in testing, so a
+  daily run takes about an hour; `gemini-2.5-*` models are closed to new API users.
   `python -m airtime plan` shows the numbers.
 - **Free-tier data use:** Google may use free-tier content. Only public questions and public
   store facts are sent; never put customer data in the config or questions.

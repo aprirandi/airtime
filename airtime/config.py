@@ -15,9 +15,11 @@ CONFIG_DIR = REPO_ROOT / "config" / "stores"
 @dataclass(frozen=True)
 class ProviderConfig:
     name: str = "gemini"
-    ask_model: str = "gemini-2.5-flash"
-    work_model: str = "gemini-2.5-flash-lite"
+    ask_model: str = "gemini-3.8-flash"
+    work_model: str = "gemini-3.5-flash-lite"
     use_search: bool = False
+    ask_thinking_level: str = "low"   # "" = model default; low is closest to the app's fast mode
+    timeout_seconds: float = 300.0
     min_seconds_between_calls: float = 7.0
     max_ask_calls_per_run: int = 24
     max_work_calls_per_run: int = 60

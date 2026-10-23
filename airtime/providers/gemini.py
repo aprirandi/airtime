@@ -21,18 +21,21 @@ class GeminiProvider(Provider):
     channel = "api"
 
     def __init__(self, model: str, *, api_key: str | None = None, use_search: bool = False,
-                 timeout: float = 90.0, **kwargs):
+                 thinking_level: str = "", timeout: float = 300.0, **kwargs):
         super().__init__(model, **kwargs)
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY", "")
         if not self.api_key:
             raise ProviderError("GEMINI_API_KEY is not set")
         self.use_search = use_search
+        self.thinking_level = thinking_level
         self.timeout = timeout
 
     def _ask(self, question: str) -> Answer:
         body: dict = {"contents": [{"role": "user", "parts": [{"text": question}]}]}
         if self.use_search:
             body["tools"] = [{"google_search": {}}]
+        if self.thinking_level:
+            body["generationConfig"] = {"thinkingConfig": {"thinkingLevel": self.thinking_level}}
         raw = self._post(body)
         return parse_answer(raw, self.model)
 

@@ -15,7 +15,9 @@ def make_provider(cfg: ProviderConfig, role: str, name: str | None = None) -> Pr
     common = {"max_calls": max_calls, "min_interval": cfg.min_seconds_between_calls}
     if name == "gemini":
         from airtime.providers.gemini import GeminiProvider
-        return GeminiProvider(model, use_search=cfg.use_search and role == "ask", **common)
+        return GeminiProvider(model, use_search=cfg.use_search and role == "ask",
+                              thinking_level=cfg.ask_thinking_level if role == "ask" else "",
+                              timeout=cfg.timeout_seconds, **common)
     raise ProviderError(f"unknown provider {name!r}")
 
 

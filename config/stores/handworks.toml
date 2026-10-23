@@ -36,12 +36,18 @@ timezone = "Australia/Melbourne"
 [provider]
 name = "gemini"
 # Model that answers the buyer questions (stands in for the consumer app).
-ask_model = "gemini-2.5-flash"
+# gemini-2.5-* is closed to new API users (HTTP 404), so the 3.x models are used.
+ask_model = "gemini-3.8-flash"
 # Model that does the agent's own language work (question writing, extraction, summary).
 # A separate model keeps it on a separate free-tier quota.
-work_model = "gemini-2.5-flash-lite"
+work_model = "gemini-3.5-flash-lite"
 # false = plain model answer, no Google Search grounding. The report states which was used.
 use_search = false
+# Thinking effort for the buyer-question answers. "low" is closest to the Gemini app's fast mode
+# and avoids paying for thinking tokens on a paid tier. "" = model default.
+ask_thinking_level = "low"
+# Free-tier answers took 2-4 minutes each in testing, so allow a long wait per call.
+timeout_seconds = 300
 # Free-tier limits are not published in a fixed place: check AI Studio (Dashboard -> Rate limits)
 # for both models and keep these well under the requests-per-minute and per-day figures shown.
 min_seconds_between_calls = 7.0
