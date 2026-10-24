@@ -1,35 +1,64 @@
 import { useEffect, useState } from "react"
-import { Moon, Sun } from "lucide-react"
+import { Bot, Languages, LayoutDashboard, Moon, Sun } from "lucide-react"
 
-import { AgentHQ } from "@/components/AgentHQ"
-import { Competitors, LatestFindings, StatStrip, Trend, WorkDiary } from "@/components/Findings"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { useSite } from "@/lib/data"
-import { fmtDate } from "@/lib/format"
+import { useLive, useSite } from "@/lib/data"
+import { useI18n } from "@/lib/i18n"
+import { cn } from "@/lib/utils"
+import { Agents } from "@/pages/Agents"
+import { Dashboard } from "@/pages/Dashboard"
 import { Day } from "@/pages/Day"
 
-function useHashRoute() {
-  const [hash, setHash] = useState(() => location.hash)
+type Route = { page: "dashboard" } | { page: "run"; id: number } | { page: "agents"; view: "team" | "flow" }
+
+function parse(hash: string): Route {
+  const run = hash.match(/^#\/run\/(\d+)/)
+  if (run) return { page: "run", id: Number(run[1]) }
+  if (hash.startsWith("#/agents")) return { page: "agents", view: hash.endsWith("/flow") ? "flow" : "team" }
+  return { page: "dashboard" }
+}
+
+function useRoute() {
+  const [route, setRoute] = useState(() => parse(location.hash))
   useEffect(() => {
     const on = () => {
-      setHash(location.hash)
+      setRoute(parse(location.hash))
       window.scrollTo({ top: 0 })
     }
     addEventListener("hashchange", on)
     return () => removeEventListener("hashchange", on)
   }, [])
-  const m = hash.match(/^#\/run\/(\d+)/)
-  return { runId: m ? Number(m[1]) : null, go: (h: string) => (location.hash = h) }
+  return { route, go: (h: string) => (location.hash = h) }
+}
+
+function LangToggle() {
+  const { lang, setLang } = useI18n()
+  return (
+    <div className="bg-muted flex items-center rounded-md p-0.5 text-xs font-medium" role="group" aria-label="Language / Bahasa">
+      <Languages className="text-muted-foreground mx-1.5 size-3.5" />
+      {(["id", "en"] as const).map((l) => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          aria-pressed={lang === l}
+          className={cn("rounded px-2 py-1 uppercase transition-colors", lang === l ? "bg-background shadow-xs" : "text-muted-foreground hover:text-foreground")}
+        >
+          {l}
+        </button>
+      ))}
+    </div>
+  )
 }
 
 function ThemeToggle() {
+  const { t } = useI18n()
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"))
   return (
     <Button
       variant="ghost"
       size="icon"
-      aria-label="Toggle dark mode"
+      aria-label={t("theme.toggle")}
       onClick={() => {
         const next = !dark
         setDark(next)
@@ -46,67 +75,66 @@ function ThemeToggle() {
   )
 }
 
+function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      className={cn(
+        "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors [&_svg]:size-4",
+        active ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      {children}
+    </a>
+  )
+}
+
 export default function App() {
-  const { data: site, error } = useSite()
-  const { runId, go } = useHashRoute()
+  const { t } = useI18n()
+  const liveState = useLive()
+  const live = liveState.data
+  const { data: site, error } = useSite(live)
+  const { route, go } = useRoute()
   const store = site?.stores[0]
-  const apiSeries = store?.series.filter((s) => s.provider === "gemini" && s.channel === "api") ?? []
-  const latest = apiSeries[apiSeries.length - 1] ?? store?.series[store.series.length - 1]
+  const working = live?.status === "running"
 
   return (
     <div className="min-h-screen">
       <header className="bg-background/80 sticky top-0 z-20 border-b backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-4">
           <a href="#/" className="flex items-center gap-2 font-semibold tracking-tight">
             <span className="bg-chart-1 grid size-7 place-items-center rounded-lg text-xs text-white">A</span>
-            Airtime
+            <span className="hidden sm:inline">Airtime</span>
           </a>
-          {store && (
-            <span className="text-muted-foreground truncate text-sm">
-              / {store.name} <span className="hidden sm:inline">· {store.domain}</span>
-            </span>
-          )}
-          <div className="ml-auto">
+          {store && <span className="text-muted-foreground hidden truncate text-sm md:inline">{store.name}</span>}
+          <nav className="flex items-center gap-1">
+            <NavLink href="#/" active={route.page !== "agents"}>
+              <LayoutDashboard /> <span className="hidden sm:inline">{t("nav.dashboard")}</span>
+            </NavLink>
+            <NavLink href="#/agents/team" active={route.page === "agents"}>
+              <Bot /> <span className="hidden sm:inline">{t("nav.agents")}</span>
+              {working && <span className="bg-success size-1.5 animate-pulse rounded-full" />}
+            </NavLink>
+          </nav>
+          <div className="ml-auto flex items-center gap-1">
+            <LangToggle />
             <ThemeToggle />
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 py-6">
         {error && (
           <Card>
-            <CardContent className="text-destructive text-sm">Could not load the report data: {error}</CardContent>
+            <CardContent className="text-destructive text-sm">{t("common.loadError", { e: error })}</CardContent>
           </Card>
         )}
-        {!site && !error && <p className="text-muted-foreground text-sm">Loading…</p>}
-        {site && store && runId !== null && <Day runId={runId} onBack={() => go("#/")} />}
-        {site && store && runId === null && (
-          <>
-            <AgentHQ site={site} store={store} />
-            <StatStrip store={store} />
-            {latest && <LatestFindings store={store} latest={latest} onOpen={(id) => go(`#/run/${id}`)} />}
-            <div className="grid gap-6 lg:grid-cols-2">
-              {apiSeries.length > 0 && <Trend store={store} series={apiSeries} />}
-              {latest && <Competitors store={store} latest={latest} />}
-            </div>
-            <WorkDiary store={store} onOpen={(id) => go(`#/run/${id}`)} />
-            <Card>
-              <CardContent className="text-muted-foreground space-y-2 text-xs leading-relaxed">
-                <p>
-                  <span className="text-foreground font-medium">How to read this.</span> Each morning the agent asks Gemini the same buyer
-                  questions three times, reads every answer, and counts a shop only when a quote naming it appears word for word in the
-                  answer. Answers it is unsure about are set aside, never guessed. These are counts of what an AI said, not rankings or
-                  sales.
-                </p>
-                <p>
-                  Gemini answers here come from the API without web search, so they can differ from the Gemini app. The {fmtDate("2026-10-14")}{" "}
-                  baseline mixes ChatGPT, Gemini and Claude app answers and is a reference point only.
-                </p>
-                <p>Data updated {new Date(site.generated_at).toLocaleString("en-AU")}.</p>
-              </CardContent>
-            </Card>
-          </>
+        {!site && !error && <p className="text-muted-foreground text-sm">{t("common.loading")}</p>}
+        {site && store && route.page === "run" && <Day runId={route.id} onBack={() => go("#/")} storeData={store} />}
+        {site && store && route.page === "dashboard" && (
+          <Dashboard site={site} store={store} live={live} liveCheckedAt={liveState.loadedAt} go={go} />
         )}
+        {site && store && route.page === "agents" && <Agents site={site} store={store} live={live} view={route.view} go={go} />}
       </main>
     </div>
   )

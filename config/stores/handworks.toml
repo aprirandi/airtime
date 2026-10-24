@@ -30,7 +30,9 @@ list = [
 ]
 
 [run]
-attempts_per_day = 3
+# 2, not 3: AI Studio showed Gemini 3.8 Flash's free tier allows only about 20 requests per day
+# (peak 23 on 24 Oct, bar full). 6 questions x 2 = 12 asks keeps a safe margin every day.
+attempts_per_day = 2
 timezone = "Australia/Melbourne"
 
 [provider]
@@ -51,8 +53,8 @@ timeout_seconds = 300
 # Free-tier limits are not published in a fixed place: check AI Studio (Dashboard -> Rate limits)
 # for both models and keep these well under the requests-per-minute and per-day figures shown.
 min_seconds_between_calls = 7.0
-max_ask_calls_per_run = 24      # 6 questions x 3 attempts = 18, plus room for rate-limit retries
-max_work_calls_per_run = 60     # 18 extractions + up to 18 re-tries + 2 summary attempts
+max_ask_calls_per_run = 14      # hard cap: 12 asks + 2 retries, under Gemini 3.8 Flash's ~20/day
+max_work_calls_per_run = 40     # 12 extractions + up to 12 re-tries + 2 summary (3.5 Flash Lite has far more headroom)
 max_retries = 4
 # Waits 30s, 60s, 120s, 240s. Short waits used up the call budget in the first live run.
 backoff_base_seconds = 30.0

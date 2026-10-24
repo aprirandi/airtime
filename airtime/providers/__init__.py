@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from airtime.config import ProviderConfig
 from airtime.providers.base import (Answer, BudgetExceeded, Provider, ProviderError,
-                                    RateLimitError, call_with_backoff)
+                                    QuotaExhausted, RateLimitError, call_with_backoff)
 
 
 def make_provider(cfg: ProviderConfig, role: str, name: str | None = None) -> Provider:
@@ -21,5 +21,5 @@ def make_provider(cfg: ProviderConfig, role: str, name: str | None = None) -> Pr
     raise ProviderError(f"unknown provider {name!r}")
 
 
-__all__ = ["Answer", "BudgetExceeded", "Provider", "ProviderError", "RateLimitError",
+__all__ = ["Answer", "BudgetExceeded", "Provider", "ProviderError", "QuotaExhausted", "RateLimitError",
            "call_with_backoff", "make_provider"]

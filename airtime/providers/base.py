@@ -43,6 +43,10 @@ class BudgetExceeded(ProviderError):
     """This run already used the configured maximum number of calls for this provider."""
 
 
+class QuotaExhausted(ProviderError):
+    """The provider's daily quota is used up. Retrying today only wastes requests."""
+
+
 class Provider(ABC):
     """One AI behind one interface.
 
@@ -78,7 +82,11 @@ class Provider(ABC):
     def calls_left(self) -> int:
         return self.max_calls - self.calls_made
 
+    exhausted: str | None = None  # set once the daily quota is reported as used up
+
     def _before_call(self) -> None:
+        if self.exhausted:
+            raise QuotaExhausted(f"{self.name}/{self.model}: daily quota used up, not calling again today")
         if self.calls_made >= self.max_calls:
             raise BudgetExceeded(f"{self.name}/{self.model}: call budget of {self.max_calls} used")
         if self._last_call is not None and self.min_interval > 0:

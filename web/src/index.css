@@ -148,3 +148,12 @@
   .robot-walking .robot-body, .robot-walking .leg-a, .robot-walking .leg-b,
   .robot-working .antenna-light, .robot-working .work-spark, .screen-on { animation: none; }
 }
+
+@keyframes flow-down {
+  0% { top: -4px; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: calc(100% - 4px); opacity: 0; }
+}
+.flow-packet { animation: flow-down 1.8s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .flow-packet { animation: none; opacity: 0; } }

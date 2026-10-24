@@ -44,6 +44,15 @@ class RunContext:
     data: dict[str, Any] = field(default_factory=dict)  # step outputs, by step name
     log: list[dict] = field(default_factory=list)
     sleep: Callable[[float], None] = time.sleep  # injected in tests
+    progress: Callable[[dict], None] | None = None  # live progress listener (see airtime/live.py)
+
+    def report(self, **event) -> None:
+        """Tell the live listener what is happening; never lets a listener error stop the run."""
+        if self.progress:
+            try:
+                self.progress(event)
+            except Exception:  # noqa: BLE001 - progress is best effort
+                pass
 
 
 @dataclass(frozen=True)
@@ -68,22 +77,30 @@ class Agent:
         ctx.run_id = cur.lastrowid
         ctx.conn.commit()
         try:
-            for step in self.steps():
+            steps = self.steps()
+            ctx.report(type="run_start", agent=self.name, run_id=ctx.run_id,
+                       steps=[{"step": s.number, "name": s.name, "kind": s.kind.value} for s in steps])
+            for step in steps:
                 entry = {"step": step.number, "name": step.name, "kind": step.kind.value,
                          "started_at": utc_now()}
                 ctx.log.append(entry)
+                ctx.report(type="step_start", entry=entry)
                 try:
                     result = step.fn(ctx) or {}
                 except Exception as exc:
                     entry.update(status="failed", error=f"{type(exc).__name__}: {exc}")
+                    ctx.report(type="step_done", entry=entry)
                     raise
                 ctx.data[step.name] = result
                 entry.update(status="ok", finished_at=utc_now(), result=_jsonable(result))
                 self._save(ctx, "running")
+                ctx.report(type="step_done", entry=entry)
         except Exception as exc:
             self._save(ctx, "failed", error="".join(traceback.format_exception_only(exc)).strip())
+            ctx.report(type="run_done", status="failed")
             raise
         self._save(ctx, "ok")
+        ctx.report(type="run_done", status="ok")
         return ctx
 
     def _save(self, ctx: RunContext, status: str, error: str | None = None) -> None:

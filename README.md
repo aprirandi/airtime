@@ -66,17 +66,25 @@ pip install pytest && python -m pytest -q
 
 ### Report website
 
-`docs/` holds the built website and `docs/data/`, the JSON it reads. The daily run only
-rewrites `docs/data/`, so it needs no Node. After changing anything in `web/`:
+`docs/` holds the built website and `docs/data/`, the JSON it reads. It has two menus:
+
+- **Dashboard**: real counts from every shift (findings, day-by-day chart, who gets recommended,
+  work diary, every answer and verified quote per day). It re-reads its data on its own and
+  shows a live banner while the agent works.
+- **AI Agents**: *Team* is the "Airtime HQ" office where the Visibility Agent replays its last
+  shift (or shows the step it is on right now) plus an employee card per agent, with empty desks
+  for the planned ones; *Data flow* shows how the data is gathered, step by step, with the real
+  numbers from the last shift and one real answer followed from question to count.
+
+Live progress: while the agent runs, `airtime/live.py` rewrites `docs/data/live.json` on every
+event, and the daily workflow commits that file every 7 minutes (GitHub Pages allows about 10
+deploys an hour). Between shifts the site shows the last shift and the time of the next one.
+
+The daily run only rewrites `docs/data/`, so it needs no Node. After changing anything in `web/`:
 
 ```bash
 cd web && npm ci && npm run build   # builds into docs/, then re-exports docs/data/
 ```
-
-The front page is "Airtime HQ": an isometric office where the Visibility Agent replays its
-latest shift step by step from the stored run log (sped up; real times are shown). Empty desks
-mark the agents still to come. Below it: what the agent found, a day-by-day chart, who gets
-recommended, and a work diary; each day opens every answer with its verified quotes.
 
 ### Pasted app answers
 
@@ -113,13 +121,13 @@ then fails so it is visible. One-time setup:
 - **Web search:** the Gemini API answers without web search unless grounding is turned on
   (`use_search` in the config, off by default). The report states this on every page and counts
   answers that did use search. The Gemini app normally searches, so expect differences.
-- **Free-tier limits:** not published in one fixed place and changed in the past. Read the
-  real per-model figures in AI Studio (Dashboard > Rate limits) and set
-  `min_seconds_between_calls`, `max_ask_calls_per_run` and `max_work_calls_per_run` well below
-  them. A normal day uses 18 calls on the ask model (`gemini-3.8-flash`) and about 20 on the work
-  model (`gemini-3.5-flash-lite`). Free-tier answers took 2-4 minutes each in testing, so a
-  daily run takes about an hour; `gemini-2.5-*` models are closed to new API users.
-  `python -m airtime plan` shows the numbers.
+- **Free-tier limits:** read in AI Studio (Rate limit page) on 24 Oct 2026: Gemini 3.8 Flash
+  allows 5 requests per minute and about 20 per day (peak use 23, bar full); Gemini 3.5 Flash Lite
+  15 per minute with far more daily headroom. So the agent asks 6 questions x 2 tries = 12 calls
+  a day on 3.8 Flash (hard cap 14) and about 14 on 3.5 Flash Lite (cap 40). When Gemini reports the
+  daily quota as used up, the agent stops calling that model for the rest of the run instead of
+  retrying, and records the remaining asks as `no_answer`. Quotas reset daily; with no billing
+  account on the project there is nothing to pay. `python -m airtime plan` shows the numbers.
 - **Free-tier data use:** Google may use free-tier content. Only public questions and public
   store facts are sent; never put customer data in the config or questions.
 - **Baseline:** the 14 Oct 2026 manual run (Handworks 3 of 14, Milligram 10 of 14, 2 of 2 with

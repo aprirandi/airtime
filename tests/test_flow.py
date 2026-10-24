@@ -193,3 +193,34 @@ def test_recheck_reopens_needs_review_answers(conn, cfg, fake_work):
     steps = json.loads(conn.execute("SELECT steps FROM runs").fetchone()[0])
     assert [x["name"] for x in steps][-4:] == ["recheck_extract_mentions", "recheck_verify_and_count",
                                                "recheck_compare_previous", "recheck_write_summary"]
+
+
+def test_live_progress_file_follows_the_run(conn, cfg, fake_work, tmp_path):
+    from airtime.live import LiveWriter
+    path = tmp_path / "live.json"
+    seen = []
+    writer = LiveWriter(path, agent_name="Visibility Agent", store_slug="handworks", run_date="2026-10-20")
+
+    def listener(event):
+        writer(event)
+        seen.append(json.loads(path.read_text()))
+
+    ask = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
+    ctx = make_ctx(conn, cfg, ask=ask, work=fake_work)
+    ctx.progress = listener
+    Flow([VisibilityAgent()]).run(ctx)
+
+    asking = [s for s in seen if s["current"] == "ask_questions" and s["progress"]]
+    assert asking[-1]["progress"]["done"] == 18 and asking[-1]["progress"]["total"] == 18
+    assert any(s["last_event"].startswith('Asked "') for s in asking)
+    final = seen[-1]
+    assert final["status"] == "idle" and final["run_id"] == ctx.run_id
+    assert [s["status"] for s in final["steps"]] == ["done"] * 7
+
+
+def test_progress_listener_errors_do_not_stop_the_run(conn, cfg, fake_work):
+    ask = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
+    ctx = make_ctx(conn, cfg, ask=ask, work=fake_work)
+    ctx.progress = lambda e: 1 / 0
+    Flow([VisibilityAgent()]).run(ctx)
+    assert conn.execute("SELECT status FROM runs").fetchone()[0] == "ok"

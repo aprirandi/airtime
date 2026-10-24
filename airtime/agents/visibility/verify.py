@@ -169,9 +169,9 @@ def step_extract_mentions(ctx) -> dict:
     pcfg = ctx.store.provider
     raw: dict[int, str | None] = {}
     errors = 0
-    for a in run_answers(ctx):
-        if a["status"] != "ok" or a["extracted_at"]:
-            continue
+    pending = [a for a in run_answers(ctx) if a["status"] == "ok" and not a["extracted_at"]]
+    for n, a in enumerate(pending, 1):
+        ctx.report(type="extract", done=n - 1, total=len(pending), question=a["question"])
         try:
             raw[a["id"]] = call_with_backoff(
                 lambda: extract(ctx.work_provider, ctx.store, a["text"]),

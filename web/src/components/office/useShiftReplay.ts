@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
+import type { T } from "@/lib/i18n"
 import type { Step } from "@/lib/types"
 
 import { stationFor, type StationId } from "./stations"
@@ -13,14 +14,14 @@ export interface Beat {
   text: string
 }
 
-export function beatsFor(steps: Step[], storeName: string, failed: boolean): Beat[] {
-  const beats: Beat[] = steps.map((s) => ({ station: stationFor(s), step: s, text: s.description }))
-  if (!failed) beats.push({ station: "publish", step: null, text: `Published today's report for ${storeName}.` })
-  beats.push({
-    station: "lounge",
-    step: null,
-    text: failed ? "Shift stopped early. The error is in the log." : "Shift done. Resting until the next one.",
-  })
+export function beatsFor(steps: Step[], storeName: string, failed: boolean, t: T, lang: "en" | "id"): Beat[] {
+  const beats: Beat[] = steps.map((s) => ({
+    station: stationFor(s),
+    step: s,
+    text: (lang === "id" && s.description_id) || s.description,
+  }))
+  if (!failed) beats.push({ station: "publish", step: null, text: t("hq.published", { store: storeName }) })
+  beats.push({ station: "lounge", step: null, text: failed ? t("hq.stoppedEarly") : t("hq.rest") })
   return beats
 }
 

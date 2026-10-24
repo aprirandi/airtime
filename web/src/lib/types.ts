@@ -11,6 +11,7 @@ export interface Step {
   finished_at?: string
   error?: string
   description: string
+  description_id?: string
   result?: Record<string, unknown>
 }
 
@@ -73,6 +74,14 @@ export interface Store {
   domain: string
   areas: string[]
   categories: string[]
+  setup: {
+    provider: string
+    ask_model: string
+    work_model: string
+    use_search: boolean
+    attempts_per_day: number
+    questions: string[]
+  } | null
   series: Summary[]
   ranges: Record<string, Range | null>
   runs: Run[]
@@ -86,11 +95,51 @@ export interface Store {
   }
 }
 
+export interface TeamMember {
+  id: string
+  name: string
+  title: string
+  title_id?: string
+  status: "active" | "planned"
+  job: string
+  job_id?: string
+  inputs: string[]
+  outputs: string[]
+  inputs_id?: string[]
+  outputs_id?: string[]
+}
+
 export interface Site {
   generated_at: string
   schedule: { cron: string; utc_hour: number; utc_minute: number }
-  agent: { name: string; role: string }
+  agent: { name: string; role: string; role_id?: string }
+  team: TeamMember[]
   stores: Store[]
+}
+
+export interface LiveStep {
+  step: number
+  name: string
+  kind: StepKind
+  title: string
+  title_id?: string
+  status: "todo" | "working" | "done" | "failed"
+}
+
+export interface Live {
+  status: "running" | "idle" | "failed"
+  updated_at: string
+  run_id?: number | null
+  run_date?: string
+  started_at?: string
+  current: string | null
+  progress: { done: number; total: number; unit: string; ok?: number; no_answer?: number } | null
+  steps: LiveStep[]
+  last_event: string
+  last_event_id?: string
+  last_run_id?: number | null
+  last_run_status?: string | null
+  last_finished_at?: string | null
 }
 
 export interface Mention {
@@ -127,5 +176,6 @@ export interface RunDetail {
   run: Run
   summary: Summary | null
   comparison: string[]
+  comparison_id?: string[]
   answers: AnswerDetail[]
 }
