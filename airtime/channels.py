@@ -5,8 +5,6 @@ Compares the latest run of each source, overall and question by question. Pure c
 
 from __future__ import annotations
 
-from html import escape
-
 from airtime.agents.visibility.compare import pct, scope_label
 
 
@@ -97,33 +95,3 @@ def render_markdown(result: dict, store_name: str) -> str:
     lines += ["", "Overlap = share of other stores named by either source that both sources named.",
               "Single runs vary a lot; repeat the comparison over several days before drawing conclusions."]
     return "\n".join(lines)
-
-
-def render_html(md: str, title: str) -> str:
-    """Tiny markdown-table renderer, enough for the comparison page."""
-    from airtime.report import _page
-    out, in_table = [], False
-    for line in md.splitlines():
-        if line.startswith("|"):
-            cells = [c.strip() for c in line.strip("|").split("|")]
-            if all(set(c) <= {"-"} for c in cells):
-                continue
-            if not in_table:
-                out.append("<div class='scroll'><table>")
-                in_table = True
-                out.append("<tr>" + "".join(f"<th>{escape(c)}</th>" for c in cells) + "</tr>")
-            else:
-                out.append("<tr>" + "".join(f"<td>{escape(c)}</td>" for c in cells) + "</tr>")
-            continue
-        if in_table:
-            out.append("</table></div>")
-            in_table = False
-        if line.startswith("## "):
-            out.append(f"<h2>{escape(line[3:])}</h2>")
-        elif line.startswith("# "):
-            out.append(f"<h1>{escape(line[2:])}</h1>")
-        elif line.strip():
-            out.append(f"<p>{escape(line)}</p>")
-    if in_table:
-        out.append("</table></div>")
-    return _page(title, "<p><a href='../index.html'>&larr; Airtime</a></p>" + "".join(out))

@@ -41,7 +41,8 @@ airtime/
 config/stores/handworks.toml Store config (public facts only)
 data/airtime.sqlite          All stored questions, answers, mentions and daily summaries
 data/seed/                   Handworks manual baseline and a CSV template for pasted answers
-docs/                        GitHub Pages report
+web/                         Report website (React + Vite + Tailwind + shadcn/ui), built into docs/
+docs/                        GitHub Pages: built website + docs/data/*.json exported from SQLite
 ```
 
 Tables: `stores`, `questions`, `runs`, `answers`, `mentions`, `daily_summary`. Every
@@ -55,13 +56,27 @@ Needs Python 3.11+, no runtime dependencies.
 export GEMINI_API_KEY=...                       # from Google AI Studio; never commit it
 python -m airtime seed --store handworks        # register store, load 14 Oct baseline
 python -m airtime plan --store handworks        # planned calls vs budget
-python -m airtime run --store handworks         # one daily run, then rebuilds docs/
+python -m airtime run --store handworks         # one daily run, then rewrites docs/data/
 python -m airtime import --store handworks data/seed/my_pasted_answers.csv
 python -m airtime compare --store handworks --a gemini:api --b gemini:app_pasted
-python -m airtime report                        # rebuild docs/ only
+python -m airtime export                        # rewrite docs/data/*.json only
 python -m airtime recheck --store handworks --run-id 1   # re-check needs_review answers
 pip install pytest && python -m pytest -q
 ```
+
+### Report website
+
+`docs/` holds the built website and `docs/data/`, the JSON it reads. The daily run only
+rewrites `docs/data/`, so it needs no Node. After changing anything in `web/`:
+
+```bash
+cd web && npm ci && npm run build   # builds into docs/, then re-exports docs/data/
+```
+
+The front page is "Airtime HQ": an isometric office where the Visibility Agent replays its
+latest shift step by step from the stored run log (sped up; real times are shown). Empty desks
+mark the agents still to come. Below it: what the agent found, a day-by-day chart, who gets
+recommended, and a work diary; each day opens every answer with its verified quotes.
 
 ### Pasted app answers
 

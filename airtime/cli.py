@@ -58,7 +58,7 @@ def cmd_plan(args) -> int:
 
 def cmd_run(args) -> int:
     from airtime.agents.visibility.agent import VisibilityAgent
-    from airtime.report import build_site
+    from airtime.export import export_site
     cfg = load_store_config(args.store)
     conn = db.connect(args.db)
     try:
@@ -66,18 +66,18 @@ def cmd_run(args) -> int:
         Flow([VisibilityAgent()]).run(ctx)
     except (RunFailed, ProviderError) as exc:
         print(f"RUN FAILED: {exc}", file=sys.stderr)
-        build_site(conn)
+        export_site(conn)
         return 2
     for entry in ctx.log:
         print(f"step {entry['step']} [{entry['kind']}] {entry['name']}: {entry['status']}")
     print(ctx.data["write_summary"]["text"])
-    build_site(conn)
+    export_site(conn)
     return 0
 
 
 def cmd_import(args) -> int:
     from airtime.importer import import_file
-    from airtime.report import build_site
+    from airtime.export import export_site
     cfg = load_store_config(args.store)
     conn = db.connect(args.db)
     try:
@@ -88,20 +88,20 @@ def cmd_import(args) -> int:
     for ctx in done:
         provider, channel = ctx.data["_scope"]
         print(f"{ctx.run_date} {provider}/{channel}: {ctx.data['write_summary']['text']}")
-    build_site(conn)
+    export_site(conn)
     return 0
 
 
-def cmd_report(args) -> int:
-    from airtime.report import build_site
-    paths = build_site(db.connect(args.db))
-    print(f"wrote {len(paths)} pages to docs/")
+def cmd_export(args) -> int:
+    from airtime.export import export_site
+    paths = export_site(db.connect(args.db))
+    print(f"wrote {len(paths)} data files to docs/data/")
     return 0
 
 
 def cmd_recheck(args) -> int:
     from airtime.agents.visibility.recheck import recheck_run
-    from airtime.report import build_site
+    from airtime.export import export_site
     cfg = load_store_config(args.store)
     conn = db.connect(args.db)
     try:
@@ -111,13 +111,12 @@ def cmd_recheck(args) -> int:
         print(f"RECHECK FAILED: {exc}", file=sys.stderr)
         return 2
     print(result)
-    build_site(conn)
+    export_site(conn)
     return 0
 
 
 def cmd_compare(args) -> int:
-    from airtime.channels import compare_sources, render_html, render_markdown
-    from airtime.report import DOCS_DIR, build_site
+    from airtime.channels import compare_sources, render_markdown
     cfg = load_store_config(args.store)
     conn = db.connect(args.db)
     store_id = db.upsert_store(conn, cfg)
@@ -127,12 +126,9 @@ def cmd_compare(args) -> int:
     print(md)
     if not result["ok"]:
         return 1
-    out = DOCS_DIR / "comparisons"
+    out = REPO_ROOT / "reports" / "comparisons"
     out.mkdir(parents=True, exist_ok=True)
-    name = f"{cfg.slug}-{a[0]}-{a[1]}-vs-{b[0]}-{b[1]}"
-    (out / f"{name}.md").write_text(md + "\n")
-    (out / f"{name}.html").write_text(render_html(md, name))
-    build_site(conn)
+    (out / f"{cfg.slug}-{a[0]}-{a[1]}-vs-{b[0]}-{b[1]}.md").write_text(md + "\n")
     return 0
 
 
@@ -154,8 +150,8 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--store", required=True)
     s.add_argument("file")
     s.set_defaults(fn=cmd_import)
-    s = sub.add_parser("report", help="rebuild the static report in docs/")
-    s.set_defaults(fn=cmd_report)
+    s = sub.add_parser("export", help="rewrite the report data in docs/data/")
+    s.set_defaults(fn=cmd_export)
     s = sub.add_parser("recheck", help="re-run steps 4-7 on a run's needs_review answers")
     s.add_argument("--store", required=True)
     s.add_argument("--run-id", type=int, required=True)

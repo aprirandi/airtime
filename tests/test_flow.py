@@ -11,7 +11,7 @@ from airtime.importer import import_file, seed_baseline
 from airtime.config import REPO_ROOT
 from airtime.providers.base import RateLimitError
 from airtime.providers.fake import FakeProvider
-from airtime.report import build_site
+from airtime.export import export_site
 from conftest import fake_extractor, make_ctx
 
 ANSWERS = {
@@ -64,9 +64,15 @@ def test_daily_run_end_to_end(conn, cfg, fake_work, tmp_path):
     for m in conn.execute("SELECT m.quote, a.text FROM mentions m JOIN answers a ON a.id = m.answer_id"):
         assert m["quote"] in m["text"]
 
-    pages = build_site(conn, tmp_path)
-    page = (tmp_path / "handworks" / "2026-10-20-fake-api.html").read_text()
-    assert tmp_path / "index.html" in pages and "without web search" in page and "Milligram" in page
+    export_site(conn, tmp_path)
+    site = json.loads((tmp_path / "data" / "site.json").read_text())
+    store = site["stores"][0]
+    assert store["totals"]["questions_asked"] == 18 and store["totals"]["days_on_duty"] == 1
+    assert [s["step"] for s in store["runs"][0]["steps"]] == [1, 2, 3, 4, 5, 6, 7]
+    assert store["runs"][0]["steps"][2]["description"].startswith("Asked 18 questions: 15 answered, 3 no answer.")
+    detail = json.loads((tmp_path / "data" / "runs" / f"{ctx.run_id}.json").read_text())
+    assert detail["summary"]["our_mentions"] == 3 and len(detail["answers"]) == 18
+    assert detail["comparison"][0].startswith("First run")
 
 
 def test_bad_quote_is_retried_then_marked_needs_review(conn, cfg):
