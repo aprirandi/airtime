@@ -4,9 +4,9 @@ An Agent is an ordered list of Steps. Each Step is marked CODE (counts and check
 (reads and writes language). Running an agent records every step's outcome in the `runs`
 table, so any number in a report can be traced back to the run that produced it.
 
-A Flow runs several agents in order on one shared context and then an optional master
-check. Today the flow holds only the Visibility agent; Auditor, Planner, Fixer and
-Reporter agents are added later by appending them to the flow.
+A Flow runs several agents in order on one shared run (a shift). At each hand-off the
+Master runs code checks on the output before the next agent may use it. Today the flow is
+Asker -> Analyst; Auditor, Planner, Fixer and Reporter are added later by appending them.
 """
 
 from __future__ import annotations
@@ -64,70 +64,108 @@ class Step:
 
 
 class Agent:
+    """A named worker with an ordered list of steps. Several agents share one run (a shift)."""
+
     name = "agent"
+    title = "Agent"
 
     def steps(self) -> list[Step]:
         raise NotImplementedError
 
     def run(self, ctx: RunContext) -> RunContext:
-        cur = ctx.conn.execute(
-            "INSERT INTO runs (agent, store_id, run_date, started_at, status) VALUES (?, ?, ?, ?, 'running')",
-            (self.name, ctx.store_id, ctx.run_date, utc_now()),
-        )
-        ctx.run_id = cur.lastrowid
-        ctx.conn.commit()
-        try:
-            steps = self.steps()
-            ctx.report(type="run_start", agent=self.name, run_id=ctx.run_id,
-                       steps=[{"step": s.number, "name": s.name, "kind": s.kind.value} for s in steps])
-            for step in steps:
-                entry = {"step": step.number, "name": step.name, "kind": step.kind.value,
-                         "started_at": utc_now()}
-                ctx.log.append(entry)
-                ctx.report(type="step_start", entry=entry)
-                try:
-                    result = step.fn(ctx) or {}
-                except Exception as exc:
-                    entry.update(status="failed", error=f"{type(exc).__name__}: {exc}")
-                    ctx.report(type="step_done", entry=entry)
-                    raise
-                ctx.data[step.name] = result
-                entry.update(status="ok", finished_at=utc_now(), result=_jsonable(result))
-                self._save(ctx, "running")
+        if ctx.run_id is None:  # running on its own, outside a Flow
+            _open_run(ctx, self.name)
+        steps = self.steps()
+        ctx.report(type="agent_start", agent=self.name, run_id=ctx.run_id,
+                   steps=[{"step": s.number, "name": s.name, "kind": s.kind.value, "agent": self.name}
+                          for s in steps])
+        for step in steps:
+            entry = {"step": step.number, "name": step.name, "kind": step.kind.value,
+                     "agent": self.name, "started_at": utc_now()}
+            ctx.log.append(entry)
+            ctx.report(type="step_start", entry=entry)
+            try:
+                result = step.fn(ctx) or {}
+            except Exception as exc:
+                entry.update(status="failed", error=f"{type(exc).__name__}: {exc}")
                 ctx.report(type="step_done", entry=entry)
-        except Exception as exc:
-            self._save(ctx, "failed", error="".join(traceback.format_exception_only(exc)).strip())
-            ctx.report(type="run_done", status="failed")
-            raise
-        self._save(ctx, "ok")
-        ctx.report(type="run_done", status="ok")
+                raise
+            ctx.data[step.name] = result
+            entry.update(status="ok", finished_at=utc_now(), result=_jsonable(result))
+            _save(ctx, "running")
+            ctx.report(type="step_done", entry=entry)
         return ctx
 
-    def _save(self, ctx: RunContext, status: str, error: str | None = None) -> None:
-        finished = utc_now() if status != "running" else None
-        ctx.conn.execute(
-            "UPDATE runs SET status = ?, steps = ?, finished_at = ?, error = ? WHERE id = ?",
-            (status, json.dumps(ctx.log), finished, error, ctx.run_id),
-        )
-        ctx.conn.commit()
+
+@dataclass(frozen=True)
+class MasterCheck:
+    """A code check the Master runs on one agent's output before the next agent may use it.
+
+    `fn` returns (problems, facts). Any problem stops the shift loudly.
+    """
+    after: str            # agent name whose output is checked
+    name: str             # short id, e.g. "answers_complete"
+    fn: Callable[[RunContext], tuple[list[str], dict]]
 
 
 class Flow:
-    """Run agents in order on one context, then an optional master check."""
+    """Run agents in order on one shared run, with Master checks at the hand-offs."""
 
-    def __init__(self, agents: list[Agent],
-                 master_check: Callable[[RunContext], list[str]] | None = None):
+    def __init__(self, agents: list[Agent], checks: list[MasterCheck] | None = None):
         self.agents = agents
-        self.master_check = master_check
+        self.checks = checks or []
 
     def run(self, ctx: RunContext) -> RunContext:
-        for agent in self.agents:
-            agent.run(ctx)
-        if self.master_check:
-            problems = self.master_check(ctx)
-            if problems:
-                raise RunFailed("master check failed: " + "; ".join(problems))
+        if ctx.run_id is None:
+            _open_run(ctx, ",".join(a.name for a in self.agents))
+        ctx.report(type="run_start", run_id=ctx.run_id, agents=[a.name for a in self.agents],
+                   steps=[{"step": s.number, "name": s.name, "kind": s.kind.value, "agent": a.name}
+                          for a in self.agents for s in a.steps()])
+        try:
+            for agent in self.agents:
+                agent.run(ctx)
+                for check in (c for c in self.checks if c.after == agent.name):
+                    self._master(ctx, check)
+        except Exception as exc:
+            _save(ctx, "failed", error="".join(traceback.format_exception_only(exc)).strip())
+            ctx.report(type="run_done", status="failed")
+            raise
+        _save(ctx, "ok")
+        ctx.report(type="run_done", status="ok")
         return ctx
+
+    def _master(self, ctx: RunContext, check: MasterCheck) -> None:
+        entry = {"step": "M", "name": f"master_{check.name}", "kind": StepKind.CODE.value,
+                 "agent": "master", "checks": check.after, "started_at": utc_now()}
+        ctx.log.append(entry)
+        ctx.report(type="step_start", entry=entry)
+        problems, facts = check.fn(ctx)
+        entry.update(status="failed" if problems else "ok", finished_at=utc_now(),
+                     result=_jsonable({**facts, "problems": problems}))
+        if problems:
+            entry["error"] = "; ".join(problems)
+        _save(ctx, "running")
+        ctx.report(type="step_done", entry=entry)
+        if problems:
+            raise RunFailed(f"master check '{check.name}' failed: " + "; ".join(problems))
+
+
+def _open_run(ctx: RunContext, agents: str) -> None:
+    cur = ctx.conn.execute(
+        "INSERT INTO runs (agent, store_id, run_date, started_at, status) VALUES (?, ?, ?, ?, 'running')",
+        (agents, ctx.store_id, ctx.run_date, utc_now()),
+    )
+    ctx.run_id = cur.lastrowid
+    ctx.conn.commit()
+
+
+def _save(ctx: RunContext, status: str, error: str | None = None) -> None:
+    finished = utc_now() if status != "running" else None
+    ctx.conn.execute(
+        "UPDATE runs SET status = ?, steps = ?, finished_at = ?, error = ? WHERE id = ?",
+        (status, json.dumps(ctx.log), finished, error, ctx.run_id),
+    )
+    ctx.conn.commit()
 
 
 def _jsonable(value: Any) -> Any:

@@ -2,24 +2,33 @@
 
 Airtime agents measure how often AI assistants name a store when shoppers ask them for help.
 
-This MVP has one agent, the **Visibility agent**. Every day it asks Gemini the questions a
-store's buyers would ask, records which stores each answer names, and reports how often our
-store is named compared with competitors. The first test store is Handworks
-(handworks.com.au, Prahran and Brighton, Melbourne).
+This MVP runs the first two agents of the "Airtime at work" flow
+(Auditor -> **Asker** -> **Analyst** -> Planner -> Owner -> Fixer -> Reporter), with the
+**Master** checking each hand-off:
+
+- **Asker** (steps 1-3): writes the day's buyer questions and asks them to Gemini.
+- **Master check**: every planned ask has a stored answer, for every question.
+- **Analyst** (steps 4-7): reads every answer, verifies each quote, counts how often our store
+  is named against competitors, compares with the last shift, writes the owner summary
+  (step 7 moves to the Reporter once it exists).
+- **Master check**: the stored counts match the answers and every quote is still verbatim.
+
+Both agents and both checks run as one shift (one row in `runs`, each step tagged with its
+agent). The first test store is Handworks (handworks.com.au, Prahran and Brighton, Melbourne).
 
 What it does not do: change any website, recommend fixes, promise rankings or sales, use paid
 APIs, or show any UI beyond a static report.
 
-## The daily run
+## The daily shift
 
 Code decides anything that can be counted or checked. AI only reads and writes language.
 
 | # | Step | Kind | What happens |
 |---|------|------|--------------|
-| 1 | Write questions | AI | Two kinds. **Core** questions are the same every day so days can be compared (Handworks: 3 from the 14 Oct manual run, set in the config). **Daily** questions are new each morning: the AI writes 6 from the store profile; code drops any that name our store, name no place (Melbourne, Prahran, Brighton, Australia), or repeat a question from the last 14 days. If writing them fails, the core questions still go out. |
+| 1 | Write questions (Asker) | AI | Two kinds. **Core** questions are the same every day so days can be compared (Handworks: 3 from the 14 Oct manual run, set in the config). **Daily** questions are new each morning: the AI writes 6 from the store profile; code drops any that name our store, name no place (Melbourne, Prahran, Brighton, Australia), or repeat a question from the last 14 days. If writing them fails, the core questions still go out. |
 | 2 | Validate questions | CODE | Every run. Rejects empty, too-short, duplicate and near-duplicate questions; requires at least one question naming a store area. The run fails loudly if the list is invalid. |
 | 3 | Ask | CODE | Every question N times (default 3). Stores full raw response, timestamp, provider, channel, model, attempt. Backs off on rate limits. Failed or empty answers are stored as `no_answer`, never dropped. Refuses to start if the planned calls exceed the call budget. |
-| 4 | Extract mentions | AI | Per answer, strict JSON: stores named in order, rank if it is a list, tone toward our store, and an exact quote per store. |
+| 4 | Extract mentions (Analyst) | AI | Per answer, strict JSON: stores named in order, rank if it is a list, tone toward our store, and an exact quote per store. |
 | 5 | Verify and count | CODE | Every quote must appear verbatim in the stored answer; our store's name in the text must match what was extracted. On failure step 4 is retried once with the problems listed; if still wrong the answer becomes `needs_review` and is not counted. Then counts: ours X of N, top competitor Y of N, rate with and without an area in the question. |
 | 6 | Compare | CODE | Against the previous run of the same provider and channel. Reports changes, no-changes and zeros, plus the range over the last 7 runs. |
 | 7 | Summary | AI + CODE | The AI writes a 2-3 sentence template using `{placeholders}`, never digits. Code fills in the stored counts, then rejects the text if any number, "X of Y" pair or percentage does not match the stored row, or if it states causes, promises, rankings or prices. After two rejections a summary written by code is used, and the report says so. |
@@ -71,9 +80,9 @@ pip install pytest && python -m pytest -q
 - **Dashboard**: real counts from every shift (findings, day-by-day chart, who gets recommended,
   work diary, every answer and verified quote per day). It re-reads its data on its own and
   shows a live banner while the agent works.
-- **AI Agents**: *Team* is the "Airtime HQ" office where the Visibility Agent replays its last
-  shift (or shows the step it is on right now) plus an employee card per agent, with empty desks
-  for the planned ones; *Data flow* shows how the data is gathered, step by step, with the real
+- **AI Agents**: *Team* is the "Airtime HQ" office where the Asker, Analyst and Master replay
+  the last shift (or show the step they are on right now) plus a card per team member, with
+  empty desks for the planned agents; *Data flow* shows how the data is gathered, step by step, with the real
   numbers from the last shift and one real answer followed from question to count.
 
 Live progress: while the agent runs, `airtime/live.py` rewrites `docs/data/live.json` on every
@@ -103,15 +112,15 @@ then fails so it is visible. One-time setup:
 
 1. Settings > Secrets and variables > Actions: add `GEMINI_API_KEY`.
 2. Settings > Pages: deploy from branch `main`, folder `/docs`.
-3. Actions > Daily visibility run > Run workflow, to try it once by hand.
+3. Actions > Daily Airtime shift > Run workflow, to try it once by hand.
 
 ## Adding things later
 
 - **Another AI** (ChatGPT, Claude): subclass `Provider` with `_ask` and `_complete`, register
   it in `airtime/providers/__init__.py:make_provider`, add its key as a secret. Nothing else changes.
 - **Another agent** (Auditor, Planner, Fixer, Reporter): subclass `Agent`, list its `Step`s
-  with their kind, and add it to the `Flow` in `cli.py`. A Master check is the `master_check`
-  callback on `Flow`; it runs after all agents and fails the run if it returns problems.
+  with their kind, and add it to the flow in `airtime/agents/visibility/agent.py:shift_flow`.
+  Give it a `MasterCheck` (`after=<agent name>`) in `master.py`; a failed check stops the shift.
 - **Another store**: add `config/stores/<slug>.toml` and a line in the workflow.
 
 ## Settled and open questions

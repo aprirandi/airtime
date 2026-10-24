@@ -3,25 +3,40 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import type { T } from "@/lib/i18n"
 import type { Step } from "@/lib/types"
 
-import { stationFor, type StationId } from "./stations"
+import { agentFor, AGENTS, HOME, LOUNGE, STATIONS, stationFor, type AgentId, type StationId } from "./stations"
 
 export const WALK_MS = 1400
 export const WORK_MS = 3800
 
 export interface Beat {
   station: StationId
+  agent: AgentId | "all"
   step: Step | null // null for the closing beats (publish, rest)
   text: string
 }
 
+/** Where every agent stands at a given beat: the active one at its station, the rest where they last worked. */
+export function positionsAt(beats: Beat[], index: number): Record<AgentId, [number, number]> {
+  const pos = { ...HOME }
+  for (let i = 0; i <= Math.min(index, beats.length - 1); i++) {
+    const b = beats[i]
+    if (b.agent === "all") return { ...LOUNGE }
+    pos[b.agent] = STATIONS[b.station].stand
+  }
+  return pos
+}
+
+export { AGENTS }
+
 export function beatsFor(steps: Step[], storeName: string, failed: boolean, t: T, lang: "en" | "id"): Beat[] {
   const beats: Beat[] = steps.map((s) => ({
     station: stationFor(s),
+    agent: agentFor(s),
     step: s,
     text: (lang === "id" && s.description_id) || s.description,
   }))
-  if (!failed) beats.push({ station: "publish", step: null, text: t("hq.published", { store: storeName }) })
-  beats.push({ station: "lounge", step: null, text: failed ? t("hq.stoppedEarly") : t("hq.rest") })
+  if (!failed) beats.push({ station: "publish", agent: "analyst", step: null, text: t("hq.published", { store: storeName }) })
+  beats.push({ station: "lounge", agent: "all", step: null, text: failed ? t("hq.stoppedEarly") : t("hq.rest") })
   return beats
 }
 

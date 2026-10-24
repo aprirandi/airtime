@@ -5,7 +5,7 @@ from dataclasses import replace
 
 import pytest
 
-from airtime.agents.visibility.agent import VisibilityAgent
+from airtime.agents.visibility.agent import shift_flow
 from airtime.agents.visibility.questions import filter_daily, recent_questions
 from airtime.core.agent import Flow
 from airtime.providers.fake import FakeProvider
@@ -49,7 +49,7 @@ def work_provider(day_lists):
 def run_day(conn, cfg, date, work):
     ask = FakeProvider(ask_responder=lambda q: f"Try Milligram for: {q}.", sleep=lambda s: None)
     ctx = make_ctx(conn, cfg, date, ask=ask, work=work)
-    Flow([VisibilityAgent()]).run(ctx)
+    shift_flow().run(ctx)
     return ctx
 
 

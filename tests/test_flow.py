@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from airtime.agents.visibility.agent import VisibilityAgent
+from airtime.agents.visibility.agent import shift_flow
 from airtime.channels import compare_sources, render_markdown
 from airtime.core.agent import Flow, RunFailed
 from airtime.importer import import_file, seed_baseline
@@ -38,13 +38,19 @@ def ask_responder():
 def test_daily_run_end_to_end(conn, cfg, fake_work, tmp_path):
     ask = FakeProvider(ask_responder=ask_responder(), sleep=lambda s: None)
     ctx = make_ctx(conn, cfg, ask=ask, work=fake_work)
-    Flow([VisibilityAgent()]).run(ctx)
+    shift_flow().run(ctx)
 
     run = conn.execute("SELECT * FROM runs").fetchone()
     steps = json.loads(run["steps"])
     assert run["status"] == "ok"
-    assert [(s["step"], s["kind"]) for s in steps] == [
-        (1, "AI"), (2, "CODE"), (3, "CODE"), (4, "AI"), (5, "CODE"), (6, "CODE"), (7, "AI")]
+    assert [(s["step"], s["kind"], s["agent"]) for s in steps] == [
+        (1, "AI", "asker"), (2, "CODE", "asker"), (3, "CODE", "asker"), ("M", "CODE", "master"),
+        (4, "AI", "analyst"), (5, "CODE", "analyst"), (6, "CODE", "analyst"), (7, "AI", "analyst"),
+        ("M", "CODE", "master")]
+    assert run["agent"] == "asker,analyst"
+    masters = [s for s in steps if s["agent"] == "master"]
+    assert [m["name"] for m in masters] == ["master_answers_complete", "master_numbers_match"]
+    assert all(m["status"] == "ok" for m in masters) and masters[0]["result"]["recorded"] == 18
 
     answers = conn.execute("SELECT * FROM answers").fetchall()
     assert len(answers) == 18  # 6 questions x 3 attempts, nothing dropped
@@ -68,7 +74,10 @@ def test_daily_run_end_to_end(conn, cfg, fake_work, tmp_path):
     site = json.loads((tmp_path / "data" / "site.json").read_text())
     store = site["stores"][0]
     assert store["totals"]["questions_asked"] == 18 and store["totals"]["days_on_duty"] == 1
-    assert [s["step"] for s in store["runs"][0]["steps"]] == [1, 2, 3, 4, 5, 6, 7]
+    assert [s["step"] for s in store["runs"][0]["steps"]] == [1, 2, 3, "M", 4, 5, 6, 7, "M"]
+    assert store["runs"][0]["kind"] == "shift"
+    assert store["runs"][0]["steps"][3]["description"].startswith("Master checked the Asker's work: 18 of 18")
+    assert [m["id"] for m in site["team"] if m["status"] == "active"] == ["asker", "analyst", "master"]
     assert store["runs"][0]["steps"][2]["description"].startswith("Asked 18 questions: 15 answered, 3 no answer.")
     detail = json.loads((tmp_path / "data" / "runs" / f"{ctx.run_id}.json").read_text())
     assert detail["summary"]["our_mentions"] == 3 and len(detail["answers"]) == 18
@@ -91,7 +100,7 @@ def test_bad_quote_is_retried_then_marked_needs_review(conn, cfg):
     ask = FakeProvider(ask_responder=lambda q: ANSWERS[q] or "Nothing.", sleep=lambda s: None)
     work = FakeProvider(complete_responder=bad_then_good, sleep=lambda s: None)
     ctx = make_ctx(conn, cfg, ask=ask, work=work)
-    Flow([VisibilityAgent()]).run(ctx)
+    shift_flow().run(ctx)
     rows = conn.execute("SELECT a.status, a.error, q.text FROM answers a JOIN questions q ON q.id = a.question_id").fetchall()
     review = [r for r in rows if r["status"] == "needs_review"]
     assert len(review) == 3 and all(r["text"].startswith("Best stationery") for r in review)
@@ -108,7 +117,7 @@ def test_invalid_questions_fail_loudly(conn, cfg):
                                   "Online stationery store in Australia"))
     ctx = make_ctx(conn, bad, ask=FakeProvider(), work=FakeProvider())
     with pytest.raises(RunFailed):
-        Flow([VisibilityAgent()]).run(ctx)
+        shift_flow().run(ctx)
     assert conn.execute("SELECT status FROM runs").fetchone()["status"] == "failed"
     assert conn.execute("SELECT COUNT(*) FROM answers").fetchone()[0] == 0
 
@@ -116,15 +125,15 @@ def test_invalid_questions_fail_loudly(conn, cfg):
 def test_over_budget_plan_fails_before_asking(conn, cfg):
     ctx = make_ctx(conn, cfg, ask=FakeProvider(max_calls=10), work=FakeProvider())
     with pytest.raises(RunFailed, match="call budget"):
-        Flow([VisibilityAgent()]).run(ctx)
+        shift_flow().run(ctx)
 
 
 def test_questions_reused_and_second_day_compared(conn, cfg, fake_work):
     ask = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
-    Flow([VisibilityAgent()]).run(make_ctx(conn, cfg, "2026-10-20", ask=ask, work=fake_work))
+    shift_flow().run(make_ctx(conn, cfg, "2026-10-20", ask=ask, work=fake_work))
     ask2 = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
     ctx = make_ctx(conn, cfg, "2026-10-21", ask=ask2, work=fake_work)
-    Flow([VisibilityAgent()]).run(ctx)
+    shift_flow().run(ctx)
     assert ctx.data["write_questions"]["core"]["action"] == "reused"
     assert conn.execute("SELECT COUNT(*) FROM questions").fetchone()[0] == 6
     lines = ctx.data["compare_previous"]["lines"]
@@ -134,7 +143,7 @@ def test_questions_reused_and_second_day_compared(conn, cfg, fake_work):
 def test_import_pasted_answers_and_compare(conn, cfg, fake_work, tmp_path):
     ask = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
     ask.name = "gemini"
-    Flow([VisibilityAgent()]).run(make_ctx(conn, cfg, ask=ask, work=fake_work))
+    shift_flow().run(make_ctx(conn, cfg, ask=ask, work=fake_work))
 
     csv_path = tmp_path / "pasted.csv"
     csv_path.write_text(
@@ -182,7 +191,7 @@ def test_recheck_reopens_needs_review_answers(conn, cfg, fake_work):
     ask = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
     work = FakeProvider(complete_responder=extractor, sleep=lambda s: None)
     ctx = make_ctx(conn, cfg, ask=ask, work=work)
-    Flow([VisibilityAgent()]).run(ctx)
+    shift_flow().run(ctx)
     assert conn.execute("SELECT needs_review FROM daily_summary").fetchone()[0] == 3
 
     broken["on"] = False  # e.g. the faulty rule or extraction was fixed
@@ -208,7 +217,7 @@ def test_live_progress_file_follows_the_run(conn, cfg, fake_work, tmp_path):
     ask = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
     ctx = make_ctx(conn, cfg, ask=ask, work=fake_work)
     ctx.progress = listener
-    Flow([VisibilityAgent()]).run(ctx)
+    shift_flow().run(ctx)
 
     asking = [s for s in seen if s["current"] == "ask_questions" and s["progress"]]
     assert asking[-1]["progress"]["done"] == 18 and asking[-1]["progress"]["total"] == 18
@@ -222,5 +231,37 @@ def test_progress_listener_errors_do_not_stop_the_run(conn, cfg, fake_work):
     ask = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
     ctx = make_ctx(conn, cfg, ask=ask, work=fake_work)
     ctx.progress = lambda e: 1 / 0
-    Flow([VisibilityAgent()]).run(ctx)
+    shift_flow().run(ctx)
     assert conn.execute("SELECT status FROM runs").fetchone()[0] == "ok"
+
+
+
+def test_master_stops_the_shift_when_counts_do_not_match(conn, cfg, fake_work, monkeypatch):
+    import airtime.agents.visibility.master as master
+    real = master.count_answers
+
+    def off_by_one(facts):
+        c = real(facts)
+        c.our_mentions += 1
+        return c
+
+    monkeypatch.setattr(master, "count_answers", off_by_one)
+    ask = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
+    ctx = make_ctx(conn, cfg, ask=ask, work=fake_work)
+    with pytest.raises(RunFailed, match="numbers_match"):
+        shift_flow().run(ctx)
+    run = conn.execute("SELECT * FROM runs").fetchone()
+    assert run["status"] == "failed"
+    last = json.loads(run["steps"])[-1]
+    assert last["agent"] == "master" and last["status"] == "failed" and "our_mentions" in last["error"]
+
+
+def test_master_stops_the_shift_when_answers_are_missing(conn, cfg, fake_work):
+    from airtime.agents.visibility.master import answers_complete
+    ask = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
+    ctx = make_ctx(conn, cfg, ask=ask, work=fake_work)
+    shift_flow().run(ctx)
+    conn.execute("DELETE FROM mentions")
+    conn.execute("DELETE FROM answers WHERE id IN (SELECT id FROM answers LIMIT 2)")
+    problems, facts = answers_complete(ctx)
+    assert facts["recorded"] == 16 and any("16 answers stored but 18" in p for p in problems)

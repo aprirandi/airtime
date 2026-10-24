@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react"
 import {
   Archive, BookOpenText, Bot, Calculator, CheckCheck, FileText, GitCompareArrows, LayoutDashboard,
-  ListChecks, Loader2, Pause, Play, RotateCcw, Send, Store as StoreIcon, UserPlus,
+  ListChecks, Loader2, ShieldCheck, Pause, Play, RotateCcw, Send, Store as StoreIcon, UserPlus,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -13,7 +13,14 @@ import { useI18n, type T } from "@/lib/i18n"
 import type { AnswerDetail, Live, RunDetail, Site, Store } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-type Kind = "Data" | "AI" | "Code" | "Gemini" | "Output"
+type Kind = "Data" | "AI" | "Code" | "Gemini" | "Output" | "Master"
+type AgentTag = "asker" | "analyst" | "master"
+
+const AGENT_TAG: Record<AgentTag, string> = {
+  asker: "bg-agent-asker",
+  analyst: "bg-agent-analyst",
+  master: "bg-agent-master",
+}
 
 interface Node {
   id: string
@@ -21,6 +28,7 @@ interface Node {
   kind: Kind
   title: string
   who: string
+  agent?: AgentTag
   lines: ReactNode[]
   steps?: string[] // run-log step names this node covers, for live highlighting
   source?: string
@@ -32,6 +40,7 @@ const KIND_STYLE: Record<Kind, string> = {
   Code: "border bg-background text-foreground",
   Gemini: "bg-chart-1 text-white",
   Output: "bg-success/15 text-success",
+  Master: "bg-agent-master text-white",
 }
 
 type NodeState = "done" | "active" | "todo"
@@ -77,6 +86,11 @@ function FlowNode({ n, state, live }: { n: Node; state: NodeState; live: boolean
       </div>
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
+          {n.agent && (
+            <span className={cn("rounded px-1.5 py-px text-[10px] font-semibold text-white", AGENT_TAG[n.agent])}>
+              {t(`agent.${n.agent}`)}
+            </span>
+          )}
           <span className="font-medium">{n.title}</span>
           <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-normal">
             {t(`flow.kind.${n.kind}`)}
@@ -107,7 +121,7 @@ function FlowNode({ n, state, live }: { n: Node; state: NodeState; live: boolean
   )
 }
 
-function buildNodes(store: Store, d: RunDetail, t: T, comparison: string[]): Node[] {
+function buildNodes(store: Store, d: RunDetail, t: T, comparison: string[], pick: <V>(o: object, f: string) => V): Node[] {
   const a = d.answers
   const s = d.summary
   const setup = store.setup
@@ -121,6 +135,13 @@ function buildNodes(store: Store, d: RunDetail, t: T, comparison: string[]): Nod
   const model = a.find((x) => x.model)?.model ?? setup?.ask_model ?? "Gemini"
   const tries = Math.max(1, ...a.map((x) => x.attempt))
   const codeNotAi = t("flow.codeNotAi")
+  const masterNode = (id: string, stepName: string, title: string): Node => {
+    const st = d.run.steps.find((x) => x.name === stepName)
+    return {
+      id, icon: ShieldCheck, kind: "Master", title, who: codeNotAi, agent: "master",
+      lines: [st ? pick<string>(st, "description") : t("flow.m.none")], steps: [stepName],
+    }
+  }
   return [
     {
       id: "store", icon: StoreIcon, kind: "Data", title: t("flow.store.title"), who: t("flow.store.who"),
@@ -129,7 +150,7 @@ function buildNodes(store: Store, d: RunDetail, t: T, comparison: string[]): Nod
       source: `config/stores/${store.slug}.toml`,
     },
     {
-      id: "questions", icon: ListChecks, kind: "AI", title: t("flow.q.title"), who: "Visibility Agent",
+      id: "questions", icon: ListChecks, kind: "AI", title: t("flow.q.title"), who: setup?.work_model ?? "Gemini", agent: "asker",
       lines: dailyQ.length
         ? [t("flow.q.l1b", { core: coreQ.length, daily: dailyQ.length, a: areaQ, areas: store.areas.join(" / ") }),
             t("flow.q.l2", { q: dailyQ[0] }), t("flow.q.l3b")]
@@ -138,28 +159,29 @@ function buildNodes(store: Store, d: RunDetail, t: T, comparison: string[]): Nod
       steps: ["write_questions", "validate_questions"], source: "1–2",
     },
     {
-      id: "gemini", icon: Send, kind: "Gemini", title: t("flow.g.title"), who: "Google Gemini API",
+      id: "gemini", icon: Send, kind: "Gemini", title: t("flow.g.title"), who: "Google Gemini API", agent: "asker",
       lines: [`${model}${setup?.use_search ? t("flow.g.withSearch") : t("flow.g.noSearch")}`,
         t("flow.g.l2", { n: a.length, tries, ok: answered.length, no: a.length - answered.length })],
       steps: ["ask_questions"], source: "3",
     },
     {
-      id: "archive", icon: Archive, kind: "Data", title: t("flow.a.title"), who: "SQLite",
+      id: "archive", icon: Archive, kind: "Data", title: t("flow.a.title"), who: "SQLite", agent: "asker",
       lines: [t("flow.a.l1", { n: a.length }), t("flow.a.l2", { w: words })],
       source: "data/airtime.sqlite · answers",
     },
+    masterNode("m1", "master_answers_complete", t("flow.m1.title")),
     {
-      id: "read", icon: BookOpenText, kind: "AI", title: t("flow.r.title"), who: setup?.work_model ?? "Gemini",
+      id: "read", icon: BookOpenText, kind: "AI", title: t("flow.r.title"), who: setup?.work_model ?? "Gemini", agent: "analyst",
       lines: [t("flow.r.l1", { n: answered.length }), t("flow.r.l2", { n: mentions })],
       steps: ["extract_mentions"], source: "4",
     },
     {
-      id: "check", icon: CheckCheck, kind: "Code", title: t("flow.c.title"), who: codeNotAi,
+      id: "check", icon: CheckCheck, kind: "Code", title: t("flow.c.title"), who: codeNotAi, agent: "analyst",
       lines: [t("flow.c.l1", { n: d.run.quotes_verified }), t("flow.c.l2", { n: s?.needs_review ?? 0 })],
       steps: ["verify_and_count"], source: "5",
     },
     {
-      id: "count", icon: Calculator, kind: "Code", title: t("flow.n.title"), who: codeNotAi,
+      id: "count", icon: Calculator, kind: "Code", title: t("flow.n.title"), who: codeNotAi, agent: "analyst",
       lines: s
         ? [t("flow.n.l1", { store: store.name, n: s.our_mentions, d: s.total_answers }),
             t("flow.n.l1", { store: s.top_competitor ?? "-", n: s.top_competitor_mentions, d: s.total_answers }),
@@ -168,14 +190,15 @@ function buildNodes(store: Store, d: RunDetail, t: T, comparison: string[]): Nod
       steps: ["verify_and_count"], source: "data/airtime.sqlite · daily_summary",
     },
     {
-      id: "compare", icon: GitCompareArrows, kind: "Code", title: t("flow.cmp.title"), who: codeNotAi,
+      id: "compare", icon: GitCompareArrows, kind: "Code", title: t("flow.cmp.title"), who: codeNotAi, agent: "analyst",
       lines: [comparison[1] ?? comparison[0] ?? ""], steps: ["compare_previous"], source: "6",
     },
     {
-      id: "summary", icon: FileText, kind: "AI", title: t("flow.s.title"), who: t("flow.s.who"),
+      id: "summary", icon: FileText, kind: "AI", title: t("flow.s.title"), who: t("flow.s.who"), agent: "analyst",
       lines: [s?.text_source === "ai" ? t("flow.s.ai") : t("flow.s.code")],
       steps: ["write_summary"], source: "7",
     },
+    masterNode("m2", "master_numbers_match", t("flow.m2.title")),
     {
       id: "dashboard", icon: LayoutDashboard, kind: "Output", title: t("flow.d.title"), who: t("flow.d.who"),
       lines: [t("flow.d.l1")],
@@ -189,7 +212,7 @@ function pickTrace(answers: AnswerDetail[]): AnswerDetail | undefined {
 }
 
 /** Which stage of the traced answer each pipeline box corresponds to. */
-const TRACE_STAGE: Record<string, number> = { store: 0, questions: 1, gemini: 2, archive: 2, read: 3, check: 4, count: 5, compare: 6, summary: 6, dashboard: 6 }
+const TRACE_STAGE: Record<string, number> = { store: 0, questions: 1, gemini: 2, archive: 2, m1: 2, read: 3, check: 4, count: 5, compare: 6, summary: 6, m2: 6, dashboard: 6 }
 
 function TraceCard({ a, storeName, stage }: { a: AnswerDetail; storeName: string; stage: number }) {
   const { t } = useI18n()
@@ -251,7 +274,7 @@ function Stage({ n, at, title, children }: { n: number; at: number; title: strin
 
 export function DataFlow({ site, store, live }: { site: Site; store: Store; live: Live | null }) {
   const { t } = useI18n()
-  const latest = store.runs.find((r) => r.agent === "visibility")
+  const latest = store.runs.find((r) => r.kind === "shift")
   const { data, error } = useRun(latest?.id ?? null)
   if (!latest) return <p className="text-muted-foreground text-sm">{t("team.noShift")}</p>
   if (error) return <p className="text-destructive text-sm">{t("day.loadError", { e: error })}</p>
@@ -261,7 +284,7 @@ export function DataFlow({ site, store, live }: { site: Site; store: Store; live
 
 function FlowView({ site, store, live, data, runDate }: { site: Site; store: Store; live: Live | null; data: RunDetail; runDate: string }) {
   const { t, pick } = useI18n()
-  const nodes = buildNodes(store, data, t, pick<string[]>(data, "comparison") ?? data.comparison)
+  const nodes = buildNodes(store, data, t, pick<string[]>(data, "comparison") ?? data.comparison, pick)
   const replay = useFlowReplay(nodes.length)
   const current = live?.status === "running" ? live.current : null
   const liveIndex = current ? nodes.findIndex((n) => n.steps?.includes(current)) : -1

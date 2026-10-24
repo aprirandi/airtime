@@ -19,49 +19,72 @@ DOCS_DIR = REPO_ROOT / "docs"
 SCHEDULE = {"cron": "17 20 * * *", "utc_hour": 20, "utc_minute": 17}  # keep in sync with daily.yml
 
 AGENT = {
-    "name": "Visibility Agent",
-    "role": "Every morning I ask AI assistants the questions your buyers ask, note which shops "
-            "they recommend, and check every quote before I count it.",
-    "role_id": "Setiap pagi saya menanyakan ke asisten AI pertanyaan yang biasa diajukan pembeli Anda, "
-               "mencatat toko mana yang mereka rekomendasikan, dan mengecek setiap kutipan sebelum menghitungnya.",
+    "name": "Asker & Analyst",
+    "role": "Every morning the Asker asks AI assistants the questions your buyers ask. The Analyst "
+            "reads every answer, checks each quote word for word and counts which shops are "
+            "recommended. The Master checks each hand-off.",
+    "role_id": "Setiap pagi Asker menanyakan ke asisten AI pertanyaan yang biasa diajukan pembeli Anda. "
+               "Analyst membaca setiap jawaban, mengecek setiap kutipan kata per kata, dan menghitung toko "
+               "mana yang direkomendasikan. Master mengecek setiap serah-terima.",
 }
 
-# The team as the brief plans it. Only the Visibility agent exists today; the others are
-# listed so the site shows the whole flow and where each future agent will sit in it.
+# The team in the order of the "Airtime at work" flow. Asker, Analyst and the Master's hand-off
+# checks work today; the others are listed so the site shows where each one will sit.
 TEAM = [
-    {"id": "visibility", "name": "Visibility Agent", "title": "Visibility analyst", "title_id": "Analis visibilitas", "status": "active",
-     "job": "Asks AI assistants the store's buyer questions every day and counts which shops they name.",
-     "job_id": "Setiap hari menanyakan pertanyaan pembeli ke asisten AI dan menghitung toko mana yang disebut.",
-     "inputs": ["Store profile", "Buyer questions", "Gemini answers"],
-     "outputs": ["Verified mentions", "Daily counts", "Owner summary"],
-     "inputs_id": ["Profil toko", "Pertanyaan pembeli", "Jawaban Gemini"],
-     "outputs_id": ["Sebutan terverifikasi", "Hitungan harian", "Ringkasan pemilik"]},
     {"id": "auditor", "name": "Auditor", "title": "Site auditor", "title_id": "Auditor situs", "status": "planned",
      "job": "Will check the store's own website for what AI assistants can and cannot read.",
      "job_id": "Akan mengecek website toko: apa yang bisa dan tidak bisa dibaca asisten AI.",
-     "inputs": ["Store website"], "outputs": ["Audit findings"],
-     "inputs_id": ["Website toko"], "outputs_id": ["Temuan audit"]},
+     "inputs": ["Store website"], "outputs": ["Audit report"],
+     "inputs_id": ["Website toko"], "outputs_id": ["Laporan audit"]},
+    {"id": "asker", "name": "Asker", "title": "Asks the AI assistants", "title_id": "Bertanya ke asisten AI",
+     "status": "active", "steps": [1, 2, 3],
+     "job": "Writes the day's buyer questions, checks them, and asks each one to Gemini. Every answer is stored, empty ones too.",
+     "job_id": "Menulis pertanyaan pembeli hari ini, mengeceknya, lalu menanyakan masing-masing ke Gemini. Setiap jawaban disimpan, termasuk yang kosong.",
+     "inputs": ["Store profile", "Recent questions"], "outputs": ["Answer table"],
+     "inputs_id": ["Profil toko", "Pertanyaan terakhir"], "outputs_id": ["Tabel jawaban"]},
+    {"id": "analyst", "name": "Analyst", "title": "Reads and counts", "title_id": "Membaca dan menghitung",
+     "status": "active", "steps": [4, 5, 6, 7],
+     "job": "Reads every answer, checks each quote word for word, counts the store against its competitors, compares with the last shift and writes the owner summary.",
+     "job_id": "Membaca setiap jawaban, mengecek setiap kutipan kata per kata, menghitung toko dibanding kompetitor, membandingkan dengan shift lalu, dan menulis ringkasan untuk pemilik.",
+     "inputs": ["Answer table"], "outputs": ["Count results", "Owner summary"],
+     "inputs_id": ["Tabel jawaban"], "outputs_id": ["Hasil hitungan", "Ringkasan pemilik"]},
     {"id": "planner", "name": "Planner", "title": "Planner", "title_id": "Perencana", "status": "planned",
-     "job": "Will turn the findings into a short list of changes to try.",
-     "job_id": "Akan mengubah temuan menjadi daftar singkat perubahan yang bisa dicoba.",
-     "inputs": ["Daily counts", "Audit findings"], "outputs": ["Change plan"],
-     "inputs_id": ["Hitungan harian", "Temuan audit"], "outputs_id": ["Rencana perubahan"]},
+     "job": "Will turn the gaps into a short list of tasks, each with its evidence.",
+     "job_id": "Akan mengubah celah yang ditemukan menjadi daftar tugas singkat, masing-masing dengan buktinya.",
+     "inputs": ["Count results", "Audit report"], "outputs": ["Task list"],
+     "inputs_id": ["Hasil hitungan", "Laporan audit"], "outputs_id": ["Daftar tugas"]},
+    {"id": "owner", "name": "Owner", "title": "Approves the changes", "title_id": "Menyetujui perubahan",
+     "status": "human",
+     "job": "The store owner reviews the tasks and evidence. Nothing changes on the site without approval.",
+     "job_id": "Pemilik toko meninjau tugas dan buktinya. Tidak ada yang berubah di website tanpa persetujuan.",
+     "inputs": ["Task list"], "outputs": ["Approved changes"],
+     "inputs_id": ["Daftar tugas"], "outputs_id": ["Perubahan disetujui"]},
     {"id": "fixer", "name": "Fixer", "title": "Fixer", "title_id": "Pelaksana", "status": "planned",
-     "job": "Will prepare the approved changes. Nothing goes live without the owner.",
-     "job_id": "Akan menyiapkan perubahan yang disetujui. Tidak ada yang tayang tanpa persetujuan pemilik.",
-     "inputs": ["Change plan"], "outputs": ["Prepared changes"],
-     "inputs_id": ["Rencana perubahan"], "outputs_id": ["Perubahan siap pakai"]},
+     "job": "Will prepare and publish the approved changes, with a backup to restore.",
+     "job_id": "Akan menyiapkan dan menerbitkan perubahan yang disetujui, dengan backup untuk dipulihkan.",
+     "inputs": ["Approved changes"], "outputs": ["Published change"],
+     "inputs_id": ["Perubahan disetujui"], "outputs_id": ["Perubahan terbit"]},
     {"id": "reporter", "name": "Reporter", "title": "Reporter", "title_id": "Pelapor", "status": "planned",
-     "job": "Will write the weekly owner report across all agents.",
-     "job_id": "Akan menulis laporan mingguan untuk pemilik dari semua agent.",
-     "inputs": ["Everything above"], "outputs": ["Owner report"],
-     "inputs_id": ["Semua di atas"], "outputs_id": ["Laporan pemilik"]},
-    {"id": "master", "name": "Master check", "title": "Quality gate", "title_id": "Penjaga kualitas", "status": "planned",
-     "job": "Will check every agent's output before it reaches the owner.",
-     "job_id": "Akan mengecek hasil setiap agent sebelum sampai ke pemilik.",
-     "inputs": ["Every agent's output"], "outputs": ["Pass or stop"],
-     "inputs_id": ["Hasil setiap agent"], "outputs_id": ["Lolos atau berhenti"]},
+     "job": "Will compare before and after, add AI visits from analytics, and report to the owner, zeros included.",
+     "job_id": "Akan membandingkan sebelum dan sesudah, menambahkan kunjungan dari AI lewat analytics, dan melapor ke pemilik, termasuk hasil nol.",
+     "inputs": ["Count results", "Analytics"], "outputs": ["Owner report"],
+     "inputs_id": ["Hasil hitungan", "Analytics"], "outputs_id": ["Laporan pemilik"]},
+    {"id": "master", "name": "Master", "title": "Checks every hand-off", "title_id": "Mengecek setiap serah-terima",
+     "status": "active",
+     "job": "Checks each agent's output before the next one uses it. Today: the Asker's answers are complete, and the Analyst's numbers match the answers.",
+     "job_id": "Mengecek hasil setiap agent sebelum dipakai agent berikutnya. Saat ini: jawaban dari Asker lengkap, dan angka Analyst cocok dengan jawabannya.",
+     "inputs": ["Each agent's output"], "outputs": ["Pass or send back"],
+     "inputs_id": ["Hasil setiap agent"], "outputs_id": ["Lolos atau dikembalikan"]},
 ]
+
+STEP_AGENT = {"write_questions": "asker", "validate_questions": "asker", "ask_questions": "asker",
+              "import_answers": "import", "extract_mentions": "analyst", "verify_and_count": "analyst",
+              "compare_previous": "analyst", "write_summary": "analyst"}
+
+
+def is_shift(agent: str) -> bool:
+    """A daily shift run: the old single 'visibility' agent, or the Asker + Analyst flow."""
+    return agent == "visibility" or "asker" in agent.split(",")
 
 
 def _loads(value, default):
@@ -74,10 +97,31 @@ def _n(count, word: str, plural: str | None = None) -> str:
 
 def describe_step(step: dict, store_name: str, lang: str = "en") -> str:
     """One plain sentence about what a step did, from its stored result ("en" or "id")."""
+    if step["name"].startswith("master_"):
+        return _describe_master(step, lang)
     text = _describe_id(step, store_name) if lang == "id" else _describe(step, store_name)
     if step["name"].startswith("recheck_"):
         return ("Cek ulang: " if lang == "id" else "Re-check: ") + text[0].lower() + text[1:]
     return text
+
+
+def _describe_master(step: dict, lang: str) -> str:
+    r = step.get("result") or {}
+    problems = r.get("problems") or []
+    id_ = lang == "id"
+    if step["name"] == "master_answers_complete":
+        if problems:
+            return ("Master mengembalikan hasil Asker: " if id_ else "Master sent the Asker's work back: ") + "; ".join(problems)
+        return (f"Master mengecek hasil Asker: {r.get('recorded')} dari {r.get('planned')} jawaban tercatat untuk {r.get('questions')} pertanyaan. Lolos."
+                if id_ else
+                f"Master checked the Asker's work: {r.get('recorded')} of {r.get('planned')} answers recorded for {r.get('questions')} questions. Passed.")
+    if step["name"] == "master_numbers_match":
+        if problems:
+            return ("Master mengembalikan hasil Analyst: " if id_ else "Master sent the Analyst's work back: ") + "; ".join(problems)
+        return (f"Master mengecek hasil Analyst: {r.get('fields_checked')} angka cocok dengan jawaban, {r.get('quotes_checked')} kutipan masih persis sama. Lolos."
+                if id_ else
+                f"Master checked the Analyst's work: {r.get('fields_checked')} numbers match the answers, {r.get('quotes_checked')} quotes still verbatim. Passed.")
+    return "Master check." if not problems else "; ".join(problems)
 
 
 def _describe(step: dict, store_name: str) -> str:
@@ -176,6 +220,7 @@ def _describe_id(step: dict, store_name: str) -> str:
 def _run_json(conn, run, store_name: str) -> dict:
     steps = _loads(run["steps"], [])
     for s in steps:
+        s.setdefault("agent", STEP_AGENT.get(s["name"].removeprefix("recheck_"), "analyst"))
         s["description"] = describe_step(s, store_name)
         s["description_id"] = describe_step(s, store_name, "id")
     quotes = conn.execute(
@@ -187,7 +232,8 @@ def _run_json(conn, run, store_name: str) -> dict:
                   SUM(a.status = 'ok' AND EXISTS (SELECT 1 FROM mentions m WHERE m.answer_id = a.id AND m.is_ours)) AS ours
            FROM answers a JOIN questions q ON q.id = a.question_id WHERE a.run_id = ?
            GROUP BY q.id ORDER BY q.kind, q.id""", (run["id"],))]
-    return {"id": run["id"], "agent": run["agent"], "run_date": run["run_date"],
+    return {"id": run["id"], "agent": run["agent"], "kind": "shift" if is_shift(run["agent"]) else "import",
+            "run_date": run["run_date"],
             "started_at": run["started_at"], "finished_at": run["finished_at"],
             "status": run["status"], "error": run["error"], "steps": steps,
             "quotes_verified": quotes, "questions": questions}
@@ -263,7 +309,7 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
             path.write_text(json.dumps(detail, indent=1))
             written.append(path)
 
-        api_runs = [r for r in run_items if r["agent"] == "visibility" and r["status"] == "ok"]
+        api_runs = [r for r in run_items if r["kind"] == "shift" and r["status"] == "ok"]
         totals = conn.execute(
             """SELECT COUNT(*) AS asked,
                       SUM(a.status != 'no_answer') AS answered,
@@ -297,7 +343,7 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
     path = data_dir / "site.json"
     path.write_text(json.dumps(site, indent=1))
     written.append(path)
-    last = conn.execute("SELECT * FROM runs WHERE agent = 'visibility' ORDER BY started_at DESC LIMIT 1").fetchone()
+    last = next((r for r in conn.execute("SELECT * FROM runs ORDER BY started_at DESC") if is_shift(r["agent"])), None)
     live = {"status": "idle", "updated_at": utc_now(), "current": None, "progress": None, "steps": [],
             "last_run_id": last["id"] if last else None, "last_run_status": last["status"] if last else None,
             "last_finished_at": last["finished_at"] if last else None,

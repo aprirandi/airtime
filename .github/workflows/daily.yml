@@ -1,4 +1,4 @@
-name: Daily visibility run
+name: Daily Airtime shift
 
 on:
   schedule:
@@ -27,7 +27,7 @@ jobs:
           python -m pytest -q
       - name: Check planned calls against budget
         run: python -m airtime plan --store handworks
-      - name: Run Visibility agent (live progress pushed every 7 minutes)
+      - name: Run the shift - Asker, Analyst and Master checks (live progress every 7 minutes)
         id: run
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

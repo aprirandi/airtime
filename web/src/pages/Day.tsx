@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useRun } from "@/lib/data"
 import { SummaryText } from "@/components/Findings"
+import { agentFor } from "@/components/office/stations"
 import { fmtDate, fmtTime, pct } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import type { AnswerDetail } from "@/lib/types"
@@ -200,6 +201,9 @@ export function Day({ runId, onBack, storeData }: { runId: number; onBack: () =>
                     <span className="bg-muted grid size-6 shrink-0 place-items-center rounded-full text-xs font-semibold">{st.step}</span>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
+                        <span className={`rounded px-1.5 py-px text-[10px] font-semibold text-white bg-agent-${agentFor(st)}`}>
+                          {t(`agent.${agentFor(st)}`)}
+                        </span>
                         <Badge variant={st.kind === "AI" ? "default" : "outline"}>{st.kind === "AI" ? t("common.ai") : t("common.code")}</Badge>
                         <span className="text-muted-foreground text-xs">{st.name.replace(/_/g, " ")}</span>
                         {st.status === "failed" && <Badge variant="destructive">{t("day.failed")}</Badge>}

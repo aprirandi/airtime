@@ -12,16 +12,19 @@ _QUOTE_MAP = str.maketrans({
     " ": " ",
 })
 _MARKDOWN_EMPHASIS = re.compile(r"(\*\*|__|\*|`)")
+_MARKDOWN_LINK = re.compile(r"\[([^\]]*)\]\([^)\s]*\)")  # [text](url) -> text
 
 
 def normalize_for_match(text: str) -> str:
     """Normalise text for verbatim quote checks.
 
     Only presentation differences are removed: unicode form, curly quotes and
-    dashes, markdown emphasis markers and runs of whitespace. Case and wording
+    dashes, markdown links (the visible text is kept), markdown emphasis markers and
+    runs of whitespace. Case and wording
     are kept, so a quote still has to be copied word for word.
     """
     text = unicodedata.normalize("NFKC", text).translate(_QUOTE_MAP)
+    text = _MARKDOWN_LINK.sub(r"\1", text)
     text = _MARKDOWN_EMPHASIS.sub("", text)
     return re.sub(r"\s+", " ", text).strip()
 

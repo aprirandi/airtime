@@ -14,7 +14,8 @@ def test_live_config_core_questions_are_valid():
     from airtime.config import load_store_config
     live = load_store_config("handworks")
     assert validate_questions(list(live.questions), live.areas) == []
-    assert live.daily_count == 6 and live.attempts_per_day * len(live.questions) + live.daily_count * live.daily_attempts <= 14
+    assert live.daily_count == 6 and live.attempts_per_day * len(live.questions) + live.daily_count * live.daily_attempts <= 12
+    assert live.provider.max_ask_calls_per_run <= 18  # Gemini 3.8 Flash free tier: about 20 a day
 
 
 def test_seed_area_flags(cfg):

@@ -44,6 +44,10 @@
   --screen: #1f2937;
   --robot-head: #ffffff;
   --robot-line: #1f2937;
+  /* One colour per agent (decorative; names are always shown next to them) */
+  --agent-asker: #2a78d6;
+  --agent-analyst: #0b7a75;
+  --agent-master: #5a3e9e;
 }
 
 .dark {
@@ -84,6 +88,9 @@
   --screen: #0b1220;
   --robot-head: #e8edf3;
   --robot-line: #0b1220;
+  --agent-asker: #3987e5;
+  --agent-analyst: #3cc4bc;
+  --agent-master: #b7a3f0;
 }
 
 @theme inline {
@@ -111,6 +118,9 @@
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
+  --color-agent-asker: var(--agent-asker);
+  --color-agent-analyst: var(--agent-analyst);
+  --color-agent-master: var(--agent-master);
   --color-success: var(--success);
   --color-warning: var(--warning);
 }

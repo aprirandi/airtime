@@ -6,6 +6,7 @@
  "run": {
   "id": 2,
   "agent": "visibility",
+  "kind": "shift",
   "run_date": "2026-10-25",
   "started_at": "2026-10-24T22:28:27+00:00",
   "finished_at": "2026-10-24T22:41:54+00:00",
@@ -44,6 +45,7 @@
       "dropped": []
      }
     },
+    "agent": "asker",
     "description": "Set up 3 core questions and wrote 6 new ones for today.",
     "description_id": "Menyiapkan 3 pertanyaan inti dan menulis 6 pertanyaan baru untuk hari ini."
    },
@@ -61,6 +63,7 @@
      "naming_area": 4,
      "removed_as_duplicate": 0
     },
+    "agent": "asker",
     "description": "Checked the 9 questions: no empty or duplicate ones, 4 name a store area.",
     "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 4 menyebut area toko."
    },
@@ -78,6 +81,7 @@
      "retries": 5,
      "calls_made": 14
     },
+    "agent": "asker",
     "description": "Asked 12 questions: 9 answered, 3 no answer. Retried 5 times after errors.",
     "description_id": "Mengajukan 12 pertanyaan: 9 dijawab, 3 tanpa jawaban. Mencoba ulang 5 kali setelah error."
    },
@@ -92,6 +96,7 @@
      "extracted": 9,
      "failed_calls": 0
     },
+    "agent": "analyst",
     "description": "Read 9 answers and listed every shop named.",
     "description_id": "Membaca 9 jawaban dan mencatat setiap toko yang disebut."
    },
@@ -112,6 +117,7 @@
      "top_competitor": "Milligram",
      "top_competitor_mentions": 4
     },
+    "agent": "analyst",
     "description": "Checked every quote word for word: 8 answers counted, 1 set aside for review. Handworks named in 0 of 8.",
     "description_id": "Mengecek setiap kutipan kata per kata: 8 jawaban dihitung, 1 disisihkan untuk dicek. Handworks disebut di 0 dari 8."
    },
@@ -140,6 +146,7 @@
       "max_pct": 0
      }
     },
+    "agent": "analyst",
     "description": "Handworks named in 0 of 8 answers (0%), previously 0 of 14 (0%): no change.",
     "description_id": "Membandingkan dengan shift sebelumnya."
    },
@@ -155,11 +162,101 @@
      "rejected": [],
      "text": "Today, Gemini (API) recorded 8 answers, with Handworks appearing in 0 of them. This represents 0 of the total count. Meanwhile, Milligram was named in 4 answers."
     },
+    "agent": "analyst",
     "description": "Wrote the summary; code checked every number in it against the counts.",
     "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+   },
+   {
+    "step": 4,
+    "name": "recheck_extract_mentions",
+    "kind": "AI",
+    "status": "ok",
+    "finished_at": "2026-10-24T23:00:18+00:00",
+    "answer_ids": [
+     23
+    ],
+    "result": {
+     "extracted": 1,
+     "failed_calls": 0
+    },
+    "agent": "analyst",
+    "description": "Re-check: read 1 answer and listed every shop named.",
+    "description_id": "Cek ulang: membaca 1 jawaban dan mencatat setiap toko yang disebut."
+   },
+   {
+    "step": 5,
+    "name": "recheck_verify_and_count",
+    "kind": "CODE",
+    "status": "ok",
+    "finished_at": "2026-10-24T23:00:18+00:00",
+    "answer_ids": [
+     23
+    ],
+    "result": {
+     "retried": 0,
+     "asked": 12,
+     "ok": 9,
+     "no_answer": 3,
+     "needs_review": 0,
+     "our_mentions": 0,
+     "top_competitor": "Milligram",
+     "top_competitor_mentions": 4
+    },
+    "agent": "analyst",
+    "description": "Re-check: checked every quote word for word: 9 answers counted, 0 set aside for review. Handworks named in 0 of 9.",
+    "description_id": "Cek ulang: mengecek setiap kutipan kata per kata: 9 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 9."
+   },
+   {
+    "step": 6,
+    "name": "recheck_compare_previous",
+    "kind": "CODE",
+    "status": "ok",
+    "finished_at": "2026-10-24T23:00:18+00:00",
+    "answer_ids": [
+     23
+    ],
+    "result": {
+     "lines": [
+      "Compared with the previous run on 2026-10-24:",
+      "Handworks named in 0 of 9 answers (0%), previously 0 of 14 (0%): no change.",
+      "Top competitor Milligram in 4 of 9; previously Milligram in 10 of 14 (same store).",
+      "Questions naming an area: 0 of 4, previously 0 of 2: no change.",
+      "Questions not naming an area: 0 of 5, previously 0 of 12: no change.",
+      "No answer: 3 of 12 asked (previously 4 of 18); set aside for review: 0 (previously 0)."
+     ],
+     "previous_date": "2026-10-24",
+     "range": {
+      "runs": 2,
+      "from": "2026-10-24",
+      "to": "2026-10-25",
+      "min_pct": 0,
+      "max_pct": 0
+     }
+    },
+    "agent": "analyst",
+    "description": "Re-check: handworks named in 0 of 9 answers (0%), previously 0 of 14 (0%): no change.",
+    "description_id": "Cek ulang: membandingkan dengan shift sebelumnya."
+   },
+   {
+    "step": 7,
+    "name": "recheck_write_summary",
+    "kind": "AI",
+    "status": "ok",
+    "finished_at": "2026-10-24T23:00:25+00:00",
+    "answer_ids": [
+     23
+    ],
+    "result": {
+     "source": "ai",
+     "rejected": [],
+     "text": "Today, Gemini (API) provided 9 responses, of which 0 answers named Handworks. This represents 0 of the total count. Additionally, Milligram appeared in 4 of the recorded answers."
+    },
+    "agent": "analyst",
+    "description": "Re-check: wrote the summary; code checked every number in it against the counts.",
+    "description_id": "Cek ulang: menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
    }
   ],
-  "quotes_verified": 79,
+  "quotes_verified": 90,
   "questions": [
    {
     "text": "Best stationery shops in Melbourne",
@@ -198,7 +295,7 @@
     "kind": "daily",
     "names_area": 0,
     "asked": 1,
-    "counted": 0,
+    "counted": 1,
     "ours": 0
    },
    {
@@ -244,16 +341,16 @@
   "run_id": 2,
   "asked": 12,
   "no_answer": 3,
-  "needs_review": 1,
+  "needs_review": 0,
   "our_mentions": 0,
-  "total_answers": 8,
+  "total_answers": 9,
   "top_competitor": "Milligram",
   "top_competitor_mentions": 4,
   "area_mentions": 0,
   "area_answers": 4,
   "area_rate": 0.0,
   "no_area_mentions": 0,
-  "no_area_answers": 4,
+  "no_area_answers": 5,
   "no_area_rate": 0.0,
   "web_search_answers": 0,
   "competitors": [
@@ -272,6 +369,19 @@
     ]
    },
    {
+    "key": "david jones",
+    "name": "David Jones",
+    "mentions": 3,
+    "answer_ids": [
+     23,
+     25,
+     26
+    ],
+    "spellings": [
+     "David Jones"
+    ]
+   },
+   {
     "key": "il papiro",
     "name": "Il Papiro",
     "mentions": 3,
@@ -282,6 +392,31 @@
     ],
     "spellings": [
      "Il Papiro"
+    ]
+   },
+   {
+    "key": "typo",
+    "name": "Typo",
+    "mentions": 3,
+    "answer_ids": [
+     20,
+     23,
+     27
+    ],
+    "spellings": [
+     "Typo"
+    ]
+   },
+   {
+    "key": "amazon au",
+    "name": "Amazon AU",
+    "mentions": 2,
+    "answer_ids": [
+     23,
+     25
+    ],
+    "spellings": [
+     "Amazon AU"
     ]
    },
    {
@@ -309,18 +444,6 @@
     ]
    },
    {
-    "key": "david jones",
-    "name": "David Jones",
-    "mentions": 2,
-    "answer_ids": [
-     25,
-     26
-    ],
-    "spellings": [
-     "David Jones"
-    ]
-   },
-   {
     "key": "deans art",
     "name": "Deans Art",
     "mentions": 2,
@@ -330,6 +453,18 @@
     ],
     "spellings": [
      "Deans Art"
+    ]
+   },
+   {
+    "key": "dymocks",
+    "name": "Dymocks",
+    "mentions": 2,
+    "answer_ids": [
+     20,
+     23
+    ],
+    "spellings": [
+     "Dymocks"
     ]
    },
    {
@@ -343,6 +478,18 @@
     "spellings": [
      "Eckersley's Art & Craft",
      "Eckersley\u2019s Art & Craft"
+    ]
+   },
+   {
+    "key": "kikki k",
+    "name": "Kikki.K",
+    "mentions": 2,
+    "answer_ids": [
+     20,
+     23
+    ],
+    "spellings": [
+     "Kikki.K"
     ]
    },
    {
@@ -394,6 +541,18 @@
     ]
    },
    {
+    "key": "target",
+    "name": "Target",
+    "mentions": 2,
+    "answer_ids": [
+     23,
+     25
+    ],
+    "spellings": [
+     "Target"
+    ]
+   },
+   {
     "key": "essential ingredient",
     "name": "The Essential Ingredient",
     "mentions": 2,
@@ -418,18 +577,6 @@
     ]
    },
    {
-    "key": "typo",
-    "name": "Typo",
-    "mentions": 2,
-    "answer_ids": [
-     20,
-     27
-    ],
-    "spellings": [
-     "Typo"
-    ]
-   },
-   {
     "key": "aesop",
     "name": "Aesop",
     "mentions": 1,
@@ -438,17 +585,6 @@
     ],
     "spellings": [
      "Aesop"
-    ]
-   },
-   {
-    "key": "amazon au",
-    "name": "Amazon AU",
-    "mentions": 1,
-    "answer_ids": [
-     25
-    ],
-    "spellings": [
-     "Amazon AU"
     ]
    },
    {
@@ -518,6 +654,17 @@
     ]
    },
    {
+    "key": "coles local",
+    "name": "Coles Local",
+    "mentions": 1,
+    "answer_ids": [
+     23
+    ],
+    "spellings": [
+     "Coles Local"
+    ]
+   },
+   {
     "key": "coles woolies",
     "name": "Coles/Woolies",
     "mentions": 1,
@@ -537,6 +684,17 @@
     ],
     "spellings": [
      "Cotton On Kids"
+    ]
+   },
+   {
+    "key": "daily blooms",
+    "name": "Daily Blooms",
+    "mentions": 1,
+    "answer_ids": [
+     23
+    ],
+    "spellings": [
+     "Daily Blooms"
     ]
    },
    {
@@ -581,17 +739,6 @@
     ],
     "spellings": [
      "David Jones & Myer"
-    ]
-   },
-   {
-    "key": "dymocks",
-    "name": "Dymocks",
-    "mentions": 1,
-    "answer_ids": [
-     20
-    ],
-    "spellings": [
-     "Dymocks"
     ]
    },
    {
@@ -650,17 +797,6 @@
     ]
    },
    {
-    "key": "kikki k",
-    "name": "Kikki.K",
-    "mentions": 1,
-    "answer_ids": [
-     20
-    ],
-    "spellings": [
-     "Kikki.K"
-    ]
-   },
-   {
     "key": "kip and co",
     "name": "Kip&Co",
     "mentions": 1,
@@ -694,6 +830,17 @@
     ]
    },
    {
+    "key": "little flowers",
+    "name": "Little Flowers",
+    "mentions": 1,
+    "answer_ids": [
+     23
+    ],
+    "spellings": [
+     "Little Flowers"
+    ]
+   },
+   {
     "key": "local post offices australia post and newsagents",
     "name": "Local Post Offices (Australia Post) & Newsagents",
     "mentions": 1,
@@ -702,6 +849,17 @@
     ],
     "spellings": [
      "Local Post Offices (Australia Post) & Newsagents"
+    ]
+   },
+   {
+    "key": "lvly",
+    "name": "LVLY",
+    "mentions": 1,
+    "answer_ids": [
+     23
+    ],
+    "spellings": [
+     "LVLY"
     ]
    },
    {
@@ -779,6 +937,17 @@
     ],
     "spellings": [
      "Muji"
+    ]
+   },
+   {
+    "key": "myer",
+    "name": "Myer",
+    "mentions": 1,
+    "answer_ids": [
+     23
+    ],
+    "spellings": [
+     "Myer"
     ]
    },
    {
@@ -881,17 +1050,6 @@
     ]
    },
    {
-    "key": "target",
-    "name": "Target",
-    "mentions": 1,
-    "answer_ids": [
-     25
-    ],
-    "spellings": [
-     "Target"
-    ]
-   },
-   {
     "key": "target and kmart",
     "name": "Target & Kmart",
     "mentions": 1,
@@ -959,30 +1117,30 @@
    }
   ],
   "our_answer_ids": [],
-  "text": "Today, Gemini (API) recorded 8 answers, with Handworks appearing in 0 of them. This represents 0 of the total count. Meanwhile, Milligram was named in 4 answers.",
+  "text": "Today, Gemini (API) provided 9 responses, of which 0 answers named Handworks. This represents 0 of the total count. Additionally, Milligram appeared in 4 of the recorded answers.",
   "text_source": "ai",
   "note": null,
   "core_mentions": 0,
   "core_answers": 3,
   "daily_mentions": 0,
-  "daily_answers": 5,
+  "daily_answers": 6,
   "label": "Gemini (API)"
  },
  "comparison": [
   "Compared with the previous run on 2026-10-24:",
-  "Handworks named in 0 of 8 answers (0%), previously 0 of 14 (0%): no change.",
-  "Top competitor Milligram in 4 of 8; previously Milligram in 10 of 14 (same store).",
+  "Handworks named in 0 of 9 answers (0%), previously 0 of 14 (0%): no change.",
+  "Top competitor Milligram in 4 of 9; previously Milligram in 10 of 14 (same store).",
   "Questions naming an area: 0 of 4, previously 0 of 2: no change.",
-  "Questions not naming an area: 0 of 4, previously 0 of 12: no change.",
-  "No answer: 3 of 12 asked (previously 4 of 18); set aside for review: 1 (previously 0)."
+  "Questions not naming an area: 0 of 5, previously 0 of 12: no change.",
+  "No answer: 3 of 12 asked (previously 4 of 18); set aside for review: 0 (previously 0)."
  ],
  "comparison_id": [
   "Dibandingkan dengan shift sebelumnya (2026-10-24):",
-  "Handworks disebut di 0 dari 8 jawaban (0%), sebelumnya 0 dari 14 (0%): tidak berubah.",
-  "Kompetitor teratas Milligram di 4 dari 8; sebelumnya Milligram di 10 dari 14 (toko yang sama).",
+  "Handworks disebut di 0 dari 9 jawaban (0%), sebelumnya 0 dari 14 (0%): tidak berubah.",
+  "Kompetitor teratas Milligram di 4 dari 9; sebelumnya Milligram di 10 dari 14 (toko yang sama).",
   "Pertanyaan yang menyebut area: 0 dari 4, sebelumnya 0 dari 2: tidak berubah.",
-  "Pertanyaan lain: 0 dari 4, sebelumnya 0 dari 12: tidak berubah.",
-  "Tanpa jawaban: 3 dari 12 (sebelumnya 4 dari 18); disisihkan untuk dicek: 1 (sebelumnya 0)."
+  "Pertanyaan lain: 0 dari 5, sebelumnya 0 dari 12: tidak berubah.",
+  "Tanpa jawaban: 3 dari 12 (sebelumnya 4 dari 18); disisihkan untuk dicek: 0 (sebelumnya 0)."
  ],
  "answers": [
   {
@@ -1507,9 +1665,9 @@
    "provider": "gemini",
    "channel": "api",
    "model": "gemini-3.8-flash",
-   "status": "needs_review",
-   "error": "store 6 ('Daily Blooms') quote is not verbatim in the answer: 'Daily Blooms (dailyblooms.com.au):'; store 7 ('LVLY') quote is not verbatim in the answer: 'LVLY (lvly.com.au):'; store 8 ('Little Flowers') quote is not verbatim in the answer: 'Little Flowers (littleflowers.com.au):'",
-   "our_tone": null,
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
    "text": "Here are the best ways to get a birthday card and high-end wrapping paper delivered in Melbourne by tomorrow, depending on your budget and location:\n\n### 1. Instant / Same-Day Delivery Apps (Fastest & Guaranteed)\nThese are your best bets to guarantee delivery within hours (or early tomorrow) using on-demand couriers:\n\n*   **DoorDash / Uber Eats:**\n    *   Search for **Typo**, **Coles Local**, **Target**, or **Newsagents** in your app. \n    *   Typo has great, trendy birthday cards and gift wrap, and they are available on DoorDash in many Melbourne areas.\n    *   Delivery usually takes **under 1 hour**.\n*   **Amazon AU (Prime):**\n    *   If you order today, many Melbourne metro postcodes qualify for **Prime One-Day Delivery** or **Next-Day Delivery**.\n    *   Search for brands like *Hallmark* or *Cavallini* for nicer gift wraps and cards. Look for the \"Get it by tomorrow\" tag before checkout.\n\n---\n\n### 2. Premium Melbourne Florists (Best for \"Nice\" Aesthetic)\nHigh-end Melbourne florists almost always offer **same-day or next-day delivery across metro Melbourne** and carry boutique, designer stationery and wrap:\n\n*   **Daily Blooms ([dailyblooms.com.au](https://dailyblooms.com.au)):**\n    *   They deliver across Melbourne metro 7 days a week.\n    *   They stock gorgeous, artist-designed greeting cards and premium gift packaging. You can often order just gifts/cards without flowers.\n*   **LVLY ([lvly.com.au](https://www.lvly.com.au)):**\n    *   Offers same-day delivery 7 days a week if ordered before 2:00 PM (or schedule for tomorrow).\n    *   Known for beautiful, modern greeting cards and personalized packaging.\n*   **Little Flowers ([littleflowers.com.au](https://www.littleflowers.com.au)):**\n    *   Offers curated gifts and cards delivered across Melbourne next-day.\n\n---\n\n### 3. Click & Collect (Alternative Backup Plan)\nIf you run out of delivery windows, you can order online for **same-day Click & Collect** (usually ready in 1\u20132 hours) at:\n*   **Kikki.K** (High-end stationery, beautiful paper and cards)\n*   **Dymocks** (Excellent selection of premium wrap, like Cavallini & Co, and local card designers)\n*   **David Jones / Myer** (City and major shopping centres)\n\n***\n\n**Recommended Action:** Open your **Uber Eats** or **DoorDash** app right now and search for **\"Typo\"** or **\"Newsagency\"**. If that doesn't yield high-enough quality, place a next-day order on **Daily Blooms** or **LVLY**.",
    "sources": [],
    "retries": [
@@ -1520,7 +1678,107 @@
     }
    ],
    "used_search": false,
-   "mentions": []
+   "mentions": [
+    {
+     "store_name": "Typo",
+     "store_key": "typo",
+     "is_ours": 0,
+     "position": 1,
+     "rank": null,
+     "tone": null,
+     "quote": "Search for Typo, Coles Local, Target, or Newsagents in your app."
+    },
+    {
+     "store_name": "Coles Local",
+     "store_key": "coles local",
+     "is_ours": 0,
+     "position": 2,
+     "rank": null,
+     "tone": null,
+     "quote": "Search for Typo, Coles Local, Target, or Newsagents in your app."
+    },
+    {
+     "store_name": "Target",
+     "store_key": "target",
+     "is_ours": 0,
+     "position": 3,
+     "rank": null,
+     "tone": null,
+     "quote": "Search for Typo, Coles Local, Target, or Newsagents in your app."
+    },
+    {
+     "store_name": "Amazon AU",
+     "store_key": "amazon au",
+     "is_ours": 0,
+     "position": 4,
+     "rank": null,
+     "tone": null,
+     "quote": "Amazon AU (Prime):"
+    },
+    {
+     "store_name": "Daily Blooms",
+     "store_key": "daily blooms",
+     "is_ours": 0,
+     "position": 5,
+     "rank": null,
+     "tone": null,
+     "quote": "Daily Blooms (dailyblooms.com.au):"
+    },
+    {
+     "store_name": "LVLY",
+     "store_key": "lvly",
+     "is_ours": 0,
+     "position": 6,
+     "rank": null,
+     "tone": null,
+     "quote": "LVLY (lvly.com.au):"
+    },
+    {
+     "store_name": "Little Flowers",
+     "store_key": "little flowers",
+     "is_ours": 0,
+     "position": 7,
+     "rank": null,
+     "tone": null,
+     "quote": "Little Flowers (littleflowers.com.au):"
+    },
+    {
+     "store_name": "Kikki.K",
+     "store_key": "kikki k",
+     "is_ours": 0,
+     "position": 8,
+     "rank": null,
+     "tone": null,
+     "quote": "Kikki.K (High-end stationery, beautiful paper and cards)"
+    },
+    {
+     "store_name": "Dymocks",
+     "store_key": "dymocks",
+     "is_ours": 0,
+     "position": 9,
+     "rank": null,
+     "tone": null,
+     "quote": "Dymocks (Excellent selection of premium wrap, like Cavallini & Co, and local card designers)"
+    },
+    {
+     "store_name": "David Jones",
+     "store_key": "david jones",
+     "is_ours": 0,
+     "position": 10,
+     "rank": null,
+     "tone": null,
+     "quote": "David Jones / Myer (City and major shopping centres)"
+    },
+    {
+     "store_name": "Myer",
+     "store_key": "myer",
+     "is_ours": 0,
+     "position": 11,
+     "rank": null,
+     "tone": null,
+     "quote": "David Jones / Myer (City and major shopping centres)"
+    }
+   ]
   },
   {
    "id": 24,

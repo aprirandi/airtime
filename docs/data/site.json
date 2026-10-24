@@ -1,45 +1,16 @@
 {
- "generated_at": "2026-10-24T22:41:54+00:00",
+ "generated_at": "2026-10-24T23:00:47+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
   "utc_minute": 17
  },
  "agent": {
-  "name": "Visibility Agent",
-  "role": "Every morning I ask AI assistants the questions your buyers ask, note which shops they recommend, and check every quote before I count it.",
-  "role_id": "Setiap pagi saya menanyakan ke asisten AI pertanyaan yang biasa diajukan pembeli Anda, mencatat toko mana yang mereka rekomendasikan, dan mengecek setiap kutipan sebelum menghitungnya."
+  "name": "Asker & Analyst",
+  "role": "Every morning the Asker asks AI assistants the questions your buyers ask. The Analyst reads every answer, checks each quote word for word and counts which shops are recommended. The Master checks each hand-off.",
+  "role_id": "Setiap pagi Asker menanyakan ke asisten AI pertanyaan yang biasa diajukan pembeli Anda. Analyst membaca setiap jawaban, mengecek setiap kutipan kata per kata, dan menghitung toko mana yang direkomendasikan. Master mengecek setiap serah-terima."
  },
  "team": [
-  {
-   "id": "visibility",
-   "name": "Visibility Agent",
-   "title": "Visibility analyst",
-   "title_id": "Analis visibilitas",
-   "status": "active",
-   "job": "Asks AI assistants the store's buyer questions every day and counts which shops they name.",
-   "job_id": "Setiap hari menanyakan pertanyaan pembeli ke asisten AI dan menghitung toko mana yang disebut.",
-   "inputs": [
-    "Store profile",
-    "Buyer questions",
-    "Gemini answers"
-   ],
-   "outputs": [
-    "Verified mentions",
-    "Daily counts",
-    "Owner summary"
-   ],
-   "inputs_id": [
-    "Profil toko",
-    "Pertanyaan pembeli",
-    "Jawaban Gemini"
-   ],
-   "outputs_id": [
-    "Sebutan terverifikasi",
-    "Hitungan harian",
-    "Ringkasan pemilik"
-   ]
-  },
   {
    "id": "auditor",
    "name": "Auditor",
@@ -52,13 +23,70 @@
     "Store website"
    ],
    "outputs": [
-    "Audit findings"
+    "Audit report"
    ],
    "inputs_id": [
     "Website toko"
    ],
    "outputs_id": [
-    "Temuan audit"
+    "Laporan audit"
+   ]
+  },
+  {
+   "id": "asker",
+   "name": "Asker",
+   "title": "Asks the AI assistants",
+   "title_id": "Bertanya ke asisten AI",
+   "status": "active",
+   "steps": [
+    1,
+    2,
+    3
+   ],
+   "job": "Writes the day's buyer questions, checks them, and asks each one to Gemini. Every answer is stored, empty ones too.",
+   "job_id": "Menulis pertanyaan pembeli hari ini, mengeceknya, lalu menanyakan masing-masing ke Gemini. Setiap jawaban disimpan, termasuk yang kosong.",
+   "inputs": [
+    "Store profile",
+    "Recent questions"
+   ],
+   "outputs": [
+    "Answer table"
+   ],
+   "inputs_id": [
+    "Profil toko",
+    "Pertanyaan terakhir"
+   ],
+   "outputs_id": [
+    "Tabel jawaban"
+   ]
+  },
+  {
+   "id": "analyst",
+   "name": "Analyst",
+   "title": "Reads and counts",
+   "title_id": "Membaca dan menghitung",
+   "status": "active",
+   "steps": [
+    4,
+    5,
+    6,
+    7
+   ],
+   "job": "Reads every answer, checks each quote word for word, counts the store against its competitors, compares with the last shift and writes the owner summary.",
+   "job_id": "Membaca setiap jawaban, mengecek setiap kutipan kata per kata, menghitung toko dibanding kompetitor, membandingkan dengan shift lalu, dan menulis ringkasan untuk pemilik.",
+   "inputs": [
+    "Answer table"
+   ],
+   "outputs": [
+    "Count results",
+    "Owner summary"
+   ],
+   "inputs_id": [
+    "Tabel jawaban"
+   ],
+   "outputs_id": [
+    "Hasil hitungan",
+    "Ringkasan pemilik"
    ]
   },
   {
@@ -67,21 +95,42 @@
    "title": "Planner",
    "title_id": "Perencana",
    "status": "planned",
-   "job": "Will turn the findings into a short list of changes to try.",
-   "job_id": "Akan mengubah temuan menjadi daftar singkat perubahan yang bisa dicoba.",
+   "job": "Will turn the gaps into a short list of tasks, each with its evidence.",
+   "job_id": "Akan mengubah celah yang ditemukan menjadi daftar tugas singkat, masing-masing dengan buktinya.",
    "inputs": [
-    "Daily counts",
-    "Audit findings"
+    "Count results",
+    "Audit report"
    ],
    "outputs": [
-    "Change plan"
+    "Task list"
    ],
    "inputs_id": [
-    "Hitungan harian",
-    "Temuan audit"
+    "Hasil hitungan",
+    "Laporan audit"
    ],
    "outputs_id": [
-    "Rencana perubahan"
+    "Daftar tugas"
+   ]
+  },
+  {
+   "id": "owner",
+   "name": "Owner",
+   "title": "Approves the changes",
+   "title_id": "Menyetujui perubahan",
+   "status": "human",
+   "job": "The store owner reviews the tasks and evidence. Nothing changes on the site without approval.",
+   "job_id": "Pemilik toko meninjau tugas dan buktinya. Tidak ada yang berubah di website tanpa persetujuan.",
+   "inputs": [
+    "Task list"
+   ],
+   "outputs": [
+    "Approved changes"
+   ],
+   "inputs_id": [
+    "Daftar tugas"
+   ],
+   "outputs_id": [
+    "Perubahan disetujui"
    ]
   },
   {
@@ -90,19 +139,19 @@
    "title": "Fixer",
    "title_id": "Pelaksana",
    "status": "planned",
-   "job": "Will prepare the approved changes. Nothing goes live without the owner.",
-   "job_id": "Akan menyiapkan perubahan yang disetujui. Tidak ada yang tayang tanpa persetujuan pemilik.",
+   "job": "Will prepare and publish the approved changes, with a backup to restore.",
+   "job_id": "Akan menyiapkan dan menerbitkan perubahan yang disetujui, dengan backup untuk dipulihkan.",
    "inputs": [
-    "Change plan"
+    "Approved changes"
    ],
    "outputs": [
-    "Prepared changes"
+    "Published change"
    ],
    "inputs_id": [
-    "Rencana perubahan"
+    "Perubahan disetujui"
    ],
    "outputs_id": [
-    "Perubahan siap pakai"
+    "Perubahan terbit"
    ]
   },
   {
@@ -111,16 +160,18 @@
    "title": "Reporter",
    "title_id": "Pelapor",
    "status": "planned",
-   "job": "Will write the weekly owner report across all agents.",
-   "job_id": "Akan menulis laporan mingguan untuk pemilik dari semua agent.",
+   "job": "Will compare before and after, add AI visits from analytics, and report to the owner, zeros included.",
+   "job_id": "Akan membandingkan sebelum dan sesudah, menambahkan kunjungan dari AI lewat analytics, dan melapor ke pemilik, termasuk hasil nol.",
    "inputs": [
-    "Everything above"
+    "Count results",
+    "Analytics"
    ],
    "outputs": [
     "Owner report"
    ],
    "inputs_id": [
-    "Semua di atas"
+    "Hasil hitungan",
+    "Analytics"
    ],
    "outputs_id": [
     "Laporan pemilik"
@@ -128,23 +179,23 @@
   },
   {
    "id": "master",
-   "name": "Master check",
-   "title": "Quality gate",
-   "title_id": "Penjaga kualitas",
-   "status": "planned",
-   "job": "Will check every agent's output before it reaches the owner.",
-   "job_id": "Akan mengecek hasil setiap agent sebelum sampai ke pemilik.",
+   "name": "Master",
+   "title": "Checks every hand-off",
+   "title_id": "Mengecek setiap serah-terima",
+   "status": "active",
+   "job": "Checks each agent's output before the next one uses it. Today: the Asker's answers are complete, and the Analyst's numbers match the answers.",
+   "job_id": "Mengecek hasil setiap agent sebelum dipakai agent berikutnya. Saat ini: jawaban dari Asker lengkap, dan angka Analyst cocok dengan jawabannya.",
    "inputs": [
-    "Every agent's output"
+    "Each agent's output"
    ],
    "outputs": [
-    "Pass or stop"
+    "Pass or send back"
    ],
    "inputs_id": [
     "Hasil setiap agent"
    ],
    "outputs_id": [
-    "Lolos atau berhenti"
+    "Lolos atau dikembalikan"
    ]
   }
  ],
@@ -1344,16 +1395,16 @@
      "run_id": 2,
      "asked": 12,
      "no_answer": 3,
-     "needs_review": 1,
+     "needs_review": 0,
      "our_mentions": 0,
-     "total_answers": 8,
+     "total_answers": 9,
      "top_competitor": "Milligram",
      "top_competitor_mentions": 4,
      "area_mentions": 0,
      "area_answers": 4,
      "area_rate": 0.0,
      "no_area_mentions": 0,
-     "no_area_answers": 4,
+     "no_area_answers": 5,
      "no_area_rate": 0.0,
      "web_search_answers": 0,
      "competitors": [
@@ -1372,6 +1423,19 @@
        ]
       },
       {
+       "key": "david jones",
+       "name": "David Jones",
+       "mentions": 3,
+       "answer_ids": [
+        23,
+        25,
+        26
+       ],
+       "spellings": [
+        "David Jones"
+       ]
+      },
+      {
        "key": "il papiro",
        "name": "Il Papiro",
        "mentions": 3,
@@ -1382,6 +1446,31 @@
        ],
        "spellings": [
         "Il Papiro"
+       ]
+      },
+      {
+       "key": "typo",
+       "name": "Typo",
+       "mentions": 3,
+       "answer_ids": [
+        20,
+        23,
+        27
+       ],
+       "spellings": [
+        "Typo"
+       ]
+      },
+      {
+       "key": "amazon au",
+       "name": "Amazon AU",
+       "mentions": 2,
+       "answer_ids": [
+        23,
+        25
+       ],
+       "spellings": [
+        "Amazon AU"
        ]
       },
       {
@@ -1409,18 +1498,6 @@
        ]
       },
       {
-       "key": "david jones",
-       "name": "David Jones",
-       "mentions": 2,
-       "answer_ids": [
-        25,
-        26
-       ],
-       "spellings": [
-        "David Jones"
-       ]
-      },
-      {
        "key": "deans art",
        "name": "Deans Art",
        "mentions": 2,
@@ -1430,6 +1507,18 @@
        ],
        "spellings": [
         "Deans Art"
+       ]
+      },
+      {
+       "key": "dymocks",
+       "name": "Dymocks",
+       "mentions": 2,
+       "answer_ids": [
+        20,
+        23
+       ],
+       "spellings": [
+        "Dymocks"
        ]
       },
       {
@@ -1443,6 +1532,18 @@
        "spellings": [
         "Eckersley's Art & Craft",
         "Eckersley\u2019s Art & Craft"
+       ]
+      },
+      {
+       "key": "kikki k",
+       "name": "Kikki.K",
+       "mentions": 2,
+       "answer_ids": [
+        20,
+        23
+       ],
+       "spellings": [
+        "Kikki.K"
        ]
       },
       {
@@ -1494,6 +1595,18 @@
        ]
       },
       {
+       "key": "target",
+       "name": "Target",
+       "mentions": 2,
+       "answer_ids": [
+        23,
+        25
+       ],
+       "spellings": [
+        "Target"
+       ]
+      },
+      {
        "key": "essential ingredient",
        "name": "The Essential Ingredient",
        "mentions": 2,
@@ -1518,18 +1631,6 @@
        ]
       },
       {
-       "key": "typo",
-       "name": "Typo",
-       "mentions": 2,
-       "answer_ids": [
-        20,
-        27
-       ],
-       "spellings": [
-        "Typo"
-       ]
-      },
-      {
        "key": "aesop",
        "name": "Aesop",
        "mentions": 1,
@@ -1538,17 +1639,6 @@
        ],
        "spellings": [
         "Aesop"
-       ]
-      },
-      {
-       "key": "amazon au",
-       "name": "Amazon AU",
-       "mentions": 1,
-       "answer_ids": [
-        25
-       ],
-       "spellings": [
-        "Amazon AU"
        ]
       },
       {
@@ -1618,6 +1708,17 @@
        ]
       },
       {
+       "key": "coles local",
+       "name": "Coles Local",
+       "mentions": 1,
+       "answer_ids": [
+        23
+       ],
+       "spellings": [
+        "Coles Local"
+       ]
+      },
+      {
        "key": "coles woolies",
        "name": "Coles/Woolies",
        "mentions": 1,
@@ -1637,6 +1738,17 @@
        ],
        "spellings": [
         "Cotton On Kids"
+       ]
+      },
+      {
+       "key": "daily blooms",
+       "name": "Daily Blooms",
+       "mentions": 1,
+       "answer_ids": [
+        23
+       ],
+       "spellings": [
+        "Daily Blooms"
        ]
       },
       {
@@ -1681,17 +1793,6 @@
        ],
        "spellings": [
         "David Jones & Myer"
-       ]
-      },
-      {
-       "key": "dymocks",
-       "name": "Dymocks",
-       "mentions": 1,
-       "answer_ids": [
-        20
-       ],
-       "spellings": [
-        "Dymocks"
        ]
       },
       {
@@ -1750,17 +1851,6 @@
        ]
       },
       {
-       "key": "kikki k",
-       "name": "Kikki.K",
-       "mentions": 1,
-       "answer_ids": [
-        20
-       ],
-       "spellings": [
-        "Kikki.K"
-       ]
-      },
-      {
        "key": "kip and co",
        "name": "Kip&Co",
        "mentions": 1,
@@ -1794,6 +1884,17 @@
        ]
       },
       {
+       "key": "little flowers",
+       "name": "Little Flowers",
+       "mentions": 1,
+       "answer_ids": [
+        23
+       ],
+       "spellings": [
+        "Little Flowers"
+       ]
+      },
+      {
        "key": "local post offices australia post and newsagents",
        "name": "Local Post Offices (Australia Post) & Newsagents",
        "mentions": 1,
@@ -1802,6 +1903,17 @@
        ],
        "spellings": [
         "Local Post Offices (Australia Post) & Newsagents"
+       ]
+      },
+      {
+       "key": "lvly",
+       "name": "LVLY",
+       "mentions": 1,
+       "answer_ids": [
+        23
+       ],
+       "spellings": [
+        "LVLY"
        ]
       },
       {
@@ -1879,6 +1991,17 @@
        ],
        "spellings": [
         "Muji"
+       ]
+      },
+      {
+       "key": "myer",
+       "name": "Myer",
+       "mentions": 1,
+       "answer_ids": [
+        23
+       ],
+       "spellings": [
+        "Myer"
        ]
       },
       {
@@ -1981,17 +2104,6 @@
        ]
       },
       {
-       "key": "target",
-       "name": "Target",
-       "mentions": 1,
-       "answer_ids": [
-        25
-       ],
-       "spellings": [
-        "Target"
-       ]
-      },
-      {
        "key": "target and kmart",
        "name": "Target & Kmart",
        "mentions": 1,
@@ -2059,13 +2171,13 @@
       }
      ],
      "our_answer_ids": [],
-     "text": "Today, Gemini (API) recorded 8 answers, with Handworks appearing in 0 of them. This represents 0 of the total count. Meanwhile, Milligram was named in 4 answers.",
+     "text": "Today, Gemini (API) provided 9 responses, of which 0 answers named Handworks. This represents 0 of the total count. Additionally, Milligram appeared in 4 of the recorded answers.",
      "text_source": "ai",
      "note": null,
      "core_mentions": 0,
      "core_answers": 3,
      "daily_mentions": 0,
-     "daily_answers": 5,
+     "daily_answers": 6,
      "label": "Gemini (API)"
     }
    ],
@@ -2089,6 +2201,7 @@
     {
      "id": 2,
      "agent": "visibility",
+     "kind": "shift",
      "run_date": "2026-10-25",
      "started_at": "2026-10-24T22:28:27+00:00",
      "finished_at": "2026-10-24T22:41:54+00:00",
@@ -2127,6 +2240,7 @@
          "dropped": []
         }
        },
+       "agent": "asker",
        "description": "Set up 3 core questions and wrote 6 new ones for today.",
        "description_id": "Menyiapkan 3 pertanyaan inti dan menulis 6 pertanyaan baru untuk hari ini."
       },
@@ -2144,6 +2258,7 @@
         "naming_area": 4,
         "removed_as_duplicate": 0
        },
+       "agent": "asker",
        "description": "Checked the 9 questions: no empty or duplicate ones, 4 name a store area.",
        "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 4 menyebut area toko."
       },
@@ -2161,6 +2276,7 @@
         "retries": 5,
         "calls_made": 14
        },
+       "agent": "asker",
        "description": "Asked 12 questions: 9 answered, 3 no answer. Retried 5 times after errors.",
        "description_id": "Mengajukan 12 pertanyaan: 9 dijawab, 3 tanpa jawaban. Mencoba ulang 5 kali setelah error."
       },
@@ -2175,6 +2291,7 @@
         "extracted": 9,
         "failed_calls": 0
        },
+       "agent": "analyst",
        "description": "Read 9 answers and listed every shop named.",
        "description_id": "Membaca 9 jawaban dan mencatat setiap toko yang disebut."
       },
@@ -2195,6 +2312,7 @@
         "top_competitor": "Milligram",
         "top_competitor_mentions": 4
        },
+       "agent": "analyst",
        "description": "Checked every quote word for word: 8 answers counted, 1 set aside for review. Handworks named in 0 of 8.",
        "description_id": "Mengecek setiap kutipan kata per kata: 8 jawaban dihitung, 1 disisihkan untuk dicek. Handworks disebut di 0 dari 8."
       },
@@ -2223,6 +2341,7 @@
          "max_pct": 0
         }
        },
+       "agent": "analyst",
        "description": "Handworks named in 0 of 8 answers (0%), previously 0 of 14 (0%): no change.",
        "description_id": "Membandingkan dengan shift sebelumnya."
       },
@@ -2238,11 +2357,101 @@
         "rejected": [],
         "text": "Today, Gemini (API) recorded 8 answers, with Handworks appearing in 0 of them. This represents 0 of the total count. Meanwhile, Milligram was named in 4 answers."
        },
+       "agent": "analyst",
        "description": "Wrote the summary; code checked every number in it against the counts.",
        "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+      },
+      {
+       "step": 4,
+       "name": "recheck_extract_mentions",
+       "kind": "AI",
+       "status": "ok",
+       "finished_at": "2026-10-24T23:00:18+00:00",
+       "answer_ids": [
+        23
+       ],
+       "result": {
+        "extracted": 1,
+        "failed_calls": 0
+       },
+       "agent": "analyst",
+       "description": "Re-check: read 1 answer and listed every shop named.",
+       "description_id": "Cek ulang: membaca 1 jawaban dan mencatat setiap toko yang disebut."
+      },
+      {
+       "step": 5,
+       "name": "recheck_verify_and_count",
+       "kind": "CODE",
+       "status": "ok",
+       "finished_at": "2026-10-24T23:00:18+00:00",
+       "answer_ids": [
+        23
+       ],
+       "result": {
+        "retried": 0,
+        "asked": 12,
+        "ok": 9,
+        "no_answer": 3,
+        "needs_review": 0,
+        "our_mentions": 0,
+        "top_competitor": "Milligram",
+        "top_competitor_mentions": 4
+       },
+       "agent": "analyst",
+       "description": "Re-check: checked every quote word for word: 9 answers counted, 0 set aside for review. Handworks named in 0 of 9.",
+       "description_id": "Cek ulang: mengecek setiap kutipan kata per kata: 9 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 9."
+      },
+      {
+       "step": 6,
+       "name": "recheck_compare_previous",
+       "kind": "CODE",
+       "status": "ok",
+       "finished_at": "2026-10-24T23:00:18+00:00",
+       "answer_ids": [
+        23
+       ],
+       "result": {
+        "lines": [
+         "Compared with the previous run on 2026-10-24:",
+         "Handworks named in 0 of 9 answers (0%), previously 0 of 14 (0%): no change.",
+         "Top competitor Milligram in 4 of 9; previously Milligram in 10 of 14 (same store).",
+         "Questions naming an area: 0 of 4, previously 0 of 2: no change.",
+         "Questions not naming an area: 0 of 5, previously 0 of 12: no change.",
+         "No answer: 3 of 12 asked (previously 4 of 18); set aside for review: 0 (previously 0)."
+        ],
+        "previous_date": "2026-10-24",
+        "range": {
+         "runs": 2,
+         "from": "2026-10-24",
+         "to": "2026-10-25",
+         "min_pct": 0,
+         "max_pct": 0
+        }
+       },
+       "agent": "analyst",
+       "description": "Re-check: handworks named in 0 of 9 answers (0%), previously 0 of 14 (0%): no change.",
+       "description_id": "Cek ulang: membandingkan dengan shift sebelumnya."
+      },
+      {
+       "step": 7,
+       "name": "recheck_write_summary",
+       "kind": "AI",
+       "status": "ok",
+       "finished_at": "2026-10-24T23:00:25+00:00",
+       "answer_ids": [
+        23
+       ],
+       "result": {
+        "source": "ai",
+        "rejected": [],
+        "text": "Today, Gemini (API) provided 9 responses, of which 0 answers named Handworks. This represents 0 of the total count. Additionally, Milligram appeared in 4 of the recorded answers."
+       },
+       "agent": "analyst",
+       "description": "Re-check: wrote the summary; code checked every number in it against the counts.",
+       "description_id": "Cek ulang: menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
       }
      ],
-     "quotes_verified": 79,
+     "quotes_verified": 90,
      "questions": [
       {
        "text": "Best stationery shops in Melbourne",
@@ -2281,7 +2490,7 @@
        "kind": "daily",
        "names_area": 0,
        "asked": 1,
-       "counted": 0,
+       "counted": 1,
        "ours": 0
       },
       {
@@ -2321,6 +2530,7 @@
     {
      "id": 1,
      "agent": "visibility",
+     "kind": "shift",
      "run_date": "2026-10-24",
      "started_at": "2026-10-23T21:44:47+00:00",
      "finished_at": "2026-10-23T22:19:20+00:00",
@@ -2347,6 +2557,7 @@
          "Online stationery store in Australia with fast shipping"
         ]
        },
+       "agent": "asker",
        "description": "Wrote 6 buyer questions (config).",
        "description_id": "Menyiapkan 6 pertanyaan pembeli (config)."
       },
@@ -2361,6 +2572,7 @@
         "count": 6,
         "naming_area": 1
        },
+       "agent": "asker",
        "description": "Checked the 6 questions: no empty or duplicate ones, 1 names a store area.",
        "description_id": "Mengecek 6 pertanyaan: tidak ada yang kosong atau dobel, 1 menyebut area toko."
       },
@@ -2377,6 +2589,7 @@
         "no_answer": 4,
         "calls_made": 24
        },
+       "agent": "asker",
        "description": "Asked 18 questions: 14 answered, 4 no answer.",
        "description_id": "Mengajukan 18 pertanyaan: 14 dijawab, 4 tanpa jawaban."
       },
@@ -2391,6 +2604,7 @@
         "extracted": 14,
         "failed_calls": 0
        },
+       "agent": "analyst",
        "description": "Read 14 answers and listed every shop named.",
        "description_id": "Membaca 14 jawaban dan mencatat setiap toko yang disebut."
       },
@@ -2411,6 +2625,7 @@
         "top_competitor": "Milligram",
         "top_competitor_mentions": 10
        },
+       "agent": "analyst",
        "description": "Checked every quote word for word: 13 answers counted, 1 set aside for review. Handworks named in 0 of 13.",
        "description_id": "Mengecek setiap kutipan kata per kata: 13 jawaban dihitung, 1 disisihkan untuk dicek. Handworks disebut di 0 dari 13."
       },
@@ -2434,6 +2649,7 @@
          "max_pct": 0
         }
        },
+       "agent": "analyst",
        "description": "First run for Gemini (API): nothing earlier to compare with.",
        "description_id": "Shift pertama: belum ada pembanding."
       },
@@ -2449,6 +2665,7 @@
         "rejected": [],
         "text": "Today, Gemini (API) recorded 13 total responses. Among these, 0 answers named Handworks, while Milligram appeared in 10 responses."
        },
+       "agent": "analyst",
        "description": "Wrote the summary; code checked every number in it against the counts.",
        "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
       },
@@ -2465,6 +2682,7 @@
         "extracted": 1,
         "failed_calls": 0
        },
+       "agent": "analyst",
        "description": "Re-check: read 1 answer and listed every shop named.",
        "description_id": "Cek ulang: membaca 1 jawaban dan mencatat setiap toko yang disebut."
       },
@@ -2487,6 +2705,7 @@
         "top_competitor": "Milligram",
         "top_competitor_mentions": 10
        },
+       "agent": "analyst",
        "description": "Re-check: checked every quote word for word: 14 answers counted, 0 set aside for review. Handworks named in 0 of 14.",
        "description_id": "Cek ulang: mengecek setiap kutipan kata per kata: 14 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 14."
       },
@@ -2512,6 +2731,7 @@
          "max_pct": 0
         }
        },
+       "agent": "analyst",
        "description": "Re-check: first run for Gemini (API): nothing earlier to compare with.",
        "description_id": "Cek ulang: shift pertama: belum ada pembanding."
       },
@@ -2529,6 +2749,7 @@
         "rejected": [],
         "text": "Today, Gemini (API) recorded 14 total responses. Among these, 0 answers named Handworks, accounting for 0 of the total. Milligram appeared in 10 responses."
        },
+       "agent": "analyst",
        "description": "Re-check: wrote the summary; code checked every number in it against the counts.",
        "description_id": "Cek ulang: menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
       }
@@ -2591,8 +2812,8 @@
     "first_day": "2026-10-24",
     "questions_asked": 30,
     "answers_read": 23,
-    "quotes_verified": 243,
-    "shops_seen": 121
+    "quotes_verified": 254,
+    "shops_seen": 125
    }
   }
  ]
