@@ -27,19 +27,31 @@ jobs:
           python -m pytest -q
       - name: Check planned calls against budget
         run: python -m airtime plan --store handworks
-      - name: Run Visibility agent
+      - name: Run Visibility agent (live progress pushed every 7 minutes)
         id: run
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          python -m airtime seed --store handworks
-          set +e
-          python -m airtime run --store handworks
-          echo "code=$?" >> "$GITHUB_OUTPUT"
-      - name: Commit results (also on a failed run, so the failure is recorded)
-        run: |
           git config user.name "airtime-bot"
           git config user.email "airtime-bot@users.noreply.github.com"
+          python -m airtime seed --store handworks
+          # Publish docs/data/live.json while the agent works, so the dashboard shows the shift live.
+          # 7 minutes keeps GitHub Pages under its ~10 deploys per hour.
+          push_live() {
+            git add docs/data/live.json
+            git commit -q -m "Live: agent progress $(date -u +%H:%M) UTC" && git push -q || true
+          }
+          # First push after a minute ("on shift now"), then every 7 minutes.
+          ( sleep 60; push_live; while sleep 420; do push_live; done ) &
+          PUSHER=$!
+          set +e
+          python -m airtime run --store handworks
+          code=$?
+          kill "$PUSHER" 2>/dev/null
+          wait "$PUSHER" 2>/dev/null
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+      - name: Commit results (also on a failed run, so the failure is recorded)
+        run: |
           git add data/airtime.sqlite docs
           if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
           git commit -m "Daily visibility run $(TZ=Australia/Melbourne date +%F)"

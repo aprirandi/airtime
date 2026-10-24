@@ -61,8 +61,12 @@ def cmd_run(args) -> int:
     from airtime.export import export_site
     cfg = load_store_config(args.store)
     conn = db.connect(args.db)
+    from airtime.export import AGENT, DOCS_DIR
+    from airtime.live import LiveWriter
     try:
         ctx = _context(conn, cfg, args.date or _today(cfg.timezone))
+        ctx.progress = LiveWriter(DOCS_DIR / "data" / "live.json", agent_name=AGENT["name"],
+                                  store_slug=cfg.slug, run_date=ctx.run_date)
         Flow([VisibilityAgent()]).run(ctx)
     except (RunFailed, ProviderError) as exc:
         print(f"RUN FAILED: {exc}", file=sys.stderr)

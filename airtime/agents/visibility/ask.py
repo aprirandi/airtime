@@ -66,4 +66,7 @@ def step_ask_questions(ctx: RunContext) -> dict:
             # A failed or over-budget ask is still stored, as no_answer; nothing is dropped.
             counts[rec["status"]] += 1
             counts["retries"] += len(rec["retries"])
+            ctx.report(type="answer", done=counts["ok"] + counts["no_answer"], planned=planned,
+                       ok=counts["ok"], no_answer=counts["no_answer"], question=q["text"],
+                       attempt=attempt, status=rec["status"])
     return {"asked": planned, **counts, "calls_made": provider.calls_made}

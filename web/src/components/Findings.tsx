@@ -5,17 +5,19 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { fmtDate, pct } from "@/lib/format"
+import { useI18n, type T } from "@/lib/i18n"
 import type { Store, Summary } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 export function StatStrip({ store }: { store: Store }) {
-  const t = store.totals
+  const { t } = useI18n()
+  const tot = store.totals
   const items = [
-    { icon: CalendarDays, label: "Days on duty", value: t.days_on_duty, hint: t.first_day ? `since ${fmtDate(t.first_day)}` : "" },
-    { icon: Search, label: "Questions asked", value: t.questions_asked, hint: "to Gemini" },
-    { icon: MessageSquareQuote, label: "Answers read", value: t.answers_read, hint: "every word" },
-    { icon: Quote, label: "Quotes checked", value: t.quotes_verified, hint: "word for word" },
-    { icon: StoreIcon, label: "Shops spotted", value: t.shops_seen, hint: "in answers" },
+    { icon: CalendarDays, label: t("stat.days"), value: tot.days_on_duty, hint: tot.first_day ? t("stat.since", { d: fmtDate(tot.first_day) }) : "" },
+    { icon: Search, label: t("stat.asked"), value: tot.questions_asked, hint: t("stat.toGemini") },
+    { icon: MessageSquareQuote, label: t("stat.read"), value: tot.answers_read, hint: t("stat.everyWord") },
+    { icon: Quote, label: t("stat.quotes"), value: tot.quotes_verified, hint: t("stat.wordForWord") },
+    { icon: StoreIcon, label: t("stat.shops"), value: tot.shops_seen, hint: t("stat.inAnswers") },
   ]
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -35,12 +37,13 @@ export function StatStrip({ store }: { store: Store }) {
 }
 
 function Tile({ title, num, den, sub, accent }: { title: string; num: number; den: number; sub: string; accent?: boolean }) {
+  const { lang } = useI18n()
   return (
     <div className="rounded-lg border p-4">
       <div className="text-muted-foreground text-xs">{title}</div>
       <div className="mt-1 flex items-baseline gap-1.5">
         <span className={cn("text-3xl font-semibold tabular-nums", accent && "text-chart-1")}>{num}</span>
-        <span className="text-muted-foreground text-sm">of {den}</span>
+        <span className="text-muted-foreground text-sm">{lang === "id" ? "dari" : "of"} {den}</span>
         <span className="text-muted-foreground ml-auto text-sm tabular-nums">{pct(num, den)}</span>
       </div>
       <div className="text-muted-foreground mt-1 text-xs">{sub}</div>
@@ -48,42 +51,71 @@ function Tile({ title, num, den, sub, accent }: { title: string; num: number; de
   )
 }
 
+/** Indonesian owner summary, written by code from the stored counts (the AI summary is English). */
+export function summaryId(s: Summary, store: Store): string {
+  const top = s.top_competitor_mentions
+    ? `Toko lain yang paling sering disebut adalah ${s.top_competitor}, di ${s.top_competitor_mentions} dari ${s.total_answers} jawaban.`
+    : "Tidak ada toko lain yang disebut di jawaban yang dihitung."
+  return (
+    `${store.name} disebut di ${s.our_mentions} dari ${s.total_answers} jawaban ${s.label} yang dihitung ` +
+    `(${s.no_answer} tanpa jawaban dan ${s.needs_review} disisihkan untuk dicek). ${top} ` +
+    `Untuk pertanyaan yang menyebut ${store.areas.join(" atau ")}, ${store.name} disebut di ${s.area_mentions} dari ` +
+    `${s.area_answers} jawaban, dibanding ${s.no_area_mentions} dari ${s.no_area_answers} untuk pertanyaan lain.`
+  )
+}
+
+export function SummaryText({ s, store, t }: { s: Summary; store: Store; t: T }) {
+  const { lang } = useI18n()
+  if (lang === "id") {
+    return (
+      <>
+        {summaryId(s, store)}
+        <footer className="text-muted-foreground mt-2 text-xs">{t("find.summaryNote")}</footer>
+      </>
+    )
+  }
+  return (
+    <>
+      {s.text}
+      <footer className="text-muted-foreground mt-2 text-xs">{s.text_source === "ai" ? t("find.byAgent") : t("find.byCode")}</footer>
+    </>
+  )
+}
+
 export function LatestFindings({ store, latest, onOpen }: { store: Store; latest: Summary; onOpen: (runId: number) => void }) {
+  const { t } = useI18n()
   const range = store.ranges[`${latest.provider}:${latest.channel}`]
   return (
     <Card>
       <CardHeader>
-        <CardTitle>What I found on {fmtDate(latest.date)}</CardTitle>
+        <CardTitle>{t("find.title", { d: fmtDate(latest.date) })}</CardTitle>
         <CardDescription>
           {latest.label}
-          {latest.channel === "api" && latest.web_search_answers === 0 && " · answers without web search"} · {latest.asked} asked,{" "}
-          {latest.no_answer} no answer, {latest.needs_review} set aside for review
+          {latest.channel === "api" && latest.web_search_answers === 0 && t("find.noSearch")}
+          {t("find.counts", { asked: latest.asked, no: latest.no_answer, review: latest.needs_review })}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {latest.text && (
           <blockquote className="bg-muted/50 rounded-lg border-l-4 border-l-chart-1 p-4 text-sm leading-relaxed">
-            {latest.text}
-            <footer className="text-muted-foreground mt-2 text-xs">
-              {latest.text_source === "ai" ? "Written by the agent; every number checked by code." : "Written from the counts by code."}
-            </footer>
+            <SummaryText s={latest} store={store} t={t} />
           </blockquote>
         )}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Tile title={`${store.name} recommended`} num={latest.our_mentions} den={latest.total_answers} sub="answers that name the store" accent />
-          <Tile title={`Top other shop: ${latest.top_competitor ?? "none"}`} num={latest.top_competitor_mentions} den={latest.total_answers} sub="answers that name it" />
-          <Tile title={`Questions naming ${store.areas.join(" or ")}`} num={latest.area_mentions} den={latest.area_answers} sub={`answers naming ${store.name}`} />
-          <Tile title="Other questions" num={latest.no_area_mentions} den={latest.no_area_answers} sub={`answers naming ${store.name}`} />
+          <Tile title={t("find.recommended", { store: store.name })} num={latest.our_mentions} den={latest.total_answers} sub={t("find.nameStore")} accent />
+          <Tile title={t("find.topOther", { name: latest.top_competitor ?? t("common.none") })} num={latest.top_competitor_mentions} den={latest.total_answers} sub={t("find.nameIt")} />
+          <Tile title={t("find.areaQ", { areas: store.areas.join(" / ") })} num={latest.area_mentions} den={latest.area_answers} sub={t("find.namingStore", { store: store.name })} />
+          <Tile title={t("find.otherQ")} num={latest.no_area_mentions} den={latest.no_area_answers} sub={t("find.namingStore", { store: store.name })} />
         </div>
         <div className="text-muted-foreground flex flex-wrap items-center justify-between gap-2 text-xs">
           <span>
             {range && range.runs > 1
-              ? `Over the last ${range.runs} days: ${range.min_pct}% to ${range.max_pct}% of answers named ${store.name}.`
-              : "AI answers change a lot from day to day. A range appears here after a few days."}
+              ? t("find.range", { n: range.runs, min: range.min_pct, max: range.max_pct, store: store.name })
+              : t("find.rangeSoon")}
           </span>
           {latest.run_id && (
             <button onClick={() => onOpen(latest.run_id!)} className="text-foreground inline-flex items-center gap-1 font-medium hover:underline">
-              See every answer and quote <ChevronRight className="size-3.5" />
+              {t("find.seeAll")} <ChevronRight className="size-3.5" />
             </button>
           )}
         </div>
@@ -93,13 +125,14 @@ export function LatestFindings({ store, latest, onOpen }: { store: Store; latest
 }
 
 export function Competitors({ store, latest }: { store: Store; latest: Summary }) {
+  const { t } = useI18n()
   const top = latest.competitors.slice(0, 8)
   const max = Math.max(1, latest.total_answers)
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Who gets recommended</CardTitle>
-        <CardDescription>Share of {fmtDate(latest.date)} answers that name each shop</CardDescription>
+        <CardTitle>{t("comp.title")}</CardTitle>
+        <CardDescription>{t("comp.sub", { d: fmtDate(latest.date) })}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <Row name={store.name} n={latest.our_mentions} total={max} ours />
@@ -107,7 +140,7 @@ export function Competitors({ store, latest }: { store: Store; latest: Summary }
           <Row key={c.name} name={c.name} n={c.mentions} total={max} />
         ))}
         <p className="text-muted-foreground pt-1 text-xs">
-          {latest.competitors.length} shops named in total. Counted once per answer.
+          {t("comp.total", { n: latest.competitors.length })}
         </p>
       </CardContent>
     </Card>
@@ -115,14 +148,15 @@ export function Competitors({ store, latest }: { store: Store; latest: Summary }
 }
 
 function Row({ name, n, total, ours }: { name: string; n: number; total: number; ours?: boolean }) {
+  const { t } = useI18n()
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between gap-2 text-sm">
         <span className={cn("truncate", ours && "font-semibold")}>
-          {name} {ours && <Badge variant="outline" className="ml-1 h-4 px-1 text-[10px]">your store</Badge>}
+          {name} {ours && <Badge variant="outline" className="ml-1 h-4 px-1 text-[10px]">{t("comp.yours")}</Badge>}
         </span>
         <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-          {n} of {total}
+          {t("common.of", { n, d: total })}
         </span>
       </div>
       <Progress value={(100 * n) / total} indicatorClassName={ours ? "bg-chart-1" : "bg-muted-foreground/60"} />
@@ -155,8 +189,10 @@ function ChartTip({ active, payload, label, storeName, rivalName }: TooltipProps
 }
 
 export function Trend({ store, series }: { store: Store; series: Summary[] }) {
+  const { t, lang } = useI18n()
   const last = series[series.length - 1]
-  const rivalName = last?.top_competitor ?? "Top other shop"
+  const rivalName = last?.top_competitor ?? t("trend.topOther")
+  const of = lang === "id" ? "dari" : "of"
   const data: Point[] = series.map((s) => {
     const rival = s.competitors.find((c) => c.name === rivalName)
     const rn = rival?.mentions ?? 0
@@ -164,15 +200,15 @@ export function Trend({ store, series }: { store: Store; series: Summary[] }) {
       date: s.date,
       ours: s.total_answers ? Math.round((100 * s.our_mentions) / s.total_answers) : null,
       rival: s.total_answers ? Math.round((100 * rn) / s.total_answers) : null,
-      oursN: `${s.our_mentions} of ${s.total_answers}`,
-      rivalN: `${rn} of ${s.total_answers}`,
+      oursN: `${s.our_mentions} ${of} ${s.total_answers}`,
+      rivalN: `${rn} ${of} ${s.total_answers}`,
     }
   })
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Day by day</CardTitle>
-        <CardDescription>Share of Gemini answers naming each shop</CardDescription>
+        <CardTitle>{t("trend.title")}</CardTitle>
+        <CardDescription>{t("trend.sub")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-2 flex flex-wrap gap-4 text-xs">
@@ -196,7 +232,7 @@ export function Trend({ store, series }: { store: Store; series: Summary[] }) {
           </ResponsiveContainer>
         </div>
         {series.length < 3 && (
-          <p className="text-muted-foreground mt-2 text-xs">The line fills in as the agent works each day. One day alone says little.</p>
+          <p className="text-muted-foreground mt-2 text-xs">{t("trend.soon")}</p>
         )}
       </CardContent>
     </Card>
@@ -204,14 +240,15 @@ export function Trend({ store, series }: { store: Store; series: Summary[] }) {
 }
 
 export function WorkDiary({ store, onOpen }: { store: Store; onOpen: (runId: number) => void }) {
+  const { t } = useI18n()
   const rows = [...store.series].sort((a, b) => b.date.localeCompare(a.date))
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Users className="size-4" /> Work diary
+          <Users className="size-4" /> {t("diary.title")}
         </CardTitle>
-        <CardDescription>Every shift, newest first</CardDescription>
+        <CardDescription>{t("diary.sub")}</CardDescription>
       </CardHeader>
       <CardContent className="divide-y p-0">
         {rows.map((s) => {
@@ -229,15 +266,17 @@ export function WorkDiary({ store, onOpen }: { store: Store; onOpen: (runId: num
               </div>
               <div className="min-w-0 flex-1 text-sm">
                 <div className="truncate">
-                  <span className="font-medium">{store.name}</span> {s.our_mentions} of {s.total_answers}
-                  <span className="text-muted-foreground"> · {s.top_competitor ?? "no other shop"} {s.top_competitor_mentions} of {s.total_answers}</span>
+                  <span className="font-medium">{store.name}</span> {t("common.of", { n: s.our_mentions, d: s.total_answers })}
+                  <span className="text-muted-foreground">
+                    {" "}· {s.top_competitor ?? t("diary.noOther")} {t("common.of", { n: s.top_competitor_mentions, d: s.total_answers })}
+                  </span>
                 </div>
                 <div className="text-muted-foreground truncate text-xs">
-                  {s.label} · {s.asked} asked · {s.no_answer} no answer · {s.needs_review} for review
+                  {t("diary.meta", { label: s.label, asked: s.asked, no: s.no_answer, review: s.needs_review })}
                 </div>
               </div>
               {s.text_source === "manual" ? (
-                <Badge variant="outline">manual baseline</Badge>
+                <Badge variant="outline">{t("diary.manual")}</Badge>
               ) : (
                 <ChevronRight className="text-muted-foreground size-4 shrink-0" />
               )}

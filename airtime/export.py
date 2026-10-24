@@ -11,7 +11,8 @@ import shutil
 from pathlib import Path
 
 from airtime.agents.visibility.compare import compare_days, mention_range, scope_label
-from airtime.config import REPO_ROOT
+from airtime.config import REPO_ROOT, load_store_config
+from airtime.live import write_json
 from airtime.providers.base import utc_now
 
 DOCS_DIR = REPO_ROOT / "docs"
@@ -21,7 +22,46 @@ AGENT = {
     "name": "Visibility Agent",
     "role": "Every morning I ask AI assistants the questions your buyers ask, note which shops "
             "they recommend, and check every quote before I count it.",
+    "role_id": "Setiap pagi saya menanyakan ke asisten AI pertanyaan yang biasa diajukan pembeli Anda, "
+               "mencatat toko mana yang mereka rekomendasikan, dan mengecek setiap kutipan sebelum menghitungnya.",
 }
+
+# The team as the brief plans it. Only the Visibility agent exists today; the others are
+# listed so the site shows the whole flow and where each future agent will sit in it.
+TEAM = [
+    {"id": "visibility", "name": "Visibility Agent", "title": "Visibility analyst", "title_id": "Analis visibilitas", "status": "active",
+     "job": "Asks AI assistants the store's buyer questions every day and counts which shops they name.",
+     "job_id": "Setiap hari menanyakan pertanyaan pembeli ke asisten AI dan menghitung toko mana yang disebut.",
+     "inputs": ["Store profile", "Buyer questions", "Gemini answers"],
+     "outputs": ["Verified mentions", "Daily counts", "Owner summary"],
+     "inputs_id": ["Profil toko", "Pertanyaan pembeli", "Jawaban Gemini"],
+     "outputs_id": ["Sebutan terverifikasi", "Hitungan harian", "Ringkasan pemilik"]},
+    {"id": "auditor", "name": "Auditor", "title": "Site auditor", "title_id": "Auditor situs", "status": "planned",
+     "job": "Will check the store's own website for what AI assistants can and cannot read.",
+     "job_id": "Akan mengecek website toko: apa yang bisa dan tidak bisa dibaca asisten AI.",
+     "inputs": ["Store website"], "outputs": ["Audit findings"],
+     "inputs_id": ["Website toko"], "outputs_id": ["Temuan audit"]},
+    {"id": "planner", "name": "Planner", "title": "Planner", "title_id": "Perencana", "status": "planned",
+     "job": "Will turn the findings into a short list of changes to try.",
+     "job_id": "Akan mengubah temuan menjadi daftar singkat perubahan yang bisa dicoba.",
+     "inputs": ["Daily counts", "Audit findings"], "outputs": ["Change plan"],
+     "inputs_id": ["Hitungan harian", "Temuan audit"], "outputs_id": ["Rencana perubahan"]},
+    {"id": "fixer", "name": "Fixer", "title": "Fixer", "title_id": "Pelaksana", "status": "planned",
+     "job": "Will prepare the approved changes. Nothing goes live without the owner.",
+     "job_id": "Akan menyiapkan perubahan yang disetujui. Tidak ada yang tayang tanpa persetujuan pemilik.",
+     "inputs": ["Change plan"], "outputs": ["Prepared changes"],
+     "inputs_id": ["Rencana perubahan"], "outputs_id": ["Perubahan siap pakai"]},
+    {"id": "reporter", "name": "Reporter", "title": "Reporter", "title_id": "Pelapor", "status": "planned",
+     "job": "Will write the weekly owner report across all agents.",
+     "job_id": "Akan menulis laporan mingguan untuk pemilik dari semua agent.",
+     "inputs": ["Everything above"], "outputs": ["Owner report"],
+     "inputs_id": ["Semua di atas"], "outputs_id": ["Laporan pemilik"]},
+    {"id": "master", "name": "Master check", "title": "Quality gate", "title_id": "Penjaga kualitas", "status": "planned",
+     "job": "Will check every agent's output before it reaches the owner.",
+     "job_id": "Akan mengecek hasil setiap agent sebelum sampai ke pemilik.",
+     "inputs": ["Every agent's output"], "outputs": ["Pass or stop"],
+     "inputs_id": ["Hasil setiap agent"], "outputs_id": ["Lolos atau berhenti"]},
+]
 
 
 def _loads(value, default):
@@ -32,10 +72,12 @@ def _n(count, word: str, plural: str | None = None) -> str:
     return f"{count} {word if count == 1 else (plural or word + 's')}"
 
 
-def describe_step(step: dict, store_name: str) -> str:
-    """One plain sentence about what a step did, from its stored result."""
-    text = _describe(step, store_name)
-    return ("Re-check: " + text[0].lower() + text[1:]) if step["name"].startswith("recheck_") else text
+def describe_step(step: dict, store_name: str, lang: str = "en") -> str:
+    """One plain sentence about what a step did, from its stored result ("en" or "id")."""
+    text = _describe_id(step, store_name) if lang == "id" else _describe(step, store_name)
+    if step["name"].startswith("recheck_"):
+        return ("Cek ulang: " if lang == "id" else "Re-check: ") + text[0].lower() + text[1:]
+    return text
 
 
 def _describe(step: dict, store_name: str) -> str:
@@ -74,10 +116,49 @@ def _describe(step: dict, store_name: str) -> str:
     return name.replace("_", " ").capitalize() + "."
 
 
+def _describe_id(step: dict, store_name: str) -> str:
+    r = step.get("result") or {}
+    name = step["name"].removeprefix("recheck_")
+    if step.get("status") == "failed":
+        return f"Berhenti di sini: {step.get('error', 'error tidak diketahui')}"
+    if name == "write_questions":
+        if r.get("action") == "reused":
+            return f"Memakai {r.get('count')} pertanyaan pembeli yang sama seperti sebelumnya."
+        return f"Menyiapkan {r.get('count')} pertanyaan pembeli ({r.get('source')})."
+    if name == "validate_questions":
+        return (f"Mengecek {r.get('count')} pertanyaan: tidak ada yang kosong atau dobel, "
+                f"{r.get('naming_area') or 0} menyebut area toko.")
+    if name == "ask_questions":
+        text = (f"Mengajukan {r.get('asked')} pertanyaan: {r.get('ok')} dijawab, "
+                f"{r.get('no_answer')} tanpa jawaban.")
+        if r.get("retries"):
+            text += f" Mencoba ulang {r['retries']} kali setelah error."
+        return text
+    if name == "import_answers":
+        return f"Mengimpor {r.get('imported')} jawaban yang di-paste ({r.get('empty')} kosong)."
+    if name == "extract_mentions":
+        return f"Membaca {r.get('extracted') or 0} jawaban dan mencatat setiap toko yang disebut."
+    if name == "verify_and_count":
+        return (f"Mengecek setiap kutipan kata per kata: {r.get('ok')} jawaban dihitung, "
+                f"{r.get('needs_review')} disisihkan untuk dicek. {store_name} disebut di "
+                f"{r.get('our_mentions')} dari {r.get('ok')}.")
+    if name == "compare_previous":
+        lines = r.get("lines") or []
+        if lines and lines[0].startswith("First run"):
+            return "Shift pertama: belum ada pembanding."
+        return "Membandingkan dengan shift sebelumnya."
+    if name == "write_summary":
+        if r.get("source") == "ai":
+            return "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+        return "Menulis ringkasan dari hasil hitungan (draf AI tidak lolos cek angka)."
+    return name.replace("_", " ").capitalize() + "."
+
+
 def _run_json(conn, run, store_name: str) -> dict:
     steps = _loads(run["steps"], [])
     for s in steps:
         s["description"] = describe_step(s, store_name)
+        s["description_id"] = describe_step(s, store_name, "id")
     quotes = conn.execute(
         "SELECT COUNT(*) FROM mentions m JOIN answers a ON a.id = m.answer_id WHERE a.run_id = ?",
         (run["id"],)).fetchone()[0]
@@ -150,6 +231,7 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
                 "run": _run_json(conn, run, store["name"]),
                 "summary": summary,
                 "comparison": compare_days(summary, prev, store["name"]) if summary else [],
+                "comparison_id": compare_days(summary, prev, store["name"], "id") if summary else [],
                 "answers": _answers_json(conn, run["id"]),
             }
             path = data_dir / "runs" / f"{run['id']}.json"
@@ -163,8 +245,15 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
                       SUM(a.extracted_at IS NOT NULL) AS read
                FROM answers a JOIN runs r ON r.id = a.run_id WHERE r.store_id = ?""",
             (store["id"],)).fetchone()
+        try:
+            cfg = load_store_config(store["slug"])
+            setup = {"ask_model": cfg.provider.ask_model, "work_model": cfg.provider.work_model,
+                     "use_search": cfg.provider.use_search, "attempts_per_day": cfg.attempts_per_day,
+                     "questions": list(cfg.questions), "provider": cfg.provider.name}
+        except FileNotFoundError:
+            setup = None
         stores.append({
-            "slug": store["slug"], "name": store["name"], "domain": store["domain"],
+            "slug": store["slug"], "name": store["name"], "domain": store["domain"], "setup": setup,
             "areas": _loads(store["areas"], []), "categories": _loads(store["categories"], []),
             "series": series, "ranges": ranges, "runs": run_items,
             "totals": {
@@ -178,8 +267,16 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
                        JOIN runs r ON r.id = a.run_id WHERE r.store_id = ?""", (store["id"],)).fetchone()[0],
             },
         })
-    site = {"generated_at": utc_now(), "schedule": SCHEDULE, "agent": AGENT, "stores": stores}
+    site = {"generated_at": utc_now(), "schedule": SCHEDULE, "agent": AGENT, "team": TEAM, "stores": stores}
     path = data_dir / "site.json"
     path.write_text(json.dumps(site, indent=1))
     written.append(path)
+    last = conn.execute("SELECT * FROM runs WHERE agent = 'visibility' ORDER BY started_at DESC LIMIT 1").fetchone()
+    live = {"status": "idle", "updated_at": utc_now(), "current": None, "progress": None, "steps": [],
+            "last_run_id": last["id"] if last else None, "last_run_status": last["status"] if last else None,
+            "last_finished_at": last["finished_at"] if last else None,
+            "last_event": "Off shift. Waiting for the next one.",
+            "last_event_id": "Sedang tidak bertugas. Menunggu shift berikutnya."}
+    write_json(data_dir / "live.json", live)
+    written.append(data_dir / "live.json")
     return written

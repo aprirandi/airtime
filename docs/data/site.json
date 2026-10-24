@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-24T01:11:12+00:00",
+ "generated_at": "2026-10-24T01:36:31+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
@@ -7,13 +7,167 @@
  },
  "agent": {
   "name": "Visibility Agent",
-  "role": "Every morning I ask AI assistants the questions your buyers ask, note which shops they recommend, and check every quote before I count it."
+  "role": "Every morning I ask AI assistants the questions your buyers ask, note which shops they recommend, and check every quote before I count it.",
+  "role_id": "Setiap pagi saya menanyakan ke asisten AI pertanyaan yang biasa diajukan pembeli Anda, mencatat toko mana yang mereka rekomendasikan, dan mengecek setiap kutipan sebelum menghitungnya."
  },
+ "team": [
+  {
+   "id": "visibility",
+   "name": "Visibility Agent",
+   "title": "Visibility analyst",
+   "title_id": "Analis visibilitas",
+   "status": "active",
+   "job": "Asks AI assistants the store's buyer questions every day and counts which shops they name.",
+   "job_id": "Setiap hari menanyakan pertanyaan pembeli ke asisten AI dan menghitung toko mana yang disebut.",
+   "inputs": [
+    "Store profile",
+    "Buyer questions",
+    "Gemini answers"
+   ],
+   "outputs": [
+    "Verified mentions",
+    "Daily counts",
+    "Owner summary"
+   ],
+   "inputs_id": [
+    "Profil toko",
+    "Pertanyaan pembeli",
+    "Jawaban Gemini"
+   ],
+   "outputs_id": [
+    "Sebutan terverifikasi",
+    "Hitungan harian",
+    "Ringkasan pemilik"
+   ]
+  },
+  {
+   "id": "auditor",
+   "name": "Auditor",
+   "title": "Site auditor",
+   "title_id": "Auditor situs",
+   "status": "planned",
+   "job": "Will check the store's own website for what AI assistants can and cannot read.",
+   "job_id": "Akan mengecek website toko: apa yang bisa dan tidak bisa dibaca asisten AI.",
+   "inputs": [
+    "Store website"
+   ],
+   "outputs": [
+    "Audit findings"
+   ],
+   "inputs_id": [
+    "Website toko"
+   ],
+   "outputs_id": [
+    "Temuan audit"
+   ]
+  },
+  {
+   "id": "planner",
+   "name": "Planner",
+   "title": "Planner",
+   "title_id": "Perencana",
+   "status": "planned",
+   "job": "Will turn the findings into a short list of changes to try.",
+   "job_id": "Akan mengubah temuan menjadi daftar singkat perubahan yang bisa dicoba.",
+   "inputs": [
+    "Daily counts",
+    "Audit findings"
+   ],
+   "outputs": [
+    "Change plan"
+   ],
+   "inputs_id": [
+    "Hitungan harian",
+    "Temuan audit"
+   ],
+   "outputs_id": [
+    "Rencana perubahan"
+   ]
+  },
+  {
+   "id": "fixer",
+   "name": "Fixer",
+   "title": "Fixer",
+   "title_id": "Pelaksana",
+   "status": "planned",
+   "job": "Will prepare the approved changes. Nothing goes live without the owner.",
+   "job_id": "Akan menyiapkan perubahan yang disetujui. Tidak ada yang tayang tanpa persetujuan pemilik.",
+   "inputs": [
+    "Change plan"
+   ],
+   "outputs": [
+    "Prepared changes"
+   ],
+   "inputs_id": [
+    "Rencana perubahan"
+   ],
+   "outputs_id": [
+    "Perubahan siap pakai"
+   ]
+  },
+  {
+   "id": "reporter",
+   "name": "Reporter",
+   "title": "Reporter",
+   "title_id": "Pelapor",
+   "status": "planned",
+   "job": "Will write the weekly owner report across all agents.",
+   "job_id": "Akan menulis laporan mingguan untuk pemilik dari semua agent.",
+   "inputs": [
+    "Everything above"
+   ],
+   "outputs": [
+    "Owner report"
+   ],
+   "inputs_id": [
+    "Semua di atas"
+   ],
+   "outputs_id": [
+    "Laporan pemilik"
+   ]
+  },
+  {
+   "id": "master",
+   "name": "Master check",
+   "title": "Quality gate",
+   "title_id": "Penjaga kualitas",
+   "status": "planned",
+   "job": "Will check every agent's output before it reaches the owner.",
+   "job_id": "Akan mengecek hasil setiap agent sebelum sampai ke pemilik.",
+   "inputs": [
+    "Every agent's output"
+   ],
+   "outputs": [
+    "Pass or stop"
+   ],
+   "inputs_id": [
+    "Hasil setiap agent"
+   ],
+   "outputs_id": [
+    "Lolos atau berhenti"
+   ]
+  }
+ ],
  "stores": [
   {
    "slug": "handworks",
    "name": "Handworks",
    "domain": "handworks.com.au",
+   "setup": {
+    "ask_model": "gemini-3.8-flash",
+    "work_model": "gemini-3.5-flash-lite",
+    "use_search": false,
+    "attempts_per_day": 2,
+    "questions": [
+     "Best stationery shops in Melbourne",
+     "Where can I buy greeting cards and wrapping paper in Melbourne?",
+     "Unique gift shops in Prahran or Brighton Melbourne",
+     "Best place to buy journals and notebooks in Melbourne",
+     "Birthday gift ideas under $30 in Melbourne",
+     "Online stationery store in Australia with fast shipping"
+    ],
+    "provider": "gemini"
+   },
    "areas": [
     "Prahran",
     "Brighton"
@@ -1221,7 +1375,8 @@
          "Online stationery store in Australia with fast shipping"
         ]
        },
-       "description": "Wrote 6 buyer questions (config)."
+       "description": "Wrote 6 buyer questions (config).",
+       "description_id": "Menyiapkan 6 pertanyaan pembeli (config)."
       },
       {
        "step": 2,
@@ -1234,7 +1389,8 @@
         "count": 6,
         "naming_area": 1
        },
-       "description": "Checked the 6 questions: no empty or duplicate ones, 1 names a store area."
+       "description": "Checked the 6 questions: no empty or duplicate ones, 1 names a store area.",
+       "description_id": "Mengecek 6 pertanyaan: tidak ada yang kosong atau dobel, 1 menyebut area toko."
       },
       {
        "step": 3,
@@ -1249,7 +1405,8 @@
         "no_answer": 4,
         "calls_made": 24
        },
-       "description": "Asked 18 questions: 14 answered, 4 no answer."
+       "description": "Asked 18 questions: 14 answered, 4 no answer.",
+       "description_id": "Mengajukan 18 pertanyaan: 14 dijawab, 4 tanpa jawaban."
       },
       {
        "step": 4,
@@ -1262,7 +1419,8 @@
         "extracted": 14,
         "failed_calls": 0
        },
-       "description": "Read 14 answers and listed every shop named."
+       "description": "Read 14 answers and listed every shop named.",
+       "description_id": "Membaca 14 jawaban dan mencatat setiap toko yang disebut."
       },
       {
        "step": 5,
@@ -1281,7 +1439,8 @@
         "top_competitor": "Milligram",
         "top_competitor_mentions": 10
        },
-       "description": "Checked every quote word for word: 13 answers counted, 1 set aside for review. Handworks named in 0 of 13."
+       "description": "Checked every quote word for word: 13 answers counted, 1 set aside for review. Handworks named in 0 of 13.",
+       "description_id": "Mengecek setiap kutipan kata per kata: 13 jawaban dihitung, 1 disisihkan untuk dicek. Handworks disebut di 0 dari 13."
       },
       {
        "step": 6,
@@ -1303,7 +1462,8 @@
          "max_pct": 0
         }
        },
-       "description": "First run for Gemini (API): nothing earlier to compare with."
+       "description": "First run for Gemini (API): nothing earlier to compare with.",
+       "description_id": "Shift pertama: belum ada pembanding."
       },
       {
        "step": 7,
@@ -1317,7 +1477,8 @@
         "rejected": [],
         "text": "Today, Gemini (API) recorded 13 total responses. Among these, 0 answers named Handworks, while Milligram appeared in 10 responses."
        },
-       "description": "Wrote the summary; code checked every number in it against the counts."
+       "description": "Wrote the summary; code checked every number in it against the counts.",
+       "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
       },
       {
        "step": 4,
@@ -1332,7 +1493,8 @@
         "extracted": 1,
         "failed_calls": 0
        },
-       "description": "Re-check: read 1 answer and listed every shop named."
+       "description": "Re-check: read 1 answer and listed every shop named.",
+       "description_id": "Cek ulang: membaca 1 jawaban dan mencatat setiap toko yang disebut."
       },
       {
        "step": 5,
@@ -1353,7 +1515,8 @@
         "top_competitor": "Milligram",
         "top_competitor_mentions": 10
        },
-       "description": "Re-check: checked every quote word for word: 14 answers counted, 0 set aside for review. Handworks named in 0 of 14."
+       "description": "Re-check: checked every quote word for word: 14 answers counted, 0 set aside for review. Handworks named in 0 of 14.",
+       "description_id": "Cek ulang: mengecek setiap kutipan kata per kata: 14 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 14."
       },
       {
        "step": 6,
@@ -1377,7 +1540,8 @@
          "max_pct": 0
         }
        },
-       "description": "Re-check: first run for Gemini (API): nothing earlier to compare with."
+       "description": "Re-check: first run for Gemini (API): nothing earlier to compare with.",
+       "description_id": "Cek ulang: shift pertama: belum ada pembanding."
       },
       {
        "step": 7,
@@ -1393,7 +1557,8 @@
         "rejected": [],
         "text": "Today, Gemini (API) recorded 14 total responses. Among these, 0 answers named Handworks, accounting for 0 of the total. Milligram appeared in 10 responses."
        },
-       "description": "Re-check: wrote the summary; code checked every number in it against the counts."
+       "description": "Re-check: wrote the summary; code checked every number in it against the counts.",
+       "description_id": "Cek ulang: menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
       }
      ],
      "quotes_verified": 164

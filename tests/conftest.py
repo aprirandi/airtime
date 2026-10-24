@@ -1,5 +1,6 @@
 import json
 import re
+from dataclasses import replace
 
 import pytest
 
@@ -13,7 +14,8 @@ KNOWN_STORES = ["Handworks", "Milligram", "kikki.K", "Notemaker", "Officeworks"]
 
 @pytest.fixture
 def cfg():
-    return load_store_config("handworks")
+    # Pinned to 3 attempts so tests do not depend on the live quota setting in handworks.toml.
+    return replace(load_store_config("handworks"), attempts_per_day=3)
 
 
 @pytest.fixture

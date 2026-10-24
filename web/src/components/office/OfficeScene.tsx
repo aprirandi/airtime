@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
 import { boxFaces, GRID, iso, pct, pts, tile, VIEW, WALL_H } from "./iso"
@@ -132,6 +133,7 @@ function Robot({ at, walking, working }: { at: [number, number]; walking: boolea
 }
 
 function StationLabel({ id, active }: { id: StationId; active: boolean }) {
+  const { t } = useI18n()
   const s = STATIONS[id]
   const p = iso(s.stand[0], s.stand[1])
   return (
@@ -142,12 +144,13 @@ function StationLabel({ id, active }: { id: StationId; active: boolean }) {
       )}
       style={pct(p)}
     >
-      {s.label}
+      {t(`station.${id}`)}
     </div>
   )
 }
 
 export function OfficeScene({ beat, phase, done, agentName }: { beat: Beat | undefined; phase: "walk" | "work"; done: boolean; agentName: string }) {
+  const { t } = useI18n()
   const station = beat?.station ?? "lounge"
   const at = STATIONS[station].stand
   const working = phase === "work" && !done
@@ -195,14 +198,14 @@ export function OfficeScene({ beat, phase, done, agentName }: { beat: Beat | und
           className="text-muted-foreground bg-background/80 pointer-events-none absolute hidden sm:block -translate-x-1/2 -translate-y-1/2 rounded-md border border-dashed px-1.5 py-0.5 text-[9px] whitespace-nowrap sm:text-[10px]"
           style={pct(iso(a.desk[0] + 0.6, a.desk[1] + 1.05, 8))}
         >
-          {a.name} · soon
+          {t("hq.soon", { name: a.name })}
         </div>
       ))}
       <div
         className="text-muted-foreground bg-background/80 pointer-events-none absolute hidden sm:block -translate-x-1/2 translate-y-1 rounded-md border border-dashed px-1.5 py-0.5 text-[9px] whitespace-nowrap sm:text-[10px]"
         style={pct(iso(11.45, 4.4))}
       >
-        Master check · soon
+        {t("hq.soon", { name: "Master check" })}
       </div>
 
       {beat && phase === "work" && (
@@ -216,7 +219,7 @@ export function OfficeScene({ beat, phase, done, agentName }: { beat: Beat | und
         >
           {beat.step && (
             <Badge variant={beat.step.kind === "AI" ? "default" : "secondary"} className="mb-1 h-4 px-1.5 text-[10px]">
-              {beat.step.kind === "AI" ? "AI step" : "Code step"}
+              {beat.step.kind === "AI" ? t("common.aiStep") : t("common.codeStep")}
             </Badge>
           )}
           <p>{beat.text}</p>

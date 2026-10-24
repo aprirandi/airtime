@@ -32,7 +32,8 @@
       "Online stationery store in Australia with fast shipping"
      ]
     },
-    "description": "Wrote 6 buyer questions (config)."
+    "description": "Wrote 6 buyer questions (config).",
+    "description_id": "Menyiapkan 6 pertanyaan pembeli (config)."
    },
    {
     "step": 2,
@@ -45,7 +46,8 @@
      "count": 6,
      "naming_area": 1
     },
-    "description": "Checked the 6 questions: no empty or duplicate ones, 1 names a store area."
+    "description": "Checked the 6 questions: no empty or duplicate ones, 1 names a store area.",
+    "description_id": "Mengecek 6 pertanyaan: tidak ada yang kosong atau dobel, 1 menyebut area toko."
    },
    {
     "step": 3,
@@ -60,7 +62,8 @@
      "no_answer": 4,
      "calls_made": 24
     },
-    "description": "Asked 18 questions: 14 answered, 4 no answer."
+    "description": "Asked 18 questions: 14 answered, 4 no answer.",
+    "description_id": "Mengajukan 18 pertanyaan: 14 dijawab, 4 tanpa jawaban."
    },
    {
     "step": 4,
@@ -73,7 +76,8 @@
      "extracted": 14,
      "failed_calls": 0
     },
-    "description": "Read 14 answers and listed every shop named."
+    "description": "Read 14 answers and listed every shop named.",
+    "description_id": "Membaca 14 jawaban dan mencatat setiap toko yang disebut."
    },
    {
     "step": 5,
@@ -92,7 +96,8 @@
      "top_competitor": "Milligram",
      "top_competitor_mentions": 10
     },
-    "description": "Checked every quote word for word: 13 answers counted, 1 set aside for review. Handworks named in 0 of 13."
+    "description": "Checked every quote word for word: 13 answers counted, 1 set aside for review. Handworks named in 0 of 13.",
+    "description_id": "Mengecek setiap kutipan kata per kata: 13 jawaban dihitung, 1 disisihkan untuk dicek. Handworks disebut di 0 dari 13."
    },
    {
     "step": 6,
@@ -114,7 +119,8 @@
       "max_pct": 0
      }
     },
-    "description": "First run for Gemini (API): nothing earlier to compare with."
+    "description": "First run for Gemini (API): nothing earlier to compare with.",
+    "description_id": "Shift pertama: belum ada pembanding."
    },
    {
     "step": 7,
@@ -128,7 +134,8 @@
      "rejected": [],
      "text": "Today, Gemini (API) recorded 13 total responses. Among these, 0 answers named Handworks, while Milligram appeared in 10 responses."
     },
-    "description": "Wrote the summary; code checked every number in it against the counts."
+    "description": "Wrote the summary; code checked every number in it against the counts.",
+    "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
    },
    {
     "step": 4,
@@ -143,7 +150,8 @@
      "extracted": 1,
      "failed_calls": 0
     },
-    "description": "Re-check: read 1 answer and listed every shop named."
+    "description": "Re-check: read 1 answer and listed every shop named.",
+    "description_id": "Cek ulang: membaca 1 jawaban dan mencatat setiap toko yang disebut."
    },
    {
     "step": 5,
@@ -164,7 +172,8 @@
      "top_competitor": "Milligram",
      "top_competitor_mentions": 10
     },
-    "description": "Re-check: checked every quote word for word: 14 answers counted, 0 set aside for review. Handworks named in 0 of 14."
+    "description": "Re-check: checked every quote word for word: 14 answers counted, 0 set aside for review. Handworks named in 0 of 14.",
+    "description_id": "Cek ulang: mengecek setiap kutipan kata per kata: 14 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 14."
    },
    {
     "step": 6,
@@ -188,7 +197,8 @@
       "max_pct": 0
      }
     },
-    "description": "Re-check: first run for Gemini (API): nothing earlier to compare with."
+    "description": "Re-check: first run for Gemini (API): nothing earlier to compare with.",
+    "description_id": "Cek ulang: shift pertama: belum ada pembanding."
    },
    {
     "step": 7,
@@ -204,7 +214,8 @@
      "rejected": [],
      "text": "Today, Gemini (API) recorded 14 total responses. Among these, 0 answers named Handworks, accounting for 0 of the total. Milligram appeared in 10 responses."
     },
-    "description": "Re-check: wrote the summary; code checked every number in it against the counts."
+    "description": "Re-check: wrote the summary; code checked every number in it against the counts.",
+    "description_id": "Cek ulang: menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
    }
   ],
   "quotes_verified": 164
@@ -1325,6 +1336,9 @@
  },
  "comparison": [
   "First run for Gemini (API): nothing earlier to compare with."
+ ],
+ "comparison_id": [
+  "Shift pertama untuk Gemini (API): belum ada pembanding."
  ],
  "answers": [
   {

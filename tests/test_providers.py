@@ -53,3 +53,42 @@ def test_backoff_retries_rate_limits_then_gives_up():
     with pytest.raises(RateLimitError):
         call_with_backoff(lambda: (_ for _ in ()).throw(RateLimitError("429")),
                           max_retries=1, base_delay=1, sleep=lambda s: None)
+
+
+def test_daily_quota_stops_all_further_calls(monkeypatch):
+    import io
+    import urllib.error
+
+    from airtime.providers.base import QuotaExhausted
+    from airtime.providers.gemini import GeminiProvider
+
+    body = b'{"error": {"code": 429, "details": [{"quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier"}]}}'
+    calls = []
+
+    def fake_urlopen(req, timeout):
+        calls.append(1)
+        raise urllib.error.HTTPError(req.full_url, 429, "Too Many Requests", {}, io.BytesIO(body))
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+    p = GeminiProvider("m", api_key="k")
+    with pytest.raises(QuotaExhausted):
+        call_with_backoff(lambda: p.ask("q"), max_retries=4, base_delay=1, sleep=lambda s: None)
+    with pytest.raises(QuotaExhausted):
+        p.ask("another")
+    assert len(calls) == 1  # no retries, and no second request once the quota is known to be gone
+
+
+def test_per_minute_429_is_still_retried(monkeypatch):
+    import io
+    import urllib.error
+
+    from airtime.providers.gemini import GeminiProvider
+
+    body = b'{"error": {"code": 429, "details": [{"quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"}]}}'
+
+    def fake_urlopen(req, timeout):
+        raise urllib.error.HTTPError(req.full_url, 429, "Too Many Requests", {}, io.BytesIO(body))
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+    with pytest.raises(RateLimitError):
+        GeminiProvider("m", api_key="k").ask("q")

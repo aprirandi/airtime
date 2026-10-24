@@ -51,51 +51,72 @@ def save_counts(conn, *, store_id: int, date: str, provider: str, channel: str,
     conn.commit()
 
 
-def _direction(now_num, now_den, prev_num, prev_den) -> str:
+def _direction(now_num, now_den, prev_num, prev_den, lang: str = "en") -> str:
+    id_ = lang == "id"
     if now_den == 0 or prev_den == 0:
-        return "not comparable (no counted answers on one of the days)"
+        return ("tidak bisa dibandingkan (tidak ada jawaban terhitung di salah satu hari)" if id_
+                else "not comparable (no counted answers on one of the days)")
     a, b = now_num / now_den, prev_num / prev_den
     if a == b:
-        return "no change"
+        return "tidak berubah" if id_ else "no change"
     points = round(100 * (a - b))
+    if id_:
+        return f"naik {points} poin" if a > b else f"turun {-points} poin"
     return f"higher by {points} points" if a > b else f"lower by {-points} points"
 
 
-def compare_days(today: dict, previous: dict | None, store_name: str) -> list[str]:
-    """Plain-language lines comparing two daily_summary rows of the same provider and channel."""
-    t = today
-    if previous is None:
+def compare_days(today: dict, previous: dict | None, store_name: str, lang: str = "en") -> list[str]:
+    """Plain-language lines comparing two daily_summary rows of the same provider and channel.
+
+    lang is "en" (stored in the run log) or "id" (Indonesian, for the website).
+    """
+    t, p, id_ = today, previous, lang == "id"
+    if p is None:
+        if id_:
+            return [f"Shift pertama untuk {scope_label(t['provider'], t['channel'])}: belum ada pembanding."]
         return [f"First run for {scope_label(t['provider'], t['channel'])}: nothing earlier to compare with."]
-    p = previous
-    lines = [f"Compared with the previous run on {p['date']}:"]
-    lines.append(
+
+    def d(n1, d1, n2, d2):
+        return _direction(t[n1], t[d1], p[n2], p[d2], lang)
+
+    same_top = t["top_competitor"] == p["top_competitor"]
+    if id_:
+        none = "tidak ada"
+        return [
+            f"Dibandingkan dengan shift sebelumnya ({p['date']}):",
+            f"{store_name} disebut di {t['our_mentions']} dari {t['total_answers']} jawaban "
+            f"({pct(t['our_mentions'], t['total_answers'])}), sebelumnya {p['our_mentions']} dari "
+            f"{p['total_answers']} ({pct(p['our_mentions'], p['total_answers'])}): "
+            f"{d('our_mentions', 'total_answers', 'our_mentions', 'total_answers')}.",
+            f"Kompetitor teratas {t['top_competitor'] or none} di {t['top_competitor_mentions']} dari "
+            f"{t['total_answers']}; sebelumnya {p['top_competitor'] or none} di {p['top_competitor_mentions']} "
+            f"dari {p['total_answers']}" + (" (toko yang sama)." if same_top else " (toko berbeda)."),
+            f"Pertanyaan yang menyebut area: {t['area_mentions']} dari {t['area_answers']}, sebelumnya "
+            f"{p['area_mentions']} dari {p['area_answers']}: {d('area_mentions', 'area_answers', 'area_mentions', 'area_answers')}.",
+            f"Pertanyaan lain: {t['no_area_mentions']} dari {t['no_area_answers']}, sebelumnya "
+            f"{p['no_area_mentions']} dari {p['no_area_answers']}: "
+            f"{d('no_area_mentions', 'no_area_answers', 'no_area_mentions', 'no_area_answers')}.",
+            f"Tanpa jawaban: {t['no_answer']} dari {t['asked']} (sebelumnya {p['no_answer']} dari {p['asked']}); "
+            f"disisihkan untuk dicek: {t['needs_review']} (sebelumnya {p['needs_review']}).",
+        ]
+    return [
+        f"Compared with the previous run on {p['date']}:",
         f"{store_name} named in {t['our_mentions']} of {t['total_answers']} answers "
         f"({pct(t['our_mentions'], t['total_answers'])}), previously {p['our_mentions']} of "
         f"{p['total_answers']} ({pct(p['our_mentions'], p['total_answers'])}): "
-        f"{_direction(t['our_mentions'], t['total_answers'], p['our_mentions'], p['total_answers'])}."
-    )
-    same_top = t["top_competitor"] == p["top_competitor"]
-    lines.append(
+        f"{d('our_mentions', 'total_answers', 'our_mentions', 'total_answers')}.",
         f"Top competitor {t['top_competitor'] or 'none'} in {t['top_competitor_mentions']} of "
         f"{t['total_answers']}; previously {p['top_competitor'] or 'none'} in "
         f"{p['top_competitor_mentions']} of {p['total_answers']}"
-        + (" (same store)." if same_top else " (different store).")
-    )
-    lines.append(
+        + (" (same store)." if same_top else " (different store)."),
         f"Questions naming an area: {t['area_mentions']} of {t['area_answers']}, previously "
-        f"{p['area_mentions']} of {p['area_answers']}: "
-        f"{_direction(t['area_mentions'], t['area_answers'], p['area_mentions'], p['area_answers'])}."
-    )
-    lines.append(
+        f"{p['area_mentions']} of {p['area_answers']}: {d('area_mentions', 'area_answers', 'area_mentions', 'area_answers')}.",
         f"Questions not naming an area: {t['no_area_mentions']} of {t['no_area_answers']}, previously "
         f"{p['no_area_mentions']} of {p['no_area_answers']}: "
-        f"{_direction(t['no_area_mentions'], t['no_area_answers'], p['no_area_mentions'], p['no_area_answers'])}."
-    )
-    lines.append(
+        f"{d('no_area_mentions', 'no_area_answers', 'no_area_mentions', 'no_area_answers')}.",
         f"No answer: {t['no_answer']} of {t['asked']} asked (previously {p['no_answer']} of {p['asked']}); "
-        f"set aside for review: {t['needs_review']} (previously {p['needs_review']})."
-    )
-    return lines
+        f"set aside for review: {t['needs_review']} (previously {p['needs_review']}).",
+    ]
 
 
 def mention_range(rows: list[dict], days: int = 7) -> dict | None:
