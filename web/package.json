@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && cd .. && python -m airtime export",
+    "build": "tsc -b && vite build && node scripts/make-id-page.mjs && cd .. && python -m airtime export",
     "typecheck": "tsc -b"
   },
   "dependencies": {
