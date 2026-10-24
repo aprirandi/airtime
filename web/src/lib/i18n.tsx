@@ -522,7 +522,6 @@ export type T = (key: string, vars?: Vars) => string
 
 interface Ctx {
   lang: Lang
-  setLang: (l: Lang) => void
   t: T
   /** Pick obj[field + "_id"] in Indonesian when the data provides it, else obj[field]. */
   pick: <V>(obj: object, field: string) => V
@@ -530,35 +529,21 @@ interface Ctx {
 
 const I18nContext = createContext<Ctx | null>(null)
 
-function initialLang(): Lang {
-  const fromUrl = new URLSearchParams(location.search).get("lang")
-  if (fromUrl === "en" || fromUrl === "id") return fromUrl
-  try {
-    const saved = localStorage.getItem("lang")
-    if (saved === "en" || saved === "id") return saved
-  } catch {
-    /* storage can be unavailable */
-  }
-  return navigator.language?.toLowerCase().startsWith("id") ? "id" : "en"
+/** English everywhere; Indonesian only on the /id/ page (docs/id/index.html). */
+export function langFromPath(path = location.pathname): Lang {
+  return /\/id\/?(index\.html)?$/.test(path) ? "id" : "en"
 }
 
+/** Data files live next to the English page; the /id/ page reads them one level up. */
+export const DATA_ROOT = langFromPath() === "id" ? "../data" : "./data"
+
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => {
-    const l = initialLang()
+  const [lang] = useState<Lang>(() => {
+    const l = langFromPath()
     setLocale(l)
     document.documentElement.lang = l
     return l
   })
-  const setLang = (l: Lang) => {
-    setLocale(l)
-    document.documentElement.lang = l
-    setLangState(l)
-    try {
-      localStorage.setItem("lang", l)
-    } catch {
-      /* the choice still applies for this visit */
-    }
-  }
   const t: T = (key, vars) => {
     let s = DICTS[lang][key] ?? EN[key] ?? key
     if (vars) for (const [k, v] of Object.entries(vars)) s = s.split(`{${k}}`).join(String(v))
@@ -568,7 +553,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     const o = obj as Record<string, unknown>
     return (lang === "id" && o[`${field}_id`] !== undefined ? o[`${field}_id`] : o[field]) as V
   }
-  return <I18nContext.Provider value={{ lang, setLang, t, pick }}>{children}</I18nContext.Provider>
+  return <I18nContext.Provider value={{ lang, t, pick }}>{children}</I18nContext.Provider>
 }
 
 export function useI18n(): Ctx {

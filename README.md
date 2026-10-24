@@ -75,7 +75,9 @@ pip install pytest && python -m pytest -q
 
 ### Report website
 
-`docs/` holds the built website and `docs/data/`, the JSON it reads. It has two menus:
+`docs/` holds the built website and `docs/data/`, the JSON it reads. The site is in English;
+the same site in Indonesian is at `/id/` (`docs/id/index.html`, written by the build). It has
+two menus:
 
 - **Dashboard**: real counts from every shift (findings, day-by-day chart, who gets recommended,
   work diary, every answer and verified quote per day). It re-reads its data on its own and

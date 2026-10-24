@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Bot, Languages, LayoutDashboard, Moon, Sun } from "lucide-react"
+import { Bot, LayoutDashboard, Moon, Sun } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -30,25 +30,6 @@ function useRoute() {
     return () => removeEventListener("hashchange", on)
   }, [])
   return { route, go: (h: string) => (location.hash = h) }
-}
-
-function LangToggle() {
-  const { lang, setLang } = useI18n()
-  return (
-    <div className="bg-muted flex items-center rounded-md p-0.5 text-xs font-medium" role="group" aria-label="Language / Bahasa">
-      <Languages className="text-muted-foreground mx-1.5 size-3.5" />
-      {(["id", "en"] as const).map((l) => (
-        <button
-          key={l}
-          onClick={() => setLang(l)}
-          aria-pressed={lang === l}
-          className={cn("rounded px-2 py-1 uppercase transition-colors", lang === l ? "bg-background shadow-xs" : "text-muted-foreground hover:text-foreground")}
-        >
-          {l}
-        </button>
-      ))}
-    </div>
-  )
 }
 
 function ThemeToggle() {
@@ -117,7 +98,6 @@ export default function App() {
             </NavLink>
           </nav>
           <div className="ml-auto flex items-center gap-1">
-            <LangToggle />
             <ThemeToggle />
           </div>
         </div>
