@@ -33,21 +33,26 @@ def ask_once(provider: Provider, question: str, *, max_retries: int, base_delay:
             "error": None if text else "empty answer", "used_search": ans.used_search}
 
 
+def tries_for(question, store) -> int:
+    """Core questions are asked attempts_per_day times; each daily question daily_attempts times."""
+    kind = question["kind"] if "kind" in question.keys() else "core"
+    return store.daily_attempts if kind == "daily" else store.attempts_per_day
+
+
 def step_ask_questions(ctx: RunContext) -> dict:
     provider = ctx.ask_provider
     if provider is None:
         raise RunFailed("no provider to ask")
     questions = ctx.data["_questions"]
-    attempts = ctx.store.attempts_per_day
-    planned = len(questions) * attempts
+    planned = sum(tries_for(q, ctx.store) for q in questions)
     if planned > provider.calls_left:
         raise RunFailed(f"{planned} asks planned but the call budget allows {provider.calls_left}; "
                         "lower attempts_per_day or raise max_ask_calls_per_run (check AI Studio limits)")
     pcfg = ctx.store.provider
     counts = {"ok": 0, "no_answer": 0, "retries": 0}
     # Attempt-major order spreads repeats of the same question across the run.
-    for attempt in range(1, attempts + 1):
-        for q in questions:
+    for attempt in range(1, max((tries_for(q, ctx.store) for q in questions), default=0) + 1):
+        for q in [q for q in questions if attempt <= tries_for(q, ctx.store)]:
             rec = ask_once(provider, q["text"], max_retries=pcfg.max_retries,
                            base_delay=pcfg.backoff_base_seconds, sleep=ctx.sleep)
             raw = {"response": rec["raw"], "used_search": rec["used_search"],

@@ -28,8 +28,9 @@ def save_counts(conn, *, store_id: int, date: str, provider: str, channel: str,
         """INSERT INTO daily_summary (store_id, date, provider, channel, run_id, asked, no_answer,
                needs_review, our_mentions, total_answers, top_competitor, top_competitor_mentions,
                area_mentions, area_answers, area_rate, no_area_mentions, no_area_answers,
-               no_area_rate, web_search_answers, competitors, our_answer_ids, note)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               no_area_rate, web_search_answers, competitors, our_answer_ids, note,
+               core_mentions, core_answers, daily_mentions, daily_answers)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT (store_id, date, provider, channel) DO UPDATE SET
                run_id=excluded.run_id, asked=excluded.asked, no_answer=excluded.no_answer,
                needs_review=excluded.needs_review, our_mentions=excluded.our_mentions,
@@ -40,13 +41,16 @@ def save_counts(conn, *, store_id: int, date: str, provider: str, channel: str,
                no_area_answers=excluded.no_area_answers, no_area_rate=excluded.no_area_rate,
                web_search_answers=excluded.web_search_answers, competitors=excluded.competitors,
                our_answer_ids=excluded.our_answer_ids, note=excluded.note,
+               core_mentions=excluded.core_mentions, core_answers=excluded.core_answers,
+               daily_mentions=excluded.daily_mentions, daily_answers=excluded.daily_answers,
                text=NULL, text_source=NULL""",
         (store_id, date, provider, channel, run_id, counts.asked, counts.no_answer,
          counts.needs_review, counts.our_mentions, counts.total_answers, counts.top_competitor,
          counts.top_competitor_mentions, counts.area_mentions, counts.area_answers,
          counts.area_rate, counts.no_area_mentions, counts.no_area_answers, counts.no_area_rate,
          counts.web_search_answers, json.dumps(counts.competitors),
-         json.dumps(counts.our_answer_ids), note),
+         json.dumps(counts.our_answer_ids), note, counts.core_mentions, counts.core_answers,
+         counts.daily_mentions, counts.daily_answers),
     )
     conn.commit()
 

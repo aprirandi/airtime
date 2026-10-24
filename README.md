@@ -16,7 +16,7 @@ Code decides anything that can be counted or checked. AI only reads and writes l
 
 | # | Step | Kind | What happens |
 |---|------|------|--------------|
-| 1 | Write questions | AI | Only on first run or when the store config changes. Handworks uses the 6 fixed questions from the 14 Oct 2026 manual run (`mode = "fixed"`) so results compare with that baseline; `mode = "generate"` has Gemini write them from the config and the home-page text. |
+| 1 | Write questions | AI | Two kinds. **Core** questions are the same every day so days can be compared (Handworks: 3 from the 14 Oct manual run, set in the config). **Daily** questions are new each morning: the AI writes 6 from the store profile; code drops any that name our store, name no place (Melbourne, Prahran, Brighton, Australia), or repeat a question from the last 14 days. If writing them fails, the core questions still go out. |
 | 2 | Validate questions | CODE | Every run. Rejects empty, too-short, duplicate and near-duplicate questions; requires at least one question naming a store area. The run fails loudly if the list is invalid. |
 | 3 | Ask | CODE | Every question N times (default 3). Stores full raw response, timestamp, provider, channel, model, attempt. Backs off on rate limits. Failed or empty answers are stored as `no_answer`, never dropped. Refuses to start if the planned calls exceed the call budget. |
 | 4 | Extract mentions | AI | Per answer, strict JSON: stores named in order, rank if it is a list, tone toward our store, and an exact quote per store. |
@@ -123,8 +123,8 @@ then fails so it is visible. One-time setup:
   answers that did use search. The Gemini app normally searches, so expect differences.
 - **Free-tier limits:** read in AI Studio (Rate limit page) on 24 Oct 2026: Gemini 3.8 Flash
   allows 5 requests per minute and about 20 per day (peak use 23, bar full); Gemini 3.5 Flash Lite
-  15 per minute with far more daily headroom. So the agent asks 6 questions x 2 tries = 12 calls
-  a day on 3.8 Flash (hard cap 14) and about 14 on 3.5 Flash Lite (cap 40). When Gemini reports the
+  15 per minute with far more daily headroom. So the agent asks 3 core questions x 2 tries plus
+  6 new questions x 1 try = 12 calls a day on 3.8 Flash (hard cap 14) and about 14 on 3.5 Flash Lite (cap 40). When Gemini reports the
   daily quota as used up, the agent stops calling that model for the rest of the run instead of
   retrying, and records the remaining asks as `no_answer`. Quotas reset daily; with no billing
   account on the project there is nothing to pay. `python -m airtime plan` shows the numbers.

@@ -86,9 +86,18 @@ def _describe(step: dict, store_name: str) -> str:
     if step.get("status") == "failed":
         return f"Stopped here: {step.get('error', 'unknown error')}"
     if name == "write_questions":
-        if r.get("action") == "reused":
-            return f"Used the same {r.get('count')} buyer questions as before."
-        return f"Wrote {r.get('count')} buyer questions ({r.get('source')})."
+        if "core" not in r:  # runs from before daily questions existed
+            if r.get("action") == "reused":
+                return f"Used the same {r.get('count')} buyer questions as before."
+            return f"Wrote {r.get('count')} buyer questions ({r.get('source')})."
+        core, daily = r["core"], r.get("daily") or {}
+        text = (f"Kept the same {core.get('count')} core questions" if core.get("action") == "reused"
+                else f"Set up {core.get('count')} core questions")
+        if daily.get("action") in ("created", "reused"):
+            return text + f" and {'wrote' if daily['action'] == 'created' else 'reused'} {daily.get('count')} new ones for today."
+        if daily.get("action") == "failed":
+            return text + "; could not write new ones today, so only the core questions are asked."
+        return text + "."
     if name == "validate_questions":
         n = r.get("naming_area") or 0
         return (f"Checked the {r.get('count')} questions: no empty or duplicate ones, "
@@ -122,9 +131,19 @@ def _describe_id(step: dict, store_name: str) -> str:
     if step.get("status") == "failed":
         return f"Berhenti di sini: {step.get('error', 'error tidak diketahui')}"
     if name == "write_questions":
-        if r.get("action") == "reused":
-            return f"Memakai {r.get('count')} pertanyaan pembeli yang sama seperti sebelumnya."
-        return f"Menyiapkan {r.get('count')} pertanyaan pembeli ({r.get('source')})."
+        if "core" not in r:
+            if r.get("action") == "reused":
+                return f"Memakai {r.get('count')} pertanyaan pembeli yang sama seperti sebelumnya."
+            return f"Menyiapkan {r.get('count')} pertanyaan pembeli ({r.get('source')})."
+        core, daily = r["core"], r.get("daily") or {}
+        text = (f"Memakai {core.get('count')} pertanyaan inti yang sama" if core.get("action") == "reused"
+                else f"Menyiapkan {core.get('count')} pertanyaan inti")
+        if daily.get("action") in ("created", "reused"):
+            verb = "menulis" if daily["action"] == "created" else "memakai lagi"
+            return text + f" dan {verb} {daily.get('count')} pertanyaan baru untuk hari ini."
+        if daily.get("action") == "failed":
+            return text + "; gagal menulis pertanyaan baru hari ini, jadi hanya pertanyaan inti yang diajukan."
+        return text + "."
     if name == "validate_questions":
         return (f"Mengecek {r.get('count')} pertanyaan: tidak ada yang kosong atau dobel, "
                 f"{r.get('naming_area') or 0} menyebut area toko.")
@@ -162,10 +181,16 @@ def _run_json(conn, run, store_name: str) -> dict:
     quotes = conn.execute(
         "SELECT COUNT(*) FROM mentions m JOIN answers a ON a.id = m.answer_id WHERE a.run_id = ?",
         (run["id"],)).fetchone()[0]
+    questions = [dict(q) for q in conn.execute(
+        """SELECT q.text, q.kind, q.names_area, COUNT(a.id) AS asked,
+                  SUM(a.status = 'ok') AS counted,
+                  SUM(a.status = 'ok' AND EXISTS (SELECT 1 FROM mentions m WHERE m.answer_id = a.id AND m.is_ours)) AS ours
+           FROM answers a JOIN questions q ON q.id = a.question_id WHERE a.run_id = ?
+           GROUP BY q.id ORDER BY q.kind, q.id""", (run["id"],))]
     return {"id": run["id"], "agent": run["agent"], "run_date": run["run_date"],
             "started_at": run["started_at"], "finished_at": run["finished_at"],
             "status": run["status"], "error": run["error"], "steps": steps,
-            "quotes_verified": quotes}
+            "quotes_verified": quotes, "questions": questions}
 
 
 def _summary_json(row) -> dict:
@@ -179,8 +204,8 @@ def _summary_json(row) -> dict:
 def _answers_json(conn, run_id: int) -> list[dict]:
     out = []
     rows = conn.execute(
-        """SELECT a.*, q.text AS question, q.names_area FROM answers a
-           JOIN questions q ON q.id = a.question_id WHERE a.run_id = ? ORDER BY q.id, a.attempt""",
+        """SELECT a.*, q.text AS question, q.names_area, q.kind FROM answers a
+           JOIN questions q ON q.id = a.question_id WHERE a.run_id = ? ORDER BY q.kind, q.id, a.attempt""",
         (run_id,)).fetchall()
     for a in rows:
         raw = _loads(a["raw"], {}) or {}
@@ -188,7 +213,7 @@ def _answers_json(conn, run_id: int) -> list[dict]:
             "SELECT store_name, store_key, is_ours, position, rank, tone, quote FROM mentions"
             " WHERE answer_id = ? ORDER BY position", (a["id"],))]
         out.append({
-            "id": a["id"], "question": a["question"], "names_area": bool(a["names_area"]),
+            "id": a["id"], "question": a["question"], "names_area": bool(a["names_area"]), "kind": a["kind"] or "core",
             "attempt": a["attempt"], "asked_at": a["asked_at"], "provider": a["provider"],
             "channel": a["channel"], "model": a["model"], "status": a["status"], "error": a["error"],
             "our_tone": a["our_tone"], "text": a["text"], "sources": _loads(a["sources"], []),
@@ -249,6 +274,7 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
             cfg = load_store_config(store["slug"])
             setup = {"ask_model": cfg.provider.ask_model, "work_model": cfg.provider.work_model,
                      "use_search": cfg.provider.use_search, "attempts_per_day": cfg.attempts_per_day,
+                     "daily_count": cfg.daily_count, "daily_attempts": cfg.daily_attempts,
                      "questions": list(cfg.questions), "provider": cfg.provider.name}
         except FileNotFoundError:
             setup = None

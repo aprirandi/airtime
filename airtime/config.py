@@ -34,12 +34,17 @@ class StoreConfig:
     domain: str
     areas: tuple[str, ...]
     categories: tuple[str, ...]
+    city: str = ""                     # daily questions must name the city, an area, or the country
+    country: str = ""
     aliases: tuple[str, ...] = ()
     competitor_aliases: dict[str, tuple[str, ...]] = field(default_factory=dict)
     question_mode: str = "fixed"  # "fixed" (use `questions`) or "generate" (step 1, AI)
     questions: tuple[str, ...] = ()
     target_question_count: int = 6
-    attempts_per_day: int = 3
+    attempts_per_day: int = 3          # tries per core question (the same every day)
+    daily_count: int = 0               # new questions the AI writes each day (0 = off)
+    daily_attempts: int = 1            # tries per daily question
+    novelty_days: int = 14             # daily questions must differ from those of the last N days
     timezone: str = "Australia/Melbourne"
     provider: ProviderConfig = field(default_factory=ProviderConfig)
 
@@ -68,12 +73,17 @@ def parse_store_config(slug: str, data: dict) -> StoreConfig:
         domain=store["domain"],
         areas=tuple(store["areas"]),
         categories=tuple(store["categories"]),
+        city=store.get("city", ""),
+        country=store.get("country", ""),
         aliases=tuple(store.get("aliases", ())),
         competitor_aliases={k: tuple(v) for k, v in data.get("competitor_aliases", {}).items()},
         question_mode=questions.get("mode", "fixed"),
         questions=tuple(questions.get("list", ())),
         target_question_count=questions.get("target_count", 6),
         attempts_per_day=run.get("attempts_per_day", 3),
+        daily_count=questions.get("daily_count", 0),
+        daily_attempts=run.get("daily_attempts", 1),
+        novelty_days=questions.get("novelty_days", 14),
         timezone=run.get("timezone", "Australia/Melbourne"),
         provider=provider,
     )

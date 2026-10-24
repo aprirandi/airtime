@@ -7,7 +7,7 @@ from difflib import SequenceMatcher
 
 from airtime.config import StoreConfig
 from airtime.core.agent import RunContext, RunFailed
-from airtime.providers.base import Provider, utc_now
+from airtime.providers.base import Provider, ProviderError, utc_now
 from airtime.textutil import contains_term, store_key, word_set
 
 MIN_QUESTIONS = 3
@@ -94,6 +94,79 @@ def parse_questions(raw: str) -> list[str]:
     return [q.strip() for q in qs]
 
 
+def build_daily_prompt(store: StoreConfig, site_text: str, count: int, avoid: list[str],
+                       problems: list[str] | None = None) -> str:
+    lines = [
+        "You help a small shop understand what its customers ask AI assistants.",
+        f"Write {count} NEW questions a shopper might type into an AI assistant today when looking "
+        "for products this shop sells. Rules:",
+        "- Write as a shopper, in plain words, as typed into a chat box. Vary the need: occasions, "
+        "budgets, gift ideas, specific products, local or online, urgency.",
+        "- Never include the shop's own name or website.",
+        f"- Every question must name {_places_text(store)}, as a local shopper would.",
+        f"- At least one question must name one of these areas: {', '.join(store.areas)}.",
+        "- Each question must be clearly different from every other one and from the list of "
+        "questions already asked below.",
+        "- Return JSON: {\"questions\": [\"...\"]}.",
+        "",
+        f"Shop categories: {', '.join(store.categories)}",
+        f"Shop areas: {', '.join(store.areas)} (city: {store.city or '?'}, country: {store.country or '?'})",
+        "Questions already asked recently (do not repeat or rephrase these):",
+        *[f"- {q}" for q in avoid[-60:]],
+    ]
+    if problems:
+        lines.append("Your previous list had these problems, avoid them: " + "; ".join(problems[:10]))
+    if site_text:
+        lines += ["", f"Public text from the shop website:\n{site_text[:3000]}"]
+    return "\n".join(lines)
+
+
+def _places(store: StoreConfig) -> list[str]:
+    return [p for p in (store.city, *store.areas, store.country) if p]
+
+
+def _places_text(store: StoreConfig) -> str:
+    return " or ".join(_places(store)) or "the shop's city"
+
+
+def filter_daily(candidates: list[str], store: StoreConfig, avoid: list[str], count: int
+                 ) -> tuple[list[str], list[str]]:
+    """Keep up to `count` usable new questions. Returns (kept, reasons for each one dropped)."""
+    kept: list[str] = []
+    dropped: list[str] = []
+    for q in candidates:
+        q = q.strip()
+        if len(q.split()) < MIN_WORDS:
+            dropped.append(f"too short: {q!r}")
+        elif any(contains_term(q, a) for a in store.all_aliases):
+            dropped.append(f"names our store: {q!r}")
+        elif _places(store) and not any(contains_term(q, p) for p in _places(store)):
+            dropped.append(f"names no place ({_places_text(store)}): {q!r}")
+        elif any(near_duplicate(q, old) for old in avoid):
+            dropped.append(f"repeats a recent question: {q!r}")
+        elif any(near_duplicate(q, k) for k in kept):
+            dropped.append(f"duplicate within today's list: {q!r}")
+        elif len(kept) < count:
+            kept.append(q)
+    return kept, dropped
+
+
+def generate_daily_questions(store: StoreConfig, provider: Provider, site_text: str, avoid: list[str],
+                             count: int) -> tuple[list[str], list[str]]:
+    """Step 1 (AI) for the daily questions: one call, and one more if too few survive the checks."""
+    kept, dropped = [], []
+    for _ in range(2):
+        need = count - len(kept)
+        raw = provider.complete(build_daily_prompt(store, site_text, need + 2, avoid + kept, dropped),
+                                json_schema=QUESTIONS_SCHEMA)
+        more, why = filter_daily(parse_questions(raw), store, avoid + kept, need)
+        kept += more
+        dropped += why
+        if len(kept) >= count:
+            break
+    return kept, dropped
+
+
 def generate_questions(store: StoreConfig, provider: Provider, site_text: str) -> list[str]:
     raw = provider.complete(build_question_prompt(store, site_text), json_schema=QUESTIONS_SCHEMA)
     questions = parse_questions(raw)
@@ -106,11 +179,20 @@ def generate_questions(store: StoreConfig, provider: Provider, site_text: str) -
 # ---- Step functions wired into the agent ---------------------------------------------
 
 def step_write_questions(ctx: RunContext, fetch_site_text=None) -> dict:
-    """Step 1. Reuses the stored list unless this is the first run or the config changed."""
+    """Step 1. Core questions: reused unless this is the first run or the config changed.
+    Daily questions: written fresh by the AI once per run date (reused on a re-run that day)."""
+    if fetch_site_text is None:
+        from airtime.site import fetch_site_text
+    core = _write_core(ctx, fetch_site_text)
+    daily = _write_daily(ctx, fetch_site_text) if ctx.store.daily_count > 0 else {"action": "off", "count": 0}
+    return {"core": core, "daily": daily}
+
+
+def _write_core(ctx: RunContext, fetch_site_text) -> dict:
     cfg = ctx.store
     wanted_hash = cfg.question_hash()
     row = ctx.conn.execute("SELECT question_hash FROM stores WHERE id = ?", (ctx.store_id,)).fetchone()
-    current = [q["text"] for q in _active(ctx)]
+    current = [q["text"] for q in _core(ctx)]
     if row["question_hash"] == wanted_hash and current:
         return {"action": "reused", "count": len(current)}
 
@@ -119,10 +201,7 @@ def step_write_questions(ctx: RunContext, fetch_site_text=None) -> dict:
     elif cfg.question_mode == "generate":
         if ctx.work_provider is None:
             raise RunFailed("question_mode=generate needs an AI provider")
-        if fetch_site_text is None:
-            from airtime.site import fetch_site_text
-        site_text = fetch_site_text(cfg)
-        questions, source = generate_questions(cfg, ctx.work_provider, site_text), "ai"
+        questions, source = generate_questions(cfg, ctx.work_provider, fetch_site_text(cfg)), "ai"
     else:
         raise RunFailed(f"unknown question mode {cfg.question_mode!r}")
 
@@ -130,11 +209,11 @@ def step_write_questions(ctx: RunContext, fetch_site_text=None) -> dict:
     if problems:
         raise RunFailed("new question list is invalid: " + "; ".join(problems))
     now = utc_now()
-    ctx.conn.execute("UPDATE questions SET active = 0 WHERE store_id = ?", (ctx.store_id,))
+    ctx.conn.execute("UPDATE questions SET active = 0 WHERE store_id = ? AND kind = 'core'", (ctx.store_id,))
     for q in questions:
         ctx.conn.execute(
-            "INSERT INTO questions (store_id, text, names_area, created_at, active, source)"
-            " VALUES (?, ?, ?, ?, 1, ?)",
+            "INSERT INTO questions (store_id, text, names_area, created_at, active, source, kind)"
+            " VALUES (?, ?, ?, ?, 1, ?, 'core')",
             (ctx.store_id, q, int(names_area(q, cfg.areas)), now, source),
         )
     ctx.conn.execute("UPDATE stores SET question_hash = ? WHERE id = ?", (wanted_hash, ctx.store_id))
@@ -142,23 +221,74 @@ def step_write_questions(ctx: RunContext, fetch_site_text=None) -> dict:
     return {"action": "created", "source": source, "count": len(questions), "questions": questions}
 
 
+def _write_daily(ctx: RunContext, fetch_site_text) -> dict:
+    """New questions for today. A failure here never stops the run: the core questions still go out."""
+    cfg = ctx.store
+    today = _daily(ctx)
+    if today:
+        return {"action": "reused", "count": len(today)}
+    if ctx.work_provider is None:
+        return {"action": "skipped", "count": 0, "error": "no AI provider"}
+    avoid = recent_questions(ctx.conn, ctx.store_id, ctx.run_date, cfg.novelty_days)
+    try:
+        questions, dropped = generate_daily_questions(cfg, ctx.work_provider, fetch_site_text(cfg),
+                                                      avoid, cfg.daily_count)
+    except (ProviderError, RunFailed) as exc:
+        return {"action": "failed", "count": 0, "error": f"{type(exc).__name__}: {exc}"[:300]}
+    now = utc_now()
+    for q in questions:
+        ctx.conn.execute(
+            "INSERT INTO questions (store_id, text, names_area, created_at, active, source, kind, for_date)"
+            " VALUES (?, ?, ?, ?, 1, 'ai', 'daily', ?)",
+            (ctx.store_id, q, int(names_area(q, cfg.areas)), now, ctx.run_date),
+        )
+    ctx.conn.commit()
+    return {"action": "created", "count": len(questions), "questions": questions, "dropped": dropped[:10]}
+
+
+def recent_questions(conn, store_id: int, run_date: str, days: int) -> list[str]:
+    """Core questions plus daily questions written in the last `days` days, oldest first."""
+    rows = conn.execute(
+        """SELECT text FROM questions WHERE store_id = ? AND (
+               (kind = 'core' AND active = 1) OR
+               (kind = 'daily' AND for_date < ? AND for_date >= date(?, ?)))
+           ORDER BY id""",
+        (store_id, run_date, run_date, f"-{days} days"),
+    ).fetchall()
+    return [r["text"] for r in rows]
+
+
 def step_validate_questions(ctx: RunContext) -> dict:
-    """Step 2. Runs every day on the active list; fails the run loudly if invalid."""
-    rows = _active(ctx)
-    problems = validate_questions([r["text"] for r in rows], ctx.store.areas)
+    """Step 2. Runs every day on today's list; fails the run loudly if the core list is invalid."""
+    core = _core(ctx)
+    problems = validate_questions([r["text"] for r in core], ctx.store.areas)
     if problems:
         raise RunFailed("question list is invalid: " + "; ".join(problems))
+    rows = core + _daily(ctx)
+    # Today's daily questions were filtered when written; re-check them against the core list.
+    clash = [d["text"] for d in rows[len(core):] if any(near_duplicate(d["text"], c["text"]) for c in core)]
+    for text in clash:
+        ctx.conn.execute("UPDATE questions SET active = 0 WHERE store_id = ? AND kind = 'daily' AND for_date = ? AND text = ?",
+                         (ctx.store_id, ctx.run_date, text))
     for r in rows:  # names_area is decided by code, keep it in sync with the config areas
         flag = int(names_area(r["text"], ctx.store.areas))
         if flag != r["names_area"]:
             ctx.conn.execute("UPDATE questions SET names_area = ? WHERE id = ?", (flag, r["id"]))
     ctx.conn.commit()
-    rows = _active(ctx)
+    rows = _core(ctx) + _daily(ctx)
     ctx.data["_questions"] = rows
-    return {"count": len(rows), "naming_area": sum(r["names_area"] for r in rows)}
+    return {"count": len(rows), "core": len(core), "daily": len(rows) - len(core),
+            "naming_area": sum(r["names_area"] for r in rows), "removed_as_duplicate": len(clash)}
 
 
-def _active(ctx: RunContext):
+def _core(ctx: RunContext):
     return ctx.conn.execute(
-        "SELECT * FROM questions WHERE store_id = ? AND active = 1 ORDER BY id", (ctx.store_id,)
+        "SELECT * FROM questions WHERE store_id = ? AND active = 1 AND kind = 'core' ORDER BY id", (ctx.store_id,)
+    ).fetchall()
+
+
+def _daily(ctx: RunContext):
+    return ctx.conn.execute(
+        "SELECT * FROM questions WHERE store_id = ? AND active = 1 AND kind = 'daily' AND for_date = ? ORDER BY id",
+        (ctx.store_id, ctx.run_date),
     ).fetchall()

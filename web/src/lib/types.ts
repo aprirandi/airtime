@@ -25,6 +25,16 @@ export interface Run {
   error: string | null
   steps: Step[]
   quotes_verified: number
+  questions?: RunQuestion[]
+}
+
+export interface RunQuestion {
+  text: string
+  kind: "core" | "daily"
+  names_area: number
+  asked: number
+  counted: number | null
+  ours: number | null
 }
 
 export interface Competitor {
@@ -53,6 +63,10 @@ export interface Summary {
   no_area_mentions: number
   no_area_answers: number
   web_search_answers: number
+  core_mentions?: number
+  core_answers?: number
+  daily_mentions?: number
+  daily_answers?: number
   competitors: Competitor[]
   our_answer_ids: number[]
   text: string | null
@@ -80,6 +94,8 @@ export interface Store {
     work_model: string
     use_search: boolean
     attempts_per_day: number
+    daily_count?: number
+    daily_attempts?: number
     questions: string[]
   } | null
   series: Summary[]
@@ -156,6 +172,7 @@ export interface AnswerDetail {
   id: number
   question: string
   names_area: boolean
+  kind?: "core" | "daily"
   attempt: number
   asked_at: string
   provider: string

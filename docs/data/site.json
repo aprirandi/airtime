@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-24T01:36:31+00:00",
+ "generated_at": "2026-10-24T01:47:09+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
@@ -158,13 +158,12 @@
     "work_model": "gemini-3.5-flash-lite",
     "use_search": false,
     "attempts_per_day": 2,
+    "daily_count": 6,
+    "daily_attempts": 1,
     "questions": [
      "Best stationery shops in Melbourne",
      "Where can I buy greeting cards and wrapping paper in Melbourne?",
-     "Unique gift shops in Prahran or Brighton Melbourne",
-     "Best place to buy journals and notebooks in Melbourne",
-     "Birthday gift ideas under $30 in Melbourne",
-     "Online stationery store in Australia with fast shipping"
+     "Unique gift shops in Prahran or Brighton Melbourne"
     ],
     "provider": "gemini"
    },
@@ -212,6 +211,10 @@
      "text": "Handworks was named in 3 of 14 answers pasted from the ChatGPT, Gemini and Claude apps (4 of 18 asks got no answer). Milligram was named in 10 of 14. When the question named Prahran or Brighton, Handworks was named in 2 of 2 answers, against 1 of 12 for other questions.",
      "text_source": "manual",
      "note": "Manual run, 1 attempt per question in each of ChatGPT, Gemini and Claude apps. Totals only: the per-answer texts are not in the database yet, so these counts cannot be traced to quotes until the pasted answers are imported. Mixed providers, so not like-for-like with any single-provider series.",
+     "core_mentions": 0,
+     "core_answers": 0,
+     "daily_mentions": 0,
+     "daily_answers": 0,
      "label": "ChatGPT/Gemini/Claude (pasted from app)"
     },
     {
@@ -1326,6 +1329,10 @@
      "text": "Today, Gemini (API) recorded 14 total responses. Among these, 0 answers named Handworks, accounting for 0 of the total. Milligram appeared in 10 responses.",
      "text_source": "ai",
      "note": null,
+     "core_mentions": 0,
+     "core_answers": 0,
+     "daily_mentions": 0,
+     "daily_answers": 0,
      "label": "Gemini (API)"
     }
    ],
@@ -1561,7 +1568,57 @@
        "description_id": "Cek ulang: menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
       }
      ],
-     "quotes_verified": 164
+     "quotes_verified": 164,
+     "questions": [
+      {
+       "text": "Best stationery shops in Melbourne",
+       "kind": "core",
+       "names_area": 0,
+       "asked": 3,
+       "counted": 3,
+       "ours": 0
+      },
+      {
+       "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+       "kind": "core",
+       "names_area": 0,
+       "asked": 3,
+       "counted": 3,
+       "ours": 0
+      },
+      {
+       "text": "Unique gift shops in Prahran or Brighton Melbourne",
+       "kind": "core",
+       "names_area": 1,
+       "asked": 3,
+       "counted": 2,
+       "ours": 0
+      },
+      {
+       "text": "Best place to buy journals and notebooks in Melbourne",
+       "kind": "core",
+       "names_area": 0,
+       "asked": 3,
+       "counted": 2,
+       "ours": 0
+      },
+      {
+       "text": "Birthday gift ideas under $30 in Melbourne",
+       "kind": "core",
+       "names_area": 0,
+       "asked": 3,
+       "counted": 2,
+       "ours": 0
+      },
+      {
+       "text": "Online stationery store in Australia with fast shipping",
+       "kind": "core",
+       "names_area": 0,
+       "asked": 3,
+       "counted": 2,
+       "ours": 0
+      }
+     ]
     }
    ],
    "totals": {

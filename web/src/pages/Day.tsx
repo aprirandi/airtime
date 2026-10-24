@@ -37,6 +37,9 @@ function AnswerItem({ a, storeName }: { a: AnswerDetail; storeName: string }) {
           <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs font-normal">
             <span>#{a.id}</span>
             <span>{t("day.try", { n: a.attempt })}</span>
+            <Badge variant={a.kind === "daily" ? "default" : "outline"} className={a.kind === "daily" ? "bg-chart-1" : "font-normal"}>
+              {t(`day.kind.${a.kind ?? "core"}`)}
+            </Badge>
             <Badge variant={STATUS[a.status]}>{t(`day.status.${a.status}`)}</Badge>
             {a.status === "ok" &&
               (ours ? (

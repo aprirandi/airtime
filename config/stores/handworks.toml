@@ -4,6 +4,8 @@
 [store]
 name = "Handworks"
 domain = "handworks.com.au"
+city = "Melbourne"
+country = "Australia"
 areas = ["Prahran", "Brighton"]
 categories = ["stationery", "greeting cards", "wrapping paper", "journals", "notebooks", "gifts"]
 # Other spellings that count as our store when an answer names it.
@@ -15,24 +17,27 @@ aliases = ["Handworks Stationery", "Hand Works"]
 "kikki.K" = ["kikki K", "Kikki.K Melbourne"]
 
 [questions]
-# "fixed": use the list below (validated every run by step 2).
-# "generate": step 1 asks the AI for ~target_count questions on first run or when this file changes.
-# Handworks uses the 6 questions from the manual run of 14 Oct 2026 so results compare with that baseline.
+# Two kinds of questions are asked every day:
+#  - core: the same every day, so days can be compared. "fixed" uses the list below;
+#    "generate" has the AI write target_count of them once (and again when this file changes).
+#  - daily: daily_count new questions the AI writes each morning from this profile. Code rejects
+#    any that name our store or repeat a question from the last novelty_days days.
+# The 3 core questions come from the manual run of 14 Oct 2026 (one of them names an area).
 mode = "fixed"
-target_count = 6
+target_count = 3
 list = [
   "Best stationery shops in Melbourne",
   "Where can I buy greeting cards and wrapping paper in Melbourne?",
   "Unique gift shops in Prahran or Brighton Melbourne",
-  "Best place to buy journals and notebooks in Melbourne",
-  "Birthday gift ideas under $30 in Melbourne",
-  "Online stationery store in Australia with fast shipping",
 ]
+daily_count = 6
+novelty_days = 14
 
 [run]
-# 2, not 3: AI Studio showed Gemini 3.8 Flash's free tier allows only about 20 requests per day
-# (peak 23 on 24 Oct, bar full). 6 questions x 2 = 12 asks keeps a safe margin every day.
+# AI Studio showed Gemini 3.8 Flash's free tier allows only about 20 requests per day
+# (peak 23 on 24 Oct, bar full). 3 core x 2 tries + 6 daily x 1 try = 12 asks a day.
 attempts_per_day = 2
+daily_attempts = 1
 timezone = "Australia/Melbourne"
 
 [provider]

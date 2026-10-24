@@ -83,6 +83,7 @@ class AnswerFacts:
     ours: bool = False
     competitors: dict[str, str] = field(default_factory=dict)  # store_key -> display name
     used_search: bool = False
+    kind: str = "core"                # core (same every day) | daily (new today)
 
 
 @dataclass
@@ -102,6 +103,10 @@ class Counts:
     no_area_mentions: int
     no_area_answers: int
     web_search_answers: int
+    core_mentions: int = 0
+    core_answers: int = 0
+    daily_mentions: int = 0
+    daily_answers: int = 0
 
     @property
     def area_rate(self) -> float | None:
@@ -151,6 +156,10 @@ def count_answers(facts: list[AnswerFacts]) -> Counts:
         no_area_mentions=sum(f.ours for f in no_area),
         no_area_answers=len(no_area),
         web_search_answers=sum(f.used_search for f in ok),
+        core_mentions=sum(f.ours for f in ok if f.kind != "daily"),
+        core_answers=sum(f.kind != "daily" for f in ok),
+        daily_mentions=sum(f.ours for f in ok if f.kind == "daily"),
+        daily_answers=sum(f.kind == "daily" for f in ok),
     )
 
 
@@ -244,7 +253,7 @@ def _check(raw: str | None, text: str, store: StoreConfig) -> tuple[dict | None,
 def load_facts(conn, run_id: int) -> list[AnswerFacts]:
     """Read one run's answers and verified mentions back from the database."""
     rows = conn.execute(
-        """SELECT a.id, a.status, a.raw, q.names_area FROM answers a
+        """SELECT a.id, a.status, a.raw, q.names_area, q.kind FROM answers a
            JOIN questions q ON q.id = a.question_id WHERE a.run_id = ? ORDER BY a.id""", (run_id,)
     ).fetchall()
     facts = []
@@ -257,5 +266,6 @@ def load_facts(conn, run_id: int) -> list[AnswerFacts]:
             ours=any(m["is_ours"] for m in ms),
             competitors={m["store_key"]: m["store_name"] for m in ms if not m["is_ours"]},
             used_search=bool(isinstance(raw, dict) and raw.get("used_search")),
+            kind=r["kind"] or "core",
         ))
     return facts

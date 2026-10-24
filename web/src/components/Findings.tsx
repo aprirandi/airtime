@@ -287,3 +287,67 @@ export function WorkDiary({ store, onOpen }: { store: Store; onOpen: (runId: num
     </Card>
   )
 }
+
+/** The questions of one shift: the core ones (same every day) and the new ones written that day. */
+export function QuestionsToday({ store, latest }: { store: Store; latest: Summary }) {
+  const { t } = useI18n()
+  const run = store.runs.find((r) => r.id === latest.run_id)
+  const qs = run?.questions ?? []
+  if (!qs.length) return null
+  const core = qs.filter((q) => q.kind !== "daily")
+  const daily = qs.filter((q) => q.kind === "daily")
+  const group = (title: string, items: typeof qs, accent: boolean) => (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-xs font-medium">
+        <Badge variant={accent ? "default" : "outline"} className={cn(accent && "bg-chart-1")}>
+          {title}
+        </Badge>
+      </div>
+      <ul className="divide-y rounded-lg border">
+        {items.map((q) => {
+          const counted = q.counted ?? 0
+          const ours = q.ours ?? 0
+          return (
+            <li key={q.text} className="flex items-start gap-3 px-3 py-2 text-sm">
+              <span className="min-w-0 flex-1">{q.text}</span>
+              <span className="text-muted-foreground shrink-0 text-right text-xs">
+                {counted === 0 ? (
+                  t("qt.noAnswer")
+                ) : ours > 0 ? (
+                  <span className="text-chart-1 font-medium">{t("qt.named", { store: store.name })} · {t("qt.counts", { n: ours, d: counted })}</span>
+                ) : (
+                  <>
+                    {t("qt.notNamed")} · {t("qt.counts", { n: 0, d: counted })}
+                  </>
+                )}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("qt.title")}</CardTitle>
+        <CardDescription>{t("qt.sub", { core: core.length, daily: daily.length, d: fmtDate(latest.date) })}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {group(t("qt.core"), core, false)}
+        {daily.length ? group(t("qt.daily"), daily, true) : <p className="text-muted-foreground text-xs">{t("qt.none")}</p>}
+        {(latest.daily_answers ?? 0) > 0 && (
+          <p className="text-muted-foreground text-xs">
+            {t("qt.split", {
+              store: store.name,
+              cn: latest.core_mentions ?? 0,
+              cd: latest.core_answers ?? 0,
+              dn: latest.daily_mentions ?? 0,
+              dd: latest.daily_answers ?? 0,
+            })}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  )
+}

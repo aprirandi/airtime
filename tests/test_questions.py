@@ -10,6 +10,13 @@ def test_handworks_seed_questions_are_valid(cfg):
     assert validate_questions(list(cfg.questions), cfg.areas) == []
 
 
+def test_live_config_core_questions_are_valid():
+    from airtime.config import load_store_config
+    live = load_store_config("handworks")
+    assert validate_questions(list(live.questions), live.areas) == []
+    assert live.daily_count == 6 and live.attempts_per_day * len(live.questions) + live.daily_count * live.daily_attempts <= 14
+
+
 def test_seed_area_flags(cfg):
     flags = [names_area(q, cfg.areas) for q in cfg.questions]
     assert flags == [False, False, True, False, False, False]

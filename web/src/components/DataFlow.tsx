@@ -113,6 +113,8 @@ function buildNodes(store: Store, d: RunDetail, t: T, comparison: string[]): Nod
   const setup = store.setup
   const questions = [...new Set(a.map((x) => x.question))]
   const areaQ = [...new Set(a.filter((x) => x.names_area).map((x) => x.question))].length
+  const coreQ = [...new Set(a.filter((x) => x.kind !== "daily").map((x) => x.question))]
+  const dailyQ = [...new Set(a.filter((x) => x.kind === "daily").map((x) => x.question))]
   const answered = a.filter((x) => x.status !== "no_answer")
   const mentions = a.reduce((n, x) => n + x.mentions.length, 0)
   const words = answered.length ? Math.round(answered.reduce((n, x) => n + x.text.split(/\s+/).length, 0) / answered.length) : 0
@@ -128,8 +130,11 @@ function buildNodes(store: Store, d: RunDetail, t: T, comparison: string[]): Nod
     },
     {
       id: "questions", icon: ListChecks, kind: "AI", title: t("flow.q.title"), who: "Visibility Agent",
-      lines: [t("flow.q.l1", { n: questions.length, a: areaQ, areas: store.areas.join(" / ") }),
-        t("flow.q.l2", { q: questions[0] ?? "" }), t("flow.q.l3")],
+      lines: dailyQ.length
+        ? [t("flow.q.l1b", { core: coreQ.length, daily: dailyQ.length, a: areaQ, areas: store.areas.join(" / ") }),
+            t("flow.q.l2", { q: dailyQ[0] }), t("flow.q.l3b")]
+        : [t("flow.q.l1", { n: questions.length, a: areaQ, areas: store.areas.join(" / ") }),
+            t("flow.q.l2", { q: questions[0] ?? "" }), t("flow.q.l3")],
       steps: ["write_questions", "validate_questions"], source: "1–2",
     },
     {
