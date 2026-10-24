@@ -5,7 +5,7 @@
  "run_date": "2026-10-25",
  "run_id": 2,
  "started_at": "2026-10-24T22:28:27+00:00",
- "updated_at": "2026-10-24T22:29:17+00:00",
+ "updated_at": "2026-10-24T22:34:40+00:00",
  "steps": [
   {
    "step": 1,
@@ -66,12 +66,12 @@
  ],
  "current": "ask_questions",
  "progress": {
-  "done": 1,
+  "done": 5,
   "total": 12,
   "unit": "questions asked",
-  "ok": 1,
+  "ok": 5,
   "no_answer": 0
  },
- "last_event": "Asked \"Best stationery shops in Melbourne\" (try 1): answered.",
- "last_event_id": "Bertanya \"Best stationery shops in Melbourne\" (percobaan 1): dijawab."
+ "last_event": "Asked \"I need a birthday card and nice wrapping paper delivered in Melbourne by tomorrow\" (try 1): answered.",
+ "last_event_id": "Bertanya \"I need a birthday card and nice wrapping paper delivered in Melbourne by tomorrow\" (percobaan 1): dijawab."
 }
