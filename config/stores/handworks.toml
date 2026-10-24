@@ -58,7 +58,9 @@ timeout_seconds = 300
 # Free-tier limits are not published in a fixed place: check AI Studio (Dashboard -> Rate limits)
 # for both models and keep these well under the requests-per-minute and per-day figures shown.
 min_seconds_between_calls = 7.0
-max_ask_calls_per_run = 14      # hard cap: 12 asks + 2 retries, under Gemini 3.8 Flash's ~20/day
+# Hard cap: 12 asks + 6 retries, still under Gemini 3.8 Flash's ~20/day. On 25 Oct Gemini answered
+# "high demand" (HTTP 503) 5 times; each retry worked but the old cap of 14 cut the last 3 asks.
+max_ask_calls_per_run = 18
 max_work_calls_per_run = 40     # 12 extractions + up to 12 re-tries + 2 summary (3.5 Flash Lite has far more headroom)
 max_retries = 4
 # Waits 30s, 60s, 120s, 240s. Short waits used up the call budget in the first live run.

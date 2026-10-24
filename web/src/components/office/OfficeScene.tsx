@@ -3,7 +3,7 @@ import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
 import { boxFaces, GRID, iso, pct, pts, tile, VIEW, WALL_H } from "./iso"
-import { FUTURE_AGENTS, STATIONS, type StationId } from "./stations"
+import { AGENTS, FUTURE_AGENTS, STATIONS, type AgentId, type StationId } from "./stations"
 import { WALK_MS, type Beat } from "./useShiftReplay"
 
 type Tone = "wood" | "metal"
@@ -104,7 +104,7 @@ function Plant({ x, y }: { x: number; y: number }) {
   )
 }
 
-function Robot({ at, walking, working }: { at: [number, number]; walking: boolean; working: boolean }) {
+function Robot({ at, walking, working, color }: { at: [number, number]; walking: boolean; working: boolean; color: string }) {
   const p = iso(at[0], at[1])
   return (
     <g
@@ -115,13 +115,13 @@ function Robot({ at, walking, working }: { at: [number, number]; walking: boolea
       <rect className="leg-a" x={-6} y={-8} width={4} height={8} rx={2} fill="var(--robot-line)" />
       <rect className="leg-b" x={2} y={-8} width={4} height={8} rx={2} fill="var(--robot-line)" />
       <g className="robot-body">
-        <rect x={-9} y={-22} width={18} height={15} rx={5} fill="var(--chart-1)" />
+        <rect x={-9} y={-22} width={18} height={15} rx={5} fill={color} />
         <rect x={-4} y={-18} width={8} height={5} rx={1.5} fill="#ffffff" opacity={0.85} />
         <rect x={-10} y={-38} width={20} height={16} rx={6} fill="var(--robot-head)" stroke="var(--robot-line)" strokeWidth={1.5} />
         <circle cx={-4} cy={-30} r={2} fill="var(--robot-line)" />
         <circle cx={4} cy={-30} r={2} fill="var(--robot-line)" />
         <line x1={0} y1={-38} x2={0} y2={-44} stroke="var(--robot-line)" strokeWidth={1.5} />
-        <circle className="antenna-light" cx={0} cy={-46} r={2.6} fill={working ? "var(--chart-2)" : "var(--chart-1)"} />
+        <circle className="antenna-light" cx={0} cy={-46} r={2.6} fill={working ? "var(--chart-2)" : color} />
         {working && (
           <g className="work-spark">
             <text x={12} y={-40} fontSize={10} fill="var(--chart-2)">✦</text>
@@ -149,18 +149,33 @@ function StationLabel({ id, active }: { id: StationId; active: boolean }) {
   )
 }
 
-export function OfficeScene({ beat, phase, done, agentName }: { beat: Beat | undefined; phase: "walk" | "work"; done: boolean; agentName: string }) {
+const COLOR: Record<AgentId, string> = {
+  asker: "var(--agent-asker)",
+  analyst: "var(--agent-analyst)",
+  master: "var(--agent-master)",
+}
+
+export function OfficeScene({ beat, positions, phase, done, agentName }: {
+  beat: Beat | undefined
+  positions: Record<AgentId, [number, number]>
+  phase: "walk" | "work"
+  done: boolean
+  agentName: string
+}) {
   const { t } = useI18n()
   const station = beat?.station ?? "lounge"
-  const at = STATIONS[station].stand
+  const active: AgentId | null = beat && beat.agent !== "all" ? beat.agent : null
   const working = phase === "work" && !done
-  const walking = phase === "walk"
+  const speaker = active ?? "asker"
+  const at = positions[speaker]
   const head = iso(at[0], at[1], 52)
   const failed = beat?.step?.status === "failed"
+  // Draw back to front so a robot nearer the viewer covers one behind it.
+  const order = [...AGENTS].sort((a, b) => positions[a][0] + positions[a][1] - (positions[b][0] + positions[b][1]))
 
   return (
     <div className="relative w-full select-none" style={{ aspectRatio: `${VIEW.w} / ${VIEW.h}` }}>
-      <svg viewBox={`0 0 ${VIEW.w} ${VIEW.h}`} className="absolute inset-0 h-full w-full" role="img" aria-label={`${agentName} at the ${STATIONS[station].label}`}>
+      <svg viewBox={`0 0 ${VIEW.w} ${VIEW.h}`} className="absolute inset-0 h-full w-full" role="img" aria-label={`${agentName}: ${STATIONS[station].label}`}>
         <Walls />
         <Floor active={phase === "work" ? station : null} />
         {/* back row */}
@@ -179,14 +194,22 @@ export function OfficeScene({ beat, phase, done, agentName }: { beat: Beat | und
         {/* lounge */}
         <Box x={0.3} y={6.2} w={0.7} d={1.6} h={16} tone="metal" />
         <Box x={1.6} y={6.6} w={0.8} d={0.8} h={9} />
-        {/* future agents' desks */}
+        {/* desks of the agents still to be built */}
         {FUTURE_AGENTS.map((a) => (
           <Desk key={a.name} x={a.desk[0]} y={a.desk[1]} w={1.2} d={0.6} empty />
         ))}
         {/* publish: printer */}
         <Box x={11.1} y={6.2} w={0.7} d={0.7} h={18} tone="metal" />
         <Box x={11.2} y={6.3} w={0.5} d={0.4} h={3} z={18} />
-        <Robot at={at} walking={walking} working={working} />
+        {order.map((id) => (
+          <Robot
+            key={id}
+            at={positions[id]}
+            color={COLOR[id]}
+            walking={phase === "walk" && (active === id || beat?.agent === "all")}
+            working={working && active === id}
+          />
+        ))}
       </svg>
 
       {(Object.keys(STATIONS) as StationId[]).map((id) => (
@@ -201,12 +224,15 @@ export function OfficeScene({ beat, phase, done, agentName }: { beat: Beat | und
           {t("hq.soon", { name: a.name })}
         </div>
       ))}
-      <div
-        className="text-muted-foreground bg-background/80 pointer-events-none absolute hidden sm:block -translate-x-1/2 translate-y-1 rounded-md border border-dashed px-1.5 py-0.5 text-[9px] whitespace-nowrap sm:text-[10px]"
-        style={pct(iso(11.45, 4.4))}
-      >
-        {t("hq.soon", { name: "Master check" })}
-      </div>
+      {AGENTS.map((id) => (
+        <div
+          key={id}
+          className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-full px-1.5 py-px text-[9px] font-semibold text-white shadow-xs transition-[left,top] duration-[1400ms] ease-in-out sm:text-[10px]"
+          style={{ ...pct(iso(positions[id][0], positions[id][1], 50)), background: COLOR[id] }}
+        >
+          {t(`agent.${id}`)}
+        </div>
+      ))}
 
       {beat && phase === "work" && (
         <div
@@ -215,13 +241,20 @@ export function OfficeScene({ beat, phase, done, agentName }: { beat: Beat | und
             "animate-in fade-in-0 zoom-in-95 bg-popover text-popover-foreground absolute z-10 w-[min(240px,46%)] -translate-x-1/2 -translate-y-full rounded-lg border p-2.5 text-xs leading-snug shadow-md",
             failed && "border-destructive"
           )}
-          style={pct(head)}
+          style={{ ...pct(head), marginTop: -14 }}
         >
-          {beat.step && (
-            <Badge variant={beat.step.kind === "AI" ? "default" : "secondary"} className="mb-1 h-4 px-1.5 text-[10px]">
-              {beat.step.kind === "AI" ? t("common.aiStep") : t("common.codeStep")}
-            </Badge>
-          )}
+          <div className="mb-1 flex flex-wrap items-center gap-1">
+            {active && (
+              <span className="rounded px-1.5 text-[10px] font-semibold text-white" style={{ background: COLOR[active] }}>
+                {t(`agent.${active}`)}
+              </span>
+            )}
+            {beat.step && (
+              <Badge variant={beat.step.kind === "AI" ? "default" : "secondary"} className="h-4 px-1.5 text-[10px]">
+                {beat.step.kind === "AI" ? t("common.aiStep") : t("common.codeStep")}
+              </Badge>
+            )}
+          </div>
           <p>{beat.text}</p>
           <span className="bg-popover absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 border-r border-b" />
         </div>

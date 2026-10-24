@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react"
 import { Bot, Check, CircleAlert, Pause, Play, RotateCcw, ArrowRight } from "lucide-react"
 
 import { OfficeScene } from "@/components/office/OfficeScene"
-import { FUTURE_AGENTS, stationFor } from "@/components/office/stations"
-import { beatsFor, useShiftReplay, type Beat } from "@/components/office/useShiftReplay"
+import { HOME, STATIONS, stationFor, type AgentId } from "@/components/office/stations"
+import { beatsFor, positionsAt, useShiftReplay, type Beat } from "@/components/office/useShiftReplay"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -61,15 +61,29 @@ function ShiftStatus({ site, latest, live }: { site: Site; latest: Run | undefin
 }
 
 function liveBeat(live: Live, lang: "en" | "id"): Beat {
-  const cur = live.steps.find((s) => s.name === live.current)
   const text = (lang === "id" && live.last_event_id) || live.last_event
+  const agent = (live.agent_now as AgentId) || "asker"
+  if (agent === "master") return { station: "master", agent, step: null, text }
+  const cur = live.steps.find((s) => s.name === live.current)
   const step = cur ? ({ ...cur, description: text, status: "ok" } as Step) : null
-  return { station: step ? stationFor(step) : "board", step, text }
+  return { station: step ? stationFor(step) : "board", agent, step, text }
+}
+
+function livePositions(beat: Beat): Record<AgentId, [number, number]> {
+  const pos = { ...HOME }
+  if (beat.agent !== "all") pos[beat.agent] = STATIONS[beat.station].stand
+  return pos
+}
+
+const AGENT_BADGE: Record<string, string> = {
+  asker: "bg-agent-asker text-white",
+  analyst: "bg-agent-analyst text-white",
+  master: "bg-agent-master text-white",
 }
 
 export function AgentHQ({ site, store, live }: { site: Site; store: Store; live: Live | null }) {
   const { t, lang, pick } = useI18n()
-  const latest = store.runs.find((r) => r.agent === "visibility") ?? store.runs[0]
+  const latest = store.runs.find((r) => r.kind === "shift") ?? store.runs[0]
   const beats = useMemo(
     () => (latest ? beatsFor(latest.steps, store.name, latest.status === "failed", t, lang) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,9 +136,9 @@ export function AgentHQ({ site, store, live }: { site: Site; store: Store; live:
         {latest ? (
           <div className="mx-auto max-w-[960px]">
             {isLive && live ? (
-              <OfficeScene beat={liveBeat(live, lang)} phase="work" done={false} agentName={site.agent.name} />
+              <OfficeScene beat={liveBeat(live, lang)} positions={livePositions(liveBeat(live, lang))} phase="work" done={false} agentName={site.agent.name} />
             ) : (
-              <OfficeScene beat={replay.beat} phase={replay.phase} done={replay.done} agentName={site.agent.name} />
+              <OfficeScene beat={replay.beat} positions={positionsAt(beats, replay.index)} phase={replay.phase} done={replay.done} agentName={site.agent.name} />
             )}
           </div>
         ) : (
@@ -179,17 +193,29 @@ export function AgentHQ({ site, store, live }: { site: Site; store: Store; live:
 
       <div className="flex flex-wrap items-center gap-1.5 border-t px-5 py-3 text-xs">
         <span className="text-muted-foreground mr-1">{t("hq.team")}</span>
-        <Badge variant="default" className="gap-1">
-          <Bot /> {t("hq.onDuty")}
-        </Badge>
-        {[...FUTURE_AGENTS.map((a) => a.name), "Master check"].map((n) => (
-          <span key={n} className="text-muted-foreground flex items-center gap-1.5">
-            <ArrowRight className="size-3" />
-            <Badge variant="outline" className="border-dashed font-normal">
-              {t("hq.planned", { name: n })}
-            </Badge>
-          </span>
-        ))}
+        {site.team
+          .filter((m) => m.id !== "master")
+          .map((m, i) => (
+            <span key={m.id} className="text-muted-foreground flex items-center gap-1.5">
+              {i > 0 && <ArrowRight className="size-3" />}
+              {m.status === "active" ? (
+                <Badge className={cn("gap-1 border-transparent", AGENT_BADGE[m.id])}>
+                  <Bot /> {t("hq.onDuty", { name: m.name })}
+                </Badge>
+              ) : m.status === "human" ? (
+                <Badge variant="outline" className="border-warning text-warning font-normal">
+                  {t("hq.human", { name: m.name })}
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="border-dashed font-normal">
+                  {t("hq.planned", { name: m.name })}
+                </Badge>
+              )}
+            </span>
+          ))}
+        <span className="text-muted-foreground ml-1 flex items-center gap-1.5">
+          · <Badge className={cn("border-transparent", AGENT_BADGE.master)}>{t("hq.masterGate")}</Badge>
+        </span>
       </div>
     </Card>
   )

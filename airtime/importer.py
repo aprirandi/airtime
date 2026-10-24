@@ -18,7 +18,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from airtime.agents.visibility.agent import ImportedAnswersAgent
+from airtime.agents.visibility.agent import import_flow
 from airtime.agents.visibility.questions import names_area
 from airtime.core.agent import RunContext, RunFailed
 from airtime.db import find_or_add_question
@@ -101,7 +101,7 @@ def import_file(path: Path, make_ctx) -> list[RunContext]:
     done = []
     for (provider, channel, date), group in sorted(group_rows(rows).items()):
         ctx = make_ctx(date)
-        ImportedAnswersAgent(make_loader(group), provider, channel).run(ctx)
+        import_flow(make_loader(group), provider, channel).run(ctx)
         done.append(ctx)
     return done
 

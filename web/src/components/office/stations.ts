@@ -1,6 +1,8 @@
 import type { Step } from "@/lib/types"
 
-export type StationId = "board" | "gemini" | "reading" | "check" | "archive" | "writing" | "publish" | "lounge"
+export type StationId = "board" | "gemini" | "reading" | "check" | "archive" | "writing" | "publish" | "master" | "lounge"
+export type AgentId = "asker" | "analyst" | "master"
+export const AGENTS: AgentId[] = ["asker", "analyst", "master"]
 
 export interface Station {
   id: StationId
@@ -17,6 +19,7 @@ export const STATIONS: Record<StationId, Station> = {
   check: { id: "check", label: "Fact-check desk", stand: [5.5, 5.3] },
   writing: { id: "writing", label: "Writing desk", stand: [9, 5.3] },
   publish: { id: "publish", label: "Publish report", stand: [10.6, 6.9] },
+  master: { id: "master", label: "Master check", stand: [10.5, 4.8] },
   lounge: { id: "lounge", label: "Lounge", stand: [2.9, 7.1] },
 }
 
@@ -32,10 +35,35 @@ const STEP_STATION: Record<string, StationId> = {
 }
 
 export function stationFor(step: Step): StationId {
+  if (step.name.startsWith("master_")) return "master"
   return STEP_STATION[step.name.replace(/^recheck_/, "")] ?? "board"
 }
 
-/** The agents planned after this one. They get an empty desk until they are built. */
+const STEP_AGENT: Record<string, AgentId> = {
+  write_questions: "asker", validate_questions: "asker", ask_questions: "asker", import_answers: "asker",
+  extract_mentions: "analyst", verify_and_count: "analyst", compare_previous: "analyst", write_summary: "analyst",
+}
+
+/** Which agent did a step (old runs have no agent field, so it is inferred from the step). */
+export function agentFor(step: Step): AgentId {
+  if (step.agent === "asker" || step.agent === "analyst" || step.agent === "master") return step.agent
+  if (step.name.startsWith("master_")) return "master"
+  return STEP_AGENT[step.name.replace(/^recheck_/, "")] ?? "analyst"
+}
+
+/** Where each agent waits when it is not working, and where it rests after the shift. */
+export const HOME: Record<AgentId, [number, number]> = {
+  asker: [2.6, 1.5],
+  analyst: [9.5, 2.5],
+  master: [10.5, 4.8],
+}
+export const LOUNGE: Record<AgentId, [number, number]> = {
+  asker: [2.9, 7.1],
+  analyst: [2.6, 6.0],
+  master: [3.3, 7.6],
+}
+
+/** The agents still to be built. They get an empty desk until then. */
 export const FUTURE_AGENTS = [
   { name: "Auditor", job: "Audits the store's site", desk: [3.9, 6.75] as [number, number] },
   { name: "Planner", job: "Plans what to change", desk: [5.5, 6.75] as [number, number] },

@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 
 from airtime import db
 from airtime.config import REPO_ROOT, load_store_config
-from airtime.core.agent import Flow, RunContext, RunFailed
+from airtime.core.agent import RunContext, RunFailed
 from airtime.providers.base import ProviderError
 
 SEED_DIR = REPO_ROOT / "data" / "seed"
@@ -59,7 +59,7 @@ def cmd_plan(args) -> int:
 
 
 def cmd_run(args) -> int:
-    from airtime.agents.visibility.agent import VisibilityAgent
+    from airtime.agents.visibility.agent import shift_flow
     from airtime.export import export_site
     cfg = load_store_config(args.store)
     conn = db.connect(args.db)
@@ -69,7 +69,7 @@ def cmd_run(args) -> int:
         ctx = _context(conn, cfg, args.date or _today(cfg.timezone))
         ctx.progress = LiveWriter(DOCS_DIR / "data" / "live.json", agent_name=AGENT["name"],
                                   store_slug=cfg.slug, run_date=ctx.run_date)
-        Flow([VisibilityAgent()]).run(ctx)
+        shift_flow().run(ctx)
     except (RunFailed, ProviderError) as exc:
         print(f"RUN FAILED: {exc}", file=sys.stderr)
         export_site(conn)

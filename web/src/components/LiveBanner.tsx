@@ -48,6 +48,11 @@ export function LiveBanner({ live, site, checkedAt }: { live: Live | null; site:
             <Badge variant="success" className="gap-1.5">
               <span className="bg-success size-1.5 animate-pulse rounded-full" /> {t("live.on")}
             </Badge>
+            {live.agent_now && (
+              <span className={`rounded px-1.5 py-px text-[11px] font-semibold text-white bg-agent-${live.agent_now}`}>
+                {t(`agent.${live.agent_now}`)}
+              </span>
+            )}
             <span className="text-sm font-medium">
               {t("live.step", {
                 n: current?.step ?? done + 1,

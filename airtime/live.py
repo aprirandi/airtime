@@ -59,16 +59,25 @@ class LiveWriter:
         kind = event.get("type")
         if kind == "run_start":
             s["run_id"] = event.get("run_id")
+            s["agents"] = event.get("agents", [])
             s["steps"] = [{**st, "title": STEP_TITLES.get(st["name"], st["name"]),
                            "title_id": STEP_TITLES_ID.get(st["name"], st["name"]), "status": "todo"}
                           for st in event.get("steps", [])]
+        elif kind == "agent_start":
+            s["agent_now"] = event.get("agent")
         elif kind == "step_start":
-            name = event["entry"]["name"]
-            self._set_step(name, "working")
-            s["current"] = name
-            s["progress"] = None
-            s["last_event"] = STEP_TITLES.get(name, name) + "."
-            s["last_event_id"] = STEP_TITLES_ID.get(name, name) + "."
+            entry = event["entry"]
+            name = entry["name"]
+            s["agent_now"] = entry.get("agent", s.get("agent_now"))
+            if name.startswith("master_"):
+                s["last_event"] = f"Master is checking the {entry.get('checks')}'s work."
+                s["last_event_id"] = f"Master sedang mengecek hasil kerja {entry.get('checks')}."
+            else:
+                self._set_step(name, "working")
+                s["current"] = name
+                s["progress"] = None
+                s["last_event"] = STEP_TITLES.get(name, name) + "."
+                s["last_event_id"] = STEP_TITLES_ID.get(name, name) + "."
         elif kind == "step_done":
             entry = event["entry"]
             self._set_step(entry["name"], "done" if entry.get("status") == "ok" else "failed")

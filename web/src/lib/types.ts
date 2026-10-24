@@ -3,8 +3,9 @@
 export type StepKind = "AI" | "CODE"
 
 export interface Step {
-  step: number
+  step: number | string
   name: string
+  agent?: string
   kind: StepKind
   status: "ok" | "failed" | string
   started_at?: string
@@ -18,6 +19,7 @@ export interface Step {
 export interface Run {
   id: number
   agent: string
+  kind?: "shift" | "import"
   run_date: string
   started_at: string
   finished_at: string | null
@@ -116,7 +118,8 @@ export interface TeamMember {
   name: string
   title: string
   title_id?: string
-  status: "active" | "planned"
+  status: "active" | "planned" | "human"
+  steps?: number[]
   job: string
   job_id?: string
   inputs: string[]
@@ -153,6 +156,8 @@ export interface Live {
   steps: LiveStep[]
   last_event: string
   last_event_id?: string
+  agent_now?: string
+  agents?: string[]
   last_run_id?: number | null
   last_run_status?: string | null
   last_finished_at?: string | null

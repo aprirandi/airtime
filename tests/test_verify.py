@@ -22,6 +22,13 @@ def test_quote_ignores_markdown_curly_quotes_and_spacing():
     assert quote_in_text("1. Milligram - a stylish  stationery chain", TEXT)
 
 
+def test_quote_ignores_markdown_links():
+    # Real Gemini answer, 25 Oct 2026: the shop's site is written as a markdown link.
+    text = "*   **Daily Blooms ([dailyblooms.com.au](https://dailyblooms.com.au)):**\n    *   They deliver"
+    assert quote_in_text("Daily Blooms (dailyblooms.com.au):", text)
+    assert not quote_in_text("Daily Blooms (https://dailyblooms.com.au):", text)
+
+
 def test_paraphrased_quote_fails():
     assert not quote_in_text("Handworks has a great range of cards", TEXT)
 
