@@ -99,6 +99,22 @@ def cmd_report(args) -> int:
     return 0
 
 
+def cmd_recheck(args) -> int:
+    from airtime.agents.visibility.recheck import recheck_run
+    from airtime.report import build_site
+    cfg = load_store_config(args.store)
+    conn = db.connect(args.db)
+    try:
+        ctx = _context(conn, cfg, "", ask=False)
+        result = recheck_run(ctx, args.run_id)
+    except (RunFailed, ProviderError) as exc:
+        print(f"RECHECK FAILED: {exc}", file=sys.stderr)
+        return 2
+    print(result)
+    build_site(conn)
+    return 0
+
+
 def cmd_compare(args) -> int:
     from airtime.channels import compare_sources, render_html, render_markdown
     from airtime.report import DOCS_DIR, build_site
@@ -140,6 +156,10 @@ def main(argv: list[str] | None = None) -> int:
     s.set_defaults(fn=cmd_import)
     s = sub.add_parser("report", help="rebuild the static report in docs/")
     s.set_defaults(fn=cmd_report)
+    s = sub.add_parser("recheck", help="re-run steps 4-7 on a run's needs_review answers")
+    s.add_argument("--store", required=True)
+    s.add_argument("--run-id", type=int, required=True)
+    s.set_defaults(fn=cmd_recheck)
     s = sub.add_parser("compare", help="compare two sources, e.g. gemini:api vs gemini:app_pasted")
     s.add_argument("--store", required=True)
     s.add_argument("--a", default="gemini:api")

@@ -160,3 +160,30 @@ def test_seed_baseline(conn, cfg):
     assert (r["top_competitor"], r["top_competitor_mentions"]) == ("Milligram", 10)
     from airtime.agents.visibility.summary import check_summary, summary_facts
     assert check_summary(r["text"], summary_facts(dict(r), None, "Handworks", cfg.areas)) == []
+
+
+def test_recheck_reopens_needs_review_answers(conn, cfg, fake_work):
+    from airtime.agents.visibility.recheck import recheck_run
+    broken = {"on": True}
+
+    def extractor(prompt, schema):
+        out = json.loads(fake_extractor(prompt, schema))
+        if broken["on"] and "Notemaker" in prompt:
+            for st in out["stores"]:
+                st["quote"] = "not in the answer"
+        return json.dumps(out)
+
+    ask = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
+    work = FakeProvider(complete_responder=extractor, sleep=lambda s: None)
+    ctx = make_ctx(conn, cfg, ask=ask, work=work)
+    Flow([VisibilityAgent()]).run(ctx)
+    assert conn.execute("SELECT needs_review FROM daily_summary").fetchone()[0] == 3
+
+    broken["on"] = False  # e.g. the faulty rule or extraction was fixed
+    result = recheck_run(make_ctx(conn, cfg, work=work), ctx.run_id)
+    assert result["rechecked"] == 3 and result["needs_review"] == 0
+    s = conn.execute("SELECT * FROM daily_summary").fetchone()
+    assert (s["needs_review"], s["total_answers"], s["run_id"]) == (0, 15, ctx.run_id)
+    steps = json.loads(conn.execute("SELECT steps FROM runs").fetchone()[0])
+    assert [x["name"] for x in steps][-4:] == ["recheck_extract_mentions", "recheck_verify_and_count",
+                                               "recheck_compare_previous", "recheck_write_summary"]

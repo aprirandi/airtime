@@ -59,6 +59,7 @@ python -m airtime run --store handworks         # one daily run, then rebuilds d
 python -m airtime import --store handworks data/seed/my_pasted_answers.csv
 python -m airtime compare --store handworks --a gemini:api --b gemini:app_pasted
 python -m airtime report                        # rebuild docs/ only
+python -m airtime recheck --store handworks --run-id 1   # re-check needs_review answers
 pip install pytest && python -m pytest -q
 ```
 
