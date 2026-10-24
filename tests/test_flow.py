@@ -125,7 +125,7 @@ def test_questions_reused_and_second_day_compared(conn, cfg, fake_work):
     ask2 = FakeProvider(ask_responder=lambda q: ANSWERS[q], sleep=lambda s: None)
     ctx = make_ctx(conn, cfg, "2026-10-21", ask=ask2, work=fake_work)
     Flow([VisibilityAgent()]).run(ctx)
-    assert ctx.data["write_questions"]["action"] == "reused"
+    assert ctx.data["write_questions"]["core"]["action"] == "reused"
     assert conn.execute("SELECT COUNT(*) FROM questions").fetchone()[0] == 6
     lines = ctx.data["compare_previous"]["lines"]
     assert lines[0] == "Compared with the previous run on 2026-10-20:" and "no change" in lines[1]

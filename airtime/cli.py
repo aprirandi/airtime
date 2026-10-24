@@ -45,12 +45,14 @@ def cmd_plan(args) -> int:
     cfg = load_store_config(args.store)
     p = cfg.provider
     n_q = len(cfg.questions) if cfg.question_mode == "fixed" else cfg.target_question_count
-    asks = n_q * cfg.attempts_per_day
-    print(f"{cfg.name}: {n_q} questions x {cfg.attempts_per_day} attempts = {asks} asks on {p.ask_model} "
-          f"(budget {p.max_ask_calls_per_run})")
-    print(f"work calls on {p.work_model}: {asks} extractions + up to {asks} re-tries + up to 2 summary"
-          f"{' + 1 question writing' if cfg.question_mode == 'generate' else ''} "
-          f"(budget {p.max_work_calls_per_run})")
+    core = n_q * cfg.attempts_per_day
+    daily = cfg.daily_count * cfg.daily_attempts
+    asks = core + daily
+    print(f"{cfg.name}: {n_q} core questions x {cfg.attempts_per_day} tries = {core}, plus "
+          f"{cfg.daily_count} new questions a day x {cfg.daily_attempts} = {daily}: "
+          f"{asks} asks on {p.ask_model} (budget {p.max_ask_calls_per_run})")
+    print(f"work calls on {p.work_model}: up to 2 to write today's questions + {asks} extractions + "
+          f"up to {asks} re-tries + up to 2 summary (budget {p.max_work_calls_per_run})")
     print(f"web search grounding: {'on' if p.use_search else 'off'}; "
           f"min {p.min_seconds_between_calls}s between calls")
     return 0 if asks <= p.max_ask_calls_per_run else 1

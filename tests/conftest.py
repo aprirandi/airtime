@@ -9,13 +9,23 @@ from airtime.config import load_store_config
 from airtime.core.agent import RunContext
 from airtime.providers.fake import FakeProvider
 
+# The 6 questions of the 14 Oct 2026 manual run; most tests use them with no daily questions.
+BASELINE_QUESTIONS = (
+    "Best stationery shops in Melbourne",
+    "Where can I buy greeting cards and wrapping paper in Melbourne?",
+    "Unique gift shops in Prahran or Brighton Melbourne",
+    "Best place to buy journals and notebooks in Melbourne",
+    "Birthday gift ideas under $30 in Melbourne",
+    "Online stationery store in Australia with fast shipping",
+)
+
 KNOWN_STORES = ["Handworks", "Milligram", "kikki.K", "Notemaker", "Officeworks"]
 
 
 @pytest.fixture
 def cfg():
     # Pinned to 3 attempts so tests do not depend on the live quota setting in handworks.toml.
-    return replace(load_store_config("handworks"), attempts_per_day=3)
+    return replace(load_store_config("handworks"), attempts_per_day=3, daily_count=0, questions=BASELINE_QUESTIONS)
 
 
 @pytest.fixture

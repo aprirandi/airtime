@@ -112,7 +112,26 @@ def connect(path: Path | str = DEFAULT_DB_PATH) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(SCHEMA)
+    _migrate(conn)
     return conn
+
+
+# Columns added after the first release. SQLite cannot add them in CREATE TABLE IF NOT EXISTS.
+MIGRATIONS = {
+    "questions": [("kind", "TEXT NOT NULL DEFAULT 'core'"),   # core (same every day) | daily (new each day)
+                  ("for_date", "TEXT")],                       # run date a daily question was written for
+    "daily_summary": [("core_mentions", "INTEGER NOT NULL DEFAULT 0"), ("core_answers", "INTEGER NOT NULL DEFAULT 0"),
+                      ("daily_mentions", "INTEGER NOT NULL DEFAULT 0"), ("daily_answers", "INTEGER NOT NULL DEFAULT 0")],
+}
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    for table, cols in MIGRATIONS.items():
+        have = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
+        for name, decl in cols:
+            if name not in have:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
+    conn.commit()
 
 
 def upsert_store(conn: sqlite3.Connection, cfg: StoreConfig) -> int:
