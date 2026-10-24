@@ -1,0 +1,54 @@
+import json
+import re
+
+import pytest
+
+from airtime import db
+from airtime.config import load_store_config
+from airtime.core.agent import RunContext
+from airtime.providers.fake import FakeProvider
+
+KNOWN_STORES = ["Handworks", "Milligram", "kikki.K", "Notemaker", "Officeworks"]
+
+
+@pytest.fixture
+def cfg():
+    return load_store_config("handworks")
+
+
+@pytest.fixture
+def conn():
+    c = db.connect(":memory:")
+    yield c
+    c.close()
+
+
+def answer_from_prompt(prompt: str) -> str:
+    return prompt.split("<<<\n", 1)[1].rsplit("\n>>>", 1)[0]
+
+
+def fake_extractor(prompt: str, schema) -> str:
+    """Stands in for the AI in step 4: finds known store names and quotes their line."""
+    if "<<<" not in prompt:  # not an extraction prompt (e.g. the summary): no template
+        return "{}"
+    text = answer_from_prompt(prompt)
+    stores = []
+    for line in text.splitlines():
+        for name in KNOWN_STORES:
+            if name.lower() in line.lower() and name not in [s["name"] for s in stores]:
+                m = re.match(r"\s*(\d+)\.", line)
+                stores.append({"name": name, "rank": int(m.group(1)) if m else None,
+                               "quote": line.strip()})
+    ours = any(s["name"] == "Handworks" for s in stores)
+    return json.dumps({"stores": stores, "our_store_tone": "positive" if ours else "none"})
+
+
+def make_ctx(conn, cfg, date="2026-10-20", ask=None, work=None):
+    store_id = db.upsert_store(conn, cfg)
+    return RunContext(conn=conn, store=cfg, store_id=store_id, run_date=date,
+                      ask_provider=ask, work_provider=work, sleep=lambda s: None)
+
+
+@pytest.fixture
+def fake_work():
+    return FakeProvider(complete_responder=fake_extractor, sleep=lambda s: None)

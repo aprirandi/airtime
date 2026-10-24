@@ -1,0 +1,18 @@
+[project]
+name = "airtime"
+version = "0.1.0"
+description = "Airtime agents: measure how often AI assistants name a store."
+requires-python = ">=3.11"
+dependencies = []  # stdlib only at runtime
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+airtime = "airtime.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["airtime*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
