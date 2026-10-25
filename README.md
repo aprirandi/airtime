@@ -124,6 +124,7 @@ then fails so it is visible. One-time setup:
   with their kind, and add it to the flow in `airtime/agents/visibility/agent.py:shift_flow`.
   Give it a `MasterCheck` (`after=<agent name>`) in `master.py`; a failed check stops the shift.
 - **Another store**: add `config/stores/<slug>.toml` and a line in the workflow.
+- **Weekly Asker with GSC questions**: planned in [`plans/asker.md`](plans/asker.md).
 
 ## Settled and open questions
 
