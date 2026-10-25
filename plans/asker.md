@@ -6,11 +6,11 @@ questions taken from the customer's own Google Search Console (GSC) data.
 
 ## Schedule
 
-- **Once a week.** A fix made by the Fixer takes days to weeks to show in AI answers, so measuring
-  every day adds cost without adding information. The flow stays one waterfall per week:
-  Asker -> Analyst -> Planner -> Owner -> Fixer, and next week's Asker shift measures the result.
-- **10 questions, each asked once** to each AI. With 4 AIs that is 40 answers a week. One answer
-  can be a fluke, so the Fixer acts on the trend over several weeks, not on one week's result.
+- **1, 2 or 3 shifts a week** (to be chosen). A fix made by the Fixer takes days to weeks to show in
+  AI answers, so daily shifts add cost without adding information. Each shift runs the agents in
+  order: Asker -> Analyst -> Planner -> Owner -> Fixer, and the next Asker shift measures the result.
+- **10 questions, each asked once** to each AI. With 4 AIs that is 40 answers a shift. One answer
+  can be a fluke, so the Fixer acts on the trend over several weeks, not on one shift's result.
 - **Reports show the range over the last 4 weeks**, not just this week's number.
 
 ## Questions: 8 fixed + 2 new
@@ -47,11 +47,11 @@ not share them. GSC is the closest real signal.
 
 ## Cost and limits
 
-- Paid APIs, 4 AIs with web search: about $8 a month per store (10 questions x ~4.3 shifts a
-  month, ~$0.16 per question to all 4 AIs, plus ~$1 for the other agents). Spending cap: $12 a
-  month per store.
+- Paid APIs, 4 AIs with web search, ~$0.16 per question to all 4 AIs plus a little for the other
+  agents. Per store per month (spending cap 1.5x in brackets): 1 shift a week ~$8 ($12),
+  2 a week ~$16 ($24), 3 a week ~$24 ($36).
 - GSC and GA data: free.
-- 10 asks fit in today's Gemini free tier (about 20 asks a day on 3.8 Flash), so the weekly shift
-  can run there before the paid APIs are on.
+- 10 asks fit in today's Gemini free tier (about 20 asks a day on 3.8 Flash), so any of these
+  schedules can run there before the paid APIs are on.
 - Customer GSC data must not be sent to a free-tier model, since Google may use free-tier content.
   Steps 1 to 5 run on paid APIs only.
