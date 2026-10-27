@@ -54,7 +54,7 @@ function ActiveCard({ m, site, store, live }: { m: TeamMember; site: Site; store
   const { t, pick } = useI18n()
   const latest = store.runs.find((r) => r.kind === "shift")
   const working = live?.status === "running" && live.agent_now === m.id
-  const next = nextShift(site.schedule.utc_hour, site.schedule.utc_minute)
+  const next = nextShift(site.schedule.utc_hour, site.schedule.utc_minute, new Date(), site.schedule.weekdays)
   const mine = latest?.steps.filter((s) => agentFor(s) === m.id) ?? []
   const last = mine.at(-1)
   const Icon = m.id === "master" ? ShieldCheck : Bot

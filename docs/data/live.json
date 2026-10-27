@@ -1,83 +1,12 @@
 {
- "status": "failed",
- "agent": "Asker & Analyst",
- "store": "handworks",
- "run_date": "2026-10-27",
- "run_id": 4,
- "started_at": "2026-10-26T23:52:26+00:00",
- "updated_at": "2026-10-27T00:26:00+00:00",
- "steps": [
-  {
-   "step": 1,
-   "name": "write_questions",
-   "kind": "AI",
-   "agent": "asker",
-   "title": "Writing buyer questions",
-   "title_id": "Menyiapkan pertanyaan pembeli",
-   "status": "done"
-  },
-  {
-   "step": 2,
-   "name": "validate_questions",
-   "kind": "CODE",
-   "agent": "asker",
-   "title": "Checking the questions",
-   "title_id": "Mengecek pertanyaan",
-   "status": "done"
-  },
-  {
-   "step": 3,
-   "name": "ask_questions",
-   "kind": "CODE",
-   "agent": "asker",
-   "title": "Asking Gemini",
-   "title_id": "Bertanya ke Gemini",
-   "status": "failed"
-  },
-  {
-   "step": 4,
-   "name": "extract_mentions",
-   "kind": "AI",
-   "agent": "analyst",
-   "title": "Reading the answers",
-   "title_id": "Membaca jawaban",
-   "status": "todo"
-  },
-  {
-   "step": 5,
-   "name": "verify_and_count",
-   "kind": "CODE",
-   "agent": "analyst",
-   "title": "Checking quotes and counting",
-   "title_id": "Mengecek kutipan dan menghitung",
-   "status": "todo"
-  },
-  {
-   "step": 6,
-   "name": "compare_previous",
-   "kind": "CODE",
-   "agent": "analyst",
-   "title": "Comparing with the last shift",
-   "title_id": "Membandingkan dengan shift lalu",
-   "status": "todo"
-  },
-  {
-   "step": 7,
-   "name": "write_summary",
-   "kind": "AI",
-   "agent": "analyst",
-   "title": "Writing the summary",
-   "title_id": "Menulis ringkasan",
-   "status": "todo"
-  }
- ],
+ "status": "idle",
+ "updated_at": "2026-10-27T00:52:31+00:00",
  "current": null,
  "progress": null,
- "last_event": "Stopped here: IncompleteRead: IncompleteRead(3986 bytes read)",
- "last_event_id": "Berhenti di sini: IncompleteRead: IncompleteRead(3986 bytes read)",
- "agents": [
-  "asker",
-  "analyst"
- ],
- "agent_now": "asker"
+ "steps": [],
+ "last_run_id": 4,
+ "last_run_status": "failed",
+ "last_finished_at": "2026-10-27T00:26:00+00:00",
+ "last_event": "Off shift. Waiting for the next one.",
+ "last_event_id": "Sedang tidak bertugas. Menunggu shift berikutnya."
 }

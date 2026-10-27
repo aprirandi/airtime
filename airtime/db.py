@@ -119,7 +119,8 @@ def connect(path: Path | str = DEFAULT_DB_PATH) -> sqlite3.Connection:
 # Columns added after the first release. SQLite cannot add them in CREATE TABLE IF NOT EXISTS.
 MIGRATIONS = {
     "questions": [("kind", "TEXT NOT NULL DEFAULT 'core'"),   # core (same every day) | daily (new each day)
-                  ("for_date", "TEXT")],                       # run date a daily question was written for
+                  ("for_date", "TEXT"),                        # run date a daily question was written for
+                  ("reason", "TEXT")],                         # JSON: why the Asker chose it (explore mode)
     "daily_summary": [("core_mentions", "INTEGER NOT NULL DEFAULT 0"), ("core_answers", "INTEGER NOT NULL DEFAULT 0"),
                       ("daily_mentions", "INTEGER NOT NULL DEFAULT 0"), ("daily_answers", "INTEGER NOT NULL DEFAULT 0")],
 }

@@ -30,9 +30,17 @@ export function todayIn(tz = STORE_TZ): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date())
 }
 
-export function nextShift(utcHour: number, utcMinute: number, now = new Date()): Date {
+const weekdayIn = new Intl.DateTimeFormat("en-US", { timeZone: STORE_TZ, weekday: "short" })
+
+/** Next shift start. `weekdays` (mon..sun, in the store's timezone) skips the days off. */
+export function nextShift(utcHour: number, utcMinute: number, now = new Date(), weekdays?: string[] | null): Date {
   const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), utcHour, utcMinute))
   if (next.getTime() <= now.getTime()) next.setUTCDate(next.getUTCDate() + 1)
+  if (weekdays?.length) {
+    for (let i = 0; i < 7 && !weekdays.includes(weekdayIn.format(next).toLowerCase().slice(0, 3)); i++) {
+      next.setUTCDate(next.getUTCDate() + 1)
+    }
+  }
   return next
 }
 

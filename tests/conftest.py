@@ -24,8 +24,9 @@ KNOWN_STORES = ["Handworks", "Milligram", "kikki.K", "Notemaker", "Officeworks"]
 
 @pytest.fixture
 def cfg():
-    # Pinned to 3 attempts so tests do not depend on the live quota setting in handworks.toml.
-    return replace(load_store_config("handworks"), attempts_per_day=3, daily_count=0, questions=BASELINE_QUESTIONS)
+    # Pinned to 3 attempts and profile mode so tests do not depend on the live quota setting in handworks.toml.
+    return replace(load_store_config("handworks"), attempts_per_day=3, daily_count=0, daily_mode="profile",
+                   questions=BASELINE_QUESTIONS)
 
 
 @pytest.fixture

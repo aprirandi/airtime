@@ -30,10 +30,33 @@ export interface Run {
   questions?: RunQuestion[]
 }
 
+export interface Reason {
+  topic: string
+  answers: number
+  ours: number
+  competitor: string | null
+  competitor_mentions: number
+  window_days: number
+}
+
+export interface TopicRow {
+  topic: string
+  weight: number
+  answers: number
+  ours: number
+  rate: number | null
+  competitor: string | null
+  competitor_mentions: number
+  question_count: number
+  terms: string[]
+}
+
 export interface RunQuestion {
   text: string
   kind: "core" | "daily"
   names_area: number
+  reason?: Reason | null
+  topics?: string[]
   asked: number
   counted: number | null
   ours: number | null
@@ -99,10 +122,14 @@ export interface Store {
     daily_count?: number
     daily_attempts?: number
     questions: string[]
+    daily_mode?: "profile" | "explore"
+    weekdays?: string[]
+    explore_window_days?: number
   } | null
   series: Summary[]
   ranges: Record<string, Range | null>
   runs: Run[]
+  topics?: TopicRow[]
   totals: {
     days_on_duty: number
     first_day: string | null
@@ -130,7 +157,7 @@ export interface TeamMember {
 
 export interface Site {
   generated_at: string
-  schedule: { cron: string; utc_hour: number; utc_minute: number }
+  schedule: { cron: string; utc_hour: number; utc_minute: number; weekdays?: string[] | null }
   agent: { name: string; role: string; role_id?: string }
   team: TeamMember[]
   stores: Store[]

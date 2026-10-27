@@ -28,6 +28,18 @@ class ProviderConfig:
 
 
 @dataclass(frozen=True)
+class Topic:
+    """A group of products or needs the store sells. Big catalogues are measured per topic,
+    not per product: shoppers ask AI assistants about needs, not SKUs."""
+    name: str
+    terms: tuple[str, ...]             # words that put a question in this topic (plurals match too)
+    weight: float = 1.0                # how much the topic matters to the store; later from GSC/GA
+
+
+WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+
+
+@dataclass(frozen=True)
 class StoreConfig:
     slug: str
     name: str
@@ -45,6 +57,11 @@ class StoreConfig:
     daily_count: int = 0               # new questions the AI writes each day (0 = off)
     daily_attempts: int = 1            # tries per daily question
     novelty_days: int = 14             # daily questions must differ from those of the last N days
+    daily_mode: str = "profile"        # "profile" (any need) or "explore" (aim at the weakest topics)
+    explore_per_topic: int = 2         # explore mode: new questions per weak topic
+    explore_window_days: int = 28      # explore mode: how far back results are read
+    topics: tuple[Topic, ...] = ()
+    weekdays: tuple[str, ...] = WEEKDAYS  # days the shift runs, in the store's timezone
     timezone: str = "Australia/Melbourne"
     provider: ProviderConfig = field(default_factory=ProviderConfig)
 
@@ -67,6 +84,12 @@ def parse_store_config(slug: str, data: dict) -> StoreConfig:
     questions = data.get("questions", {})
     run = data.get("run", {})
     provider = ProviderConfig(**data.get("provider", {}))
+    topics = tuple(Topic(t["name"], tuple(t["terms"]), float(t.get("weight", 1.0)))
+                   for t in data.get("topics", ()))
+    weekdays = tuple(d.lower()[:3] for d in run.get("weekdays", WEEKDAYS))
+    bad = [d for d in weekdays if d not in WEEKDAYS]
+    if bad:
+        raise ValueError(f"unknown weekdays in run.weekdays: {bad}")
     return StoreConfig(
         slug=slug,
         name=store["name"],
@@ -84,6 +107,11 @@ def parse_store_config(slug: str, data: dict) -> StoreConfig:
         daily_count=questions.get("daily_count", 0),
         daily_attempts=run.get("daily_attempts", 1),
         novelty_days=questions.get("novelty_days", 14),
+        daily_mode=questions.get("daily_mode", "profile"),
+        explore_per_topic=questions.get("explore_per_topic", 2),
+        explore_window_days=questions.get("explore_window_days", 28),
+        topics=topics,
+        weekdays=weekdays,
         timezone=run.get("timezone", "Australia/Melbourne"),
         provider=provider,
     )

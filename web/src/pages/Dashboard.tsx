@@ -1,4 +1,4 @@
-import { Competitors, LatestFindings, QuestionsToday, StatStrip, Trend, WorkDiary } from "@/components/Findings"
+import { Competitors, LatestFindings, QuestionsToday, StatStrip, Topics, Trend, WorkDiary } from "@/components/Findings"
 import { LiveBanner } from "@/components/LiveBanner"
 import { Card, CardContent } from "@/components/ui/card"
 import { fmtDate, fmtDateTime } from "@/lib/format"
@@ -21,6 +21,7 @@ export function Dashboard({ site, store, live, liveCheckedAt, go }: {
       <StatStrip store={store} />
       {latest && <LatestFindings store={store} latest={latest} onOpen={(id) => go(`#/run/${id}`)} />}
       {latest && <QuestionsToday store={store} latest={latest} />}
+      {latest && <Topics store={store} latest={latest} />}
       <div className="grid gap-6 lg:grid-cols-2">
         {apiSeries.length > 0 && <Trend store={store} series={apiSeries} />}
         {latest && <Competitors store={store} latest={latest} />}

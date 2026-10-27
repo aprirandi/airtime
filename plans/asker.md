@@ -1,4 +1,9 @@
-# Asker: next version (plan, not built yet)
+# Asker: next version (plan, partly built)
+
+**Built (27 Oct 2026):** topics per store with results per topic; new questions aimed at the
+weakest topics that learn from what was asked before (`daily_mode = "explore"`); shift days picked
+in the config (`run.weekdays`). **Not built yet:** questions from GSC, topic weights from GSC/GA,
+paid APIs for the 4 AIs.
 
 Today the Asker runs every day on the Gemini free tier: 3 core questions x 2 tries plus 6 new
 questions x 1 try, written from the store profile. This plan moves it to a weekly shift with

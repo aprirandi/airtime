@@ -1,14 +1,23 @@
 {
- "generated_at": "2026-10-25T22:47:34+00:00",
+ "generated_at": "2026-10-27T00:52:31+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
-  "utc_minute": 17
+  "utc_minute": 17,
+  "weekdays": [
+   "mon",
+   "tue",
+   "wed",
+   "thu",
+   "fri",
+   "sat",
+   "sun"
+  ]
  },
  "agent": {
   "name": "Asker & Analyst",
-  "role": "Every morning the Asker asks AI assistants the questions your buyers ask. The Analyst reads every answer, checks each quote word for word and counts which shops are recommended. The Master checks each hand-off.",
-  "role_id": "Setiap pagi Asker menanyakan ke asisten AI pertanyaan yang biasa diajukan pembeli Anda. Analyst membaca setiap jawaban, mengecek setiap kutipan kata per kata, dan menghitung toko mana yang direkomendasikan. Master mengecek setiap serah-terima."
+  "role": "On each shift the Asker asks AI assistants the questions your buyers ask. The Analyst reads every answer, checks each quote word for word and counts which shops are recommended. The Master checks each hand-off.",
+  "role_id": "Setiap shift Asker menanyakan ke asisten AI pertanyaan yang biasa diajukan pembeli Anda. Analyst membaca setiap jawaban, mengecek setiap kutipan kata per kata, dan menghitung toko mana yang direkomendasikan. Master mengecek setiap serah-terima."
  },
  "team": [
   {
@@ -43,17 +52,19 @@
     2,
     3
    ],
-   "job": "Writes the day's buyer questions, checks them, and asks each one to Gemini. Every answer is stored, empty ones too.",
-   "job_id": "Menulis pertanyaan pembeli hari ini, mengeceknya, lalu menanyakan masing-masing ke Gemini. Setiap jawaban disimpan, termasuk yang kosong.",
+   "job": "Keeps the same core questions for the trend and writes new ones aimed at the topics where the store is named least, learning from what was asked before. Checks them and asks each one to Gemini. Every answer is stored, empty ones too.",
+   "job_id": "Memakai pertanyaan inti yang sama untuk tren, dan menulis pertanyaan baru yang diarahkan ke topik di mana toko paling jarang disebut, belajar dari pertanyaan sebelumnya. Mengeceknya lalu menanyakan masing-masing ke Gemini. Setiap jawaban disimpan, termasuk yang kosong.",
    "inputs": [
-    "Store profile",
+    "Store topics",
+    "Results per topic",
     "Recent questions"
    ],
    "outputs": [
     "Answer table"
    ],
    "inputs_id": [
-    "Profil toko",
+    "Topik toko",
+    "Hasil per topik",
     "Pertanyaan terakhir"
    ],
    "outputs_id": [
@@ -216,7 +227,18 @@
      "Where can I buy greeting cards and wrapping paper in Melbourne?",
      "Unique gift shops in Prahran or Brighton Melbourne"
     ],
-    "provider": "gemini"
+    "provider": "gemini",
+    "daily_mode": "explore",
+    "weekdays": [
+     "mon",
+     "tue",
+     "wed",
+     "thu",
+     "fri",
+     "sat",
+     "sun"
+    ],
+    "explore_window_days": 28
    },
    "areas": [
     "Prahran",
@@ -3310,6 +3332,165 @@
    },
    "runs": [
     {
+     "id": 4,
+     "agent": "asker,analyst",
+     "kind": "shift",
+     "run_date": "2026-10-27",
+     "started_at": "2026-10-26T23:52:26+00:00",
+     "finished_at": "2026-10-27T00:26:00+00:00",
+     "status": "failed",
+     "error": "http.client.IncompleteRead: IncompleteRead(3986 bytes read)",
+     "steps": [
+      {
+       "step": 1,
+       "name": "write_questions",
+       "kind": "AI",
+       "agent": "asker",
+       "started_at": "2026-10-26T23:52:26+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-26T23:52:28+00:00",
+       "result": {
+        "core": {
+         "action": "reused",
+         "count": 3
+        },
+        "daily": {
+         "action": "created",
+         "count": 6,
+         "questions": [
+          "Where can I buy a wedding greeting card and elegant gift wrapping in Brighton today?",
+          "Need a lovely baby shower gift set delivered anywhere in Australia by tomorrow.",
+          "Best shops in Prahran to pick up cute novelty socks and fun men gifts.",
+          "Where is a good place to find scented hand cream and luxury body sprays in Melbourne?",
+          "Looking for engagement greeting cards and beautiful gift bags around Brighton.",
+          "Where to buy unique jigsaw puzzles and board games for adults in Melbourne."
+         ],
+         "dropped": []
+        }
+       },
+       "description": "Kept the same 3 core questions and wrote 6 new ones for today.",
+       "description_id": "Memakai 3 pertanyaan inti yang sama dan menulis 6 pertanyaan baru untuk hari ini."
+      },
+      {
+       "step": 2,
+       "name": "validate_questions",
+       "kind": "CODE",
+       "agent": "asker",
+       "started_at": "2026-10-26T23:52:28+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-26T23:52:28+00:00",
+       "result": {
+        "count": 9,
+        "core": 3,
+        "daily": 6,
+        "naming_area": 4,
+        "removed_as_duplicate": 0
+       },
+       "description": "Checked the 9 questions: no empty or duplicate ones, 4 name a store area.",
+       "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 4 menyebut area toko."
+      },
+      {
+       "step": 3,
+       "name": "ask_questions",
+       "kind": "CODE",
+       "agent": "asker",
+       "started_at": "2026-10-26T23:52:28+00:00",
+       "status": "failed",
+       "error": "IncompleteRead: IncompleteRead(3986 bytes read)",
+       "description": "Stopped here: IncompleteRead: IncompleteRead(3986 bytes read)",
+       "description_id": "Berhenti di sini: IncompleteRead: IncompleteRead(3986 bytes read)"
+      }
+     ],
+     "quotes_verified": 0,
+     "questions": [
+      {
+       "text": "Best stationery shops in Melbourne",
+       "kind": "core",
+       "names_area": 0,
+       "reason": null,
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+       "kind": "core",
+       "names_area": 0,
+       "reason": null,
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Wrapping paper"
+       ]
+      },
+      {
+       "text": "Unique gift shops in Prahran or Brighton Melbourne",
+       "kind": "core",
+       "names_area": 1,
+       "reason": null,
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
+      },
+      {
+       "text": "Where can I buy a wedding greeting card and elegant gift wrapping in Brighton today?",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": null,
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Wrapping paper",
+        "Gifts"
+       ]
+      },
+      {
+       "text": "Need a lovely baby shower gift set delivered anywhere in Australia by tomorrow.",
+       "kind": "daily",
+       "names_area": 0,
+       "reason": null,
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
+      },
+      {
+       "text": "Best shops in Prahran to pick up cute novelty socks and fun men gifts.",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": null,
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
+      },
+      {
+       "text": "Where is a good place to find scented hand cream and luxury body sprays in Melbourne?",
+       "kind": "daily",
+       "names_area": 0,
+       "reason": null,
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": []
+      }
+     ]
+    },
+    {
      "id": 3,
      "agent": "asker,analyst",
      "kind": "shift",
@@ -3512,73 +3693,107 @@
        "text": "Best stationery shops in Melbourne",
        "kind": "core",
        "names_area": 0,
+       "reason": null,
        "asked": 2,
        "counted": 2,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
       },
       {
        "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
        "kind": "core",
        "names_area": 0,
+       "reason": null,
        "asked": 2,
        "counted": 2,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Wrapping paper"
+       ]
       },
       {
        "text": "Unique gift shops in Prahran or Brighton Melbourne",
        "kind": "core",
        "names_area": 1,
+       "reason": null,
        "asked": 2,
        "counted": 2,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
       },
       {
        "text": "Where can I buy scented candles and room diffusers in Brighton today?",
        "kind": "daily",
        "names_area": 1,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": []
       },
       {
        "text": "Need to find a funny birthday card and cute socks for men in Melbourne.",
        "kind": "daily",
        "names_area": 0,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Greeting cards"
+       ]
       },
       {
        "text": "Best shops in Prahran to get luxury journals and nice pens.",
        "kind": "daily",
        "names_area": 1,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Stationery",
+        "Journals and notebooks"
+       ]
       },
       {
        "text": "Looking for Lamy pens and desk accessories with free delivery in Australia.",
        "kind": "daily",
        "names_area": 0,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
       },
       {
        "text": "Where to buy baby plush toys and newborn books around Melbourne?",
        "kind": "daily",
        "names_area": 0,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": []
       },
       {
        "text": "Shops in Brighton that sell Ted Baker shoe shine kits or men gifts.",
        "kind": "daily",
        "names_area": 1,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
       }
      ]
     },
@@ -3841,73 +4056,111 @@
        "text": "Best stationery shops in Melbourne",
        "kind": "core",
        "names_area": 0,
+       "reason": null,
        "asked": 2,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
       },
       {
        "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
        "kind": "core",
        "names_area": 0,
+       "reason": null,
        "asked": 2,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Wrapping paper"
+       ]
       },
       {
        "text": "Unique gift shops in Prahran or Brighton Melbourne",
        "kind": "core",
        "names_area": 1,
+       "reason": null,
        "asked": 2,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
       },
       {
        "text": "Where can I buy Jellycat plush toys in Brighton today?",
        "kind": "daily",
        "names_area": 1,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": []
       },
       {
        "text": "I need a birthday card and nice wrapping paper delivered in Melbourne by tomorrow",
        "kind": "daily",
        "names_area": 0,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Wrapping paper"
+       ]
       },
       {
        "text": "Best place to buy imported Italian journals in Prahran",
        "kind": "daily",
        "names_area": 1,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Journals and notebooks"
+       ]
       },
       {
        "text": "Looking for a cute baby shower gift under 30 dollars in Australia",
        "kind": "daily",
        "names_area": 0,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
       },
       {
        "text": "Where to find luxury notebooks and fountain pens in Melbourne CBD",
        "kind": "daily",
        "names_area": 0,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Stationery",
+        "Journals and notebooks"
+       ]
       },
       {
        "text": "Need a thank you card and a small gift for a colleague near Prahran",
        "kind": "daily",
        "names_area": 1,
+       "reason": null,
        "asked": 1,
        "counted": 1,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Gifts"
+       ]
       }
      ]
     },
@@ -4144,57 +4397,167 @@
        "text": "Best stationery shops in Melbourne",
        "kind": "core",
        "names_area": 0,
+       "reason": null,
        "asked": 3,
        "counted": 3,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
       },
       {
        "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
        "kind": "core",
        "names_area": 0,
+       "reason": null,
        "asked": 3,
        "counted": 3,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Wrapping paper"
+       ]
       },
       {
        "text": "Unique gift shops in Prahran or Brighton Melbourne",
        "kind": "core",
        "names_area": 1,
+       "reason": null,
        "asked": 3,
        "counted": 2,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
       },
       {
        "text": "Best place to buy journals and notebooks in Melbourne",
        "kind": "core",
        "names_area": 0,
+       "reason": null,
        "asked": 3,
        "counted": 2,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Journals and notebooks"
+       ]
       },
       {
        "text": "Birthday gift ideas under $30 in Melbourne",
        "kind": "core",
        "names_area": 0,
+       "reason": null,
        "asked": 3,
        "counted": 2,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
       },
       {
        "text": "Online stationery store in Australia with fast shipping",
        "kind": "core",
        "names_area": 0,
+       "reason": null,
        "asked": 3,
        "counted": 2,
-       "ours": 0
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
       }
+     ]
+    }
+   ],
+   "topics": [
+    {
+     "topic": "Stationery",
+     "weight": 1.0,
+     "answers": 11,
+     "ours": 0,
+     "rate": 0.0,
+     "competitor": "Milligram",
+     "competitor_mentions": 11,
+     "question_count": 6,
+     "terms": [
+      "stationery",
+      "pen",
+      "pencil",
+      "desk accessory",
+      "art supplies",
+      "calligraphy"
+     ]
+    },
+    {
+     "topic": "Greeting cards",
+     "weight": 1.0,
+     "answers": 9,
+     "ours": 0,
+     "rate": 0.0,
+     "competitor": "Monsterthreads",
+     "competitor_mentions": 7,
+     "question_count": 5,
+     "terms": [
+      "greeting card",
+      "card",
+      "birthday card",
+      "wedding card"
+     ]
+    },
+    {
+     "topic": "Wrapping paper",
+     "weight": 1.0,
+     "answers": 7,
+     "ours": 0,
+     "rate": 0.0,
+     "competitor": "Milligram",
+     "competitor_mentions": 6,
+     "question_count": 3,
+     "terms": [
+      "wrapping paper",
+      "gift wrap",
+      "gift wrapping",
+      "wrapping",
+      "ribbon"
+     ]
+    },
+    {
+     "topic": "Journals and notebooks",
+     "weight": 1.0,
+     "answers": 5,
+     "ours": 0,
+     "rate": 0.0,
+     "competitor": "Milligram",
+     "competitor_mentions": 5,
+     "question_count": 4,
+     "terms": [
+      "journal",
+      "notebook",
+      "planner",
+      "diary",
+      "sketchbook"
+     ]
+    },
+    {
+     "topic": "Gifts",
+     "weight": 1.0,
+     "answers": 10,
+     "ours": 0,
+     "rate": 0.0,
+     "competitor": "Fenton & Fenton",
+     "competitor_mentions": 5,
+     "question_count": 6,
+     "terms": [
+      "gift",
+      "present",
+      "gift shop"
      ]
     }
    ],
    "totals": {
     "days_on_duty": 3,
     "first_day": "2026-10-24",
-    "questions_asked": 42,
+    "questions_asked": 49,
     "answers_read": 35,
     "quotes_verified": 391,
     "shops_seen": 186
