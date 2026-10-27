@@ -5,7 +5,7 @@
  "run_date": "2026-10-27",
  "run_id": 4,
  "started_at": "2026-10-26T23:52:26+00:00",
- "updated_at": "2026-10-27T00:00:34+00:00",
+ "updated_at": "2026-10-27T00:14:01+00:00",
  "steps": [
   {
    "step": 1,
@@ -73,14 +73,14 @@
  ],
  "current": "ask_questions",
  "progress": {
-  "done": 3,
+  "done": 5,
   "total": 12,
   "unit": "questions asked",
-  "ok": 3,
-  "no_answer": 0
+  "ok": 4,
+  "no_answer": 1
  },
- "last_event": "Asked \"Unique gift shops in Prahran or Brighton Melbourne\" (try 1): answered.",
- "last_event_id": "Bertanya \"Unique gift shops in Prahran or Brighton Melbourne\" (percobaan 1): dijawab.",
+ "last_event": "Asked \"Need a lovely baby shower gift set delivered anywhere in Australia by tomorrow.\" (try 1): answered.",
+ "last_event_id": "Bertanya \"Need a lovely baby shower gift set delivered anywhere in Australia by tomorrow.\" (percobaan 1): dijawab.",
  "agents": [
   "asker",
   "analyst"
