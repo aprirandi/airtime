@@ -1,11 +1,11 @@
 {
- "status": "running",
+ "status": "failed",
  "agent": "Asker & Analyst",
  "store": "handworks",
  "run_date": "2026-10-27",
  "run_id": 4,
  "started_at": "2026-10-26T23:52:26+00:00",
- "updated_at": "2026-10-27T00:19:35+00:00",
+ "updated_at": "2026-10-27T00:26:00+00:00",
  "steps": [
   {
    "step": 1,
@@ -32,7 +32,7 @@
    "agent": "asker",
    "title": "Asking Gemini",
    "title_id": "Bertanya ke Gemini",
-   "status": "working"
+   "status": "failed"
   },
   {
    "step": 4,
@@ -71,16 +71,10 @@
    "status": "todo"
   }
  ],
- "current": "ask_questions",
- "progress": {
-  "done": 7,
-  "total": 12,
-  "unit": "questions asked",
-  "ok": 6,
-  "no_answer": 1
- },
- "last_event": "Asked \"Where is a good place to find scented hand cream and luxury body sprays in Melbourne?\" (try 1): answered.",
- "last_event_id": "Bertanya \"Where is a good place to find scented hand cream and luxury body sprays in Melbourne?\" (percobaan 1): dijawab.",
+ "current": null,
+ "progress": null,
+ "last_event": "Stopped here: IncompleteRead: IncompleteRead(3986 bytes read)",
+ "last_event_id": "Berhenti di sini: IncompleteRead: IncompleteRead(3986 bytes read)",
  "agents": [
   "asker",
   "analyst"
