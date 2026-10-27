@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
 from difflib import SequenceMatcher
 
 from airtime.config import StoreConfig
+from airtime.agents.visibility.topics import pick_weak_topics, reason_for, topic_stats, topics_for
 from airtime.core.agent import RunContext, RunFailed
 from airtime.providers.base import Provider, ProviderError, utc_now
 from airtime.textutil import contains_term, store_key, word_set
@@ -129,6 +131,21 @@ def _places_text(store: StoreConfig) -> str:
     return " or ".join(_places(store)) or "the shop's city"
 
 
+def drop_reason(q: str, store: StoreConfig, avoid: list[str], kept: list[str]) -> str | None:
+    """Why a new question cannot be used, or None if it can."""
+    if len(q.split()) < MIN_WORDS:
+        return f"too short: {q!r}"
+    if any(contains_term(q, a) for a in store.all_aliases):
+        return f"names our store: {q!r}"
+    if _places(store) and not any(contains_term(q, p) for p in _places(store)):
+        return f"names no place ({_places_text(store)}): {q!r}"
+    if any(near_duplicate(q, old) for old in avoid):
+        return f"repeats a recent question: {q!r}"
+    if any(near_duplicate(q, k) for k in kept):
+        return f"duplicate within today's list: {q!r}"
+    return None
+
+
 def filter_daily(candidates: list[str], store: StoreConfig, avoid: list[str], count: int
                  ) -> tuple[list[str], list[str]]:
     """Keep up to `count` usable new questions. Returns (kept, reasons for each one dropped)."""
@@ -136,16 +153,9 @@ def filter_daily(candidates: list[str], store: StoreConfig, avoid: list[str], co
     dropped: list[str] = []
     for q in candidates:
         q = q.strip()
-        if len(q.split()) < MIN_WORDS:
-            dropped.append(f"too short: {q!r}")
-        elif any(contains_term(q, a) for a in store.all_aliases):
-            dropped.append(f"names our store: {q!r}")
-        elif _places(store) and not any(contains_term(q, p) for p in _places(store)):
-            dropped.append(f"names no place ({_places_text(store)}): {q!r}")
-        elif any(near_duplicate(q, old) for old in avoid):
-            dropped.append(f"repeats a recent question: {q!r}")
-        elif any(near_duplicate(q, k) for k in kept):
-            dropped.append(f"duplicate within today's list: {q!r}")
+        why = drop_reason(q, store, avoid, kept)
+        if why:
+            dropped.append(why)
         elif len(kept) < count:
             kept.append(q)
     return kept, dropped
@@ -174,6 +184,130 @@ def generate_questions(store: StoreConfig, provider: Provider, site_text: str) -
     if leaked:
         raise RunFailed(f"generated questions name our own store: {leaked}")
     return questions
+
+
+# ---- Step 1, explore mode: aim the new questions at the weakest topics (AI + CODE) -----
+
+EXPLORE_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {"questions": {"type": "ARRAY", "items": {
+        "type": "OBJECT",
+        "properties": {"topic": {"type": "STRING"}, "question": {"type": "STRING"}},
+        "required": ["topic", "question"]}}},
+    "required": ["questions"],
+}
+
+
+def explore_plan(stats: list[dict], store: StoreConfig) -> list[tuple[dict, int]]:
+    """(topic stats, how many new questions) for the weakest topics, daily_count in total."""
+    per = max(store.explore_per_topic, 1)
+    picks = pick_weak_topics(stats, -(-store.daily_count // per))
+    plan, left = [], store.daily_count
+    for stat in picks:
+        n = min(per, left)
+        if n > 0:
+            plan.append((stat, n))
+            left -= n
+    return plan
+
+
+def build_explore_prompt(store: StoreConfig, plan: list[tuple[dict, int]], avoid: list[str],
+                         window_days: int, problems: list[str] | None = None) -> str:
+    topics = {t.name: t for t in store.topics}
+    lines = [
+        "You help a small shop understand what its customers ask AI assistants.",
+        "Write NEW questions a shopper might type into an AI assistant, for the topics below. "
+        "These are the topics where the shop is named least, so ask about them the way different "
+        "shoppers would. Rules:",
+        "- Write as a shopper, in plain words, as typed into a chat box. Vary the angle: occasion, "
+        "budget, who it is for, specific product, local or online, urgency.",
+        "- Never include the shop's own name or website.",
+        f"- Every question must name {_places_text(store)}, as a local shopper would.",
+        "- Every question must use at least one of its topic's words.",
+        "- Do not repeat or rephrase any question listed below.",
+        "- Return JSON: {\"questions\": [{\"topic\": \"...\", \"question\": \"...\"}]}, "
+        "with the topic name exactly as written here.",
+        "",
+    ]
+    for stat, n in plan:
+        t = topics[stat["topic"]]
+        lines.append(f"Topic: {t.name} — write {n} question{'s' if n != 1 else ''}. "
+                     f"Topic words: {', '.join(t.terms)}.")
+        if stat["answers"]:
+            line = (f"  Last {window_days} days: {store.name} named in {stat['ours']} of "
+                    f"{stat['answers']} answers")
+            if stat["competitor"]:
+                line += f"; {stat['competitor']} named most ({stat['competitor_mentions']})"
+            lines.append(line + ".")
+            for q in stat["questions"][-8:]:
+                lines.append(f"  Already asked: {q['text']} ({'shop named' if q['ours'] else 'shop not named'})")
+        else:
+            lines.append("  Not asked yet.")
+    lines += ["", f"Shop areas: {', '.join(store.areas)} (city: {store.city or '?'}, "
+                  f"country: {store.country or '?'})",
+              "Other questions already asked recently (do not repeat or rephrase these):",
+              *[f"- {q}" for q in avoid[-40:]]]
+    if problems:
+        lines.append("Your previous list had these problems, avoid them: " + "; ".join(problems[:10]))
+    return "\n".join(lines)
+
+
+def parse_explore(raw: str) -> list[tuple[str, str]]:
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise RunFailed(f"question writer returned invalid JSON: {exc}") from exc
+    items = data.get("questions") if isinstance(data, dict) else None
+    if not isinstance(items, list):
+        raise RunFailed("question writer JSON has no list under 'questions'")
+    out = []
+    for item in items:
+        if isinstance(item, dict) and isinstance(item.get("topic"), str) and isinstance(item.get("question"), str):
+            out.append((item["topic"].strip(), item["question"].strip()))
+    return out
+
+
+def filter_explore(candidates: list[tuple[str, str]], store: StoreConfig, plan: list[tuple[dict, int]],
+                   avoid: list[str], kept: list[tuple[str, str]]) -> tuple[list[tuple[str, str]], list[str]]:
+    """Keep usable (topic, question) pairs, at most the planned number per topic. Code decides
+    the topic from the question's words: the AI's label is only accepted if the words agree."""
+    want = {stat["topic"]: n for stat, n in plan}
+    have = Counter(t for t, _ in kept)
+    texts = [q for _, q in kept]
+    new: list[tuple[str, str]] = []
+    dropped: list[str] = []
+    for topic, q in candidates:
+        if topic not in want:
+            dropped.append(f"not one of today's topics ({topic}): {q!r}")
+        elif topic not in topics_for(q, store.topics):
+            dropped.append(f"does not use a {topic} word: {q!r}")
+        elif (why := drop_reason(q, store, avoid, texts)):
+            dropped.append(why)
+        elif have[topic] < want[topic]:
+            new.append((topic, q))
+            texts.append(q)
+            have[topic] += 1
+    return new, dropped
+
+
+def generate_explore_questions(store: StoreConfig, provider: Provider, plan: list[tuple[dict, int]],
+                               avoid: list[str], window_days: int) -> tuple[list[tuple[str, str]], list[str]]:
+    """One call, and one more for the topics still short after the checks."""
+    kept: list[tuple[str, str]] = []
+    dropped: list[str] = []
+    todo = plan
+    for _ in range(2):
+        raw = provider.complete(build_explore_prompt(store, todo, avoid + [q for _, q in kept],
+                                                     window_days, dropped),
+                                json_schema=EXPLORE_SCHEMA)
+        more, why = filter_explore(parse_explore(raw), store, plan, avoid, kept)
+        kept += more
+        dropped += why
+        have = Counter(t for t, _ in kept)
+        todo = [(stat, n - have[stat["topic"]]) for stat, n in plan if have[stat["topic"]] < n]
+        if not todo:
+            break
+    return kept, dropped
 
 
 # ---- Step functions wired into the agent ---------------------------------------------
@@ -230,6 +364,8 @@ def _write_daily(ctx: RunContext, fetch_site_text) -> dict:
     if ctx.work_provider is None:
         return {"action": "skipped", "count": 0, "error": "no AI provider"}
     avoid = recent_questions(ctx.conn, ctx.store_id, ctx.run_date, cfg.novelty_days)
+    if cfg.daily_mode == "explore" and cfg.topics:
+        return _write_explore(ctx, avoid)
     try:
         questions, dropped = generate_daily_questions(cfg, ctx.work_provider, fetch_site_text(cfg),
                                                       avoid, cfg.daily_count)
@@ -244,6 +380,34 @@ def _write_daily(ctx: RunContext, fetch_site_text) -> dict:
         )
     ctx.conn.commit()
     return {"action": "created", "count": len(questions), "questions": questions, "dropped": dropped[:10]}
+
+
+def _write_explore(ctx: RunContext, avoid: list[str]) -> dict:
+    """Explore mode: read the results per topic, pick the weakest, ask the AI for new questions
+    there, and store with each question why its topic was picked."""
+    cfg = ctx.store
+    scope = (ctx.ask_provider.name, ctx.ask_provider.channel) if ctx.ask_provider else (None, None)
+    stats = topic_stats(ctx.conn, ctx.store_id, cfg.topics, before=ctx.run_date,
+                        days=cfg.explore_window_days, provider=scope[0], channel=scope[1])
+    plan = explore_plan(stats, cfg)
+    try:
+        pairs, dropped = generate_explore_questions(cfg, ctx.work_provider, plan, avoid,
+                                                    cfg.explore_window_days)
+    except (ProviderError, RunFailed) as exc:
+        return {"action": "failed", "mode": "explore", "count": 0, "error": f"{type(exc).__name__}: {exc}"[:300]}
+    reasons = {stat["topic"]: reason_for(stat, cfg.explore_window_days) for stat, _ in plan}
+    now = utc_now()
+    for topic, q in pairs:
+        ctx.conn.execute(
+            "INSERT INTO questions (store_id, text, names_area, created_at, active, source, kind, for_date, reason)"
+            " VALUES (?, ?, ?, ?, 1, 'ai', 'daily', ?, ?)",
+            (ctx.store_id, q, int(names_area(q, cfg.areas)), now, ctx.run_date, json.dumps(reasons[topic])),
+        )
+    ctx.conn.commit()
+    return {"action": "created", "mode": "explore", "count": len(pairs),
+            "topics": [{"topic": stat["topic"], "planned": n, "answers": stat["answers"], "ours": stat["ours"],
+                        "competitor": stat["competitor"]} for stat, n in plan],
+            "questions": [q for _, q in pairs], "dropped": dropped[:10]}
 
 
 def recent_questions(conn, store_id: int, run_date: str, days: int) -> list[str]:

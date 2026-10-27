@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { fmtDate, pct } from "@/lib/format"
 import { useI18n, type T } from "@/lib/i18n"
-import type { Store, Summary } from "@/lib/types"
+import type { RunQuestion, Store, Summary } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 export function StatStrip({ store }: { store: Store }) {
@@ -309,7 +309,17 @@ export function QuestionsToday({ store, latest }: { store: Store; latest: Summar
           const ours = q.ours ?? 0
           return (
             <li key={q.text} className="flex items-start gap-3 px-3 py-2 text-sm">
-              <span className="min-w-0 flex-1">{q.text}</span>
+              <span className="min-w-0 flex-1 space-y-1">
+                <span className="block">{q.text}</span>
+                {!!q.topics?.length && (
+                  <span className="flex flex-wrap gap-1">
+                    {q.topics.map((tp) => (
+                      <Badge key={tp} variant="outline" className="h-4 px-1.5 text-[10px] font-normal">{tp}</Badge>
+                    ))}
+                  </span>
+                )}
+                {q.reason && <span className="text-muted-foreground block text-xs">{whyText(t, store.name, q.reason)}</span>}
+              </span>
               <span className="text-muted-foreground shrink-0 text-right text-xs">
                 {counted === 0 ? (
                   t("qt.noAnswer")
@@ -335,7 +345,11 @@ export function QuestionsToday({ store, latest }: { store: Store; latest: Summar
       </CardHeader>
       <CardContent className="space-y-4">
         {group(t("qt.core"), core, false)}
-        {daily.length ? group(t("qt.daily"), daily, true) : <p className="text-muted-foreground text-xs">{t("qt.none")}</p>}
+        {daily.length ? (
+          group(daily.some((q) => q.reason) ? t("qt.explore") : t("qt.daily"), daily, true)
+        ) : (
+          <p className="text-muted-foreground text-xs">{t("qt.none")}</p>
+        )}
         {(latest.daily_answers ?? 0) > 0 && (
           <p className="text-muted-foreground text-xs">
             {t("qt.split", {
@@ -347,6 +361,45 @@ export function QuestionsToday({ store, latest }: { store: Store; latest: Summar
             })}
           </p>
         )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function whyText(t: T, storeName: string, r: NonNullable<RunQuestion["reason"]>): string {
+  if (!r.answers) return t("qt.whyNew", { topic: r.topic, days: r.window_days })
+  let text = t("qt.why", { store: storeName, n: r.ours, d: r.answers, topic: r.topic, days: r.window_days })
+  if (r.competitor) text += t("qt.whyRival", { rival: r.competitor, m: r.competitor_mentions })
+  return text + "."
+}
+
+export function Topics({ store, latest }: { store: Store; latest: Summary }) {
+  const { t } = useI18n()
+  const rows = store.topics ?? []
+  if (!rows.length) return null
+  const days = store.setup?.explore_window_days ?? 28
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("topic.title")}</CardTitle>
+        <CardDescription>{t("topic.sub", { days, d: fmtDate(latest.date), store: store.name })}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {rows.map((r) => (
+          <div key={r.topic} className="space-y-1">
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="truncate font-medium">{r.topic}</span>
+              <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
+                {r.answers ? t("qt.counts", { n: r.ours, d: r.answers }) : t("topic.notAsked")}
+              </span>
+            </div>
+            <Progress value={r.answers ? (100 * r.ours) / r.answers : 0} indicatorClassName="bg-chart-1" />
+            <p className="text-muted-foreground text-xs">
+              {t("topic.questions", { n: r.question_count })}
+              {r.competitor && <> · {t("topic.rival", { rival: r.competitor, m: r.competitor_mentions })}</>}
+            </p>
+          </div>
+        ))}
       </CardContent>
     </Card>
   )

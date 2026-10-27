@@ -24,7 +24,7 @@ function useNow(ms = 30000) {
 function ShiftStatus({ site, latest, live }: { site: Site; latest: Run | undefined; live: Live | null }) {
   const { t } = useI18n()
   const now = useNow()
-  const next = nextShift(site.schedule.utc_hour, site.schedule.utc_minute, now)
+  const next = nextShift(site.schedule.utc_hour, site.schedule.utc_minute, now, site.schedule.weekdays)
   const today = todayIn()
   let badge = <Badge variant="secondary">{t("shift.off")}</Badge>
   if (live?.status === "running") {

@@ -25,7 +25,7 @@ Code decides anything that can be counted or checked. AI only reads and writes l
 
 | # | Step | Kind | What happens |
 |---|------|------|--------------|
-| 1 | Write questions (Asker) | AI | Two kinds. **Core** questions are the same every day so days can be compared (Handworks: 3 from the 14 Oct manual run, set in the config). **Daily** questions are new each morning: the AI writes 6 from the store profile; code drops any that name our store, name no place (Melbourne, Prahran, Brighton, Australia), or repeat a question from the last 14 days. If writing them fails, the core questions still go out. |
+| 1 | Write questions (Asker) | AI | Two kinds. **Core** questions are the same every shift so shifts can be compared (Handworks: 3 from the 14 Oct manual run, set in the config). **New** questions are written each shift. In `explore` mode (Handworks) code first reads the results per **topic** (below) for the last 28 days and picks the topics where the store was named least (never-asked topics first); the AI writes 2 questions for each, seeing what was already asked there and which shop was named instead, so it tries new angles. Code drops any question that does not use its topic's words, names our store, names no place (Melbourne, Prahran, Brighton, Australia), or repeats a question from the last 14 days, and stores with each question why its topic was picked. If writing them fails, the core questions still go out. |
 | 2 | Validate questions | CODE | Every run. Rejects empty, too-short, duplicate and near-duplicate questions; requires at least one question naming a store area. The run fails loudly if the list is invalid. |
 | 3 | Ask | CODE | Every question N times (default 3). Stores full raw response, timestamp, provider, channel, model, attempt. Backs off on rate limits. Failed or empty answers are stored as `no_answer`, never dropped. Refuses to start if the planned calls exceed the call budget. |
 | 4 | Extract mentions (Analyst) | AI | Per answer, strict JSON: stores named in order, rank if it is a list, tone toward our store, and an exact quote per store. |
@@ -34,6 +34,17 @@ Code decides anything that can be counted or checked. AI only reads and writes l
 | 7 | Summary | AI + CODE | The AI writes a 2-3 sentence template using `{placeholders}`, never digits. Code fills in the stored counts, then rejects the text if any number, "X of Y" pair or percentage does not match the stored row, or if it states causes, promises, rankings or prices. After two rejections a summary written by code is used, and the report says so. |
 
 Every run is logged in the `runs` table with each step's kind, status and result.
+
+**Topics.** A store with thousands of products is not asked about product by product: shoppers ask
+AI assistants about needs ("a birthday card for a coworker in Melbourne"), not SKUs. The config
+groups the catalogue into topics (`[[topics]]`, each with the words that place a question in it and
+a weight). Code puts every question in each topic whose words it uses, and the dashboard shows,
+per topic, how often the store was named and which shop was named most. Weights are all 1 for now;
+they are meant to come from the store's Search Console and Analytics data (`plans/asker.md`).
+
+**Shift days.** `run.weekdays` in the store config picks the days the shift runs (all seven for
+now, e.g. `["mon"]` for weekly). The daily workflow checks it with `python -m airtime due` and
+skips the other days; a manual run of the workflow always runs.
 
 ## Layout
 
@@ -65,7 +76,8 @@ Needs Python 3.11+, no runtime dependencies.
 export GEMINI_API_KEY=...                       # from Google AI Studio; never commit it
 python -m airtime seed --store handworks        # register store, load 14 Oct baseline
 python -m airtime plan --store handworks        # planned calls vs budget
-python -m airtime run --store handworks         # one daily run, then rewrites docs/data/
+python -m airtime run --store handworks         # one shift (skipped on a day off; --force), then rewrites docs/data/
+python -m airtime due --store handworks         # is today a shift day?
 python -m airtime import --store handworks data/seed/my_pasted_answers.csv
 python -m airtime compare --store handworks --a gemini:api --b gemini:app_pasted
 python -m airtime export                        # rewrite docs/data/*.json only
@@ -124,6 +136,7 @@ then fails so it is visible. One-time setup:
   with their kind, and add it to the flow in `airtime/agents/visibility/agent.py:shift_flow`.
   Give it a `MasterCheck` (`after=<agent name>`) in `master.py`; a failed check stops the shift.
 - **Another store**: add `config/stores/<slug>.toml` and a line in the workflow.
+- **Weekly Asker with GSC questions**: planned in [`plans/asker.md`](plans/asker.md).
 
 ## Settled and open questions
 

@@ -11,6 +11,7 @@ import shutil
 from pathlib import Path
 
 from airtime.agents.visibility.compare import compare_days, mention_range, scope_label
+from airtime.agents.visibility.topics import topic_stats, topics_for
 from airtime.config import REPO_ROOT, load_store_config
 from airtime.live import write_json
 from airtime.providers.base import utc_now
@@ -20,10 +21,10 @@ SCHEDULE = {"cron": "17 20 * * *", "utc_hour": 20, "utc_minute": 17}  # keep in 
 
 AGENT = {
     "name": "Asker & Analyst",
-    "role": "Every morning the Asker asks AI assistants the questions your buyers ask. The Analyst "
+    "role": "On each shift the Asker asks AI assistants the questions your buyers ask. The Analyst "
             "reads every answer, checks each quote word for word and counts which shops are "
             "recommended. The Master checks each hand-off.",
-    "role_id": "Setiap pagi Asker menanyakan ke asisten AI pertanyaan yang biasa diajukan pembeli Anda. "
+    "role_id": "Setiap shift Asker menanyakan ke asisten AI pertanyaan yang biasa diajukan pembeli Anda. "
                "Analyst membaca setiap jawaban, mengecek setiap kutipan kata per kata, dan menghitung toko "
                "mana yang direkomendasikan. Master mengecek setiap serah-terima.",
 }
@@ -38,10 +39,10 @@ TEAM = [
      "inputs_id": ["Website toko"], "outputs_id": ["Laporan audit"]},
     {"id": "asker", "name": "Asker", "title": "Asks the AI assistants", "title_id": "Bertanya ke asisten AI",
      "status": "active", "steps": [1, 2, 3],
-     "job": "Writes the day's buyer questions, checks them, and asks each one to Gemini. Every answer is stored, empty ones too.",
-     "job_id": "Menulis pertanyaan pembeli hari ini, mengeceknya, lalu menanyakan masing-masing ke Gemini. Setiap jawaban disimpan, termasuk yang kosong.",
-     "inputs": ["Store profile", "Recent questions"], "outputs": ["Answer table"],
-     "inputs_id": ["Profil toko", "Pertanyaan terakhir"], "outputs_id": ["Tabel jawaban"]},
+     "job": "Keeps the same core questions for the trend and writes new ones aimed at the topics where the store is named least, learning from what was asked before. Checks them and asks each one to Gemini. Every answer is stored, empty ones too.",
+     "job_id": "Memakai pertanyaan inti yang sama untuk tren, dan menulis pertanyaan baru yang diarahkan ke topik di mana toko paling jarang disebut, belajar dari pertanyaan sebelumnya. Mengeceknya lalu menanyakan masing-masing ke Gemini. Setiap jawaban disimpan, termasuk yang kosong.",
+     "inputs": ["Store topics", "Results per topic", "Recent questions"], "outputs": ["Answer table"],
+     "inputs_id": ["Topik toko", "Hasil per topik", "Pertanyaan terakhir"], "outputs_id": ["Tabel jawaban"]},
     {"id": "analyst", "name": "Analyst", "title": "Reads and counts", "title_id": "Membaca dan menghitung",
      "status": "active", "steps": [4, 5, 6, 7],
      "job": "Reads every answer, checks each quote word for word, counts the store against its competitors, compares with the last shift and writes the owner summary.",
@@ -137,6 +138,9 @@ def _describe(step: dict, store_name: str) -> str:
         core, daily = r["core"], r.get("daily") or {}
         text = (f"Kept the same {core.get('count')} core questions" if core.get("action") == "reused"
                 else f"Set up {core.get('count')} core questions")
+        if daily.get("action") == "created" and daily.get("mode") == "explore":
+            topics = ", ".join(t["topic"] for t in daily.get("topics") or [])
+            return text + f" and wrote {daily.get('count')} new ones for the topics where {store_name} is named least: {topics}."
         if daily.get("action") in ("created", "reused"):
             return text + f" and {'wrote' if daily['action'] == 'created' else 'reused'} {daily.get('count')} new ones for today."
         if daily.get("action") == "failed":
@@ -182,6 +186,9 @@ def _describe_id(step: dict, store_name: str) -> str:
         core, daily = r["core"], r.get("daily") or {}
         text = (f"Memakai {core.get('count')} pertanyaan inti yang sama" if core.get("action") == "reused"
                 else f"Menyiapkan {core.get('count')} pertanyaan inti")
+        if daily.get("action") == "created" and daily.get("mode") == "explore":
+            topics = ", ".join(t["topic"] for t in daily.get("topics") or [])
+            return text + f" dan menulis {daily.get('count')} pertanyaan baru untuk topik di mana {store_name} paling jarang disebut: {topics}."
         if daily.get("action") in ("created", "reused"):
             verb = "menulis" if daily["action"] == "created" else "memakai lagi"
             return text + f" dan {verb} {daily.get('count')} pertanyaan baru untuk hari ini."
@@ -217,7 +224,7 @@ def _describe_id(step: dict, store_name: str) -> str:
     return name.replace("_", " ").capitalize() + "."
 
 
-def _run_json(conn, run, store_name: str) -> dict:
+def _run_json(conn, run, store_name: str, topics=()) -> dict:
     steps = _loads(run["steps"], [])
     for s in steps:
         s.setdefault("agent", STEP_AGENT.get(s["name"].removeprefix("recheck_"), "analyst"))
@@ -227,11 +234,14 @@ def _run_json(conn, run, store_name: str) -> dict:
         "SELECT COUNT(*) FROM mentions m JOIN answers a ON a.id = m.answer_id WHERE a.run_id = ?",
         (run["id"],)).fetchone()[0]
     questions = [dict(q) for q in conn.execute(
-        """SELECT q.text, q.kind, q.names_area, COUNT(a.id) AS asked,
+        """SELECT q.text, q.kind, q.names_area, q.reason, COUNT(a.id) AS asked,
                   SUM(a.status = 'ok') AS counted,
                   SUM(a.status = 'ok' AND EXISTS (SELECT 1 FROM mentions m WHERE m.answer_id = a.id AND m.is_ours)) AS ours
            FROM answers a JOIN questions q ON q.id = a.question_id WHERE a.run_id = ?
            GROUP BY q.id ORDER BY q.kind, q.id""", (run["id"],))]
+    for q in questions:
+        q["reason"] = _loads(q["reason"], None)
+        q["topics"] = topics_for(q["text"], topics)
     return {"id": run["id"], "agent": run["agent"], "kind": "shift" if is_shift(run["agent"]) else "import",
             "run_date": run["run_date"],
             "started_at": run["started_at"], "finished_at": run["finished_at"],
@@ -283,7 +293,12 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
                             (store["id"],)).fetchall()
         runs = conn.execute("SELECT * FROM runs WHERE store_id = ? ORDER BY started_at DESC",
                             (store["id"],)).fetchall()
-        run_items = [_run_json(conn, r, store["name"]) for r in runs]
+        try:
+            cfg = load_store_config(store["slug"])
+        except FileNotFoundError:
+            cfg = None
+        topics = cfg.topics if cfg else ()
+        run_items = [_run_json(conn, r, store["name"], topics) for r in runs]
         series = [_summary_json(r) for r in rows]
         by_scope: dict[tuple, list] = {}
         for s in series:
@@ -299,7 +314,7 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
                 prev = earlier[-1] if earlier else None
             detail = {
                 "store": {"slug": store["slug"], "name": store["name"]},
-                "run": _run_json(conn, run, store["name"]),
+                "run": _run_json(conn, run, store["name"], topics),
                 "summary": summary,
                 "comparison": compare_days(summary, prev, store["name"]) if summary else [],
                 "comparison_id": compare_days(summary, prev, store["name"], "id") if summary else [],
@@ -316,18 +331,29 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
                       SUM(a.extracted_at IS NOT NULL) AS read
                FROM answers a JOIN runs r ON r.id = a.run_id WHERE r.store_id = ?""",
             (store["id"],)).fetchone()
-        try:
-            cfg = load_store_config(store["slug"])
+        setup = None
+        topic_rows: list[dict] = []
+        if cfg:
             setup = {"ask_model": cfg.provider.ask_model, "work_model": cfg.provider.work_model,
                      "use_search": cfg.provider.use_search, "attempts_per_day": cfg.attempts_per_day,
                      "daily_count": cfg.daily_count, "daily_attempts": cfg.daily_attempts,
-                     "questions": list(cfg.questions), "provider": cfg.provider.name}
-        except FileNotFoundError:
-            setup = None
+                     "questions": list(cfg.questions), "provider": cfg.provider.name,
+                     "daily_mode": cfg.daily_mode, "weekdays": list(cfg.weekdays),
+                     "explore_window_days": cfg.explore_window_days}
+            if api_runs and cfg.topics:
+                # Results per topic up to and including the latest shift, from the AI that shift asked.
+                last = api_runs[0]
+                scope = next(((x["provider"], x["channel"]) for x in series if x["run_id"] == last["id"]), (None, None))
+                before = conn.execute("SELECT date(?, '+1 day')", (last["run_date"],)).fetchone()[0]
+                for t in topic_stats(conn, store["id"], cfg.topics, before=before, days=cfg.explore_window_days,
+                                     provider=scope[0], channel=scope[1]):
+                    t["question_count"] = len(t.pop("questions"))
+                    t["terms"] = list(next(x.terms for x in cfg.topics if x.name == t["topic"]))
+                    topic_rows.append(t)
         stores.append({
             "slug": store["slug"], "name": store["name"], "domain": store["domain"], "setup": setup,
             "areas": _loads(store["areas"], []), "categories": _loads(store["categories"], []),
-            "series": series, "ranges": ranges, "runs": run_items,
+            "series": series, "ranges": ranges, "runs": run_items, "topics": topic_rows,
             "totals": {
                 "days_on_duty": len({r["run_date"] for r in api_runs}),
                 "first_day": min((r["run_date"] for r in api_runs), default=None),
@@ -339,7 +365,9 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
                        JOIN runs r ON r.id = a.run_id WHERE r.store_id = ?""", (store["id"],)).fetchone()[0],
             },
         })
-    site = {"generated_at": utc_now(), "schedule": SCHEDULE, "agent": AGENT, "team": TEAM, "stores": stores}
+    weekdays = sorted({d for st in stores for d in ((st["setup"] or {}).get("weekdays") or [])},
+                      key=lambda d: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"].index(d))
+    site = {"generated_at": utc_now(), "schedule": {**SCHEDULE, "weekdays": weekdays or None}, "agent": AGENT, "team": TEAM, "stores": stores}
     path = data_dir / "site.json"
     path.write_text(json.dumps(site, indent=1))
     written.append(path)

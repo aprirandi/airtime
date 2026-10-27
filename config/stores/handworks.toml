@@ -32,6 +32,37 @@ list = [
 ]
 daily_count = 6
 novelty_days = 14
+# "explore": the new questions go to the topics where the store was named least in the last
+# explore_window_days (topics never asked come first), explore_per_topic questions each.
+# The AI sees what was already asked there and which shop was named instead, so it tries new
+# angles; code checks every question still uses its topic's words. "profile" = any need.
+daily_mode = "explore"
+explore_per_topic = 2
+explore_window_days = 28
+
+# What the store sells, grouped the way shoppers ask. Big catalogues are read per topic, not per
+# product. Code puts each question in every topic whose words it uses (plurals match too).
+# weight = how much the topic matters to the store (ties go to the heavier one). All 1 until
+# the store's Search Console and Analytics data can set them.
+[[topics]]
+name = "Stationery"
+terms = ["stationery", "pen", "pencil", "desk accessory", "art supplies", "calligraphy"]
+
+[[topics]]
+name = "Greeting cards"
+terms = ["greeting card", "card", "birthday card", "wedding card"]
+
+[[topics]]
+name = "Wrapping paper"
+terms = ["wrapping paper", "gift wrap", "gift wrapping", "wrapping", "ribbon"]
+
+[[topics]]
+name = "Journals and notebooks"
+terms = ["journal", "notebook", "planner", "diary", "sketchbook"]
+
+[[topics]]
+name = "Gifts"
+terms = ["gift", "present", "gift shop"]
 
 [run]
 # AI Studio showed Gemini 3.8 Flash's free tier allows only about 20 requests per day
@@ -39,6 +70,8 @@ novelty_days = 14
 attempts_per_day = 2
 daily_attempts = 1
 timezone = "Australia/Melbourne"
+# Shift days in the store's timezone, e.g. ["mon"] for once a week, ["mon", "thu"] for twice.
+weekdays = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 
 [provider]
 name = "gemini"

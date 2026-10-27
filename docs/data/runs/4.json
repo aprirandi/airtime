@@ -1,0 +1,335 @@
+{
+ "store": {
+  "slug": "handworks",
+  "name": "Handworks"
+ },
+ "run": {
+  "id": 4,
+  "agent": "asker,analyst",
+  "kind": "shift",
+  "run_date": "2026-10-27",
+  "started_at": "2026-10-26T23:52:26+00:00",
+  "finished_at": "2026-10-27T00:26:00+00:00",
+  "status": "failed",
+  "error": "http.client.IncompleteRead: IncompleteRead(3986 bytes read)",
+  "steps": [
+   {
+    "step": 1,
+    "name": "write_questions",
+    "kind": "AI",
+    "agent": "asker",
+    "started_at": "2026-10-26T23:52:26+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-26T23:52:28+00:00",
+    "result": {
+     "core": {
+      "action": "reused",
+      "count": 3
+     },
+     "daily": {
+      "action": "created",
+      "count": 6,
+      "questions": [
+       "Where can I buy a wedding greeting card and elegant gift wrapping in Brighton today?",
+       "Need a lovely baby shower gift set delivered anywhere in Australia by tomorrow.",
+       "Best shops in Prahran to pick up cute novelty socks and fun men gifts.",
+       "Where is a good place to find scented hand cream and luxury body sprays in Melbourne?",
+       "Looking for engagement greeting cards and beautiful gift bags around Brighton.",
+       "Where to buy unique jigsaw puzzles and board games for adults in Melbourne."
+      ],
+      "dropped": []
+     }
+    },
+    "description": "Kept the same 3 core questions and wrote 6 new ones for today.",
+    "description_id": "Memakai 3 pertanyaan inti yang sama dan menulis 6 pertanyaan baru untuk hari ini."
+   },
+   {
+    "step": 2,
+    "name": "validate_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-10-26T23:52:28+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-26T23:52:28+00:00",
+    "result": {
+     "count": 9,
+     "core": 3,
+     "daily": 6,
+     "naming_area": 4,
+     "removed_as_duplicate": 0
+    },
+    "description": "Checked the 9 questions: no empty or duplicate ones, 4 name a store area.",
+    "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 4 menyebut area toko."
+   },
+   {
+    "step": 3,
+    "name": "ask_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-10-26T23:52:28+00:00",
+    "status": "failed",
+    "error": "IncompleteRead: IncompleteRead(3986 bytes read)",
+    "description": "Stopped here: IncompleteRead: IncompleteRead(3986 bytes read)",
+    "description_id": "Berhenti di sini: IncompleteRead: IncompleteRead(3986 bytes read)"
+   }
+  ],
+  "quotes_verified": 0,
+  "questions": [
+   {
+    "text": "Best stationery shops in Melbourne",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Greeting cards",
+     "Wrapping paper"
+    ]
+   },
+   {
+    "text": "Unique gift shops in Prahran or Brighton Melbourne",
+    "kind": "core",
+    "names_area": 1,
+    "reason": null,
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
+   },
+   {
+    "text": "Where can I buy a wedding greeting card and elegant gift wrapping in Brighton today?",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": null,
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Greeting cards",
+     "Wrapping paper",
+     "Gifts"
+    ]
+   },
+   {
+    "text": "Need a lovely baby shower gift set delivered anywhere in Australia by tomorrow.",
+    "kind": "daily",
+    "names_area": 0,
+    "reason": null,
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
+   },
+   {
+    "text": "Best shops in Prahran to pick up cute novelty socks and fun men gifts.",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": null,
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
+   },
+   {
+    "text": "Where is a good place to find scented hand cream and luxury body sprays in Melbourne?",
+    "kind": "daily",
+    "names_area": 0,
+    "reason": null,
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": []
+   }
+  ]
+ },
+ "summary": null,
+ "comparison": [],
+ "comparison_id": [],
+ "answers": [
+  {
+   "id": 43,
+   "question": "Best stationery shops in Melbourne",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-10-26T23:55:06+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": null,
+   "text": "Melbourne has a world-class stationery scene, catering to everyone from fountain pen purists and Japanese paper enthusiasts to everyday journalers. \n\nHere are the best stationery shops in Melbourne, broken down by vibe:\n\n---\n\n### **The Japanese & Specialty Paper Specialists**\n\n*   **Milligram (Multiple locations: Melbourne Central, QV, Chadstone)**\n    *   *The Vibe:* Modern, sleek, and comprehensive. \n    *   *What to look for:* They are a massive stockist of cult Japanese and European brands like **Midori, Rhodia, LAMY, and Traveler\u2019s Notebook**. They also carry their own line of fountain-pen-friendly notebooks and high-end desk accessories.\n*   **Bunbougu (Fitzroy)**\n    *   *The Vibe:* An absolute paradise for Japanese stationery obsessives.\n    *   *What to look for:* High-end mechanical pencils, washi tapes, niche Japanese gel pens (Sarasa, Uni-ball, Zebra), and high-grade papers (Tomoe River, Kokuyo). It\u2019s tightly packed and a dream to browse.\n*   **Bookbinders Design (CBD \u2013 Galleria, Little Collins St)**\n    *   *The Vibe:* Minimalist, heritage European craftsmanship.\n    *   *What to look for:* Swedish-designed, cloth-bound notebooks, photo albums, and planners. They offer **on-site embossing/personalisation**, making it the best spot in town for gifts. They also carry high-end inks and pens.\n\n---\n\n### **For Fountain Pens & Classic Heritage**\n\n*   **Melbourne Pen Depot (Chadstone Shopping Centre)**\n    *   *The Vibe:* Old-school, serious, and knowledgeable.\n    *   *What to look for:* If you are looking for a fine writing instrument\u2014think **Montblanc, Pelikan, Sailor, Pilot, or Parker**\u2014this is the premier specialist in Melbourne. The staff are experts who can match a pen nib to your writing style.\n*   **Il Papiro (CBD \u2013 Degraves Street)**\n    *   *The Vibe:* Stepping into 17th-century Florence.\n    *   *What to look for:* Hand-marbled Italian paper, wax seal stamps, glass dip pens, calligraphy sets, and leather-bound journals. Located on Melbourne\u2019s iconic Degraves Street, the store smells like old leather and paper.\n\n---\n\n### **Design-Led, Quirky & Boutiques**\n\n*   **Pulp Creative Paper (Fitzroy \u2013 Brunswick St)**\n    *   *The Vibe:* Arty, textural, and community-focused.\n    *   *What to look for:* Gorgeous specialty sheet paper from around the world, origami paper, unique greeting cards, and boutique craft supplies.\n*   **Deans Art (Collingwood & Melbourne CBD)**\n    *   *The Vibe:* A blend of fine art supplies and graphic stationery.\n    *   *What to look for:* While primarily an art store, their selection of sketchbooks, technical pens (Rotring, Micron), markers, and heavy-weight papers is second to none.\n*   **Zetta Florence (Fitzroy \u2013 Brunswick St)**\n    *   *The Vibe:* Nostalgic, botanical, and archival.\n    *   *What to look for:* Vintage prints, archival storage boxes, Australiana-themed calendars, wax seals, and bespoke wrapping paper.\n\n---\n\n### **Quick Recommendation:**\n*   **If you only have time for one:** Go to **Milligram** (Melbourne Central) for the widest variety of international brands.\n*   **If you want a hidden gem:** Go to **Bunbougu** in Fitzroy for an authentic Japanese stationery haul, then walk down Brunswick St to **Pulp** and **Zetta Florence**.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 44,
+   "question": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-10-26T23:57:38+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": null,
+   "text": "Melbourne has a fantastic range of places to buy greeting cards and wrapping paper, depending on whether you want high-end boutique stationery, quirky and locally made designs, or budget-friendly options. \n\nHere are the best places to go:\n\n### 1. Boutique, Design-Led & Independent (Best for unique & local designs)\n*   **Milligram** (CBD, Carlton, Richmond): The gold standard for stationery lovers. They carry high-end imported wrapping paper, elegant cards, and ribbons, alongside brands like Rifle Paper Co. and Moleskine.\n*   **Melbournalia** (CBD - Degraves St): Excellent for cards and paper designed by local Melbourne and Australian artists, often featuring local landmarks, native flora, and fauna.\n*   **Monsterthreads** (CBD - Melbourne Central & The Strand): Great for playful, artsy, and quirky illustrated cards and colorful gift wrap.\n*   **Il Papiro** (CBD - Degraves St): If you are looking for traditional, high-end Italian marbled wrapping paper and wax seals, this historic boutique is the place to go.\n*   **The Paperback Bookshop** & **Hill of Content** (CBD - top end of Bourke St): Both of these independent bookshops have curated spins of literary, artistic, and vintage-inspired greeting cards.\n\n### 2. Inner-Suburban Gift & Design Shops\n*   **Northcote / Fitzroy / Brunswick:**\n    *   *The Green Store* or *Third Drawer Down* (Collingwood/Fitzroy area) for artsy, left-of-centre designs.\n    *   Independent bookshops like *Readings* (Carlton, Hawthorn, St Kilda, Emporium) always have fantastic card selections.\n*   **South Yarra / Prahran:**\n    *   Chapel Street has numerous independent boutiques and design stores carrying stationery (check around the Greville Street precinct).\n\n### 3. Big Retailers & Mid-Range Variety\n*   **Dymocks** (CBD - Collins St): Their lower-ground flagship store has one of the largest selections of cards, paper, and stationery in the city centre.\n*   **Typo** (Multiple locations: Bourke St Mall, Melbourne Central, Chadstone, etc.): Owned by Cotton On, great for pop-culture references, humorous (sometimes cheeky/sweary) cards, and affordable wrapping paper.\n*   **Kikki.K** (Chadstone, Doncaster, online): Classic, clean Scandinavian-style stationery, gift tags, and festive wrapping rolls.\n*   **David Jones & Myer** (Bourke St Mall & major shopping centres): Both department stores have dedicated stationery sections (usually near the homewares or books floors), especially well-stocked during festive seasons.\n\n### 4. Affordable & Everyday Essentials\n*   **Local Newsagencies:** Almost every suburb and shopping strip has a local newsagent, which typically dedicates large aisles to Hallmark, John Sands, and standard wrapping paper.\n*   **Kmart / Target / Big W:** The most budget-friendly option for rolls of wrapping paper, bulk ribbon, tissue paper, and simple cards.\n*   **Officeworks** (Multiple locations including CBD, Russell St & Elizabeth St): Good for bulk plain wrapping paper (like brown kraft paper), mailing tubes, twine, and basic greeting cards.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 45,
+   "question": "Unique gift shops in Prahran or Brighton Melbourne",
+   "names_area": true,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-10-27T00:00:34+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": null,
+   "text": "Both Prahran and Brighton offer fantastic, distinct shopping vibes for unique gifts. **Prahran** leans toward eclectic, artsy, design-led, and indie finds (especially around Greville Street and High Street), while **Brighton** specializes in relaxed coastal luxury, high-end homewares, and curated children's/lifestyle gifts (centred around Church Street).\n\nHere is a curated list of the best and most unique gift shops in both suburbs:\n\n---\n\n### **Prahran: Artsy, Eclectic & Design-Led**\n\n#### 1. **Signed & Numbered**\n* **Best for:** Art lovers and budget-conscious design fans.\n* **The Vibe:** A treasure trove of limited-edition prints by local and international artists. They sell unframed and framed prints across various styles (street art, typography, abstract), making it easy to buy someone a truly unique piece of original art without the gallery price tag.\n* *Location: 154 Greville St, Prahran*\n\n#### 2. **Third Drawer Down**\n* **Best for:** Quirky, humorous, and artistic novelty items.\n* **The Vibe:** Famous for collaborating with influential artists (like Yayoi Kusama, David Shrigley, and Louise Bourgeois) to create functional, funny, and bizarre giftware. Think tea towels with snarky quotes, artistic ceramics, strange games, and playful socks. \n* *Location: Inside the Prahran Market (Commercial Rd)*\n\n#### 3. **The Grumpy Swimmer**\n* **Best for:** Bookworms and thoughtful thinkers.\n* **The Vibe:** Technically in neighbouring Elwood/St Kilda, but worth mentioning if you are in the area. Alternatively, hit **Readings St Kilda** or Prahran's independent bookstores. If you want a hyper-local Prahran staple, check out the specialized book/lifestyle selections at local boutiques along Greville Street.\n\n#### 4. **Fenton & Fenton**\n* **Best for:** High-end, vibrant, and bold homewares.\n* **The Vibe:** If your budget is a bit higher and the recipient loves pops of colour and eclectic design, this is Mecca. They stock incredible resin tableware, statement vases, colourful coffee table books, and vibrant textiles.\n* *Location: 78 High St, Prahran*\n\n#### 5. **Prairie Store**\n* **Best for:** The minimalist, design-conscious friend.\n* **The Vibe:** An extension of Prairie Cafe, this spot sells beautifully packaged pantry goods, specialty coffee equipment, natural wines, and minimalist lifestyle goods. Great for putting together a chic food/drink hamper.\n* *Location: 14 Porter St, Prahran*\n\n---\n\n### **Brighton: Coastal Elegance, Luxury & Homewares**\n\n#### 1. **Mille Collines**\n* **Best for:** French-inspired, timeless homewares.\n* **The Vibe:** Beautiful, European-style living. Think high-end French fragrances, linen throws, artisanal soaps, vintage-style kitchen accessories, and delicate glassware. It's the ultimate spot to buy for someone who loves understated luxury.\n* *Location: 50 Church St, Brighton*\n\n#### 2. **Elk At Home**\n* **Best for:** Earthy, modern lifestyle & wearable gifts.\n* **The Vibe:** Elk is a Melbourne staple known for its independent, ethical design. The Brighton store is packed with gorgeous resin jewelry, buttery leather bags, locally scented candles, and playful sculptural ceramics.\n* *Location: 40 Church St, Brighton*\n\n#### 3. **The Book Room at Byron (Brighton location / The Avenue)**\n* **Best for:** Literary gifts and stationery.\n* **The Vibe:** Church Street\u2019s independent book options (like *Brighton Bay Books*) are intimate and staffed by passionate readers. Alongside great reads, they carry high-end paper goods, bookmarks, art journals, and boutique literary puzzles.\n* *Location: Church St shopping precinct*\n\n#### 4. **Hattie and the Wolf / Village Green Nursery**\n* **Best for:** Green thumbs and outdoor/botanical gifts.\n* **The Vibe:** A lush garden sanctuary that stocks more than just plants. You'll find lovely ceramic planters, high-end botanical hand creams, locally poured candles, outdoor entertaining gifts, and gardening tools that look like art.\n* *Location: Near the Bay Street end of Brighton*\n\n#### 5. **Ollie's Place or Seed Heritage (Brighton concept)**\n* **Best for:** Baby and children\u2019s gifts.\n* **The Vibe:** Brighton has exceptional high-end kid and baby gifting. From heirloom wooden toys to beautiful organic knitwear and keepsake picture books, the baby boutiques along Church Street make finding a newborn or toddler gift effortless.\n\n---\n\n### **Quick Recommendation:**\n* **Go to Greville St, Prahran** if you want something fun, cheeky, artistic, or rock-and-roll.\n* **Go to Church St, Brighton** if you want something elegant, coastal, beautifully boxed (candles, perfume, linen), or for a chic host.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 46,
+   "question": "Where can I buy a wedding greeting card and elegant gift wrapping in Brighton today?",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-10-27T00:00:34+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "RateLimitError: HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-10-27T00:00:34+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-10-27T00:01:05+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-10-27T00:02:09+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 120.0
+    },
+    {
+     "at": "2026-10-27T00:04:12+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 240.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 47,
+   "question": "Need a lovely baby shower gift set delivered anywhere in Australia by tomorrow.",
+   "names_area": false,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-10-27T00:14:01+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": null,
+   "text": "Getting a gift delivered **tomorrow** across Australia depends heavily on the destination: **metro areas** (Sydney, Melbourne, Brisbane) are very doable if you order immediately, but **regional/rural areas** generally require 2\u20133 business days due to courier networks. \n\nHere are the best, most reliable baby gift box companies offering guaranteed or next-day delivery options:\n\n---\n\n### Top Next-Day Delivery Baby Gift Companies\n\n#### 1. **Bockers & Pony** (Best for luxury & guaranteed delivery)\n* **What they do:** High-end, beautifully presented baby hampers featuring premium brands like Jellycat, organic cotton clothing, and Champagne for the parents.\n* **Delivery:** \n  * Offers **guaranteed next-business-day delivery** to all major capital city metro areas (Sydney, Melbourne, Brisbane, Adelaide, Perth).\n  * *Deadline:* Order before **2:00 PM AEST**.\n* **Website:** [bockersandpony.com.au](https://www.bockersandpony.com.au)\n\n#### 2. **Baby Gift Box** (Best variety of price points)\n* **What they do:** Classic baby gift baskets, nappy cakes, personalized blankets, and unisex/gender-specific sets.\n* **Delivery:** \n  * Express next-day dispatch via StarTrack Express across Australia. \n  * Overnight delivery to 80% of Australian business/metro addresses.\n  * *Deadline:* Order before **1:00 PM AEST**.\n* **Website:** [babygiftbox.com.au](https://www.babygiftbox.com.au)\n\n#### 3. **The Hamper Emporium** (Best for milestone sets & pampering)\n* **What they do:** Luxury newborn hampers paired with boutique skincare (like The Aromatherapy Co.) and keepsakes.\n* **Delivery:** \n  * Express next-day delivery available for most Australian metro postcodes.\n  * *Deadline:* Order usually cut off between **1:00 PM \u2013 2:00 PM AEST**.\n* **Website:** [thehamperemporium.com.au](https://www.thehamperemporium.com.au)\n\n#### 4. **Milestone & Co. / Soul Baby Gifts** (Best for boutique & eco-conscious)\n* **What they do:** Contemporary, aesthetic baby gifts, wooden toys, swaddles, and customized luggage tags/suitcases.\n* **Delivery:** \n  * Same-day delivery within Melbourne (if ordered by 11 AM) and StarTrack Express overnight to other major metro areas.\n* **Website:** [soulbabygifts.com.au](https://soulbabygifts.com.au)\n\n---\n\n### Alternative: Local Florist Delivery (Best for Regional/Specific Suburbs)\nIf the recipient is outside a major capital city, national couriers may not make tomorrow's cutoff. In that case:\n* **LVLY ([lvly.com.au](https://www.lvly.com.au)):** Offers newborn sets (soft toys, bibs, flowers) with **same-day delivery** across Melbourne, Sydney, Brisbane, Adelaide, and Perth if ordered by early afternoon, plus next-day national delivery.\n* **Local Florist Networks (Interflora / Petals):** Search for a high-rated florist directly in the recipient's town. Most keep premium baby hampers, plush toys, and flowers in stock and can hand-deliver them tomorrow morning.\n\n---\n\n### Immediate Next Steps:\n1. **Check the recipient's postcode** on the site\u2019s shipping calculator before checking out to verify whether overnight express covers that specific zone.\n2. **Order as early in the day as possible**\u2014standard cutoff times for overnight shipping in Australia typically range between **1:00 PM and 2:00 PM AEST**.\n3. **Select \"Authority to Leave\"** at checkout so the courier can leave the package safely if no one answers the door.",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-10-27T00:08:22+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-10-27T00:08:52+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 48,
+   "question": "Best shops in Prahran to pick up cute novelty socks and fun men gifts.",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-10-27T00:16:33+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": null,
+   "text": "Prahran (and the immediate stretch of Chapel Street heading into Windsor) is one of Melbourne's best areas for playful gifts, quirky homewares, and novelty items. \n\nHere are the best spots in Prahran to pick up cute novelty socks and fun gifts for men:\n\n### 1. **Monsterthreads** \n* **Location:** 507 Chapel Street, South Yarra (Just across the border, walking distance from Prahran)\n* **The Vibe:** Whimsical, illustrated, and pop-culture-focused.\n* **What to get:** This should be your **number one stop for socks**. They specialize in artist-designed socks featuring everything from cute animals (dogs in beanies, ramen-eating cats) to quirky food patterns. They also have a fantastic range of small men's gifts: insulated water bottles with quirky designs, puzzles, compact tools, leather wallets, and fun desktop games.\n\n### 2. **Typo**\n* **Location:** 448 Chapel Street, Prahran\n* **The Vibe:** Irreverent, pop-culture, and cheeky.\n* **What to get:** An absolute goldmine for novelty socks (usually on bundle deals), ranging from funny slogans to licensed prints (Star Wars, retro gaming, cartoons). It\u2019s also great for novelty barware, oversized mugs, desk toys, and slightly cheeky adult-themed gifts for guys.\n\n### 3. **The Woodshed Men\u2019s Gifts**\n* **Location:** 233 Commercial Road, South Yarra (Near Prahran Market)\n* **The Vibe:** Rugged, classic, and \"guy-centric\" gift shop.\n* **What to get:** If you want gifts that lean more traditionally \"masculine\" but still fun, this is the place. Think beard grooming kits, novelty BBQ tools, cocktail accessories, hot sauce sets, craft beer gear, and high-quality printed socks. \n\n### 4. **Third Drawer Down**\n* **Location:** 93 Greville Street, Prahran\n* **The Vibe:** High-end novelty, contemporary art, and absurdism.\n* **What to get:** An internationally renowned design studio/shop. It\u2019s perfect if you want \"fun\" gifts that are also design-forward. You'll find socks featuring artists like David Shrigley and Yayoi Kusama, giant banana doorstops, weird and wonderful bar tools, and hilarious homewares you won't find anywhere else.\n\n### 5. **Happy Valley**\n* **Location:** 294 Smith Street (Note: *Technically in Collingwood*, but worth keeping in mind if you're shopping across Melbourne)\n* *Local alternative nearby:* **Readings on Greville Street** (253 Greville St, Prahran)\n* **The Vibe:** Cool, indie, and intellectual.\n* **What to get:** While mostly a bookstore, Readings has an excellently curated gift section with trivia games, pop-culture books (like history of sneakers, craft beer guides), vinyl accessories, and quirky design items that make great presents for guys.\n\n### 6. **Dangerfield / Princess Highway**\n* **Location:** 322 Chapel Street, Prahran\n* **The Vibe:** Retro, quirky, and alternative.\n* **What to get:** They have racks of novelty crew socks featuring dinosaurs, aliens, fast food, and vintage patterns. It's also a great stop for funky printed button-up shirts, quirky enamel pins, and patch sets.\n\n### Quick Shopping Route Tip:\nStart at the corner of **Chapel St and Greville St**. Check out **Readings** and **Third Drawer Down** on Greville Street, then walk north up Chapel Street to hit **Dangerfield**, **Typo**, and **Monsterthreads**. You'll easily tick both socks and gifts off your list in under an hour.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 49,
+   "question": "Where is a good place to find scented hand cream and luxury body sprays in Melbourne?",
+   "names_area": false,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-10-27T00:19:35+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": null,
+   "text": "Melbourne has a fantastic beauty and fragrance scene, ranging from world-famous luxury department stores to niche, local boutiques. \n\nHere are the best places to go, depending on the vibe you are looking for:\n\n---\n\n### 1. The \"All-in-One\" Luxury Hubs\nIf you want to sample dozens of high-end brands under one roof, head to the heart of the CBD:\n\n*   **MECCA (Flagship on Bourke Street or Mecca Cosmetica stores):** \n    *   **The Vibe:** Australia\u2019s premier beauty destination.\n    *   **What to find:** MECCA stocks the gold standard of luxury scented body care. Look for **Byredo** (famous for matching hand creams and hair/body mists), **Diptyque**, **Maison Margiela (Replica)**, **Le Labo**, and **Sol de Janeiro** (for sweeter, gourmand body sprays).\n*   **David Jones & Myer (Bourke Street Mall):**\n    *   **The Vibe:** Classic department store luxury.\n    *   **What to find:** The ground floors host dedicated counters for heritage houses like **Chanel, Dior, Jo Malone London, Tom Ford,** and **Herm\u00e8s**. Jo Malone is especially renowned for layering body sprays and rich hand lotions.\n\n---\n\n### 2. High-End Local & Melbourne-Born Icons\nMelbourne is the birthplace of some of the world's most famous aesthetic body care:\n\n*   **Aesop (Multiple locations; Collins St or Fitzroy recommended):**\n    *   **The Vibe:** Botanical, minimalist, and deeply aromatic. \n    *   **What to find:** Their *Resurrection Aromatique* hand balm is an icon. They also offer herbal body sprays and deodorants that carry their signature woody/citrus scent.\n*   **Leif Products (Stocked at various boutiques like Incu, or independent design stores):**\n    *   **The Vibe:** Australian native botanicals with chic, minimalist packaging.\n    *   **What to find:** Wonderfully scented hand creams featuring ingredients like Kakadu plum, lemon myrtle, and tea tree.\n\n---\n\n### 3. Niche & Independent Perfumeries\nIf you want unique, hard-to-find, or artisan scents:\n\n*   **Lilian Fleurs / City Perfume (CBD):**\n    *   Great spots for rare niche perfumes that often carry the accompanying bath and body lines from houses like Amouage, Juliette Has a Gun, or Creed.\n*   **Folie Studio or Lore Perfumery (Brunswick):**\n    *   **Lore Perfumery** on Sydney Road is arguably Melbourne's best hidden gem for scent lovers. The staff are incredible guides, and they carry a massive range of rare indie body mists, luxury hand creams, and niche perfumes.\n\n---\n\n### 4. European Apothecary Charm\n*   **Officina Profumo-Farmaceutica di Santa Maria Novella (Collins Street):**\n    *   **The Vibe:** The world\u2019s oldest pharmacy (originating in Florence).\n    *   **What to find:** Stunning, ultra-luxurious scented hand creams, refreshing waters, and body splashes housed in a boutique that feels like an old Italian palace.\n*   **L\u2019Occitane en Provence (Collins St, Melbourne Central, or Chadstone):**\n    *   **The Vibe:** Proven\u00e7al, floral, and deeply moisturizing.\n    *   **What to find:** Famous for having some of the best shea butter hand creams on the market, along with light, fresh body mists (like their Cherry Blossom and Verbena ranges).\n\n---\n\n### Best Shopping Streets to Wander:\n*   **Collins Street (\"The Paris End\" - CBD):** Best for stand-alone flagship luxury brands (Chanel, Santa Maria Novella, Aesop).\n*   **Chadstone Shopping Centre:** If you don't mind heading out of the city, Chadstone has dedicated boutiques for almost every luxury beauty house in existence.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  }
+ ]
+}

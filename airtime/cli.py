@@ -20,6 +20,21 @@ def _today(tz: str) -> str:
     return datetime.now(ZoneInfo(tz)).date().isoformat()
 
 
+def is_shift_day(cfg, date: str) -> bool:
+    from datetime import date as Date
+    from airtime.config import WEEKDAYS
+    return WEEKDAYS[Date.fromisoformat(date).weekday()] in cfg.weekdays
+
+
+def cmd_due(args) -> int:
+    """Exit 0 if today (store timezone) is a shift day, 1 if not. Used by the daily workflow."""
+    cfg = load_store_config(args.store)
+    date = args.date or _today(cfg.timezone)
+    due = is_shift_day(cfg, date)
+    print(f"{cfg.name} {date}: {'shift day' if due else 'no shift today'} (runs on {', '.join(cfg.weekdays)})")
+    return 0 if due else 1
+
+
 def _context(conn, cfg, date, *, ask=True, work=True) -> RunContext:
     from airtime.providers import make_provider
     store_id = db.upsert_store(conn, cfg)
@@ -53,6 +68,9 @@ def cmd_plan(args) -> int:
           f"{asks} asks on {p.ask_model} (budget {p.max_ask_calls_per_run})")
     print(f"work calls on {p.work_model}: up to 2 to write today's questions + {asks} extractions + "
           f"up to {asks} re-tries + up to 2 summary (budget {p.max_work_calls_per_run})")
+    print(f"new questions: {cfg.daily_mode} mode"
+          + (f", {len(cfg.topics)} topics, {cfg.explore_per_topic} per weak topic" if cfg.daily_mode == "explore" else "")
+          + f"; shift days: {', '.join(cfg.weekdays)}")
     print(f"web search grounding: {'on' if p.use_search else 'off'}; "
           f"min {p.min_seconds_between_calls}s between calls")
     return 0 if asks <= p.max_ask_calls_per_run else 1
@@ -62,11 +80,16 @@ def cmd_run(args) -> int:
     from airtime.agents.visibility.agent import shift_flow
     from airtime.export import export_site
     cfg = load_store_config(args.store)
+    date = args.date or _today(cfg.timezone)
+    if not args.force and not is_shift_day(cfg, date):
+        print(f"{date} is not a shift day for {cfg.name} (runs on {', '.join(cfg.weekdays)}); "
+              "use --force to run anyway")
+        return 0
     conn = db.connect(args.db)
     from airtime.export import AGENT, DOCS_DIR
     from airtime.live import LiveWriter
     try:
-        ctx = _context(conn, cfg, args.date or _today(cfg.timezone))
+        ctx = _context(conn, cfg, date)
         ctx.progress = LiveWriter(DOCS_DIR / "data" / "live.json", agent_name=AGENT["name"],
                                   store_slug=cfg.slug, run_date=ctx.run_date)
         shift_flow().run(ctx)
@@ -151,7 +174,12 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("run", help="run the Visibility agent once (daily job)")
     s.add_argument("--store", required=True)
     s.add_argument("--date", help="run date, default today in the store's timezone")
+    s.add_argument("--force", action="store_true", help="run even if today is not a shift day")
     s.set_defaults(fn=cmd_run)
+    s = sub.add_parser("due", help="exit 0 if today is a shift day for the store, 1 if not")
+    s.add_argument("--store", required=True)
+    s.add_argument("--date")
+    s.set_defaults(fn=cmd_due)
     s = sub.add_parser("import", help="import answers pasted from apps (CSV or JSON)")
     s.add_argument("--store", required=True)
     s.add_argument("file")

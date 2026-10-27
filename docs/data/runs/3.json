@@ -206,73 +206,107 @@
     "text": "Best stationery shops in Melbourne",
     "kind": "core",
     "names_area": 0,
+    "reason": null,
     "asked": 2,
     "counted": 2,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
    },
    {
     "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
     "kind": "core",
     "names_area": 0,
+    "reason": null,
     "asked": 2,
     "counted": 2,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Greeting cards",
+     "Wrapping paper"
+    ]
    },
    {
     "text": "Unique gift shops in Prahran or Brighton Melbourne",
     "kind": "core",
     "names_area": 1,
+    "reason": null,
     "asked": 2,
     "counted": 2,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
    },
    {
     "text": "Where can I buy scented candles and room diffusers in Brighton today?",
     "kind": "daily",
     "names_area": 1,
+    "reason": null,
     "asked": 1,
     "counted": 1,
-    "ours": 0
+    "ours": 0,
+    "topics": []
    },
    {
     "text": "Need to find a funny birthday card and cute socks for men in Melbourne.",
     "kind": "daily",
     "names_area": 0,
+    "reason": null,
     "asked": 1,
     "counted": 1,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Greeting cards"
+    ]
    },
    {
     "text": "Best shops in Prahran to get luxury journals and nice pens.",
     "kind": "daily",
     "names_area": 1,
+    "reason": null,
     "asked": 1,
     "counted": 1,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Stationery",
+     "Journals and notebooks"
+    ]
    },
    {
     "text": "Looking for Lamy pens and desk accessories with free delivery in Australia.",
     "kind": "daily",
     "names_area": 0,
+    "reason": null,
     "asked": 1,
     "counted": 1,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
    },
    {
     "text": "Where to buy baby plush toys and newborn books around Melbourne?",
     "kind": "daily",
     "names_area": 0,
+    "reason": null,
     "asked": 1,
     "counted": 1,
-    "ours": 0
+    "ours": 0,
+    "topics": []
    },
    {
     "text": "Shops in Brighton that sell Ted Baker shoe shine kits or men gifts.",
     "kind": "daily",
     "names_area": 1,
+    "reason": null,
     "asked": 1,
     "counted": 1,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
    }
   ]
  },

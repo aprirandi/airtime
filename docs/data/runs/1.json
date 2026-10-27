@@ -236,49 +236,74 @@
     "text": "Best stationery shops in Melbourne",
     "kind": "core",
     "names_area": 0,
+    "reason": null,
     "asked": 3,
     "counted": 3,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
    },
    {
     "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
     "kind": "core",
     "names_area": 0,
+    "reason": null,
     "asked": 3,
     "counted": 3,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Greeting cards",
+     "Wrapping paper"
+    ]
    },
    {
     "text": "Unique gift shops in Prahran or Brighton Melbourne",
     "kind": "core",
     "names_area": 1,
+    "reason": null,
     "asked": 3,
     "counted": 2,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
    },
    {
     "text": "Best place to buy journals and notebooks in Melbourne",
     "kind": "core",
     "names_area": 0,
+    "reason": null,
     "asked": 3,
     "counted": 2,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Journals and notebooks"
+    ]
    },
    {
     "text": "Birthday gift ideas under $30 in Melbourne",
     "kind": "core",
     "names_area": 0,
+    "reason": null,
     "asked": 3,
     "counted": 2,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
    },
    {
     "text": "Online stationery store in Australia with fast shipping",
     "kind": "core",
     "names_area": 0,
+    "reason": null,
     "asked": 3,
     "counted": 2,
-    "ours": 0
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
    }
   ]
  },

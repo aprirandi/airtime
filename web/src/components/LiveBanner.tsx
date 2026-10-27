@@ -30,7 +30,7 @@ export function useTick(ms = 1000) {
 export function LiveBanner({ live, site, checkedAt }: { live: Live | null; site: Site; checkedAt: Date | null }) {
   const { t, pick } = useI18n()
   const now = useTick(1000)
-  const next = nextShift(site.schedule.utc_hour, site.schedule.utc_minute, now)
+  const next = nextShift(site.schedule.utc_hour, site.schedule.utc_minute, now, site.schedule.weekdays)
   const checked = (
     <span className="text-muted-foreground inline-flex items-center gap-1 text-[11px]">
       <RefreshCw className="size-3" /> {t("live.checked", { ago: ago(t, checkedAt, now) })}
