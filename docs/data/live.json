@@ -5,7 +5,7 @@
  "run_date": "2026-10-28",
  "run_id": 5,
  "started_at": "2026-10-27T23:46:03+00:00",
- "updated_at": "2026-10-28T00:04:31+00:00",
+ "updated_at": "2026-10-28T00:14:38+00:00",
  "steps": [
   {
    "step": 1,
@@ -73,14 +73,14 @@
  ],
  "current": "ask_questions",
  "progress": {
-  "done": 2,
+  "done": 3,
   "total": 6,
   "unit": "questions asked",
   "ok": 0,
-  "no_answer": 2
+  "no_answer": 3
  },
- "last_event": "Asked \"Where can I buy greeting cards and wrapping paper in Melbourne?\" (try 1): no answer.",
- "last_event_id": "Bertanya \"Where can I buy greeting cards and wrapping paper in Melbourne?\" (percobaan 1): tanpa jawaban.",
+ "last_event": "Asked \"Unique gift shops in Prahran or Brighton Melbourne\" (try 1): no answer.",
+ "last_event_id": "Bertanya \"Unique gift shops in Prahran or Brighton Melbourne\" (percobaan 1): tanpa jawaban.",
  "agents": [
   "asker",
   "analyst"
