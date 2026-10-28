@@ -1,0 +1,480 @@
+{
+ "store": {
+  "slug": "handworks",
+  "name": "Handworks"
+ },
+ "run": {
+  "id": 5,
+  "agent": "asker,analyst",
+  "kind": "shift",
+  "run_date": "2026-10-28",
+  "started_at": "2026-10-27T23:46:03+00:00",
+  "finished_at": "2026-10-28T00:18:29+00:00",
+  "status": "ok",
+  "error": null,
+  "steps": [
+   {
+    "step": 1,
+    "name": "write_questions",
+    "kind": "AI",
+    "agent": "asker",
+    "started_at": "2026-10-27T23:46:03+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-27T23:46:03+00:00",
+    "result": {
+     "core": {
+      "action": "reused",
+      "count": 3
+     },
+     "daily": {
+      "action": "failed",
+      "mode": "explore",
+      "count": 0,
+      "error": "RateLimitError: HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n"
+     }
+    },
+    "description": "Kept the same 3 core questions; could not write new ones today, so only the core questions are asked.",
+    "description_id": "Memakai 3 pertanyaan inti yang sama; gagal menulis pertanyaan baru hari ini, jadi hanya pertanyaan inti yang diajukan."
+   },
+   {
+    "step": 2,
+    "name": "validate_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-10-27T23:46:03+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-27T23:46:03+00:00",
+    "result": {
+     "count": 3,
+     "core": 3,
+     "daily": 0,
+     "naming_area": 1,
+     "removed_as_duplicate": 0
+    },
+    "description": "Checked the 3 questions: no empty or duplicate ones, 1 names a store area.",
+    "description_id": "Mengecek 3 pertanyaan: tidak ada yang kosong atau dobel, 1 menyebut area toko."
+   },
+   {
+    "step": 3,
+    "name": "ask_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-10-27T23:46:03+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-28T00:18:28+00:00",
+    "result": {
+     "asked": 6,
+     "ok": 0,
+     "no_answer": 6,
+     "retries": 15,
+     "calls_made": 18
+    },
+    "description": "Asked 6 questions: 0 answered, 6 no answer. Retried 15 times after errors.",
+    "description_id": "Mengajukan 6 pertanyaan: 0 dijawab, 6 tanpa jawaban. Mencoba ulang 15 kali setelah error."
+   },
+   {
+    "step": "M",
+    "name": "master_answers_complete",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "asker",
+    "started_at": "2026-10-28T00:18:28+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-28T00:18:28+00:00",
+    "result": {
+     "recorded": 6,
+     "planned": 6,
+     "questions": 3,
+     "answered": 0,
+     "no_answer": 6,
+     "problems": []
+    },
+    "description": "Master checked the Asker's work: 6 of 6 answers recorded for 3 questions. Passed.",
+    "description_id": "Master mengecek hasil Asker: 6 dari 6 jawaban tercatat untuk 3 pertanyaan. Lolos."
+   },
+   {
+    "step": 4,
+    "name": "extract_mentions",
+    "kind": "AI",
+    "agent": "analyst",
+    "started_at": "2026-10-28T00:18:28+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-28T00:18:28+00:00",
+    "result": {
+     "extracted": 0,
+     "failed_calls": 0
+    },
+    "description": "Read 0 answers and listed every shop named.",
+    "description_id": "Membaca 0 jawaban dan mencatat setiap toko yang disebut."
+   },
+   {
+    "step": 5,
+    "name": "verify_and_count",
+    "kind": "CODE",
+    "agent": "analyst",
+    "started_at": "2026-10-28T00:18:28+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-28T00:18:28+00:00",
+    "result": {
+     "retried": 0,
+     "asked": 6,
+     "ok": 0,
+     "no_answer": 6,
+     "needs_review": 0,
+     "our_mentions": 0,
+     "top_competitor": null,
+     "top_competitor_mentions": 0
+    },
+    "description": "Checked every quote word for word: 0 answers counted, 0 set aside for review. Handworks named in 0 of 0.",
+    "description_id": "Mengecek setiap kutipan kata per kata: 0 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 0."
+   },
+   {
+    "step": 6,
+    "name": "compare_previous",
+    "kind": "CODE",
+    "agent": "analyst",
+    "started_at": "2026-10-28T00:18:28+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-28T00:18:28+00:00",
+    "result": {
+     "lines": [
+      "Compared with the previous run on 2026-10-26:",
+      "Handworks named in 0 of 0 answers (n/a), previously 0 of 12 (0%): not comparable (no counted answers on one of the days).",
+      "Top competitor none in 0 of 0; previously Milligram in 6 of 12 (different store).",
+      "Questions naming an area: 0 of 0, previously 0 of 5: not comparable (no counted answers on one of the days).",
+      "Questions not naming an area: 0 of 0, previously 0 of 7: not comparable (no counted answers on one of the days).",
+      "No answer: 6 of 6 asked (previously 0 of 12); set aside for review: 0 (previously 0)."
+     ],
+     "previous_date": "2026-10-26",
+     "range": {
+      "runs": 3,
+      "from": "2026-10-24",
+      "to": "2026-10-26",
+      "min_pct": 0,
+      "max_pct": 0
+     }
+    },
+    "description": "Handworks named in 0 of 0 answers (n/a), previously 0 of 12 (0%): not comparable (no counted answers on one of the days).",
+    "description_id": "Membandingkan dengan shift sebelumnya."
+   },
+   {
+    "step": 7,
+    "name": "write_summary",
+    "kind": "AI",
+    "agent": "analyst",
+    "started_at": "2026-10-28T00:18:28+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-28T00:18:29+00:00",
+    "result": {
+     "source": "ai",
+     "rejected": [],
+     "text": "Today, Gemini (API) produced 0 answers. Among these, Handworks was named in 0 responses, representing 0 of the total counted."
+    },
+    "description": "Wrote the summary; code checked every number in it against the counts.",
+    "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+   },
+   {
+    "step": "M",
+    "name": "master_numbers_match",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "analyst",
+    "started_at": "2026-10-28T00:18:29+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-28T00:18:29+00:00",
+    "result": {
+     "quotes_checked": 0,
+     "fields_checked": 10,
+     "our_mentions": 0,
+     "total_answers": 0,
+     "problems": []
+    },
+    "description": "Master checked the Analyst's work: 10 numbers match the answers, 0 quotes still verbatim. Passed.",
+    "description_id": "Master mengecek hasil Analyst: 10 angka cocok dengan jawaban, 0 kutipan masih persis sama. Lolos."
+   }
+  ],
+  "quotes_verified": 0,
+  "questions": [
+   {
+    "text": "Best stationery shops in Melbourne",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 2,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 2,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Greeting cards",
+     "Wrapping paper"
+    ]
+   },
+   {
+    "text": "Unique gift shops in Prahran or Brighton Melbourne",
+    "kind": "core",
+    "names_area": 1,
+    "reason": null,
+    "asked": 2,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
+   }
+  ]
+ },
+ "summary": {
+  "id": 5,
+  "store_id": 1,
+  "date": "2026-10-28",
+  "provider": "gemini",
+  "channel": "api",
+  "run_id": 5,
+  "asked": 6,
+  "no_answer": 6,
+  "needs_review": 0,
+  "our_mentions": 0,
+  "total_answers": 0,
+  "top_competitor": null,
+  "top_competitor_mentions": 0,
+  "area_mentions": 0,
+  "area_answers": 0,
+  "area_rate": null,
+  "no_area_mentions": 0,
+  "no_area_answers": 0,
+  "no_area_rate": null,
+  "web_search_answers": 0,
+  "competitors": [],
+  "our_answer_ids": [],
+  "text": "Today, Gemini (API) produced 0 answers. Among these, Handworks was named in 0 responses, representing 0 of the total counted.",
+  "text_source": "ai",
+  "note": null,
+  "core_mentions": 0,
+  "core_answers": 0,
+  "daily_mentions": 0,
+  "daily_answers": 0,
+  "label": "Gemini (API)"
+ },
+ "comparison": [
+  "Compared with the previous run on 2026-10-26:",
+  "Handworks named in 0 of 0 answers (n/a), previously 0 of 12 (0%): not comparable (no counted answers on one of the days).",
+  "Top competitor none in 0 of 0; previously Milligram in 6 of 12 (different store).",
+  "Questions naming an area: 0 of 0, previously 0 of 5: not comparable (no counted answers on one of the days).",
+  "Questions not naming an area: 0 of 0, previously 0 of 7: not comparable (no counted answers on one of the days).",
+  "No answer: 6 of 6 asked (previously 0 of 12); set aside for review: 0 (previously 0)."
+ ],
+ "comparison_id": [
+  "Dibandingkan dengan shift sebelumnya (2026-10-26):",
+  "Handworks disebut di 0 dari 0 jawaban (n/a), sebelumnya 0 dari 12 (0%): tidak bisa dibandingkan (tidak ada jawaban terhitung di salah satu hari).",
+  "Kompetitor teratas tidak ada di 0 dari 0; sebelumnya Milligram di 6 dari 12 (toko berbeda).",
+  "Pertanyaan yang menyebut area: 0 dari 0, sebelumnya 0 dari 5: tidak bisa dibandingkan (tidak ada jawaban terhitung di salah satu hari).",
+  "Pertanyaan lain: 0 dari 0, sebelumnya 0 dari 7: tidak bisa dibandingkan (tidak ada jawaban terhitung di salah satu hari).",
+  "Tanpa jawaban: 6 dari 6 (sebelumnya 0 dari 12); disisihkan untuk dicek: 0 (sebelumnya 0)."
+ ],
+ "answers": [
+  {
+   "id": 50,
+   "question": "Best stationery shops in Melbourne",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-10-27T23:46:03+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "RateLimitError: HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-10-27T23:46:56+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-10-27T23:48:41+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-10-27T23:49:43+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 120.0
+    },
+    {
+     "at": "2026-10-27T23:52:06+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 240.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 53,
+   "question": "Best stationery shops in Melbourne",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-10-28T00:14:38+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-10-28T00:14:46+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-10-28T00:15:25+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-10-28T00:16:28+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 120.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 51,
+   "question": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-10-27T23:56:18+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "RateLimitError: HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-10-27T23:56:29+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-10-27T23:57:05+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-10-27T23:58:26+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 120.0
+    },
+    {
+     "at": "2026-10-28T00:00:27+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 240.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 54,
+   "question": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-10-28T00:18:28+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 52,
+   "question": "Unique gift shops in Prahran or Brighton Melbourne",
+   "names_area": true,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-10-28T00:04:31+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "RateLimitError: HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-10-28T00:05:15+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-10-28T00:06:10+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-10-28T00:08:33+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 120.0
+    },
+    {
+     "at": "2026-10-28T00:10:35+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 240.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 55,
+   "question": "Unique gift shops in Prahran or Brighton Melbourne",
+   "names_area": true,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-10-28T00:18:28+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  }
+ ]
+}
