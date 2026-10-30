@@ -5,7 +5,7 @@
  "run_date": "2026-10-30",
  "run_id": 7,
  "started_at": "2026-10-29T23:56:48+00:00",
- "updated_at": "2026-10-29T23:56:56+00:00",
+ "updated_at": "2026-10-30T00:03:37+00:00",
  "steps": [
   {
    "step": 1,
@@ -72,9 +72,15 @@
   }
  ],
  "current": "ask_questions",
- "progress": null,
- "last_event": "Asking Gemini.",
- "last_event_id": "Bertanya ke Gemini.",
+ "progress": {
+  "done": 3,
+  "total": 6,
+  "unit": "questions asked",
+  "ok": 3,
+  "no_answer": 0
+ },
+ "last_event": "Asked \"Unique gift shops in Prahran or Brighton Melbourne\" (try 1): answered.",
+ "last_event_id": "Bertanya \"Unique gift shops in Prahran or Brighton Melbourne\" (percobaan 1): dijawab.",
  "agents": [
   "asker",
   "analyst"
