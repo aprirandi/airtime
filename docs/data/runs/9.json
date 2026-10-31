@@ -1,0 +1,2676 @@
+{
+ "store": {
+  "slug": "handworks",
+  "name": "Handworks"
+ },
+ "run": {
+  "id": 9,
+  "agent": "asker,analyst",
+  "kind": "shift",
+  "run_date": "2026-11-01",
+  "started_at": "2026-10-31T23:23:26+00:00",
+  "finished_at": "2026-10-31T23:37:39+00:00",
+  "status": "ok",
+  "error": null,
+  "steps": [
+   {
+    "step": 1,
+    "name": "write_questions",
+    "kind": "AI",
+    "agent": "asker",
+    "started_at": "2026-10-31T23:23:26+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-31T23:23:27+00:00",
+    "result": {
+     "core": {
+      "action": "reused",
+      "count": 3
+     },
+     "daily": {
+      "action": "created",
+      "mode": "explore",
+      "count": 6,
+      "topics": [
+       {
+        "topic": "Stationery",
+        "planned": 2,
+        "answers": 20,
+        "ours": 0,
+        "competitor": "Milligram"
+       },
+       {
+        "topic": "Greeting cards",
+        "planned": 2,
+        "answers": 18,
+        "ours": 0,
+        "competitor": "Readings"
+       },
+       {
+        "topic": "Wrapping paper",
+        "planned": 2,
+        "answers": 16,
+        "ours": 0,
+        "competitor": "Readings"
+       }
+      ],
+      "questions": [
+       "Where can I buy a vintage wooden pencil box and quality art supplies in Brighton?",
+       "Looking for a sleek metal desk accessory and a smooth black pen in Melbourne.",
+       "Where is the best place to find a minimalist wedding card in Melbourne?",
+       "Need a cute pop-up greeting card for a baby shower in Brighton today.",
+       "Where can I buy eco-friendly gift wrapping and colourful silk ribbon in Melbourne?",
+       "Shops in Brighton that sell luxury metallic wrapping paper for a milestone birthday."
+      ],
+      "dropped": []
+     }
+    },
+    "description": "Kept the same 3 core questions and wrote 6 new ones for the topics where Handworks is named least: Stationery, Greeting cards, Wrapping paper.",
+    "description_id": "Memakai 3 pertanyaan inti yang sama dan menulis 6 pertanyaan baru untuk topik di mana Handworks paling jarang disebut: Stationery, Greeting cards, Wrapping paper."
+   },
+   {
+    "step": 2,
+    "name": "validate_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-10-31T23:23:27+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-31T23:23:27+00:00",
+    "result": {
+     "count": 9,
+     "core": 3,
+     "daily": 6,
+     "naming_area": 4,
+     "removed_as_duplicate": 0
+    },
+    "description": "Checked the 9 questions: no empty or duplicate ones, 4 name a store area.",
+    "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 4 menyebut area toko."
+   },
+   {
+    "step": 3,
+    "name": "ask_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-10-31T23:23:27+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-31T23:36:07+00:00",
+    "result": {
+     "asked": 12,
+     "ok": 12,
+     "no_answer": 0,
+     "retries": 0,
+     "calls_made": 12
+    },
+    "description": "Asked 12 questions: 12 answered, 0 no answer.",
+    "description_id": "Mengajukan 12 pertanyaan: 12 dijawab, 0 tanpa jawaban."
+   },
+   {
+    "step": "M",
+    "name": "master_answers_complete",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "asker",
+    "started_at": "2026-10-31T23:36:07+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-31T23:36:07+00:00",
+    "result": {
+     "recorded": 12,
+     "planned": 12,
+     "questions": 9,
+     "answered": 12,
+     "no_answer": 0,
+     "problems": []
+    },
+    "description": "Master checked the Asker's work: 12 of 12 answers recorded for 9 questions. Passed.",
+    "description_id": "Master mengecek hasil Asker: 12 dari 12 jawaban tercatat untuk 9 pertanyaan. Lolos."
+   },
+   {
+    "step": 4,
+    "name": "extract_mentions",
+    "kind": "AI",
+    "agent": "analyst",
+    "started_at": "2026-10-31T23:36:07+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-31T23:37:26+00:00",
+    "result": {
+     "extracted": 12,
+     "failed_calls": 0
+    },
+    "description": "Read 12 answers and listed every shop named.",
+    "description_id": "Membaca 12 jawaban dan mencatat setiap toko yang disebut."
+   },
+   {
+    "step": 5,
+    "name": "verify_and_count",
+    "kind": "CODE",
+    "agent": "analyst",
+    "started_at": "2026-10-31T23:37:26+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-31T23:37:32+00:00",
+    "result": {
+     "retried": 1,
+     "asked": 12,
+     "ok": 12,
+     "no_answer": 0,
+     "needs_review": 0,
+     "our_mentions": 0,
+     "top_competitor": "Il Papiro",
+     "top_competitor_mentions": 4
+    },
+    "description": "Checked every quote word for word: 12 answers counted, 0 set aside for review. Handworks named in 0 of 12.",
+    "description_id": "Mengecek setiap kutipan kata per kata: 12 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 12."
+   },
+   {
+    "step": 6,
+    "name": "compare_previous",
+    "kind": "CODE",
+    "agent": "analyst",
+    "started_at": "2026-10-31T23:37:32+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-31T23:37:32+00:00",
+    "result": {
+     "lines": [
+      "Compared with the previous run on 2026-10-31:",
+      "Handworks named in 0 of 12 answers (0%), previously 0 of 12 (0%): no change.",
+      "Top competitor Il Papiro in 4 of 12; previously Readings in 6 of 12 (different store).",
+      "Questions naming an area: 0 of 5, previously 0 of 5: no change.",
+      "Questions not naming an area: 0 of 7, previously 0 of 7: no change.",
+      "No answer: 0 of 12 asked (previously 0 of 12); set aside for review: 0 (previously 0)."
+     ],
+     "previous_date": "2026-10-31",
+     "range": {
+      "runs": 7,
+      "from": "2026-10-24",
+      "to": "2026-11-01",
+      "min_pct": 0,
+      "max_pct": 0
+     }
+    },
+    "description": "Handworks named in 0 of 12 answers (0%), previously 0 of 12 (0%): no change.",
+    "description_id": "Membandingkan dengan shift sebelumnya."
+   },
+   {
+    "step": 7,
+    "name": "write_summary",
+    "kind": "AI",
+    "agent": "analyst",
+    "started_at": "2026-10-31T23:37:32+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-31T23:37:39+00:00",
+    "result": {
+     "source": "ai",
+     "rejected": [],
+     "text": "Today, Gemini (API) recorded 12 responses, of which 0 answers explicitly named Handworks. This resulted in an appearance rate of 0, while Il Papiro appeared in 4 responses. The mention rate is currently unchanged compared to the previous check on 2026-10-31."
+    },
+    "description": "Wrote the summary; code checked every number in it against the counts.",
+    "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+   },
+   {
+    "step": "M",
+    "name": "master_numbers_match",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "analyst",
+    "started_at": "2026-10-31T23:37:39+00:00",
+    "status": "ok",
+    "finished_at": "2026-10-31T23:37:39+00:00",
+    "result": {
+     "quotes_checked": 115,
+     "fields_checked": 10,
+     "our_mentions": 0,
+     "total_answers": 12,
+     "problems": []
+    },
+    "description": "Master checked the Analyst's work: 10 numbers match the answers, 115 quotes still verbatim. Passed.",
+    "description_id": "Master mengecek hasil Analyst: 10 angka cocok dengan jawaban, 115 kutipan masih persis sama. Lolos."
+   }
+  ],
+  "quotes_verified": 115,
+  "questions": [
+   {
+    "text": "Best stationery shops in Melbourne",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 2,
+    "counted": 2,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 2,
+    "counted": 2,
+    "ours": 0,
+    "topics": [
+     "Greeting cards",
+     "Wrapping paper"
+    ]
+   },
+   {
+    "text": "Unique gift shops in Prahran or Brighton Melbourne",
+    "kind": "core",
+    "names_area": 1,
+    "reason": null,
+    "asked": 2,
+    "counted": 2,
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
+   },
+   {
+    "text": "Where can I buy a vintage wooden pencil box and quality art supplies in Brighton?",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Stationery",
+     "answers": 20,
+     "ours": 0,
+     "competitor": "Milligram",
+     "competitor_mentions": 17,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Looking for a sleek metal desk accessory and a smooth black pen in Melbourne.",
+    "kind": "daily",
+    "names_area": 0,
+    "reason": {
+     "topic": "Stationery",
+     "answers": 20,
+     "ours": 0,
+     "competitor": "Milligram",
+     "competitor_mentions": 17,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Where is the best place to find a minimalist wedding card in Melbourne?",
+    "kind": "daily",
+    "names_area": 0,
+    "reason": {
+     "topic": "Greeting cards",
+     "answers": 18,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 14,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Greeting cards"
+    ]
+   },
+   {
+    "text": "Need a cute pop-up greeting card for a baby shower in Brighton today.",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Greeting cards",
+     "answers": 18,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 14,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Greeting cards"
+    ]
+   },
+   {
+    "text": "Where can I buy eco-friendly gift wrapping and colourful silk ribbon in Melbourne?",
+    "kind": "daily",
+    "names_area": 0,
+    "reason": {
+     "topic": "Wrapping paper",
+     "answers": 16,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 13,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Wrapping paper",
+     "Gifts"
+    ]
+   },
+   {
+    "text": "Shops in Brighton that sell luxury metallic wrapping paper for a milestone birthday.",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Wrapping paper",
+     "answers": 16,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 13,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Wrapping paper"
+    ]
+   }
+  ]
+ },
+ "summary": {
+  "id": 9,
+  "store_id": 1,
+  "date": "2026-11-01",
+  "provider": "gemini",
+  "channel": "api",
+  "run_id": 9,
+  "asked": 12,
+  "no_answer": 0,
+  "needs_review": 0,
+  "our_mentions": 0,
+  "total_answers": 12,
+  "top_competitor": "Il Papiro",
+  "top_competitor_mentions": 4,
+  "area_mentions": 0,
+  "area_answers": 5,
+  "area_rate": 0.0,
+  "no_area_mentions": 0,
+  "no_area_answers": 7,
+  "no_area_rate": 0.0,
+  "web_search_answers": 0,
+  "competitors": [
+   {
+    "key": "il papiro",
+    "name": "Il Papiro",
+    "mentions": 4,
+    "answer_ids": [
+     80,
+     81,
+     89,
+     90
+    ],
+    "spellings": [
+     "Il Papiro"
+    ]
+   },
+   {
+    "key": "milligram",
+    "name": "Milligram",
+    "mentions": 4,
+    "answer_ids": [
+     80,
+     84,
+     85,
+     90
+    ],
+    "spellings": [
+     "Milligram"
+    ]
+   },
+   {
+    "key": "readings",
+    "name": "Readings",
+    "mentions": 4,
+    "answer_ids": [
+     80,
+     81,
+     85,
+     90
+    ],
+    "spellings": [
+     "Readings"
+    ]
+   },
+   {
+    "key": "third drawer down",
+    "name": "Third Drawer Down",
+    "mentions": 4,
+    "answer_ids": [
+     81,
+     82,
+     90,
+     91
+    ],
+    "spellings": [
+     "Third Drawer Down"
+    ]
+   },
+   {
+    "key": "melbournalia",
+    "name": "Melbournalia",
+    "mentions": 3,
+    "answer_ids": [
+     81,
+     85,
+     90
+    ],
+    "spellings": [
+     "Melbournalia"
+    ]
+   },
+   {
+    "key": "muji",
+    "name": "MUJI",
+    "mentions": 3,
+    "answer_ids": [
+     80,
+     87,
+     89
+    ],
+    "spellings": [
+     "MUJI",
+     "MuJi"
+    ]
+   },
+   {
+    "key": "paper empire",
+    "name": "The Paper Empire",
+    "mentions": 3,
+    "answer_ids": [
+     81,
+     85,
+     87
+    ],
+    "spellings": [
+     "The Paper Empire"
+    ]
+   },
+   {
+    "key": "avenue bookstore",
+    "name": "Avenue Bookstore",
+    "mentions": 2,
+    "answer_ids": [
+     81,
+     90
+    ],
+    "spellings": [
+     "Avenue Bookstore",
+     "The Avenue Bookstore"
+    ]
+   },
+   {
+    "key": "bookbinders design",
+    "name": "Bookbinders Design",
+    "mentions": 2,
+    "answer_ids": [
+     80,
+     89
+    ],
+    "spellings": [
+     "Bookbinders Design"
+    ]
+   },
+   {
+    "key": "cass art",
+    "name": "Cass Art",
+    "mentions": 2,
+    "answer_ids": [
+     83,
+     88
+    ],
+    "spellings": [
+     "Cass Art"
+    ]
+   },
+   {
+    "key": "dymocks",
+    "name": "Dymocks",
+    "mentions": 2,
+    "answer_ids": [
+     81,
+     90
+    ],
+    "spellings": [
+     "Dymocks"
+    ]
+   },
+   {
+    "key": "hill of content",
+    "name": "Hill of Content",
+    "mentions": 2,
+    "answer_ids": [
+     85,
+     90
+    ],
+    "spellings": [
+     "Hill of Content"
+    ]
+   },
+   {
+    "key": "monsterthreads",
+    "name": "Monsterthreads",
+    "mentions": 2,
+    "answer_ids": [
+     81,
+     90
+    ],
+    "spellings": [
+     "Monsterthreads"
+    ]
+   },
+   {
+    "key": "ngv design store",
+    "name": "NGV design store",
+    "mentions": 2,
+    "answer_ids": [
+     81,
+     85
+    ],
+    "spellings": [
+     "NGV design store"
+    ]
+   },
+   {
+    "key": "present in the laine",
+    "name": "Present in the Laine",
+    "mentions": 2,
+    "answer_ids": [
+     86,
+     88
+    ],
+    "spellings": [
+     "Present in the Laine"
+    ]
+   },
+   {
+    "key": "snoopers paradise",
+    "name": "Snoopers Paradise",
+    "mentions": 2,
+    "answer_ids": [
+     83,
+     86
+    ],
+    "spellings": [
+     "Snoopers Paradise"
+    ]
+   },
+   {
+    "key": "grumpy swimmer",
+    "name": "The Grumpy Swimmer",
+    "mentions": 2,
+    "answer_ids": [
+     82,
+     91
+    ],
+    "spellings": [
+     "The Grumpy Swimmer"
+    ]
+   },
+   {
+    "key": "typo",
+    "name": "Typo",
+    "mentions": 2,
+    "answer_ids": [
+     81,
+     90
+    ],
+    "spellings": [
+     "Typo"
+    ]
+   },
+   {
+    "key": "waterstones",
+    "name": "Waterstones",
+    "mentions": 2,
+    "answer_ids": [
+     86,
+     88
+    ],
+    "spellings": [
+     "Waterstones"
+    ]
+   },
+   {
+    "key": "australia post",
+    "name": "Australia Post",
+    "mentions": 1,
+    "answer_ids": [
+     90
+    ],
+    "spellings": [
+     "Australia Post"
+    ]
+   },
+   {
+    "key": "bert s",
+    "name": "Bert's",
+    "mentions": 1,
+    "answer_ids": [
+     88
+    ],
+    "spellings": [
+     "Bert's"
+    ]
+   },
+   {
+    "key": "bert s homestore",
+    "name": "Bert\u2019s Homestore",
+    "mentions": 1,
+    "answer_ids": [
+     88
+    ],
+    "spellings": [
+     "Bert\u2019s Homestore"
+    ]
+   },
+   {
+    "key": "bibelot",
+    "name": "Bibelot",
+    "mentions": 1,
+    "answer_ids": [
+     82
+    ],
+    "spellings": [
+     "Bibelot"
+    ]
+   },
+   {
+    "key": "biome",
+    "name": "Biome",
+    "mentions": 1,
+    "answer_ids": [
+     87
+    ],
+    "spellings": [
+     "Biome"
+    ]
+   },
+   {
+    "key": "brighton bay pharmacy bay street gifts",
+    "name": "Brighton Bay Pharmacy / Bay Street Gifts",
+    "mentions": 1,
+    "answer_ids": [
+     91
+    ],
+    "spellings": [
+     "Brighton Bay Pharmacy / Bay Street Gifts"
+    ]
+   },
+   {
+    "key": "brighton flea market",
+    "name": "Brighton Flea Market",
+    "mentions": 1,
+    "answer_ids": [
+     83
+    ],
+    "spellings": [
+     "Brighton Flea Market"
+    ]
+   },
+   {
+    "key": "card shack",
+    "name": "Card Shack",
+    "mentions": 1,
+    "answer_ids": [
+     86
+    ],
+    "spellings": [
+     "Card Shack"
+    ]
+   },
+   {
+    "key": "clarkes",
+    "name": "Clarkes",
+    "mentions": 1,
+    "answer_ids": [
+     83
+    ],
+    "spellings": [
+     "Clarkes"
+    ]
+   },
+   {
+    "key": "crumpler taft top3 by design",
+    "name": "Crumpler / Taft / Top3 by Design",
+    "mentions": 1,
+    "answer_ids": [
+     84
+    ],
+    "spellings": [
+     "Crumpler / Taft / Top3 by Design"
+    ]
+   },
+   {
+    "key": "daiso",
+    "name": "Daiso",
+    "mentions": 1,
+    "answer_ids": [
+     90
+    ],
+    "spellings": [
+     "Daiso"
+    ]
+   },
+   {
+    "key": "daisy daisy",
+    "name": "Daisy Daisy",
+    "mentions": 1,
+    "answer_ids": [
+     86
+    ],
+    "spellings": [
+     "Daisy Daisy"
+    ]
+   },
+   {
+    "key": "david jones",
+    "name": "David Jones",
+    "mentions": 1,
+    "answer_ids": [
+     90
+    ],
+    "spellings": [
+     "David Jones"
+    ]
+   },
+   {
+    "key": "deans art",
+    "name": "Deans Art",
+    "mentions": 1,
+    "answer_ids": [
+     89
+    ],
+    "spellings": [
+     "Deans Art"
+    ]
+   },
+   {
+    "key": "dinosaur designs",
+    "name": "Dinosaur Designs",
+    "mentions": 1,
+    "answer_ids": [
+     91
+    ],
+    "spellings": [
+     "Dinosaur Designs"
+    ]
+   },
+   {
+    "key": "drakensberg drom",
+    "name": "Drakensberg / Drom",
+    "mentions": 1,
+    "answer_ids": [
+     84
+    ],
+    "spellings": [
+     "Drakensberg / Drom"
+    ]
+   },
+   {
+    "key": "fenton and fenton",
+    "name": "Fenton & Fenton",
+    "mentions": 1,
+    "answer_ids": [
+     82
+    ],
+    "spellings": [
+     "Fenton & Fenton"
+    ]
+   },
+   {
+    "key": "hay melbourne",
+    "name": "HAY Melbourne",
+    "mentions": 1,
+    "answer_ids": [
+     84
+    ],
+    "spellings": [
+     "HAY Melbourne"
+    ]
+   },
+   {
+    "key": "hill of content bookshop",
+    "name": "Hill of Content Bookshop",
+    "mentions": 1,
+    "answer_ids": [
+     81
+    ],
+    "spellings": [
+     "Hill of Content Bookshop"
+    ]
+   },
+   {
+    "key": "in the daylight",
+    "name": "In the Daylight",
+    "mentions": 1,
+    "answer_ids": [
+     85
+    ],
+    "spellings": [
+     "In the Daylight"
+    ]
+   },
+   {
+    "key": "jimmy buttons",
+    "name": "Jimmy Buttons",
+    "mentions": 1,
+    "answer_ids": [
+     87
+    ],
+    "spellings": [
+     "Jimmy Buttons"
+    ]
+   },
+   {
+    "key": "kmart",
+    "name": "Kmart",
+    "mentions": 1,
+    "answer_ids": [
+     90
+    ],
+    "spellings": [
+     "Kmart"
+    ]
+   },
+   {
+    "key": "kmart target big w",
+    "name": "Kmart / Target / Big W",
+    "mentions": 1,
+    "answer_ids": [
+     81
+    ],
+    "spellings": [
+     "Kmart / Target / Big W"
+    ]
+   },
+   {
+    "key": "lamington drive",
+    "name": "Lamington Drive",
+    "mentions": 1,
+    "answer_ids": [
+     82
+    ],
+    "spellings": [
+     "Lamington Drive"
+    ]
+   },
+   {
+    "key": "local post offices australia post and newsagencies",
+    "name": "Local Post Offices (Australia Post) & Newsagencies",
+    "mentions": 1,
+    "answer_ids": [
+     81
+    ],
+    "spellings": [
+     "Local Post Offices (Australia Post) & Newsagencies"
+    ]
+   },
+   {
+    "key": "made in japan",
+    "name": "Made in Japan",
+    "mentions": 1,
+    "answer_ids": [
+     80
+    ],
+    "spellings": [
+     "Made in Japan"
+    ]
+   },
+   {
+    "key": "made in japan mij",
+    "name": "Made in Japan (MIJ)",
+    "mentions": 1,
+    "answer_ids": [
+     87
+    ],
+    "spellings": [
+     "Made in Japan (MIJ)"
+    ]
+   },
+   {
+    "key": "maison living",
+    "name": "Maison Living",
+    "mentions": 1,
+    "answer_ids": [
+     82
+    ],
+    "spellings": [
+     "Maison Living"
+    ]
+   },
+   {
+    "key": "maker and monger",
+    "name": "Maker & Monger",
+    "mentions": 1,
+    "answer_ids": [
+     91
+    ],
+    "spellings": [
+     "Maker & Monger"
+    ]
+   },
+   {
+    "key": "melbournal",
+    "name": "Melbournal",
+    "mentions": 1,
+    "answer_ids": [
+     80
+    ],
+    "spellings": [
+     "Melbournal"
+    ]
+   },
+   {
+    "key": "melbourne pen depot",
+    "name": "Melbourne Pen Depot",
+    "mentions": 1,
+    "answer_ids": [
+     80
+    ],
+    "spellings": [
+     "Melbourne Pen Depot"
+    ]
+   },
+   {
+    "key": "melpens melbourne pens",
+    "name": "Melpens (Melbourne Pens)",
+    "mentions": 1,
+    "answer_ids": [
+     84
+    ],
+    "spellings": [
+     "Melpens (Melbourne Pens)"
+    ]
+   },
+   {
+    "key": "metropolis bookshop",
+    "name": "Metropolis Bookshop",
+    "mentions": 1,
+    "answer_ids": [
+     80
+    ],
+    "spellings": [
+     "Metropolis Bookshop"
+    ]
+   },
+   {
+    "key": "millgram",
+    "name": "Millgram",
+    "mentions": 1,
+    "answer_ids": [
+     89
+    ],
+    "spellings": [
+     "Millgram"
+    ]
+   },
+   {
+    "key": "mu ji",
+    "name": "Mu-Ji",
+    "mentions": 1,
+    "answer_ids": [
+     84
+    ],
+    "spellings": [
+     "Mu-Ji"
+    ]
+   },
+   {
+    "key": "myer",
+    "name": "Myer",
+    "mentions": 1,
+    "answer_ids": [
+     90
+    ],
+    "spellings": [
+     "Myer"
+    ]
+   },
+   {
+    "key": "officeworks",
+    "name": "Officeworks",
+    "mentions": 1,
+    "answer_ids": [
+     81
+    ],
+    "spellings": [
+     "Officeworks"
+    ]
+   },
+   {
+    "key": "oliver bonas",
+    "name": "Oliver Bonas",
+    "mentions": 1,
+    "answer_ids": [
+     88
+    ],
+    "spellings": [
+     "Oliver Bonas"
+    ]
+   },
+   {
+    "key": "oomomo",
+    "name": "Oomomo",
+    "mentions": 1,
+    "answer_ids": [
+     89
+    ],
+    "spellings": [
+     "Oomomo"
+    ]
+   },
+   {
+    "key": "paperchase next",
+    "name": "Paperchase @ Next",
+    "mentions": 1,
+    "answer_ids": [
+     86
+    ],
+    "spellings": [
+     "Paperchase @ Next"
+    ]
+   },
+   {
+    "key": "pinky s store",
+    "name": "Pinky\u2019s Store",
+    "mentions": 1,
+    "answer_ids": [
+     80
+    ],
+    "spellings": [
+     "Pinky\u2019s Store"
+    ]
+   },
+   {
+    "key": "pollon flowers",
+    "name": "Pollon Flowers",
+    "mentions": 1,
+    "answer_ids": [
+     87
+    ],
+    "spellings": [
+     "Pollon Flowers"
+    ]
+   },
+   {
+    "key": "prahran market specialty stalls",
+    "name": "Prahran Market Specialty Stalls",
+    "mentions": 1,
+    "answer_ids": [
+     82
+    ],
+    "spellings": [
+     "Prahran Market Specialty Stalls"
+    ]
+   },
+   {
+    "key": "quirks australia",
+    "name": "Quirks Australia",
+    "mentions": 1,
+    "answer_ids": [
+     91
+    ],
+    "spellings": [
+     "Quirks Australia"
+    ]
+   },
+   {
+    "key": "reverse art truck",
+    "name": "Reverse Art Truck",
+    "mentions": 1,
+    "answer_ids": [
+     87
+    ],
+    "spellings": [
+     "Reverse Art Truck"
+    ]
+   },
+   {
+    "key": "saint gertrude",
+    "name": "Saint Gertrude",
+    "mentions": 1,
+    "answer_ids": [
+     85
+    ],
+    "spellings": [
+     "Saint Gertrude"
+    ]
+   },
+   {
+    "key": "scout house",
+    "name": "Scout House",
+    "mentions": 1,
+    "answer_ids": [
+     82
+    ],
+    "spellings": [
+     "Scout House"
+    ]
+   },
+   {
+    "key": "senior art supplies",
+    "name": "Senior Art Supplies",
+    "mentions": 1,
+    "answer_ids": [
+     89
+    ],
+    "spellings": [
+     "Senior Art Supplies"
+    ]
+   },
+   {
+    "key": "signed and numbered",
+    "name": "Signed & Numbered",
+    "mentions": 1,
+    "answer_ids": [
+     91
+    ],
+    "spellings": [
+     "Signed & Numbered"
+    ]
+   },
+   {
+    "key": "spoilt gift and homewares",
+    "name": "Spoilt Gift & Homewares",
+    "mentions": 1,
+    "answer_ids": [
+     81
+    ],
+    "spellings": [
+     "Spoilt Gift & Homewares"
+    ]
+   },
+   {
+    "key": "tafts",
+    "name": "Tafts",
+    "mentions": 1,
+    "answer_ids": [
+     89
+    ],
+    "spellings": [
+     "Tafts"
+    ]
+   },
+   {
+    "key": "target",
+    "name": "Target",
+    "mentions": 1,
+    "answer_ids": [
+     90
+    ],
+    "spellings": [
+     "Target"
+    ]
+   },
+   {
+    "key": "telegram co milligram",
+    "name": "Telegram Co. / Milligram",
+    "mentions": 1,
+    "answer_ids": [
+     81
+    ],
+    "spellings": [
+     "Telegram Co. / Milligram"
+    ]
+   },
+   {
+    "key": "tessuti fabrics",
+    "name": "Tessuti Fabrics",
+    "mentions": 1,
+    "answer_ids": [
+     87
+    ],
+    "spellings": [
+     "Tessuti Fabrics"
+    ]
+   },
+   {
+    "key": "bayside soap and candle co",
+    "name": "The Bayside Soap & Candle Co.",
+    "mentions": 1,
+    "answer_ids": [
+     82
+    ],
+    "spellings": [
+     "The Bayside Soap & Candle Co."
+    ]
+   },
+   {
+    "key": "blacklist studio",
+    "name": "The Blacklist Studio",
+    "mentions": 1,
+    "answer_ids": [
+     85
+    ],
+    "spellings": [
+     "The Blacklist Studio"
+    ]
+   },
+   {
+    "key": "book nook and papeterie present in the laine",
+    "name": "The Book Nook & Papeterie / Present in the Laine",
+    "mentions": 1,
+    "answer_ids": [
+     83
+    ],
+    "spellings": [
+     "The Book Nook & Papeterie / Present in the Laine"
+    ]
+   },
+   {
+    "key": "essential ingredient",
+    "name": "The Essential Ingredient",
+    "mentions": 1,
+    "answer_ids": [
+     91
+    ],
+    "spellings": [
+     "The Essential Ingredient"
+    ]
+   },
+   {
+    "key": "fabric store",
+    "name": "The Fabric Store",
+    "mentions": 1,
+    "answer_ids": [
+     87
+    ],
+    "spellings": [
+     "The Fabric Store"
+    ]
+   },
+   {
+    "key": "north laine antique and flea market",
+    "name": "The North Laine Antique & Flea Market",
+    "mentions": 1,
+    "answer_ids": [
+     83
+    ],
+    "spellings": [
+     "The North Laine Antique & Flea Market"
+    ]
+   },
+   {
+    "key": "paperback bookshop",
+    "name": "The Paperback Bookshop",
+    "mentions": 1,
+    "answer_ids": [
+     90
+    ],
+    "spellings": [
+     "The Paperback Bookshop"
+    ]
+   },
+   {
+    "key": "reject shop",
+    "name": "The Reject Shop",
+    "mentions": 1,
+    "answer_ids": [
+     90
+    ],
+    "spellings": [
+     "The Reject Shop"
+    ]
+   },
+   {
+    "key": "upper gardner street saturday market",
+    "name": "Upper Gardner Street Saturday Market",
+    "mentions": 1,
+    "answer_ids": [
+     83
+    ],
+    "spellings": [
+     "Upper Gardner Street Saturday Market"
+    ]
+   },
+   {
+    "key": "utility",
+    "name": "Utility",
+    "mentions": 1,
+    "answer_ids": [
+     88
+    ],
+    "spellings": [
+     "Utility"
+    ]
+   },
+   {
+    "key": "white nest",
+    "name": "White Nest",
+    "mentions": 1,
+    "answer_ids": [
+     91
+    ],
+    "spellings": [
+     "White Nest"
+    ]
+   },
+   {
+    "key": "wunderkammer",
+    "name": "Wunderkammer",
+    "mentions": 1,
+    "answer_ids": [
+     89
+    ],
+    "spellings": [
+     "Wunderkammer"
+    ]
+   }
+  ],
+  "our_answer_ids": [],
+  "text": "Today, Gemini (API) recorded 12 responses, of which 0 answers explicitly named Handworks. This resulted in an appearance rate of 0, while Il Papiro appeared in 4 responses. The mention rate is currently unchanged compared to the previous check on 2026-10-31.",
+  "text_source": "ai",
+  "note": null,
+  "core_mentions": 0,
+  "core_answers": 6,
+  "daily_mentions": 0,
+  "daily_answers": 6,
+  "label": "Gemini (API)"
+ },
+ "comparison": [
+  "Compared with the previous run on 2026-10-31:",
+  "Handworks named in 0 of 12 answers (0%), previously 0 of 12 (0%): no change.",
+  "Top competitor Il Papiro in 4 of 12; previously Readings in 6 of 12 (different store).",
+  "Questions naming an area: 0 of 5, previously 0 of 5: no change.",
+  "Questions not naming an area: 0 of 7, previously 0 of 7: no change.",
+  "No answer: 0 of 12 asked (previously 0 of 12); set aside for review: 0 (previously 0)."
+ ],
+ "comparison_id": [
+  "Dibandingkan dengan shift sebelumnya (2026-10-31):",
+  "Handworks disebut di 0 dari 12 jawaban (0%), sebelumnya 0 dari 12 (0%): tidak berubah.",
+  "Kompetitor teratas Il Papiro di 4 dari 12; sebelumnya Readings di 6 dari 12 (toko berbeda).",
+  "Pertanyaan yang menyebut area: 0 dari 5, sebelumnya 0 dari 5: tidak berubah.",
+  "Pertanyaan lain: 0 dari 7, sebelumnya 0 dari 7: tidak berubah.",
+  "Tanpa jawaban: 0 dari 12 (sebelumnya 0 dari 12); disisihkan untuk dicek: 0 (sebelumnya 0)."
+ ],
+ "answers": [
+  {
+   "id": 80,
+   "question": "Best stationery shops in Melbourne",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-10-31T23:24:13+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Melbourne has a fantastic stationery scene, catering to everyone from fountain pen purists and Japanese paper enthusiasts to lovers of cute, quirky desk accessories. \n\nHere are the best stationery shops in Melbourne, broken down by style and location:\n\n---\n\n### **The Curated & Japanese Specialists**\n*Best for: Midori, Traveler\u2019s Notebooks, washi tape, and sleek design.*\n\n* **Milligram (CBD - Melbourne Central & Chadstone)**\n    * **The Vibe:** The heavyweight of Melbourne's design stationery scene. \n    * **What to look for:** A massive range of international brands like Rhodia, Moleskine, Kaweco, Delfonics, and their own Milligram Studio paper (which is fountain-pen friendly). They also sell high-end desk lighting and lifestyle goods.\n* **Made in Japan (South Melbourne & Queen Victoria Market)**\n    * **The Vibe:** Primarily known for ceramics, but their South Melbourne store has a dedicated, beautiful selection of Japanese paper, envelopes, and craft items.\n* **MuJi (CBD - Emporium & Chadstone)**\n    * **The Vibe:** Minimalist heaven. \n    * **What to look for:** Their iconic gel ink pens (a cult favorite worldwide), recycled paper notebooks, acrylic desk organizers, and minimalist pencil cases. Very affordable.\n\n---\n\n### **The Pen & Luxury Paper Purists**\n*Best for: Fountain pens, archival inks, and heirloom journals.*\n\n* **Melbourne Pen Depot (Chadstone Shopping Centre)**\n    * **The Vibe:** Old-school pen connoisseur. \n    * **What to look for:** If you are serious about fine writing instruments, this is the place. They stock Montblanc, Lamy, Pelikan, Sailor, and Pilot, along with premium inks and refills.\n* **Bookbinders Design (CBD - Galleria, Elizabeth St)**\n    * **The Vibe:** Swiss-owned, minimalist, high-end European craftsmanship.\n    * **What to look for:** Handcrafted cloth-bound notebooks, photo albums, and desk accessories that can be personalized with custom embossing. They also carry high-end pens (Kaweco, Caran d\u2019Ache) and bottled inks.\n\n---\n\n### **Boutique, Indie & Gift Stationery**\n*Best for: Greeting cards, quirky desk items, wrapping paper, and unique finds.*\n\n* **Il Papiro (CBD - Degraves Street)**\n    * **The Vibe:** A slice of Renaissance Florence in Melbourne\u2019s most famous laneway.\n    * **What to look for:** Traditional hand-marbled paper, wax seals, calligraphy sets, leather-bound journals, and artisanal correspondence cards. \n* **Pinky\u2019s Store (Preston)**\n    * **The Vibe:** Colorful, joyful, and design-led.\n    * **What to look for:** A curated range of independent local and international stationery brands (like Rifle Paper Co, Poketo), alongside bright planners, fun pens, and great greeting cards.\n* **Melbournal (Brunswick)**\n    * **The Vibe:** A paradise for journaling, scrapbooking, and \"bujo\" (bullet journal) fans.\n    * **What to look for:** Enormous varieties of washi tapes, stickers, rubber stamps, and journaling ephemera imported from Japan, Korea, and Taiwan.\n\n---\n\n### **The Bookstore Stationery Nooks**\n*Melbourne's independent bookstores often have world-class stationery sections.*\n\n* **Readings (Carlton, CBD, Hawthorn, St Kilda)**\n    * The Carlton flagship, in particular, has a wonderful selection of high-end notebooks (Leuchtturm1917, Blackwing pencils), reading accessories, and locally designed cards.\n* **Metropolis Bookshop (CBD - Curtin House, Swanston St)**\n    * An indie bookstore with a great eye for graphic design; stocks unique notebooks, zines, and architecture/design-focused stationery.\n\n---\n\n### **Quick Recommendation:**\n* If you only have time to visit **one area**, head to the **Melbourne CBD**. Within walking distance, you can visit **Milligram** (Melbourne Central), **MuJi** (Emporium), **Bookbinders Design** (Elizabeth St), and **Il Papiro** (Degraves St).",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Milligram",
+     "store_key": "milligram",
+     "is_ours": 0,
+     "position": 1,
+     "rank": null,
+     "tone": null,
+     "quote": "Milligram (CBD - Melbourne Central & Chadstone)"
+    },
+    {
+     "store_name": "Made in Japan",
+     "store_key": "made in japan",
+     "is_ours": 0,
+     "position": 2,
+     "rank": null,
+     "tone": null,
+     "quote": "Made in Japan (South Melbourne & Queen Victoria Market)"
+    },
+    {
+     "store_name": "MuJi",
+     "store_key": "muji",
+     "is_ours": 0,
+     "position": 3,
+     "rank": null,
+     "tone": null,
+     "quote": "MuJi (CBD - Emporium & Chadstone)"
+    },
+    {
+     "store_name": "Melbourne Pen Depot",
+     "store_key": "melbourne pen depot",
+     "is_ours": 0,
+     "position": 4,
+     "rank": null,
+     "tone": null,
+     "quote": "Melbourne Pen Depot (Chadstone Shopping Centre)"
+    },
+    {
+     "store_name": "Bookbinders Design",
+     "store_key": "bookbinders design",
+     "is_ours": 0,
+     "position": 5,
+     "rank": null,
+     "tone": null,
+     "quote": "Bookbinders Design (CBD - Galleria, Elizabeth St)"
+    },
+    {
+     "store_name": "Il Papiro",
+     "store_key": "il papiro",
+     "is_ours": 0,
+     "position": 6,
+     "rank": null,
+     "tone": null,
+     "quote": "Il Papiro (CBD - Degraves Street)"
+    },
+    {
+     "store_name": "Pinky\u2019s Store",
+     "store_key": "pinky s store",
+     "is_ours": 0,
+     "position": 7,
+     "rank": null,
+     "tone": null,
+     "quote": "Pinky\u2019s Store (Preston)"
+    },
+    {
+     "store_name": "Melbournal",
+     "store_key": "melbournal",
+     "is_ours": 0,
+     "position": 8,
+     "rank": null,
+     "tone": null,
+     "quote": "Melbournal (Brunswick)"
+    },
+    {
+     "store_name": "Readings",
+     "store_key": "readings",
+     "is_ours": 0,
+     "position": 9,
+     "rank": null,
+     "tone": null,
+     "quote": "Readings (Carlton, CBD, Hawthorn, St Kilda)"
+    },
+    {
+     "store_name": "Metropolis Bookshop",
+     "store_key": "metropolis bookshop",
+     "is_ours": 0,
+     "position": 10,
+     "rank": null,
+     "tone": null,
+     "quote": "Metropolis Bookshop (CBD - Curtin House, Swanston St)"
+    }
+   ]
+  },
+  {
+   "id": 89,
+   "question": "Best stationery shops in Melbourne",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-10-31T23:33:46+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Melbourne is one of the best cities in the world for stationery lovers, with a rich culture of independent boutiques, specialist paper stores, and Japanese imports. \n\nHere are the best stationery shops in Melbourne, broken down by category:\n\n---\n\n### **The Absolute Essentials (Boutique & Specialist)**\n\n#### 1. **Millgram** *(Melbourne Central & Barkly Square, Brunswick)*\nFormerly known as *Notemaker*, Millgram is arguably Melbourne\u2019s premier destination for curated, design-focused stationery. They stock an incredible range of high-end notebooks, planner inserts, pens, and desk accessories.\n* **Brands to look for:** Midori/Traveler\u2019s Notebook, Leuchtturm1917, Rhodia, Lamy, Kaweco, and their own Millgram-designed planners.\n* **Vibe:** Minimalist, sleek, and exceptionally well-curated.\n\n#### 2. **Bookbinders Design** *(348 Little Collins St, CBD)*\nIf you love European heritage, high-grade linen, and bespoke craftsmanship, this is your place. Originally from Sweden, they specialize in cloth-bound notebooks, photo albums, and premium fountain pens. They also offer **on-site embossing/personalization**.\n* **Brands to look for:** Bookbinders original cloth-bound books, Caran d'Ache, Otto Hutt, Graf von Faber-Castell.\n* **Vibe:** Old-world European luxury.\n\n#### 3. **Il Papiro** *(Degraves Street, CBD)*\nHidden down Melbourne\u2019s most famous caf\u00e9 lane, Il Papiro is an authentic slice of Florence. They specialize in traditional hand-marbled paper, wax seals, calligraphy sets, and leather-bound journals.\n* **Best for:** Wax seals, fine writing paper, dipping pens, and unique gifts.\n* **Vibe:** Classic Italian artisan.\n\n---\n\n### **For Japanese Stationery & Cuteness**\n\nMelbourne has a massive appetite for Japanese stationery, which is famous for its paper quality, clever design, and precision.\n\n#### 4. **MUJI** *(Chadstone & Emporium, CBD)*\nNo stationery list is complete without MUJI. World-renowned for its minimalist aesthetic, ultra-smooth gel ink pens, and remarkably affordable recycled-paper notebooks. \n* **Must-buys:** The 0.38/0.5mm gel pens, acrylic desk organizers, and plantation paper notebooks.\n\n#### 5. **Oomomo** *(Midtown Plaza, Bourke St, CBD)*\nA treasure trove of Japanese goods, including a dedicated section of Japanese stationery. It\u2019s the place to go for cute washi tapes, quirky sticky notes, novelty erasers, and functional everyday pens at very reasonable prices.\n\n#### 6. **Wunderkammer** *(Lonsdale St, CBD)*\nWhile technically a \"cabinet of curiosities\" selling vintage science equipment, fossils, and taxidermy, they have a fantastic, moody stationery section featuring vintage-style notebooks, anatomical prints, dipping pens, and ink.\n\n---\n\n### **Art, Craft & Specialty Paper**\n\n#### 7. **Senior Art Supplies** *(Degraves St, CBD)*\nJust down the lane from Il Papiro, this is a Melbourne institution for fine artists, but it\u2019s equally beloved by notebook enthusiasts. They stock a massive variety of sketchbooks, calligraphy inks, watercolor paper, and drawing pens (Microns, Posca, Tombow).\n\n#### 8. **Deans Art** *(Brunswick & Collingwood)*\nA staple for local design students and artists. While broader than just \"stationery,\" their paper selection is among the best in the city\u2014ideal if you want loose-leaf specialty paper, high-end marker pads, or binding materials.\n\n---\n\n### **High-End Pens & Calligraphy**\n\n#### 9. **Tafts** *(Melbourne Central)*\nIf you are specifically into fountain pens, luxury rollerballs, and collector's inks, Tafts is Melbourne\u2019s legacy pen retailer. \n* **Brands to look for:** Montblanc, Pilot, Sailor, Visconti, Pelikan.\n\n---\n\n### **A Quick Shopping Itinerary (CBD):**\nIf you want to do a \"Stationery Crawl\" in one afternoon:\n1. Start at **Melbourne Central** (Millgram & Tafts).\n2. Walk down to **Emporium** for **MUJI**.\n3. Head down to **Little Collins St** for **Bookbinders Design**.\n4. End at **Degraves Street** to browse **Senior Art Supplies** and **Il Papiro** (and grab a coffee).",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Millgram",
+     "store_key": "millgram",
+     "is_ours": 0,
+     "position": 1,
+     "rank": 1,
+     "tone": null,
+     "quote": "Millgram is arguably Melbourne\u2019s premier destination for curated, design-focused stationery."
+    },
+    {
+     "store_name": "Bookbinders Design",
+     "store_key": "bookbinders design",
+     "is_ours": 0,
+     "position": 2,
+     "rank": 2,
+     "tone": null,
+     "quote": "Bookbinders Design (348 Little Collins St, CBD)"
+    },
+    {
+     "store_name": "Il Papiro",
+     "store_key": "il papiro",
+     "is_ours": 0,
+     "position": 3,
+     "rank": 3,
+     "tone": null,
+     "quote": "Il Papiro (Degraves Street, CBD)"
+    },
+    {
+     "store_name": "MUJI",
+     "store_key": "muji",
+     "is_ours": 0,
+     "position": 4,
+     "rank": 4,
+     "tone": null,
+     "quote": "MUJI (Chadstone & Emporium, CBD)"
+    },
+    {
+     "store_name": "Oomomo",
+     "store_key": "oomomo",
+     "is_ours": 0,
+     "position": 5,
+     "rank": 5,
+     "tone": null,
+     "quote": "Oomomo (Midtown Plaza, Bourke St, CBD)"
+    },
+    {
+     "store_name": "Wunderkammer",
+     "store_key": "wunderkammer",
+     "is_ours": 0,
+     "position": 6,
+     "rank": 6,
+     "tone": null,
+     "quote": "Wunderkammer (Lonsdale St, CBD)"
+    },
+    {
+     "store_name": "Senior Art Supplies",
+     "store_key": "senior art supplies",
+     "is_ours": 0,
+     "position": 7,
+     "rank": 7,
+     "tone": null,
+     "quote": "Senior Art Supplies (Degraves St, CBD)"
+    },
+    {
+     "store_name": "Deans Art",
+     "store_key": "deans art",
+     "is_ours": 0,
+     "position": 8,
+     "rank": 8,
+     "tone": null,
+     "quote": "Deans Art (Brunswick & Collingwood)"
+    },
+    {
+     "store_name": "Tafts",
+     "store_key": "tafts",
+     "is_ours": 0,
+     "position": 9,
+     "rank": 9,
+     "tone": null,
+     "quote": "Tafts (Melbourne Central)"
+    }
+   ]
+  },
+  {
+   "id": 81,
+   "question": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-10-31T23:25:37+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Melbourne has a fantastic range of places to buy greeting cards and wrapping paper, depending on whether you are looking for quirky and indie designs, high-end luxury stationery, or budget-friendly options. \n\nHere is a guide to the best spots across the city:\n\n---\n\n### 1. Boutique & Indie Stationery (Best for unique, local, and artistic designs)\n\n*   **Telegram Co. / Milligram** (CBD, Carlton, Richmond)\n    *   *Best for:* Premium stationery, minimalist wrapping paper, and thoughtful imported cards. \n    *   *Locations:* Melbourne Central, Collins Street, Lygon Street (Carlton), and Bridge Road.\n*   **Melbournalia** (CBD)\n    *   *Best for:* Australiana, Melbourne-centric designs, and cards by local artists.\n    *   *Location:* 322 Bourke Street.\n*   **Spoilt Gift & Homewares** (CBD)\n    *   *Best for:* A massive wall of cards ranging from funny and rude to heartfelt and elegant, plus decent wrapping paper rolls.\n    *   *Locations:* Several in the CBD, including Bourke Street Mall and Collins Street.\n*   **The Paper Empire** (Hawthorn)\n    *   *Best for:* Serious paper lovers. They specialise in fine papers, artisan gift wraps (often sold in flat sheets suitable for framing or wrapping), ribbons, and cards.\n    *   *Location:* 1162 Glenferrie Road.\n\n---\n\n### 2. Independent Bookstores (Best for literary, witty, and beautiful cards)\n\nIndependent bookstores in Melbourne almost always have curated collections of high-quality cards and wraps from local illustrators.\n\n*   **Readings** (Carlton, CBD, Fitzroy, St Kilda, Hawthorn, Emporium)\n    *   One of Melbourne's best selections of literary, artsy, and Australian-designed cards.\n*   **Hill of Content Bookshop** (CBD)\n    *   *Location:* 86 Bourke Street (Top end of town). Great selection of classic, tasteful cards.\n*   **Avenue Bookstore** (Albert Park, Elsternwick, Richmond)\n    *   Features a large selection of premium wrap and independent card lines.\n\n---\n\n### 3. Gift & Design Stores (Best for stylish and quirky cards)\n\n*   **Monsterthreads** (CBD)\n    *   *Best for:* Fun, quirky, youth-oriented art cards made in collaboration with independent artists.\n    *   *Location:* Melbourne Central & QV.\n*   **Third Drawer Down** (Online / occasional pop-ups, often stocked in museum shops)\n    *   *Best for:* Irreverent, funny, and artistic options.\n*   **NGV design store** (National Gallery of Victoria, Southbank)\n    *   *Best for:* Fine art wrapping paper, exhibition-themed cards, and contemporary design.\n\n---\n\n### 4. High-End / Specialty Paper\n\n*   **Il Papiro** (CBD)\n    *   *Best for:* Traditional, hand-marbled Florentine paper, wax seals, and timeless, old-world elegance.\n    *   *Location:* 10 Degraves Street.\n\n---\n\n### 5. High Street & Budget Options\n\n*   **Dymocks** (Lower Ground, 234 Collins St)\n    *   The lower level has an extensive stationery department with a large card and wrap selection.\n*   **Typo** (Various locations: Melbourne Central, Bourke St, suburban shopping centres)\n    *   *Best for:* Cheeky, humorous, pop-culture-themed, and inexpensive cards and wrap.\n*   **Kmart / Target / Big W** (CBD and suburbs)\n    *   *Best for:* Cheap wrapping paper in bulk, ribbons, gift bags, and basic greeting cards.\n*   **Officeworks** (Multiple CBD and inner-city locations)\n    *   *Best for:* Solid standard selection of wrapping paper, plain kraft paper rolls, tags, and standard hallmark cards at reasonable prices.\n*   **Local Post Offices (Australia Post) & Newsagencies**\n    *   Reliable for traditional greeting cards (Hallmark, John Sands) and basic gift wrap in an emergency.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Telegram Co. / Milligram",
+     "store_key": "telegram co milligram",
+     "is_ours": 0,
+     "position": 1,
+     "rank": null,
+     "tone": null,
+     "quote": "Telegram Co. / Milligram (CBD, Carlton, Richmond)"
+    },
+    {
+     "store_name": "Melbournalia",
+     "store_key": "melbournalia",
+     "is_ours": 0,
+     "position": 2,
+     "rank": null,
+     "tone": null,
+     "quote": "Melbournalia (CBD)"
+    },
+    {
+     "store_name": "Spoilt Gift & Homewares",
+     "store_key": "spoilt gift and homewares",
+     "is_ours": 0,
+     "position": 3,
+     "rank": null,
+     "tone": null,
+     "quote": "Spoilt Gift & Homewares (CBD)"
+    },
+    {
+     "store_name": "The Paper Empire",
+     "store_key": "paper empire",
+     "is_ours": 0,
+     "position": 4,
+     "rank": null,
+     "tone": null,
+     "quote": "The Paper Empire (Hawthorn)"
+    },
+    {
+     "store_name": "Readings",
+     "store_key": "readings",
+     "is_ours": 0,
+     "position": 5,
+     "rank": null,
+     "tone": null,
+     "quote": "Readings (Carlton, CBD, Fitzroy, St Kilda, Hawthorn, Emporium)"
+    },
+    {
+     "store_name": "Hill of Content Bookshop",
+     "store_key": "hill of content bookshop",
+     "is_ours": 0,
+     "position": 6,
+     "rank": null,
+     "tone": null,
+     "quote": "Hill of Content Bookshop (CBD)"
+    },
+    {
+     "store_name": "Avenue Bookstore",
+     "store_key": "avenue bookstore",
+     "is_ours": 0,
+     "position": 7,
+     "rank": null,
+     "tone": null,
+     "quote": "Avenue Bookstore (Albert Park, Elsternwick, Richmond)"
+    },
+    {
+     "store_name": "Monsterthreads",
+     "store_key": "monsterthreads",
+     "is_ours": 0,
+     "position": 8,
+     "rank": null,
+     "tone": null,
+     "quote": "Monsterthreads (CBD)"
+    },
+    {
+     "store_name": "Third Drawer Down",
+     "store_key": "third drawer down",
+     "is_ours": 0,
+     "position": 9,
+     "rank": null,
+     "tone": null,
+     "quote": "Third Drawer Down (Online / occasional pop-ups, often stocked in museum shops)"
+    },
+    {
+     "store_name": "NGV design store",
+     "store_key": "ngv design store",
+     "is_ours": 0,
+     "position": 10,
+     "rank": null,
+     "tone": null,
+     "quote": "NGV design store (National Gallery of Victoria, Southbank)"
+    },
+    {
+     "store_name": "Il Papiro",
+     "store_key": "il papiro",
+     "is_ours": 0,
+     "position": 11,
+     "rank": null,
+     "tone": null,
+     "quote": "Il Papiro (CBD)"
+    },
+    {
+     "store_name": "Dymocks",
+     "store_key": "dymocks",
+     "is_ours": 0,
+     "position": 12,
+     "rank": null,
+     "tone": null,
+     "quote": "Dymocks (Lower Ground, 234 Collins St)"
+    },
+    {
+     "store_name": "Typo",
+     "store_key": "typo",
+     "is_ours": 0,
+     "position": 13,
+     "rank": null,
+     "tone": null,
+     "quote": "Typo (Various locations: Melbourne Central, Bourke St, suburban shopping centres)"
+    },
+    {
+     "store_name": "Kmart / Target / Big W",
+     "store_key": "kmart target big w",
+     "is_ours": 0,
+     "position": 14,
+     "rank": null,
+     "tone": null,
+     "quote": "Kmart / Target / Big W (CBD and suburbs)"
+    },
+    {
+     "store_name": "Officeworks",
+     "store_key": "officeworks",
+     "is_ours": 0,
+     "position": 15,
+     "rank": null,
+     "tone": null,
+     "quote": "Officeworks (Multiple CBD and inner-city locations)"
+    },
+    {
+     "store_name": "Local Post Offices (Australia Post) & Newsagencies",
+     "store_key": "local post offices australia post and newsagencies",
+     "is_ours": 0,
+     "position": 16,
+     "rank": null,
+     "tone": null,
+     "quote": "Local Post Offices (Australia Post) & Newsagencies"
+    }
+   ]
+  },
+  {
+   "id": 90,
+   "question": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-10-31T23:35:24+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Melbourne has a fantastic selection of places to buy greeting cards and wrapping paper, ranging from boutique stationery shops with locally designed prints to convenient budget options. \n\nHere is a breakdown of the best spots depending on what you\u2019re looking for:\n\n---\n\n### 1. Independent & Design-Led Boutiques (Unique, Local & High-End)\nIf you want gorgeous letterpress cards, artisan wrapping paper, or designs by local Melbourne illustrators:\n\n*   **Il Papiro** *(CBD - Degraves St)*: Perfect for classic, traditional Italian marbled papers and wax seals. \n*   **Melbournalia** *(CBD - Degraves St)*: Fantastic for uniquely Melbourne- and Australia-themed cards made by local artists.\n*   **Milligram** *(CBD, Melbourne Central, Carlton)*: A haven for stationery lovers. They stock high-end international and local brands, gorgeous gift wrap, and understated, design-focused cards.\n*   **Monsterthreads** *(CBD - Melbourne Central & The Strand)*: Features quirky, fun, and artistic cards and prints, often supporting emerging illustrators.\n*   **The Paperback Bookshop / Hill of Content** *(CBD - top of Bourke St)*: Both of these independent bookshops have curated spins of beautiful, artistic, and literary greeting cards.\n*   **Readings** *(Carlton, CBD, Hawthorn, St Kilda, Emporium)*: Beyond books, Readings has a great selection of high-quality cards, from humorous to fine art prints.\n\n---\n\n### 2. Department & Gift Stores (Great Selection & One-Stop Shops)\n*   **David Jones & Myer** *(CBD - Bourke St Mall, and major shopping centres)*: Both have dedicated stationery sections (usually on the home/gift floors) stocking premium brands like Rifle Paper Co., Hallmark, and bespoke wrapping rolls and ribbons.\n*   **Typo** *(Multiple locations across the city and suburbs)*: Great for humorous, cheeky, pop-culture, and slightly irreverent cards, along with cheap, trendy wrapping paper.\n*   **Dymocks** *(CBD - Collins St)*: The lower ground level has an extensive stationery section with plenty of cards and wrap.\n\n---\n\n### 3. Suburb-Specific Gems\nIf you are outside the CBD:\n*   **Northcote / Fitzroy / Collingwood:** \n    *   *Third Drawer Down* (Collingwood) \u2013 quirky, art-focused gifts and cards.\n    *   *The Avenue Bookstore* (various inner-suburbs) \u2013 excellent card selections.\n*   **South Yarra / Prahran:**\n    *   Visit the shops along Chapel Street, or stop by the Prahran Market area for independent gift shops.\n\n---\n\n### 4. Budget & Last-Minute Options\nIf you need something quick, simple, or inexpensive:\n*   **Kmart / Target** *(CBD - Bourke St, and suburban centres)*: Incredibly cheap wrapping paper (plain kraft rolls, festive paper, tissue paper) and standard greeting cards.\n*   **The Reject Shop / Daiso** *(Various locations)*: Very budget-friendly gift bags, ribbons, wrap, and basic cards.\n*   **Local Newsagencies & Post Offices (Australia Post)**: Found in almost every suburb; standard selection of Hallmark cards and postal-ready packaging.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Il Papiro",
+     "store_key": "il papiro",
+     "is_ours": 0,
+     "position": 1,
+     "rank": null,
+     "tone": null,
+     "quote": "Il Papiro (CBD - Degraves St): Perfect for classic, traditional Italian marbled papers and wax seals."
+    },
+    {
+     "store_name": "Melbournalia",
+     "store_key": "melbournalia",
+     "is_ours": 0,
+     "position": 2,
+     "rank": null,
+     "tone": null,
+     "quote": "Melbournalia (CBD - Degraves St): Fantastic for uniquely Melbourne- and Australia-themed cards made by local artists."
+    },
+    {
+     "store_name": "Milligram",
+     "store_key": "milligram",
+     "is_ours": 0,
+     "position": 3,
+     "rank": null,
+     "tone": null,
+     "quote": "Milligram (CBD, Melbourne Central, Carlton): A haven for stationery lovers."
+    },
+    {
+     "store_name": "Monsterthreads",
+     "store_key": "monsterthreads",
+     "is_ours": 0,
+     "position": 4,
+     "rank": null,
+     "tone": null,
+     "quote": "Monsterthreads (CBD - Melbourne Central & The Strand): Features quirky, fun, and artistic cards and prints"
+    },
+    {
+     "store_name": "The Paperback Bookshop",
+     "store_key": "paperback bookshop",
+     "is_ours": 0,
+     "position": 5,
+     "rank": null,
+     "tone": null,
+     "quote": "The Paperback Bookshop / Hill of Content (CBD - top of Bourke St): Both of these independent bookshops"
+    },
+    {
+     "store_name": "Hill of Content",
+     "store_key": "hill of content",
+     "is_ours": 0,
+     "position": 6,
+     "rank": null,
+     "tone": null,
+     "quote": "The Paperback Bookshop / Hill of Content (CBD - top of Bourke St): Both of these independent bookshops"
+    },
+    {
+     "store_name": "Readings",
+     "store_key": "readings",
+     "is_ours": 0,
+     "position": 7,
+     "rank": null,
+     "tone": null,
+     "quote": "Readings (Carlton, CBD, Hawthorn, St Kilda, Emporium): Beyond books, Readings has a great selection"
+    },
+    {
+     "store_name": "David Jones",
+     "store_key": "david jones",
+     "is_ours": 0,
+     "position": 8,
+     "rank": null,
+     "tone": null,
+     "quote": "David Jones & Myer (CBD - Bourke St Mall, and major shopping centres): Both have dedicated stationery sections"
+    },
+    {
+     "store_name": "Myer",
+     "store_key": "myer",
+     "is_ours": 0,
+     "position": 9,
+     "rank": null,
+     "tone": null,
+     "quote": "David Jones & Myer (CBD - Bourke St Mall, and major shopping centres): Both have dedicated stationery sections"
+    },
+    {
+     "store_name": "Typo",
+     "store_key": "typo",
+     "is_ours": 0,
+     "position": 10,
+     "rank": null,
+     "tone": null,
+     "quote": "Typo (Multiple locations across the city and suburbs): Great for humorous, cheeky, pop-culture"
+    },
+    {
+     "store_name": "Dymocks",
+     "store_key": "dymocks",
+     "is_ours": 0,
+     "position": 11,
+     "rank": null,
+     "tone": null,
+     "quote": "Dymocks (CBD - Collins St): The lower ground level has an extensive stationery section"
+    },
+    {
+     "store_name": "Third Drawer Down",
+     "store_key": "third drawer down",
+     "is_ours": 0,
+     "position": 12,
+     "rank": null,
+     "tone": null,
+     "quote": "Third Drawer Down (Collingwood) \u2013 quirky, art-focused gifts and cards."
+    },
+    {
+     "store_name": "The Avenue Bookstore",
+     "store_key": "avenue bookstore",
+     "is_ours": 0,
+     "position": 13,
+     "rank": null,
+     "tone": null,
+     "quote": "The Avenue Bookstore (various inner-suburbs) \u2013 excellent card selections."
+    },
+    {
+     "store_name": "Kmart",
+     "store_key": "kmart",
+     "is_ours": 0,
+     "position": 14,
+     "rank": null,
+     "tone": null,
+     "quote": "Kmart / Target (CBD - Bourke St, and suburban centres): Incredibly cheap wrapping paper"
+    },
+    {
+     "store_name": "Target",
+     "store_key": "target",
+     "is_ours": 0,
+     "position": 15,
+     "rank": null,
+     "tone": null,
+     "quote": "Kmart / Target (CBD - Bourke St, and suburban centres): Incredibly cheap wrapping paper"
+    },
+    {
+     "store_name": "The Reject Shop",
+     "store_key": "reject shop",
+     "is_ours": 0,
+     "position": 16,
+     "rank": null,
+     "tone": null,
+     "quote": "The Reject Shop / Daiso (Various locations): Very budget-friendly gift bags"
+    },
+    {
+     "store_name": "Daiso",
+     "store_key": "daiso",
+     "is_ours": 0,
+     "position": 17,
+     "rank": null,
+     "tone": null,
+     "quote": "The Reject Shop / Daiso (Various locations): Very budget-friendly gift bags"
+    },
+    {
+     "store_name": "Australia Post",
+     "store_key": "australia post",
+     "is_ours": 0,
+     "position": 18,
+     "rank": null,
+     "tone": null,
+     "quote": "Local Newsagencies & Post Offices (Australia Post): Found in almost every suburb"
+    }
+   ]
+  },
+  {
+   "id": 82,
+   "question": "Unique gift shops in Prahran or Brighton Melbourne",
+   "names_area": true,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-10-31T23:25:54+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Here is a curated list of unique gift shops across both **Prahran** (including nearby Windsor) and **Brighton**, catering to different styles\u2014from quirky and eclectic to high-end and coastal.\n\n---\n\n### **Prahran & Windsor (Eclectic, Design-Led & Quirky)**\n\nPrahran is known for independent boutiques, vintage finds, and artsy homewares.\n\n*   **Third Drawer Down (Grevillia / Prahran area)**\n    *   *The Vibe:* Irreverent, artistic, and completely unique.\n    *   *Best for:* Collaborations with famous artists (David Shrigley, Yayoi Kusama), humorous stationery, weird and wonderful homewares, and gifts for people who \"have everything.\"\n*   **The Grumpy Swimmer (High St, Prahran)**\n    *   *The Vibe:* Intimate, thoughtful independent bookstore.\n    *   *Best for:* Beautiful coffee table books, curated fiction, upscale stationery, and gifts for literary lovers.\n*   **Fenton & Fenton (High St, Prahran)**\n    *   *The Vibe:* Vibrant, bold, and luxurious interior design.\n    *   *Best for:* Statement homewares, colourful ceramics, unique glassware, and high-end gifts for design-conscious friends.\n*   **Prahran Market Specialty Stalls (Commercial Rd, Prahran)**\n    *   *The Vibe:* Artisanal and gourmet.\n    *   *Best for:* Edible gifts. Look for artisan chocolates, specialty olive oils, boutique wines, and exotic potted plants/flowers inside the market.\n*   **Bibelot (Nearby in St Kilda, but worth mentioning for Prahran locals)**\n    *   *The Vibe:* High-end French patisserie.\n    *   *Best for:* Stunning artisanal chocolate boxes, luxury teas, and macarons packaged like fine jewellery.\n\n---\n\n### **Brighton (Coastal, Elegant & Boutique)**\n\nBrighton\u2019s shopping strips (Church Street and Bay Street) lean toward sophisticated, classic, and high-end coastal lifestyle gifts.\n\n*   **Scout House (Church St, Brighton)**\n    *   *The Vibe:* Classic, vintage-inspired lifestyle.\n    *   *Best for:* Nostalgic gifts, heritage European home goods, bespoke fragrances, luxury bath products, and antique curiosities.\n*   **Lamington Drive / Local Boutique Collectives (Around Church St)**\n    *   *The Vibe:* Chic Bayside living.\n    *   *Best for:* Upmarket scented candles (Cire Trudon, Lumira), niche Australian skincare brands, luxury linen robes, and delicate jewellery.\n*   **Maison Living (Bay St, Brighton)**\n    *   *The Vibe:* French provincial and classic European elegance.\n    *   *Best for:* Unique tableware, ornate picture frames, luxury cushions, and timeless home accessories.\n*   **The Bayside Soap & Candle Co. (Church St precinct)**\n    *   *The Vibe:* Sensory and artisanal.\n    *   *Best for:* Hand-poured local candles, boutique soaps, bath salts, and pamper hampers.\n\n---\n\n### **Quick Recommendation:**\n*   **Go to Prahran** if you want something fun, artistic, slightly cheeky, or mid-century/design-focused.\n*   **Go to Brighton (Church St)** if you want something polished, luxurious, scented, or high-end coastal.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Third Drawer Down",
+     "store_key": "third drawer down",
+     "is_ours": 0,
+     "position": 1,
+     "rank": null,
+     "tone": null,
+     "quote": "Third Drawer Down (Grevillia / Prahran area)"
+    },
+    {
+     "store_name": "The Grumpy Swimmer",
+     "store_key": "grumpy swimmer",
+     "is_ours": 0,
+     "position": 2,
+     "rank": null,
+     "tone": null,
+     "quote": "The Grumpy Swimmer (High St, Prahran)"
+    },
+    {
+     "store_name": "Fenton & Fenton",
+     "store_key": "fenton and fenton",
+     "is_ours": 0,
+     "position": 3,
+     "rank": null,
+     "tone": null,
+     "quote": "Fenton & Fenton (High St, Prahran)"
+    },
+    {
+     "store_name": "Prahran Market Specialty Stalls",
+     "store_key": "prahran market specialty stalls",
+     "is_ours": 0,
+     "position": 4,
+     "rank": null,
+     "tone": null,
+     "quote": "Prahran Market Specialty Stalls (Commercial Rd, Prahran)"
+    },
+    {
+     "store_name": "Bibelot",
+     "store_key": "bibelot",
+     "is_ours": 0,
+     "position": 5,
+     "rank": null,
+     "tone": null,
+     "quote": "Bibelot (Nearby in St Kilda, but worth mentioning for Prahran locals)"
+    },
+    {
+     "store_name": "Scout House",
+     "store_key": "scout house",
+     "is_ours": 0,
+     "position": 6,
+     "rank": null,
+     "tone": null,
+     "quote": "Scout House (Church St, Brighton)"
+    },
+    {
+     "store_name": "Lamington Drive",
+     "store_key": "lamington drive",
+     "is_ours": 0,
+     "position": 7,
+     "rank": null,
+     "tone": null,
+     "quote": "Lamington Drive / Local Boutique Collectives"
+    },
+    {
+     "store_name": "Maison Living",
+     "store_key": "maison living",
+     "is_ours": 0,
+     "position": 8,
+     "rank": null,
+     "tone": null,
+     "quote": "Maison Living (Bay St, Brighton)"
+    },
+    {
+     "store_name": "The Bayside Soap & Candle Co.",
+     "store_key": "bayside soap and candle co",
+     "is_ours": 0,
+     "position": 9,
+     "rank": null,
+     "tone": null,
+     "quote": "The Bayside Soap & Candle Co. (Church St precinct)"
+    }
+   ]
+  },
+  {
+   "id": 91,
+   "question": "Unique gift shops in Prahran or Brighton Melbourne",
+   "names_area": true,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-10-31T23:36:07+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Both Prahran and Brighton have distinct shopping vibes. **Prahran** (including nearby Windsor and the Chapel Street precinct) leans trendy, artistic, eclectic, and design-led. **Brighton** (centred around Church Street and Bay Street) leans more upscale, coastal, classic, and curated. \n\nHere are the best unique gift shops across both suburbs:\n\n---\n\n### **Prahran & Surrounds (Trendy, Eclectic & Design-Led)**\n\n**1. Third Drawer Down (Windsor / Greville St Precinct)**\n* *The Vibe:* Quirky, artistic, and completely unconventional.\n* *What to buy:* Artist-collaborated homewares, politically cheeky items, weirdly wonderful socks, and high-design novelties. They work with artists like David Shrigley and Yayoi Kusama. Perfect for someone with a great sense of humour or a passion for modern art.\n\n**2. Signed & Numbered (Greville Street)**\n* *The Vibe:* Independent, vibrant, and visually stunning.\n* *What to buy:* Affordable, limited-edition prints by local and international artists. They also sell art books, small sculptures, and artist-made greeting cards. A much more personal gift than a generic department-store print.\n\n**3. Dinosaur Designs (Chapel Street)**\n* *The Vibe:* Iconic Australian luxury and bold aesthetics.\n* *What to buy:* Handcrafted resin jewellery, sculptural vases, statement platters, and brass objects. Each piece is handmade, meaning no two gifts are entirely identical.\n\n**4. Prahran Market (Speciality Food & Florals)**\n* *The Vibe:* For the gourmet lover.\n* *What to buy:* Instead of trinkets, put together a bespoke gift hamper. Hit **The Essential Ingredient** for niche cookware and rare spices, **Maker & Monger** for artisan cheese, or pick up a unique floral arrangement from one of the market florists.\n\n---\n\n### **Brighton (Upscale, Coastal & Chic)**\n\n**1. The Grumpy Swimmer (Church Street)**\n* *The Vibe:* Thoughtful, intimate independent bookstore.\n* *What to buy:* Far more than just a bookshop; they have a very curated selection of high-end stationery, beautiful art/coffee table books, reading accessories, and niche literary gifts. The staff are incredible at giving tailored gift recommendations.\n\n**2. Quirks Australia (Bay Street)**\n* *The Vibe:* Charming, eclectic, and full of personality.\n* *What to buy:* True to its name, this shop is packed with unique homewares, eccentric jewellery, colourful scarves, designer cards, and clever gadgets. It\u2019s the kind of place where you go looking for a gift and end up buying something for yourself too.\n\n**3. White Nest (Church Street)**\n* *The Vibe:* Coastal, relaxed Australian luxury.\n* *What to buy:* Premium scented candles, organic bath & body products, linen throws, ceramic tableware, and delicate everyday jewellery. Great for housewarming, birthday, or self-care gifts.\n\n**4. Brighton Bay Pharmacy / Bay Street Gifts (Bay Street)**\n* *The Vibe:* Traditional village giftware with a modern twist.\n* *What to buy:* High-end European soaps, upscale beauty brands (L'Occitane, Glasshouse), baby gifts, leather accessories, and classic travel wares. \n\n---\n\n### **Quick Recommendation:**\n* Go to **Greville St / Chapel St in Prahran** if the recipient loves pop culture, quirky design, fashion, or modern art.\n* Head to **Church St / Bay St in Brighton** if the recipient loves coastal interiors, luxury fragrances, gardening, or a good hardback book.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Third Drawer Down",
+     "store_key": "third drawer down",
+     "is_ours": 0,
+     "position": 1,
+     "rank": 1,
+     "tone": null,
+     "quote": "1. Third Drawer Down (Windsor / Greville St Precinct)"
+    },
+    {
+     "store_name": "Signed & Numbered",
+     "store_key": "signed and numbered",
+     "is_ours": 0,
+     "position": 2,
+     "rank": 2,
+     "tone": null,
+     "quote": "2. Signed & Numbered (Greville Street)"
+    },
+    {
+     "store_name": "Dinosaur Designs",
+     "store_key": "dinosaur designs",
+     "is_ours": 0,
+     "position": 3,
+     "rank": 3,
+     "tone": null,
+     "quote": "3. Dinosaur Designs (Chapel Street)"
+    },
+    {
+     "store_name": "The Essential Ingredient",
+     "store_key": "essential ingredient",
+     "is_ours": 0,
+     "position": 4,
+     "rank": null,
+     "tone": null,
+     "quote": "Hit The Essential Ingredient for niche cookware and rare spices"
+    },
+    {
+     "store_name": "Maker & Monger",
+     "store_key": "maker and monger",
+     "is_ours": 0,
+     "position": 5,
+     "rank": null,
+     "tone": null,
+     "quote": "Maker & Monger for artisan cheese, or pick up a unique"
+    },
+    {
+     "store_name": "The Grumpy Swimmer",
+     "store_key": "grumpy swimmer",
+     "is_ours": 0,
+     "position": 6,
+     "rank": 1,
+     "tone": null,
+     "quote": "1. The Grumpy Swimmer (Church Street)"
+    },
+    {
+     "store_name": "Quirks Australia",
+     "store_key": "quirks australia",
+     "is_ours": 0,
+     "position": 7,
+     "rank": 2,
+     "tone": null,
+     "quote": "2. Quirks Australia (Bay Street)"
+    },
+    {
+     "store_name": "White Nest",
+     "store_key": "white nest",
+     "is_ours": 0,
+     "position": 8,
+     "rank": 3,
+     "tone": null,
+     "quote": "3. White Nest (Church Street)"
+    },
+    {
+     "store_name": "Brighton Bay Pharmacy / Bay Street Gifts",
+     "store_key": "brighton bay pharmacy bay street gifts",
+     "is_ours": 0,
+     "position": 9,
+     "rank": 4,
+     "tone": null,
+     "quote": "4. Brighton Bay Pharmacy / Bay Street Gifts (Bay Street)"
+    }
+   ]
+  },
+  {
+   "id": 83,
+   "question": "Where can I buy a vintage wooden pencil box and quality art supplies in Brighton?",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-10-31T23:26:10+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Brighton has a fantastic arts scene and is one of the best places in the UK for antiques and flea markets. Because you are looking for two distinct things\u2014a unique **vintage object** (the pencil box) and **quality art supplies**\u2014your best approach is to explore the **North Laine** and **The Lanes**, where both types of shops sit side-by-side.\n\nHere is the best route and specific shops to visit:\n\n---\n\n### Part 1: For the Vintage Wooden Pencil Box\n\nFor vintage items, you\u2019ll want to hunt in Brighton\u2019s flea markets and independent antique stores. Wooden pencil boxes (especially sliding-lid school boxes or artist pastel boxes) turn up frequently in these spots:\n\n1. **Snoopers Paradise (Kensington Gardens, North Laine)**\n   * *Best overall bet.* A legendary, massive indoor vintage emporium. With dozens of independent stalls, you\u2019ll find everything from ephemera and old school supplies to vintage tools and collectibles. Take your time rummaging through the glass display cases and wooden crates.\n2. **Brighton Flea Market (Upper Gardner Street, North Laine)**\n   * Located just a street over, this is a slightly dustier, more traditional junk-and-antique market with lots of small wooden boxes, vintage stationery, and curiosities.\n3. **Upper Gardner Street Saturday Market**\n   * If you are visiting on a **Saturday morning**, this entire street turns into an open-air flea market where locals sell attic clearances, vintage oddities, and wooden wares.\n4. **The North Laine Antique & Flea Market (Gloucester Road)**\n   * Another great indoor labyrinth packed with mid-century and vintage homewares, tin boxes, and small wooden storage.\n\n---\n\n### Part 2: For Quality Art Supplies\n\nBrighton has exceptional, long-running independent art shops catering to students, illustrators, and fine artists:\n\n1. **Cass Art (21 Market Street, The Lanes)**\n   * *The best for pure fine art supplies.* Cass Art is the UK\u2019s leading art specialist. Spread over two floors, they stock top-tier brands (Winsor & Newton, Sennelier, Faber-Castell, Derwent, Golden) for painting, drawing, and printmaking.\n2. **Clarkes (Bond Street, North Laine)**\n   * *The historic local shop.* Clarkes has been an independent stationer and art supplier in Brighton for generations. They carry quality pens, pencils, sketchbooks, and technical drawing supplies, alongside standard art materials.\n3. **The Book Nook & Papeterie / Present in the Laine (Gardner Street)**\n   * For higher-end drawing pencils (like Blackwing), boutique notebooks, and Japanese stationery, look into the independent gift and stationery shops scattered along Gardner Street and Sydney Street.\n\n---\n\n### Recommended Shopping Route:\n\nStart at **Cass Art** in The Lanes to pick up your core fine-art materials. From there, take a 5-minute walk north into the **North Laine**:\n1. Stop at **Clarkes** on Bond Street.\n2. Head down **Kensington Gardens** and spend an hour hunting for the box in **Snoopers Paradise**.\n3. Finish at **Brighton Flea Market** on Upper Gardner Street.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Snoopers Paradise",
+     "store_key": "snoopers paradise",
+     "is_ours": 0,
+     "position": 1,
+     "rank": 1,
+     "tone": null,
+     "quote": "Snoopers Paradise (Kensington Gardens, North Laine)"
+    },
+    {
+     "store_name": "Brighton Flea Market",
+     "store_key": "brighton flea market",
+     "is_ours": 0,
+     "position": 2,
+     "rank": 2,
+     "tone": null,
+     "quote": "Brighton Flea Market (Upper Gardner Street, North Laine)"
+    },
+    {
+     "store_name": "Upper Gardner Street Saturday Market",
+     "store_key": "upper gardner street saturday market",
+     "is_ours": 0,
+     "position": 3,
+     "rank": 3,
+     "tone": null,
+     "quote": "Upper Gardner Street Saturday Market"
+    },
+    {
+     "store_name": "The North Laine Antique & Flea Market",
+     "store_key": "north laine antique and flea market",
+     "is_ours": 0,
+     "position": 4,
+     "rank": 4,
+     "tone": null,
+     "quote": "The North Laine Antique & Flea Market (Gloucester Road)"
+    },
+    {
+     "store_name": "Cass Art",
+     "store_key": "cass art",
+     "is_ours": 0,
+     "position": 5,
+     "rank": 1,
+     "tone": null,
+     "quote": "Cass Art (21 Market Street, The Lanes)"
+    },
+    {
+     "store_name": "Clarkes",
+     "store_key": "clarkes",
+     "is_ours": 0,
+     "position": 6,
+     "rank": 2,
+     "tone": null,
+     "quote": "Clarkes (Bond Street, North Laine)"
+    },
+    {
+     "store_name": "The Book Nook & Papeterie / Present in the Laine",
+     "store_key": "book nook and papeterie present in the laine",
+     "is_ours": 0,
+     "position": 7,
+     "rank": 3,
+     "tone": null,
+     "quote": "The Book Nook & Papeterie / Present in the Laine (Gardner Street)"
+    }
+   ]
+  },
+  {
+   "id": 84,
+   "question": "Looking for a sleek metal desk accessory and a smooth black pen in Melbourne.",
+   "names_area": false,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-10-31T23:26:50+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Melbourne has a fantastic design and stationery scene. Here are the best places to find a sleek metal desk accessory and a smooth black pen, ranging from high-end design boutiques to specialised Japanese stationery shops.\n\n---\n\n### **1. Top Boutiques for Both (One-Stop Shops)**\n\n#### **Milligram**\n* **Where:** Melbourne Central, Emporium, or Barkly Street (St Kilda)\n* **Vibe:** Contemporary, design-forward, functional minimalism.\n* **Metal Desk Accessory:** Look at the **Midori Brass** collection (pencil cases, rulers, label plates that age with a patina), or powder-coated/aluminium trays and pen holders from brands like **Delfonics** and **HAY**.\n* **Smooth Black Pen:** \n  * *Rollerball:* **Lamy Studio** or **Lamy 2000** (timeless, Bauhaus design with seamless black ink flow).\n  * *Gel/Ballpoint:* **Kaweco AL Sport** in Raw Aluminium or Matte Black (hefty metal body, extremely smooth writing).\n\n#### **Drakensberg / Drom (formerly Bookbinders Design)**\n* **Where:** 348 Little Collins Street, CBD\n* **Vibe:** European heritage meets sleek minimalism.\n* **Metal Desk Accessory:** Heavy brass paperweights, minimalist desktop rulers, and sculpted wire/sheet metal desk tidies.\n* **Smooth Black Pen:** **Ystudio** pens (Taiwanese brand crafted from solid brass and copper\u2014exceptional weight, minimalist design, and uses ultra-smooth ceramic rollerball refills).\n\n---\n\n### **2. For the \"Sleek Metal\" Focus (Design & Homewares)**\n\n#### **Crumpler / Taft / Top3 by Design**\n* **Where:** Emporium Melbourne (CBD)\n* **Vibe:** Curated international industrial design.\n* **Metal Desk Accessory:** **Top3 by Design** stocks brands like **Georg Jensen** (mirror-polished stainless steel trays and desktop organisers) and **Alessi**. Ideal if you want a mirror-finish or sculptural steel accent.\n\n#### **HAY Melbourne**\n* **Where:** 176 Flinders Lane, CBD\n* **Vibe:** Modern Scandinavian design with an edge.\n* **Metal Desk Accessory:** HAY\u2019s pressed metal trays (golden, silver, or matte finishes), stainless steel pen cups, and magnetic desktop organisers.\n\n---\n\n### **3. For the \"Smooth Black Pen\" Focus (Stationery Specialists)**\n\n#### **Melpens (Melbourne Pens)**\n* **Where:** 370 Little Collins Street, CBD\n* **Vibe:** Serious pen collectors' den.\n* **What to ask for:** Tell them you want a rollerball with a **Schmidt 888 or 5888 refill** (widely considered the smoothest standard black ceramic rollerball in the world) inside a machined metal barrel (like a **Retro 51** or **Monteverde**).\n\n#### **Mu-Ji**\n* **Where:** Chadstone or Emporium Melbourne\n* **Vibe:** Japanese ultra-minimalism.\n* **Best budget combo:** Pick up an **acrylic or aluminium desktop tray** and a pack of their classic **0.5mm Smooth Gel Ink Black Pens** (an everyday staple for a reason\u2014flawless black glide with no drag).\n\n---\n\n### **Recommended Pairing to Keep in Mind**\n\n* **The Industrial Pairing:** A **Ystudio Brassing Desk Pen** (comes with its own heavy brass stand to sit on your desk, available at Milligram/Drom) \u2014 this solves both the sleek metal accessory and the pen in a single object.\n* **The Minimalist Modern Pairing:** A brushed aluminium **HAY tray** paired with a matte black **Lamy Studio Rollerball**.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Milligram",
+     "store_key": "milligram",
+     "is_ours": 0,
+     "position": 1,
+     "rank": 1,
+     "tone": null,
+     "quote": "Milligram"
+    },
+    {
+     "store_name": "Drakensberg / Drom",
+     "store_key": "drakensberg drom",
+     "is_ours": 0,
+     "position": 2,
+     "rank": 2,
+     "tone": null,
+     "quote": "Drakensberg / Drom (formerly Bookbinders Design)"
+    },
+    {
+     "store_name": "Crumpler / Taft / Top3 by Design",
+     "store_key": "crumpler taft top3 by design",
+     "is_ours": 0,
+     "position": 3,
+     "rank": 3,
+     "tone": null,
+     "quote": "Crumpler / Taft / Top3 by Design"
+    },
+    {
+     "store_name": "HAY Melbourne",
+     "store_key": "hay melbourne",
+     "is_ours": 0,
+     "position": 4,
+     "rank": 4,
+     "tone": null,
+     "quote": "HAY Melbourne"
+    },
+    {
+     "store_name": "Melpens (Melbourne Pens)",
+     "store_key": "melpens melbourne pens",
+     "is_ours": 0,
+     "position": 5,
+     "rank": 5,
+     "tone": null,
+     "quote": "Melpens (Melbourne Pens)"
+    },
+    {
+     "store_name": "Mu-Ji",
+     "store_key": "mu ji",
+     "is_ours": 0,
+     "position": 6,
+     "rank": 6,
+     "tone": null,
+     "quote": "Mu-Ji"
+    }
+   ]
+  },
+  {
+   "id": 85,
+   "question": "Where is the best place to find a minimalist wedding card in Melbourne?",
+   "names_area": false,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-10-31T23:28:51+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Melbourne has a fantastic design and stationery scene. If you\u2019re looking for a minimalist wedding card\u2014think clean typography, neutral tones, high-quality heavy cardstock, blind debossing, or subtle gold foil\u2014here are the best places to go:\n\n### 1. In-Store Boutiques (Best for browsing a curated collection)\n\n*   **Milligram** (CBD, Carlton, Richmond)\n    *   *The Vibe:* Clean, design-forward, understated. \n    *   *Why go:* Known for sleek lifestyle goods, they carry their own minimalist stationery brand (Milligram Studio) as well as curated global paper brands. You'll easily find monochromatic, typographic, and subtle cards here.\n*   **The Paper Empire** (High St, Armadale)\n    *   *The Vibe:* High-end, classic paper-lover\u2019s dream.\n    *   *Why go:* Located on Melbourne\u2019s premier bridal shopping strip, they have one of the best greeting card walls in the city. Expect gorgeous letterpress, heavy textured cotton stocks, and sophisticated, uncluttered designs.\n*   **Melbournalia** (Degraves St, CBD)\n    *   *The Vibe:* Modern, locally designed goods.\n    *   *Why go:* A great spot if you want minimalist cards created by local Melbourne printmakers and graphic designers that you won't find in chain stores.\n\n### 2. Gallery & Museum Bookshops (Best for artful, ultra-modern designs)\n\n*   **NGV design store** (St Kilda Rd, CBD)\n    *   *The Vibe:* Modernist, contemporary, sculptural paper goods.\n    *   *Why go:* Museum design shops are secret weapons for minimalist cards. The NGV stocks sleek, abstract, and architecture-inspired cards with incredible paper finishes.\n\n### 3. Local Independent Bookstores (Best for indie boutique cards)\n\n*   **Readings** (Carlton, Hawthorn, Emporium CBD)\n    *   *The Vibe:* Cultured, thoughtful, indie.\n    *   *Why go:* Their stationery sections are carefully vetted and frequently rotate cards from independent Australian letterpress studios (like *Fox & Fallow*, *Bespoke Letterpress*, and *Little Sister Press*).\n*   **Hill of Content** (Top of Bourke St, CBD)\n    *   *The Vibe:* Quiet, heritage, curated.\n    *   *Why go:* A fantastic, low-key spot for tasteful, elegant greeting cards away from the shopping mall rush.\n\n---\n\n### Quick Pro-Tip: Australian Brands to Look Out For\nIf you are browsing any boutique in Melbourne, keep an eye out for these Australian design studios stocked on the racks, as they specialize in the minimalist aesthetic:\n*   **The Blacklist Studio** (Known for clean typography and artsy brush lettering)\n*   **Saint Gertrude** (Melbourne-based, supreme custom letterpress)\n*   **In the Daylight** (Clean hand-lettering and delicate line art)",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Milligram",
+     "store_key": "milligram",
+     "is_ours": 0,
+     "position": 1,
+     "rank": 1,
+     "tone": null,
+     "quote": "Milligram (CBD, Carlton, Richmond)"
+    },
+    {
+     "store_name": "The Paper Empire",
+     "store_key": "paper empire",
+     "is_ours": 0,
+     "position": 2,
+     "rank": 2,
+     "tone": null,
+     "quote": "The Paper Empire (High St, Armadale)"
+    },
+    {
+     "store_name": "Melbournalia",
+     "store_key": "melbournalia",
+     "is_ours": 0,
+     "position": 3,
+     "rank": 3,
+     "tone": null,
+     "quote": "Melbournalia (Degraves St, CBD)"
+    },
+    {
+     "store_name": "NGV design store",
+     "store_key": "ngv design store",
+     "is_ours": 0,
+     "position": 4,
+     "rank": null,
+     "tone": null,
+     "quote": "NGV design store (St Kilda Rd, CBD)"
+    },
+    {
+     "store_name": "Readings",
+     "store_key": "readings",
+     "is_ours": 0,
+     "position": 5,
+     "rank": null,
+     "tone": null,
+     "quote": "Readings (Carlton, Hawthorn, Emporium CBD)"
+    },
+    {
+     "store_name": "Hill of Content",
+     "store_key": "hill of content",
+     "is_ours": 0,
+     "position": 6,
+     "rank": null,
+     "tone": null,
+     "quote": "Hill of Content (Top of Bourke St, CBD)"
+    },
+    {
+     "store_name": "The Blacklist Studio",
+     "store_key": "blacklist studio",
+     "is_ours": 0,
+     "position": 7,
+     "rank": null,
+     "tone": null,
+     "quote": "The Blacklist Studio (Known for clean typography and artsy brush lettering)"
+    },
+    {
+     "store_name": "Saint Gertrude",
+     "store_key": "saint gertrude",
+     "is_ours": 0,
+     "position": 8,
+     "rank": null,
+     "tone": null,
+     "quote": "Saint Gertrude (Melbourne-based, supreme custom letterpress)"
+    },
+    {
+     "store_name": "In the Daylight",
+     "store_key": "in the daylight",
+     "is_ours": 0,
+     "position": 9,
+     "rank": null,
+     "tone": null,
+     "quote": "In the Daylight (Clean hand-lettering and delicate line art)"
+    }
+   ]
+  },
+  {
+   "id": 86,
+   "question": "Need a cute pop-up greeting card for a baby shower in Brighton today.",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-10-31T23:29:50+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Here are the best places in Brighton to find a cute pop-up or 3D baby shower card **today**, ranked by who will have the best selection:\n\n### 1. Card Shack (Best overall card selection)\n* **Location:** 74 Western Road (near Montpelier Road)\n* **Why go:** This is arguably the best dedicated, independent greeting card shop in town. They stock huge ranges of novelty, handmade, and intricate 3D/pop-up cards (often including brands like Santoro Pirouettes or Me&McQ). \n* **Vibe:** Massive variety, great for unique and cute designs.\n\n### 2. Present in the Laine (Cutest designs)\n* **Location:** 34 Gardner Street (North Laine)\n* **Why go:** A gorgeous boutique gift shop that always curates beautiful, design-led paper goods. They regularly stock artistic laser-cut and pop-up cards that lean very sweet, modern, and \"cute.\"\n\n### 3. Daisy Daisy (Best for baby-specific themes)\n* **Location:** 6 Gardner Street (North Laine)\n* **Why go:** It's an independent traditional toy and baby boutique. While their card rack is smaller than a dedicated stationer, almost *everything* is geared toward babies and children, so their baby shower card options are exceptionally cute. \n\n### 4. Paperchase @ Next\n* **Location:** Churchill Square Shopping Centre\n* **Why go:** If you need a reliable chain in the city centre. Next carries the Paperchase collection, which almost always features laser-cut and 3D concertina/pop-up baby cards with pastel, sweet animal themes.\n\n### 5. Waterstones \n* **Location:** 71-74 North Street\n* **Why go:** The top floor has an extensive, upscale stationery department. They reliably stock high-end pop-up cards (frequently Roger la Borde or Santoro 3D paper sculptures).\n\n---\n\n### Quick Route Suggestion:\nHead straight to **Gardner Street in the North Laine**. Within a 1-minute walk, you can check **Daisy Daisy** and **Present in the Laine**. If you don't find the perfect one there, **Snoopers Paradise** (vintage/makers market) and several other tiny gift boutiques on that exact same street also carry independent stationery.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Card Shack",
+     "store_key": "card shack",
+     "is_ours": 0,
+     "position": 1,
+     "rank": 1,
+     "tone": null,
+     "quote": "Card Shack (Best overall card selection)"
+    },
+    {
+     "store_name": "Present in the Laine",
+     "store_key": "present in the laine",
+     "is_ours": 0,
+     "position": 2,
+     "rank": 2,
+     "tone": null,
+     "quote": "Present in the Laine (Cutest designs)"
+    },
+    {
+     "store_name": "Daisy Daisy",
+     "store_key": "daisy daisy",
+     "is_ours": 0,
+     "position": 3,
+     "rank": 3,
+     "tone": null,
+     "quote": "Daisy Daisy (Best for baby-specific themes)"
+    },
+    {
+     "store_name": "Paperchase @ Next",
+     "store_key": "paperchase next",
+     "is_ours": 0,
+     "position": 4,
+     "rank": 4,
+     "tone": null,
+     "quote": "Paperchase @ Next"
+    },
+    {
+     "store_name": "Waterstones",
+     "store_key": "waterstones",
+     "is_ours": 0,
+     "position": 5,
+     "rank": 5,
+     "tone": null,
+     "quote": "Waterstones"
+    },
+    {
+     "store_name": "Snoopers Paradise",
+     "store_key": "snoopers paradise",
+     "is_ours": 0,
+     "position": 6,
+     "rank": null,
+     "tone": null,
+     "quote": "If you don't find the perfect one there, Snoopers Paradise (vintage/makers market)"
+    }
+   ]
+  },
+  {
+   "id": 87,
+   "question": "Where can I buy eco-friendly gift wrapping and colourful silk ribbon in Melbourne?",
+   "names_area": false,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-10-31T23:31:53+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Here are the best places in Melbourne to find eco-friendly gift wrapping and colourful silk ribbons, broken down by specialty:\n\n---\n\n### **For Colourful Silk & Plant-Dyed Ribbons**\n\nTrue 100% silk ribbon (especially bias-cut, frayed-edge, or naturally dyed ribbon) is best sourced from specialty haberdasheries or boutique florists:\n\n1. **Tessuti Fabrics** (Ground Floor, 141 Flinders Lane, CBD)\n   * A high-end fabric institution. While famous for dress fabrics, they carry beautiful, high-quality pure silk ribbons, haberdashery, and remnants in a vibrant palette of colours.\n2. **Jimmy Buttons** (375 George St, Fitzroy)\n   * An absolute treasure trove for trims, cords, and haberdashery. You have to hunt a bit through floor-to-ceiling shelves, but you will find endless colourful trims, ribbons, and ties.\n3. **Boutique Florist Supplies & Paperies**\n   * High-end florists like **Pollon Flowers** (Fitzroy) or **The Rose St. Artists' Market** (weekends in Fitzroy) often stock hand-dyed, plant-based chiffon and habotai silk ribbons used for bouquets and gifting.\n   * *Online/Local Maker alternative:* **The Paper Empire** (High St, Armadale) carries gorgeous European-style woven and silk/cotton ribbons.\n\n---\n\n### **For Eco-Friendly Gift Wrapping (Recycled, Seed Paper & Furoshiki)**\n\n1. **The Paper Empire** (1053 High St, Armadale)\n   * Arguably Melbourne\u2019s premier specialty paper shop. They stock a wide range of sustainable wrapping options, including unlaminated designer wrapping sheets, recycled papers, and plant-dyed ties.\n2. **Biome** (Online, but with Victoria-wide delivery; previously had stores in Melbourne)\n   * The gold standard for zero-waste gift wrapping. They offer 100% post-consumer recycled paper, plantable seeded wrapping paper, and vegetable-ink printed rolls. \n3. **MUJI** (Chadstone & Emporium CBD)\n   * Excellent for minimalist, sustainable Japanese wrapping. You can pick up sturdy, unbleached **100% recycled kraft paper** and natural cotton twine, which provide the perfect neutral base to make bright silk ribbon pop.\n4. **Scrapstore / Resource Rescue / Reverse Art Truck** (Various locations)\n   * If you want genuine, circular-economy eco-wrapping, visit the **Reverse Art Truck** (Ringwood) or local **community craft scraps** for vintage remnant rolls, maps, architectural drafting paper, and leftover textiles.\n\n---\n\n### **The \"Zero-Waste Fabric\" Alternative: Furoshiki**\n\nIf you want to combine the texture of colourful fabric with zero-waste wrapping, try **Furoshiki** (reusable Japanese fabric wrapping):\n\n* **Made in Japan (MIJ)** (South Melbourne & Mornington): Sells authentic, printed and plain furoshiki cloths made of cotton and silk blends that double as the wrap and the keepsake.\n* **The Fabric Store** (188 Gertrude St, Fitzroy): Pick up brightly coloured silk habotai or crepe remnants from their remnant bin and simply cut them with pinking shears to wrap the gift directly.\n\n---\n\n### **Suggested Pairing:**\nFor the most striking look, pair **natural brown kraft paper** (which is 100% biodegradable and recyclable in your Melbourne council kerbside yellow bin) with a **vibrant jewel-toned (emerald, fuchsia, or mustard) silk ribbon**. When unboxing, the recipient simply recycles the paper and keeps the ribbon for their hair or future gifts.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Tessuti Fabrics",
+     "store_key": "tessuti fabrics",
+     "is_ours": 0,
+     "position": 1,
+     "rank": 1,
+     "tone": null,
+     "quote": "Tessuti Fabrics (Ground Floor, 141 Flinders Lane, CBD)"
+    },
+    {
+     "store_name": "Jimmy Buttons",
+     "store_key": "jimmy buttons",
+     "is_ours": 0,
+     "position": 2,
+     "rank": 2,
+     "tone": null,
+     "quote": "Jimmy Buttons (375 George St, Fitzroy)"
+    },
+    {
+     "store_name": "Pollon Flowers",
+     "store_key": "pollon flowers",
+     "is_ours": 0,
+     "position": 3,
+     "rank": null,
+     "tone": null,
+     "quote": "High-end florists like Pollon Flowers (Fitzroy) or The Rose St"
+    },
+    {
+     "store_name": "The Paper Empire",
+     "store_key": "paper empire",
+     "is_ours": 0,
+     "position": 4,
+     "rank": null,
+     "tone": null,
+     "quote": "Online/Local Maker alternative: The Paper Empire (High St, Armadale)"
+    },
+    {
+     "store_name": "Biome",
+     "store_key": "biome",
+     "is_ours": 0,
+     "position": 5,
+     "rank": 2,
+     "tone": null,
+     "quote": "Biome (Online, but with Victoria-wide delivery; previously had stores in Melbourne)"
+    },
+    {
+     "store_name": "MUJI",
+     "store_key": "muji",
+     "is_ours": 0,
+     "position": 6,
+     "rank": 3,
+     "tone": null,
+     "quote": "MUJI (Chadstone & Emporium CBD)"
+    },
+    {
+     "store_name": "Reverse Art Truck",
+     "store_key": "reverse art truck",
+     "is_ours": 0,
+     "position": 7,
+     "rank": null,
+     "tone": null,
+     "quote": "visit the Reverse Art Truck (Ringwood) or local community craft"
+    },
+    {
+     "store_name": "Made in Japan (MIJ)",
+     "store_key": "made in japan mij",
+     "is_ours": 0,
+     "position": 8,
+     "rank": null,
+     "tone": null,
+     "quote": "Made in Japan (MIJ) (South Melbourne & Mornington): Sells authentic"
+    },
+    {
+     "store_name": "The Fabric Store",
+     "store_key": "fabric store",
+     "is_ours": 0,
+     "position": 9,
+     "rank": null,
+     "tone": null,
+     "quote": "The Fabric Store (188 Gertrude St, Fitzroy): Pick up brightly"
+    }
+   ]
+  },
+  {
+   "id": 88,
+   "question": "Shops in Brighton that sell luxury metallic wrapping paper for a milestone birthday.",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-10-31T23:32:22+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "For a milestone birthday, you\u2019ll want high-GSM paper with a deep, reflective foil finish rather than standard thin metallic print. \n\nBrighton\u2019s North Laine is the best area to look, as it concentrates high-end independent stationers and lifestyle boutiques. Here are the best shops to visit:\n\n### 1. **Present in the Laine** \n* **Location:** 34 Gardner Street (North Laine)\n* **What to expect:** A curated boutique known for design-led gift wrap. They frequently stock premium rolls and sheets featuring heavy metallic foil accents (golds, silvers, and metallic geometric patterns) from independent UK design houses like *Wrap* and *Cavallini*.\n\n### 2. **Bert\u2019s Homestore**\n* **Location:** 10 Kensington Gardens (North Laine) & 155 Western Road\n* **What to expect:** Beyond homeware, Bert\u2019s has an extensive, dedicated stationery section. They sell premium, thick-weight wrapping paper by the sheet and roll. You will easily find high-shine metallics, brushed golds, and sophisticated foiled art prints suitable for an adult milestone.\n\n### 3. **Utility**\n* **Location:** 47 Gardner Street (North Laine)\n* **What to expect:** Known for minimalist and functional design, Utility often carries high-grade, heavyweight wrapping sheets. If you are looking for a modern, architectural metallic (e.g., matte copper, brushed brass, or industrial foil), this is a strong option.\n\n### 4. **Waterstones (North Street)**\n* **Location:** 71\u201374 North Street\n* **What to expect:** The ground floor stationery department carries luxury paper brands like *Paperblanks*, *Roger la Borde*, and *Cavallini & Co.*. They regularly stock thick, gold-embossed and metallic-foiled single sheets that are durable enough for large, luxury presentation.\n\n### 5. **Oliver Bonas**\n* **Location:** 61 George Street (Hove) & Brighton Train Station concourse\n* **What to expect:** While smaller than the independent shops, Oliver Bonas excels at glamorous milestone gifting. Their gift wrap collection heavily leans into metallic finishes, holographic tones, and gold-foil prints. \n\n### 6. **Cass Art**\n* **Location:** 21 Market Street (The Lanes)\n* **What to expect:** If you cannot find pre-made wrapping paper that feels luxurious enough, visit Cass Art. They stock professional-grade decorative paper sheets (such as metallic Lokta, Japanese Chiyogami with real gold leafing, and metallic screen-printed papers) sold individually from flat-drawers. This paper is significantly heavier and more opulent than standard commercial wrapping paper.\n\n### Pro-Tip for Brighton Shopping:\nStart on **Gardner Street** and **Kensington Gardens** in the North Laine; you can visit Present in the Laine, Bert's, and Utility within a 3-minute walk of each other.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Present in the Laine",
+     "store_key": "present in the laine",
+     "is_ours": 0,
+     "position": 1,
+     "rank": 1,
+     "tone": null,
+     "quote": "Present in the Laine"
+    },
+    {
+     "store_name": "Bert\u2019s Homestore",
+     "store_key": "bert s homestore",
+     "is_ours": 0,
+     "position": 2,
+     "rank": 2,
+     "tone": null,
+     "quote": "Bert\u2019s Homestore"
+    },
+    {
+     "store_name": "Utility",
+     "store_key": "utility",
+     "is_ours": 0,
+     "position": 3,
+     "rank": 3,
+     "tone": null,
+     "quote": "Utility"
+    },
+    {
+     "store_name": "Waterstones",
+     "store_key": "waterstones",
+     "is_ours": 0,
+     "position": 4,
+     "rank": 4,
+     "tone": null,
+     "quote": "Waterstones (North Street)"
+    },
+    {
+     "store_name": "Oliver Bonas",
+     "store_key": "oliver bonas",
+     "is_ours": 0,
+     "position": 5,
+     "rank": 5,
+     "tone": null,
+     "quote": "Oliver Bonas"
+    },
+    {
+     "store_name": "Cass Art",
+     "store_key": "cass art",
+     "is_ours": 0,
+     "position": 6,
+     "rank": 6,
+     "tone": null,
+     "quote": "Cass Art"
+    },
+    {
+     "store_name": "Bert's",
+     "store_key": "bert s",
+     "is_ours": 0,
+     "position": 7,
+     "rank": null,
+     "tone": null,
+     "quote": "Present in the Laine, Bert's, and Utility within a 3-minute walk of each other"
+    }
+   ]
+  }
+ ]
+}

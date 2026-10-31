@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-31T00:21:07+00:00",
+ "generated_at": "2026-10-31T23:37:40+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
@@ -5717,6 +5717,1006 @@
      "daily_mentions": 0,
      "daily_answers": 6,
      "label": "Gemini (API)"
+    },
+    {
+     "id": 9,
+     "store_id": 1,
+     "date": "2026-11-01",
+     "provider": "gemini",
+     "channel": "api",
+     "run_id": 9,
+     "asked": 12,
+     "no_answer": 0,
+     "needs_review": 0,
+     "our_mentions": 0,
+     "total_answers": 12,
+     "top_competitor": "Il Papiro",
+     "top_competitor_mentions": 4,
+     "area_mentions": 0,
+     "area_answers": 5,
+     "area_rate": 0.0,
+     "no_area_mentions": 0,
+     "no_area_answers": 7,
+     "no_area_rate": 0.0,
+     "web_search_answers": 0,
+     "competitors": [
+      {
+       "key": "il papiro",
+       "name": "Il Papiro",
+       "mentions": 4,
+       "answer_ids": [
+        80,
+        81,
+        89,
+        90
+       ],
+       "spellings": [
+        "Il Papiro"
+       ]
+      },
+      {
+       "key": "milligram",
+       "name": "Milligram",
+       "mentions": 4,
+       "answer_ids": [
+        80,
+        84,
+        85,
+        90
+       ],
+       "spellings": [
+        "Milligram"
+       ]
+      },
+      {
+       "key": "readings",
+       "name": "Readings",
+       "mentions": 4,
+       "answer_ids": [
+        80,
+        81,
+        85,
+        90
+       ],
+       "spellings": [
+        "Readings"
+       ]
+      },
+      {
+       "key": "third drawer down",
+       "name": "Third Drawer Down",
+       "mentions": 4,
+       "answer_ids": [
+        81,
+        82,
+        90,
+        91
+       ],
+       "spellings": [
+        "Third Drawer Down"
+       ]
+      },
+      {
+       "key": "melbournalia",
+       "name": "Melbournalia",
+       "mentions": 3,
+       "answer_ids": [
+        81,
+        85,
+        90
+       ],
+       "spellings": [
+        "Melbournalia"
+       ]
+      },
+      {
+       "key": "muji",
+       "name": "MUJI",
+       "mentions": 3,
+       "answer_ids": [
+        80,
+        87,
+        89
+       ],
+       "spellings": [
+        "MUJI",
+        "MuJi"
+       ]
+      },
+      {
+       "key": "paper empire",
+       "name": "The Paper Empire",
+       "mentions": 3,
+       "answer_ids": [
+        81,
+        85,
+        87
+       ],
+       "spellings": [
+        "The Paper Empire"
+       ]
+      },
+      {
+       "key": "avenue bookstore",
+       "name": "Avenue Bookstore",
+       "mentions": 2,
+       "answer_ids": [
+        81,
+        90
+       ],
+       "spellings": [
+        "Avenue Bookstore",
+        "The Avenue Bookstore"
+       ]
+      },
+      {
+       "key": "bookbinders design",
+       "name": "Bookbinders Design",
+       "mentions": 2,
+       "answer_ids": [
+        80,
+        89
+       ],
+       "spellings": [
+        "Bookbinders Design"
+       ]
+      },
+      {
+       "key": "cass art",
+       "name": "Cass Art",
+       "mentions": 2,
+       "answer_ids": [
+        83,
+        88
+       ],
+       "spellings": [
+        "Cass Art"
+       ]
+      },
+      {
+       "key": "dymocks",
+       "name": "Dymocks",
+       "mentions": 2,
+       "answer_ids": [
+        81,
+        90
+       ],
+       "spellings": [
+        "Dymocks"
+       ]
+      },
+      {
+       "key": "hill of content",
+       "name": "Hill of Content",
+       "mentions": 2,
+       "answer_ids": [
+        85,
+        90
+       ],
+       "spellings": [
+        "Hill of Content"
+       ]
+      },
+      {
+       "key": "monsterthreads",
+       "name": "Monsterthreads",
+       "mentions": 2,
+       "answer_ids": [
+        81,
+        90
+       ],
+       "spellings": [
+        "Monsterthreads"
+       ]
+      },
+      {
+       "key": "ngv design store",
+       "name": "NGV design store",
+       "mentions": 2,
+       "answer_ids": [
+        81,
+        85
+       ],
+       "spellings": [
+        "NGV design store"
+       ]
+      },
+      {
+       "key": "present in the laine",
+       "name": "Present in the Laine",
+       "mentions": 2,
+       "answer_ids": [
+        86,
+        88
+       ],
+       "spellings": [
+        "Present in the Laine"
+       ]
+      },
+      {
+       "key": "snoopers paradise",
+       "name": "Snoopers Paradise",
+       "mentions": 2,
+       "answer_ids": [
+        83,
+        86
+       ],
+       "spellings": [
+        "Snoopers Paradise"
+       ]
+      },
+      {
+       "key": "grumpy swimmer",
+       "name": "The Grumpy Swimmer",
+       "mentions": 2,
+       "answer_ids": [
+        82,
+        91
+       ],
+       "spellings": [
+        "The Grumpy Swimmer"
+       ]
+      },
+      {
+       "key": "typo",
+       "name": "Typo",
+       "mentions": 2,
+       "answer_ids": [
+        81,
+        90
+       ],
+       "spellings": [
+        "Typo"
+       ]
+      },
+      {
+       "key": "waterstones",
+       "name": "Waterstones",
+       "mentions": 2,
+       "answer_ids": [
+        86,
+        88
+       ],
+       "spellings": [
+        "Waterstones"
+       ]
+      },
+      {
+       "key": "australia post",
+       "name": "Australia Post",
+       "mentions": 1,
+       "answer_ids": [
+        90
+       ],
+       "spellings": [
+        "Australia Post"
+       ]
+      },
+      {
+       "key": "bert s",
+       "name": "Bert's",
+       "mentions": 1,
+       "answer_ids": [
+        88
+       ],
+       "spellings": [
+        "Bert's"
+       ]
+      },
+      {
+       "key": "bert s homestore",
+       "name": "Bert\u2019s Homestore",
+       "mentions": 1,
+       "answer_ids": [
+        88
+       ],
+       "spellings": [
+        "Bert\u2019s Homestore"
+       ]
+      },
+      {
+       "key": "bibelot",
+       "name": "Bibelot",
+       "mentions": 1,
+       "answer_ids": [
+        82
+       ],
+       "spellings": [
+        "Bibelot"
+       ]
+      },
+      {
+       "key": "biome",
+       "name": "Biome",
+       "mentions": 1,
+       "answer_ids": [
+        87
+       ],
+       "spellings": [
+        "Biome"
+       ]
+      },
+      {
+       "key": "brighton bay pharmacy bay street gifts",
+       "name": "Brighton Bay Pharmacy / Bay Street Gifts",
+       "mentions": 1,
+       "answer_ids": [
+        91
+       ],
+       "spellings": [
+        "Brighton Bay Pharmacy / Bay Street Gifts"
+       ]
+      },
+      {
+       "key": "brighton flea market",
+       "name": "Brighton Flea Market",
+       "mentions": 1,
+       "answer_ids": [
+        83
+       ],
+       "spellings": [
+        "Brighton Flea Market"
+       ]
+      },
+      {
+       "key": "card shack",
+       "name": "Card Shack",
+       "mentions": 1,
+       "answer_ids": [
+        86
+       ],
+       "spellings": [
+        "Card Shack"
+       ]
+      },
+      {
+       "key": "clarkes",
+       "name": "Clarkes",
+       "mentions": 1,
+       "answer_ids": [
+        83
+       ],
+       "spellings": [
+        "Clarkes"
+       ]
+      },
+      {
+       "key": "crumpler taft top3 by design",
+       "name": "Crumpler / Taft / Top3 by Design",
+       "mentions": 1,
+       "answer_ids": [
+        84
+       ],
+       "spellings": [
+        "Crumpler / Taft / Top3 by Design"
+       ]
+      },
+      {
+       "key": "daiso",
+       "name": "Daiso",
+       "mentions": 1,
+       "answer_ids": [
+        90
+       ],
+       "spellings": [
+        "Daiso"
+       ]
+      },
+      {
+       "key": "daisy daisy",
+       "name": "Daisy Daisy",
+       "mentions": 1,
+       "answer_ids": [
+        86
+       ],
+       "spellings": [
+        "Daisy Daisy"
+       ]
+      },
+      {
+       "key": "david jones",
+       "name": "David Jones",
+       "mentions": 1,
+       "answer_ids": [
+        90
+       ],
+       "spellings": [
+        "David Jones"
+       ]
+      },
+      {
+       "key": "deans art",
+       "name": "Deans Art",
+       "mentions": 1,
+       "answer_ids": [
+        89
+       ],
+       "spellings": [
+        "Deans Art"
+       ]
+      },
+      {
+       "key": "dinosaur designs",
+       "name": "Dinosaur Designs",
+       "mentions": 1,
+       "answer_ids": [
+        91
+       ],
+       "spellings": [
+        "Dinosaur Designs"
+       ]
+      },
+      {
+       "key": "drakensberg drom",
+       "name": "Drakensberg / Drom",
+       "mentions": 1,
+       "answer_ids": [
+        84
+       ],
+       "spellings": [
+        "Drakensberg / Drom"
+       ]
+      },
+      {
+       "key": "fenton and fenton",
+       "name": "Fenton & Fenton",
+       "mentions": 1,
+       "answer_ids": [
+        82
+       ],
+       "spellings": [
+        "Fenton & Fenton"
+       ]
+      },
+      {
+       "key": "hay melbourne",
+       "name": "HAY Melbourne",
+       "mentions": 1,
+       "answer_ids": [
+        84
+       ],
+       "spellings": [
+        "HAY Melbourne"
+       ]
+      },
+      {
+       "key": "hill of content bookshop",
+       "name": "Hill of Content Bookshop",
+       "mentions": 1,
+       "answer_ids": [
+        81
+       ],
+       "spellings": [
+        "Hill of Content Bookshop"
+       ]
+      },
+      {
+       "key": "in the daylight",
+       "name": "In the Daylight",
+       "mentions": 1,
+       "answer_ids": [
+        85
+       ],
+       "spellings": [
+        "In the Daylight"
+       ]
+      },
+      {
+       "key": "jimmy buttons",
+       "name": "Jimmy Buttons",
+       "mentions": 1,
+       "answer_ids": [
+        87
+       ],
+       "spellings": [
+        "Jimmy Buttons"
+       ]
+      },
+      {
+       "key": "kmart",
+       "name": "Kmart",
+       "mentions": 1,
+       "answer_ids": [
+        90
+       ],
+       "spellings": [
+        "Kmart"
+       ]
+      },
+      {
+       "key": "kmart target big w",
+       "name": "Kmart / Target / Big W",
+       "mentions": 1,
+       "answer_ids": [
+        81
+       ],
+       "spellings": [
+        "Kmart / Target / Big W"
+       ]
+      },
+      {
+       "key": "lamington drive",
+       "name": "Lamington Drive",
+       "mentions": 1,
+       "answer_ids": [
+        82
+       ],
+       "spellings": [
+        "Lamington Drive"
+       ]
+      },
+      {
+       "key": "local post offices australia post and newsagencies",
+       "name": "Local Post Offices (Australia Post) & Newsagencies",
+       "mentions": 1,
+       "answer_ids": [
+        81
+       ],
+       "spellings": [
+        "Local Post Offices (Australia Post) & Newsagencies"
+       ]
+      },
+      {
+       "key": "made in japan",
+       "name": "Made in Japan",
+       "mentions": 1,
+       "answer_ids": [
+        80
+       ],
+       "spellings": [
+        "Made in Japan"
+       ]
+      },
+      {
+       "key": "made in japan mij",
+       "name": "Made in Japan (MIJ)",
+       "mentions": 1,
+       "answer_ids": [
+        87
+       ],
+       "spellings": [
+        "Made in Japan (MIJ)"
+       ]
+      },
+      {
+       "key": "maison living",
+       "name": "Maison Living",
+       "mentions": 1,
+       "answer_ids": [
+        82
+       ],
+       "spellings": [
+        "Maison Living"
+       ]
+      },
+      {
+       "key": "maker and monger",
+       "name": "Maker & Monger",
+       "mentions": 1,
+       "answer_ids": [
+        91
+       ],
+       "spellings": [
+        "Maker & Monger"
+       ]
+      },
+      {
+       "key": "melbournal",
+       "name": "Melbournal",
+       "mentions": 1,
+       "answer_ids": [
+        80
+       ],
+       "spellings": [
+        "Melbournal"
+       ]
+      },
+      {
+       "key": "melbourne pen depot",
+       "name": "Melbourne Pen Depot",
+       "mentions": 1,
+       "answer_ids": [
+        80
+       ],
+       "spellings": [
+        "Melbourne Pen Depot"
+       ]
+      },
+      {
+       "key": "melpens melbourne pens",
+       "name": "Melpens (Melbourne Pens)",
+       "mentions": 1,
+       "answer_ids": [
+        84
+       ],
+       "spellings": [
+        "Melpens (Melbourne Pens)"
+       ]
+      },
+      {
+       "key": "metropolis bookshop",
+       "name": "Metropolis Bookshop",
+       "mentions": 1,
+       "answer_ids": [
+        80
+       ],
+       "spellings": [
+        "Metropolis Bookshop"
+       ]
+      },
+      {
+       "key": "millgram",
+       "name": "Millgram",
+       "mentions": 1,
+       "answer_ids": [
+        89
+       ],
+       "spellings": [
+        "Millgram"
+       ]
+      },
+      {
+       "key": "mu ji",
+       "name": "Mu-Ji",
+       "mentions": 1,
+       "answer_ids": [
+        84
+       ],
+       "spellings": [
+        "Mu-Ji"
+       ]
+      },
+      {
+       "key": "myer",
+       "name": "Myer",
+       "mentions": 1,
+       "answer_ids": [
+        90
+       ],
+       "spellings": [
+        "Myer"
+       ]
+      },
+      {
+       "key": "officeworks",
+       "name": "Officeworks",
+       "mentions": 1,
+       "answer_ids": [
+        81
+       ],
+       "spellings": [
+        "Officeworks"
+       ]
+      },
+      {
+       "key": "oliver bonas",
+       "name": "Oliver Bonas",
+       "mentions": 1,
+       "answer_ids": [
+        88
+       ],
+       "spellings": [
+        "Oliver Bonas"
+       ]
+      },
+      {
+       "key": "oomomo",
+       "name": "Oomomo",
+       "mentions": 1,
+       "answer_ids": [
+        89
+       ],
+       "spellings": [
+        "Oomomo"
+       ]
+      },
+      {
+       "key": "paperchase next",
+       "name": "Paperchase @ Next",
+       "mentions": 1,
+       "answer_ids": [
+        86
+       ],
+       "spellings": [
+        "Paperchase @ Next"
+       ]
+      },
+      {
+       "key": "pinky s store",
+       "name": "Pinky\u2019s Store",
+       "mentions": 1,
+       "answer_ids": [
+        80
+       ],
+       "spellings": [
+        "Pinky\u2019s Store"
+       ]
+      },
+      {
+       "key": "pollon flowers",
+       "name": "Pollon Flowers",
+       "mentions": 1,
+       "answer_ids": [
+        87
+       ],
+       "spellings": [
+        "Pollon Flowers"
+       ]
+      },
+      {
+       "key": "prahran market specialty stalls",
+       "name": "Prahran Market Specialty Stalls",
+       "mentions": 1,
+       "answer_ids": [
+        82
+       ],
+       "spellings": [
+        "Prahran Market Specialty Stalls"
+       ]
+      },
+      {
+       "key": "quirks australia",
+       "name": "Quirks Australia",
+       "mentions": 1,
+       "answer_ids": [
+        91
+       ],
+       "spellings": [
+        "Quirks Australia"
+       ]
+      },
+      {
+       "key": "reverse art truck",
+       "name": "Reverse Art Truck",
+       "mentions": 1,
+       "answer_ids": [
+        87
+       ],
+       "spellings": [
+        "Reverse Art Truck"
+       ]
+      },
+      {
+       "key": "saint gertrude",
+       "name": "Saint Gertrude",
+       "mentions": 1,
+       "answer_ids": [
+        85
+       ],
+       "spellings": [
+        "Saint Gertrude"
+       ]
+      },
+      {
+       "key": "scout house",
+       "name": "Scout House",
+       "mentions": 1,
+       "answer_ids": [
+        82
+       ],
+       "spellings": [
+        "Scout House"
+       ]
+      },
+      {
+       "key": "senior art supplies",
+       "name": "Senior Art Supplies",
+       "mentions": 1,
+       "answer_ids": [
+        89
+       ],
+       "spellings": [
+        "Senior Art Supplies"
+       ]
+      },
+      {
+       "key": "signed and numbered",
+       "name": "Signed & Numbered",
+       "mentions": 1,
+       "answer_ids": [
+        91
+       ],
+       "spellings": [
+        "Signed & Numbered"
+       ]
+      },
+      {
+       "key": "spoilt gift and homewares",
+       "name": "Spoilt Gift & Homewares",
+       "mentions": 1,
+       "answer_ids": [
+        81
+       ],
+       "spellings": [
+        "Spoilt Gift & Homewares"
+       ]
+      },
+      {
+       "key": "tafts",
+       "name": "Tafts",
+       "mentions": 1,
+       "answer_ids": [
+        89
+       ],
+       "spellings": [
+        "Tafts"
+       ]
+      },
+      {
+       "key": "target",
+       "name": "Target",
+       "mentions": 1,
+       "answer_ids": [
+        90
+       ],
+       "spellings": [
+        "Target"
+       ]
+      },
+      {
+       "key": "telegram co milligram",
+       "name": "Telegram Co. / Milligram",
+       "mentions": 1,
+       "answer_ids": [
+        81
+       ],
+       "spellings": [
+        "Telegram Co. / Milligram"
+       ]
+      },
+      {
+       "key": "tessuti fabrics",
+       "name": "Tessuti Fabrics",
+       "mentions": 1,
+       "answer_ids": [
+        87
+       ],
+       "spellings": [
+        "Tessuti Fabrics"
+       ]
+      },
+      {
+       "key": "bayside soap and candle co",
+       "name": "The Bayside Soap & Candle Co.",
+       "mentions": 1,
+       "answer_ids": [
+        82
+       ],
+       "spellings": [
+        "The Bayside Soap & Candle Co."
+       ]
+      },
+      {
+       "key": "blacklist studio",
+       "name": "The Blacklist Studio",
+       "mentions": 1,
+       "answer_ids": [
+        85
+       ],
+       "spellings": [
+        "The Blacklist Studio"
+       ]
+      },
+      {
+       "key": "book nook and papeterie present in the laine",
+       "name": "The Book Nook & Papeterie / Present in the Laine",
+       "mentions": 1,
+       "answer_ids": [
+        83
+       ],
+       "spellings": [
+        "The Book Nook & Papeterie / Present in the Laine"
+       ]
+      },
+      {
+       "key": "essential ingredient",
+       "name": "The Essential Ingredient",
+       "mentions": 1,
+       "answer_ids": [
+        91
+       ],
+       "spellings": [
+        "The Essential Ingredient"
+       ]
+      },
+      {
+       "key": "fabric store",
+       "name": "The Fabric Store",
+       "mentions": 1,
+       "answer_ids": [
+        87
+       ],
+       "spellings": [
+        "The Fabric Store"
+       ]
+      },
+      {
+       "key": "north laine antique and flea market",
+       "name": "The North Laine Antique & Flea Market",
+       "mentions": 1,
+       "answer_ids": [
+        83
+       ],
+       "spellings": [
+        "The North Laine Antique & Flea Market"
+       ]
+      },
+      {
+       "key": "paperback bookshop",
+       "name": "The Paperback Bookshop",
+       "mentions": 1,
+       "answer_ids": [
+        90
+       ],
+       "spellings": [
+        "The Paperback Bookshop"
+       ]
+      },
+      {
+       "key": "reject shop",
+       "name": "The Reject Shop",
+       "mentions": 1,
+       "answer_ids": [
+        90
+       ],
+       "spellings": [
+        "The Reject Shop"
+       ]
+      },
+      {
+       "key": "upper gardner street saturday market",
+       "name": "Upper Gardner Street Saturday Market",
+       "mentions": 1,
+       "answer_ids": [
+        83
+       ],
+       "spellings": [
+        "Upper Gardner Street Saturday Market"
+       ]
+      },
+      {
+       "key": "utility",
+       "name": "Utility",
+       "mentions": 1,
+       "answer_ids": [
+        88
+       ],
+       "spellings": [
+        "Utility"
+       ]
+      },
+      {
+       "key": "white nest",
+       "name": "White Nest",
+       "mentions": 1,
+       "answer_ids": [
+        91
+       ],
+       "spellings": [
+        "White Nest"
+       ]
+      },
+      {
+       "key": "wunderkammer",
+       "name": "Wunderkammer",
+       "mentions": 1,
+       "answer_ids": [
+        89
+       ],
+       "spellings": [
+        "Wunderkammer"
+       ]
+      }
+     ],
+     "our_answer_ids": [],
+     "text": "Today, Gemini (API) recorded 12 responses, of which 0 answers explicitly named Handworks. This resulted in an appearance rate of 0, while Il Papiro appeared in 4 responses. The mention rate is currently unchanged compared to the previous check on 2026-10-31.",
+     "text_source": "ai",
+     "note": null,
+     "core_mentions": 0,
+     "core_answers": 6,
+     "daily_mentions": 0,
+     "daily_answers": 6,
+     "label": "Gemini (API)"
     }
    ],
    "ranges": {
@@ -5728,14 +6728,391 @@
      "max_pct": 21
     },
     "gemini:api": {
-     "runs": 6,
+     "runs": 7,
      "from": "2026-10-24",
-     "to": "2026-10-31",
+     "to": "2026-11-01",
      "min_pct": 0,
      "max_pct": 0
     }
    },
    "runs": [
+    {
+     "id": 9,
+     "agent": "asker,analyst",
+     "kind": "shift",
+     "run_date": "2026-11-01",
+     "started_at": "2026-10-31T23:23:26+00:00",
+     "finished_at": "2026-10-31T23:37:39+00:00",
+     "status": "ok",
+     "error": null,
+     "steps": [
+      {
+       "step": 1,
+       "name": "write_questions",
+       "kind": "AI",
+       "agent": "asker",
+       "started_at": "2026-10-31T23:23:26+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-31T23:23:27+00:00",
+       "result": {
+        "core": {
+         "action": "reused",
+         "count": 3
+        },
+        "daily": {
+         "action": "created",
+         "mode": "explore",
+         "count": 6,
+         "topics": [
+          {
+           "topic": "Stationery",
+           "planned": 2,
+           "answers": 20,
+           "ours": 0,
+           "competitor": "Milligram"
+          },
+          {
+           "topic": "Greeting cards",
+           "planned": 2,
+           "answers": 18,
+           "ours": 0,
+           "competitor": "Readings"
+          },
+          {
+           "topic": "Wrapping paper",
+           "planned": 2,
+           "answers": 16,
+           "ours": 0,
+           "competitor": "Readings"
+          }
+         ],
+         "questions": [
+          "Where can I buy a vintage wooden pencil box and quality art supplies in Brighton?",
+          "Looking for a sleek metal desk accessory and a smooth black pen in Melbourne.",
+          "Where is the best place to find a minimalist wedding card in Melbourne?",
+          "Need a cute pop-up greeting card for a baby shower in Brighton today.",
+          "Where can I buy eco-friendly gift wrapping and colourful silk ribbon in Melbourne?",
+          "Shops in Brighton that sell luxury metallic wrapping paper for a milestone birthday."
+         ],
+         "dropped": []
+        }
+       },
+       "description": "Kept the same 3 core questions and wrote 6 new ones for the topics where Handworks is named least: Stationery, Greeting cards, Wrapping paper.",
+       "description_id": "Memakai 3 pertanyaan inti yang sama dan menulis 6 pertanyaan baru untuk topik di mana Handworks paling jarang disebut: Stationery, Greeting cards, Wrapping paper."
+      },
+      {
+       "step": 2,
+       "name": "validate_questions",
+       "kind": "CODE",
+       "agent": "asker",
+       "started_at": "2026-10-31T23:23:27+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-31T23:23:27+00:00",
+       "result": {
+        "count": 9,
+        "core": 3,
+        "daily": 6,
+        "naming_area": 4,
+        "removed_as_duplicate": 0
+       },
+       "description": "Checked the 9 questions: no empty or duplicate ones, 4 name a store area.",
+       "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 4 menyebut area toko."
+      },
+      {
+       "step": 3,
+       "name": "ask_questions",
+       "kind": "CODE",
+       "agent": "asker",
+       "started_at": "2026-10-31T23:23:27+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-31T23:36:07+00:00",
+       "result": {
+        "asked": 12,
+        "ok": 12,
+        "no_answer": 0,
+        "retries": 0,
+        "calls_made": 12
+       },
+       "description": "Asked 12 questions: 12 answered, 0 no answer.",
+       "description_id": "Mengajukan 12 pertanyaan: 12 dijawab, 0 tanpa jawaban."
+      },
+      {
+       "step": "M",
+       "name": "master_answers_complete",
+       "kind": "CODE",
+       "agent": "master",
+       "checks": "asker",
+       "started_at": "2026-10-31T23:36:07+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-31T23:36:07+00:00",
+       "result": {
+        "recorded": 12,
+        "planned": 12,
+        "questions": 9,
+        "answered": 12,
+        "no_answer": 0,
+        "problems": []
+       },
+       "description": "Master checked the Asker's work: 12 of 12 answers recorded for 9 questions. Passed.",
+       "description_id": "Master mengecek hasil Asker: 12 dari 12 jawaban tercatat untuk 9 pertanyaan. Lolos."
+      },
+      {
+       "step": 4,
+       "name": "extract_mentions",
+       "kind": "AI",
+       "agent": "analyst",
+       "started_at": "2026-10-31T23:36:07+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-31T23:37:26+00:00",
+       "result": {
+        "extracted": 12,
+        "failed_calls": 0
+       },
+       "description": "Read 12 answers and listed every shop named.",
+       "description_id": "Membaca 12 jawaban dan mencatat setiap toko yang disebut."
+      },
+      {
+       "step": 5,
+       "name": "verify_and_count",
+       "kind": "CODE",
+       "agent": "analyst",
+       "started_at": "2026-10-31T23:37:26+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-31T23:37:32+00:00",
+       "result": {
+        "retried": 1,
+        "asked": 12,
+        "ok": 12,
+        "no_answer": 0,
+        "needs_review": 0,
+        "our_mentions": 0,
+        "top_competitor": "Il Papiro",
+        "top_competitor_mentions": 4
+       },
+       "description": "Checked every quote word for word: 12 answers counted, 0 set aside for review. Handworks named in 0 of 12.",
+       "description_id": "Mengecek setiap kutipan kata per kata: 12 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 12."
+      },
+      {
+       "step": 6,
+       "name": "compare_previous",
+       "kind": "CODE",
+       "agent": "analyst",
+       "started_at": "2026-10-31T23:37:32+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-31T23:37:32+00:00",
+       "result": {
+        "lines": [
+         "Compared with the previous run on 2026-10-31:",
+         "Handworks named in 0 of 12 answers (0%), previously 0 of 12 (0%): no change.",
+         "Top competitor Il Papiro in 4 of 12; previously Readings in 6 of 12 (different store).",
+         "Questions naming an area: 0 of 5, previously 0 of 5: no change.",
+         "Questions not naming an area: 0 of 7, previously 0 of 7: no change.",
+         "No answer: 0 of 12 asked (previously 0 of 12); set aside for review: 0 (previously 0)."
+        ],
+        "previous_date": "2026-10-31",
+        "range": {
+         "runs": 7,
+         "from": "2026-10-24",
+         "to": "2026-11-01",
+         "min_pct": 0,
+         "max_pct": 0
+        }
+       },
+       "description": "Handworks named in 0 of 12 answers (0%), previously 0 of 12 (0%): no change.",
+       "description_id": "Membandingkan dengan shift sebelumnya."
+      },
+      {
+       "step": 7,
+       "name": "write_summary",
+       "kind": "AI",
+       "agent": "analyst",
+       "started_at": "2026-10-31T23:37:32+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-31T23:37:39+00:00",
+       "result": {
+        "source": "ai",
+        "rejected": [],
+        "text": "Today, Gemini (API) recorded 12 responses, of which 0 answers explicitly named Handworks. This resulted in an appearance rate of 0, while Il Papiro appeared in 4 responses. The mention rate is currently unchanged compared to the previous check on 2026-10-31."
+       },
+       "description": "Wrote the summary; code checked every number in it against the counts.",
+       "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+      },
+      {
+       "step": "M",
+       "name": "master_numbers_match",
+       "kind": "CODE",
+       "agent": "master",
+       "checks": "analyst",
+       "started_at": "2026-10-31T23:37:39+00:00",
+       "status": "ok",
+       "finished_at": "2026-10-31T23:37:39+00:00",
+       "result": {
+        "quotes_checked": 115,
+        "fields_checked": 10,
+        "our_mentions": 0,
+        "total_answers": 12,
+        "problems": []
+       },
+       "description": "Master checked the Analyst's work: 10 numbers match the answers, 115 quotes still verbatim. Passed.",
+       "description_id": "Master mengecek hasil Analyst: 10 angka cocok dengan jawaban, 115 kutipan masih persis sama. Lolos."
+      }
+     ],
+     "quotes_verified": 115,
+     "questions": [
+      {
+       "text": "Best stationery shops in Melbourne",
+       "kind": "core",
+       "names_area": 0,
+       "reason": null,
+       "asked": 2,
+       "counted": 2,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+       "kind": "core",
+       "names_area": 0,
+       "reason": null,
+       "asked": 2,
+       "counted": 2,
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Wrapping paper"
+       ]
+      },
+      {
+       "text": "Unique gift shops in Prahran or Brighton Melbourne",
+       "kind": "core",
+       "names_area": 1,
+       "reason": null,
+       "asked": 2,
+       "counted": 2,
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
+      },
+      {
+       "text": "Where can I buy a vintage wooden pencil box and quality art supplies in Brighton?",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Stationery",
+        "answers": 20,
+        "ours": 0,
+        "competitor": "Milligram",
+        "competitor_mentions": 17,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Looking for a sleek metal desk accessory and a smooth black pen in Melbourne.",
+       "kind": "daily",
+       "names_area": 0,
+       "reason": {
+        "topic": "Stationery",
+        "answers": 20,
+        "ours": 0,
+        "competitor": "Milligram",
+        "competitor_mentions": 17,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Where is the best place to find a minimalist wedding card in Melbourne?",
+       "kind": "daily",
+       "names_area": 0,
+       "reason": {
+        "topic": "Greeting cards",
+        "answers": 18,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 14,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Greeting cards"
+       ]
+      },
+      {
+       "text": "Need a cute pop-up greeting card for a baby shower in Brighton today.",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Greeting cards",
+        "answers": 18,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 14,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Greeting cards"
+       ]
+      },
+      {
+       "text": "Where can I buy eco-friendly gift wrapping and colourful silk ribbon in Melbourne?",
+       "kind": "daily",
+       "names_area": 0,
+       "reason": {
+        "topic": "Wrapping paper",
+        "answers": 16,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 13,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Wrapping paper",
+        "Gifts"
+       ]
+      },
+      {
+       "text": "Shops in Brighton that sell luxury metallic wrapping paper for a milestone birthday.",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Wrapping paper",
+        "answers": 16,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 13,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Wrapping paper"
+       ]
+      }
+     ]
+    },
     {
      "id": 8,
      "agent": "asker,analyst",
@@ -8026,12 +9403,12 @@
     {
      "topic": "Stationery",
      "weight": 1.0,
-     "answers": 20,
+     "answers": 24,
      "ours": 0,
      "rate": 0.0,
      "competitor": "Milligram",
-     "competitor_mentions": 17,
-     "question_count": 8,
+     "competitor_mentions": 19,
+     "question_count": 10,
      "terms": [
       "stationery",
       "pen",
@@ -8044,12 +9421,12 @@
     {
      "topic": "Greeting cards",
      "weight": 1.0,
-     "answers": 18,
+     "answers": 22,
      "ours": 0,
      "rate": 0.0,
      "competitor": "Readings",
-     "competitor_mentions": 14,
-     "question_count": 7,
+     "competitor_mentions": 17,
+     "question_count": 9,
      "terms": [
       "greeting card",
       "card",
@@ -8060,12 +9437,12 @@
     {
      "topic": "Wrapping paper",
      "weight": 1.0,
-     "answers": 16,
+     "answers": 20,
      "ours": 0,
      "rate": 0.0,
-     "competitor": "Milligram",
-     "competitor_mentions": 13,
-     "question_count": 5,
+     "competitor": "Readings",
+     "competitor_mentions": 15,
+     "question_count": 7,
      "terms": [
       "wrapping paper",
       "gift wrap",
@@ -8094,12 +9471,12 @@
     {
      "topic": "Gifts",
      "weight": 1.0,
-     "answers": 21,
+     "answers": 24,
      "ours": 0,
      "rate": 0.0,
      "competitor": "Third Drawer Down",
-     "competitor_mentions": 11,
-     "question_count": 10,
+     "competitor_mentions": 13,
+     "question_count": 11,
      "terms": [
       "gift",
       "present",
@@ -8108,12 +9485,12 @@
     }
    ],
    "totals": {
-    "days_on_duty": 7,
+    "days_on_duty": 8,
     "first_day": "2026-10-24",
-    "questions_asked": 79,
-    "answers_read": 59,
-    "quotes_verified": 683,
-    "shops_seen": 268
+    "questions_asked": 91,
+    "answers_read": 71,
+    "quotes_verified": 798,
+    "shops_seen": 305
    }
   }
  ]
