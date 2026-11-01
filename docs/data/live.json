@@ -5,7 +5,7 @@
  "run_date": "2026-11-02",
  "run_id": 10,
  "started_at": "2026-11-01T23:35:03+00:00",
- "updated_at": "2026-11-01T23:47:50+00:00",
+ "updated_at": "2026-11-01T23:55:50+00:00",
  "steps": [
   {
    "step": 1,
@@ -73,14 +73,14 @@
  ],
  "current": "ask_questions",
  "progress": {
-  "done": 6,
+  "done": 9,
   "total": 12,
   "unit": "questions asked",
-  "ok": 6,
+  "ok": 9,
   "no_answer": 0
  },
- "last_event": "Asked \"Where can I get a custom wedding card printed in Melbourne this weekend?\" (try 1): answered.",
- "last_event_id": "Bertanya \"Where can I get a custom wedding card printed in Melbourne this weekend?\" (percobaan 1): dijawab.",
+ "last_event": "Asked \"Shops in Brighton that have birthday gift wrap and matching bows in stock.\" (try 1): answered.",
+ "last_event_id": "Bertanya \"Shops in Brighton that have birthday gift wrap and matching bows in stock.\" (percobaan 1): dijawab.",
  "agents": [
   "asker",
   "analyst"
