@@ -1,11 +1,11 @@
 {
- "status": "running",
+ "status": "failed",
  "agent": "Asker & Analyst",
  "store": "handworks",
  "run_date": "2026-11-03",
  "run_id": 11,
  "started_at": "2026-11-03T02:17:50+00:00",
- "updated_at": "2026-11-03T02:22:56+00:00",
+ "updated_at": "2026-11-03T02:27:30+00:00",
  "steps": [
   {
    "step": 1,
@@ -32,7 +32,7 @@
    "agent": "asker",
    "title": "Asking Gemini",
    "title_id": "Bertanya ke Gemini",
-   "status": "working"
+   "status": "failed"
   },
   {
    "step": 4,
@@ -71,16 +71,10 @@
    "status": "todo"
   }
  ],
- "current": "ask_questions",
- "progress": {
-  "done": 2,
-  "total": 12,
-  "unit": "questions asked",
-  "ok": 2,
-  "no_answer": 0
- },
- "last_event": "Asked \"Where can I buy greeting cards and wrapping paper in Melbourne?\" (try 1): answered.",
- "last_event_id": "Bertanya \"Where can I buy greeting cards and wrapping paper in Melbourne?\" (percobaan 1): dijawab.",
+ "current": null,
+ "progress": null,
+ "last_event": "Stopped here: RemoteDisconnected: Remote end closed connection without response",
+ "last_event_id": "Berhenti di sini: RemoteDisconnected: Remote end closed connection without response",
  "agents": [
   "asker",
   "analyst"
