@@ -1,0 +1,178 @@
+{
+ "store": {
+  "slug": "handworks",
+  "name": "Handworks"
+ },
+ "run": {
+  "id": 11,
+  "agent": "asker,analyst",
+  "kind": "shift",
+  "run_date": "2026-11-03",
+  "started_at": "2026-11-03T02:17:50+00:00",
+  "finished_at": "2026-11-03T02:27:30+00:00",
+  "status": "failed",
+  "error": "http.client.RemoteDisconnected: Remote end closed connection without response",
+  "steps": [
+   {
+    "step": 1,
+    "name": "write_questions",
+    "kind": "AI",
+    "agent": "asker",
+    "started_at": "2026-11-03T02:17:50+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-03T02:17:52+00:00",
+    "result": {
+     "core": {
+      "action": "reused",
+      "count": 3
+     },
+     "daily": {
+      "action": "created",
+      "mode": "explore",
+      "count": 6,
+      "topics": [
+       {
+        "topic": "Stationery",
+        "planned": 2,
+        "answers": 28,
+        "ours": 0,
+        "competitor": "Milligram"
+       },
+       {
+        "topic": "Greeting cards",
+        "planned": 2,
+        "answers": 26,
+        "ours": 0,
+        "competitor": "Readings"
+       },
+       {
+        "topic": "Wrapping paper",
+        "planned": 2,
+        "answers": 24,
+        "ours": 0,
+        "competitor": "Readings"
+       }
+      ],
+      "questions": [
+       "Where can I find pastel highlighters and an aesthetic desk accessory for my home office in Brighton?",
+       "Looking for Japanese art supplies and a refillable fountain pen in Melbourne.",
+       "Where can I grab a graduation card and a small present in Prahran?",
+       "Need a witty retirement card for my colleague in Melbourne today.",
+       "Where to buy velvet ribbon and patterned wrapping paper in Melbourne?",
+       "Shops in Brighton that sell recycled gift wrap and twine."
+      ],
+      "dropped": []
+     }
+    },
+    "description": "Kept the same 3 core questions and wrote 6 new ones for the topics where Handworks is named least: Stationery, Greeting cards, Wrapping paper.",
+    "description_id": "Memakai 3 pertanyaan inti yang sama dan menulis 6 pertanyaan baru untuk topik di mana Handworks paling jarang disebut: Stationery, Greeting cards, Wrapping paper."
+   },
+   {
+    "step": 2,
+    "name": "validate_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-11-03T02:17:52+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-03T02:17:52+00:00",
+    "result": {
+     "count": 9,
+     "core": 3,
+     "daily": 6,
+     "naming_area": 4,
+     "removed_as_duplicate": 0
+    },
+    "description": "Checked the 9 questions: no empty or duplicate ones, 4 name a store area.",
+    "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 4 menyebut area toko."
+   },
+   {
+    "step": 3,
+    "name": "ask_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-11-03T02:17:52+00:00",
+    "status": "failed",
+    "error": "RemoteDisconnected: Remote end closed connection without response",
+    "description": "Stopped here: RemoteDisconnected: Remote end closed connection without response",
+    "description_id": "Berhenti di sini: RemoteDisconnected: Remote end closed connection without response"
+   }
+  ],
+  "quotes_verified": 0,
+  "questions": [
+   {
+    "text": "Best stationery shops in Melbourne",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Greeting cards",
+     "Wrapping paper"
+    ]
+   }
+  ]
+ },
+ "summary": null,
+ "comparison": [],
+ "comparison_id": [],
+ "answers": [
+  {
+   "id": 104,
+   "question": "Best stationery shops in Melbourne",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-11-03T02:20:39+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": null,
+   "text": "Melbourne is one of the best cities in the world for stationery lovers, with a rich mix of Japanese imports, bespoke paper, fountain pen specialists, and high-end design goods. \n\nHere are the best stationery shops in Melbourne, broken down by what they do best:\n\n---\n\n### **The Heavyweights (Design, Japanese & Cult Brands)**\n\n#### **1. Milligram**\n* **Best for:** The ultimate all-rounder, modern design, and cult international brands.\n* **What they sell:** Brands like Midori, MD Paper, Rhodia, LAMY, Kaweco, Delfonics, and their own fantastic house-brand notebooks. \n* **Locations:** Melbourne Central (CBD), QV (CBD), and various suburban shopping centres.\n\n#### **2. Bunbougu**\n* **Best for:** Hard-core Japanese stationery enthusiasts.\n* **What they sell:** Massive selection of imported Japanese pens, washi tapes, pencil cases, and paper (Hobonichi, Kokuyo, Zebra Sarasa, Uni-ball). If you love pastel highlighters, multi-pens, or precise mechanical pencils, this is your Mecca.\n* **Location:** 263 Coventry St, South Melbourne (they also have a massive online store).\n\n#### **3. MUJI**\n* **Best for:** Minimalist, affordable, high-quality basics.\n* **What they sell:** Their gel pens (especially the 0.38mm and 0.5mm) have a global cult following. Also great for simple, durable acrylic desk organizers, kraft notebooks, and highlighters.\n* **Locations:** Emporium (CBD) and Chadstone.\n\n---\n\n### **Boutique, Paper & Craft**\n\n#### **4. Il Papiro**\n* **Best for:** Old-world Florentine luxury and wax seals.\n* **What they sell:** Beautiful hand-marbled Italian paper, leather-bound journals, calligraphy sets, fine stationery sheets, and custom wax seals. Stepping in feels like stepping into 18th-century Florence.\n* **Location:** 10 Degraves St, Melbourne CBD.\n\n#### **5. Bookbinders Design**\n* **Best for:** European minimalism, cloth-bound journals, and fountain pen lovers.\n* **What they sell:** Swiss/Swedish heritage stationery. You can get custom embossing on their high-quality, cloth-bound notebooks, photo albums, and boxes. They also stock a great curation of inks and fountain pens.\n* **Location:** The Block Arcade (CBD).\n\n#### **6. Deans Art**\n* **Best for:** When art supplies cross over into stationery.\n* **What they sell:** While primarily a fine-art store, they have incredible paper stocks, technical drawing pens, sketchbooks, and drafting supplies.\n* **Locations:** Collingwood (Smith St) and Melbourne CBD (Lonsdale St).\n\n---\n\n### **Fountain Pens & Writing Instruments**\n\n#### **7. Pen City**\n* **Best for:** Pure writing instruments, from starter pens to luxury collectors' items.\n* **What they sell:** Fountain pens, rollerballs, ballpoints, and bottled inks. They carry everything from accessible brands like TWSBI and LAMY up to Montblanc, Pelikan, and Pilot Namiki.\n* **Location:** 250 Elizabeth St, Melbourne CBD.\n\n#### **8. Melbourne Pen Depot**\n* **Best for:** Pen servicing, inks, and expert advice (suburban hidden gem).\n* **What they sell:** A massive range of prestige writing instruments, refills, and inks with very knowledgeable, traditional service.\n* **Location:** Chadstone Shopping Centre.\n\n---\n\n### **Notable Mentions (Design Objects & Gifts)**\n\n* **Daiso (Multiple CBD & Suburban locations):** Extremely cheap, fun Japanese stationery. Great for novelty sticky notes, cheap brush pens, and cute pencil cases.\n* **Metropolis Bookshop (Curtin House, CBD):** While technically a bookstore, their collection of graphic design, typography, and architecture notebooks/zines is well worth browsing.\n\n---\n\n### **Quick Shopping Route Suggestion (CBD Only):**\nIf you want to do a walking tour in a single afternoon:\n1. Start at **Melbourne Central** (Milligram).\n2. Walk down to **Emporium** (MUJI).\n3. Cut through to Elizabeth St for **Pen City**.\n4. Walk down to **The Block Arcade** for **Bookbinders Design**.\n5. Finish at **Degraves Street** for **Il Papiro** (and grab a coffee).",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-11-03T02:18:44+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 30.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 105,
+   "question": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-11-03T02:22:56+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": null,
+   "text": "Here are the best places to buy greeting cards and wrapping paper in Melbourne, broken down by style and budget:\n\n### 1. Boutique Paper, Stationery & Design Stores (Best for unique, high-end, and artistic finds)\n*   **Il Papiro** (*CBD - Degraves St*): If you want exquisite, traditional, hand-marbled Italian paper, wax seals, and luxury cards, this is the ultimate destination. \n*   **Milligram** (*CBD, Melbourne Central, Chadstone*): Great for stylish, minimalist, and contemporary stationery, featuring both local independent artists and international design brands.\n*   **Pulp Bookshop** (*CBD - Nicholas Building*): A hidden gem specializing in quirky, independent, and artist-designed cards, wrapping paper, and prints.\n*   **Bookbinders Design** (*CBD - Galleria*): High-end European stationery with minimalist, beautifully crafted greeting cards and ribbons.\n*   **Telegram Paper Goods / Milligram Outlet** (*North Melbourne*): Great if you are after quality stationery and notebooks, often with good seasonal card displays.\n\n### 2. Independent Bookshops (Best for literary, witty, and local artist cards)\nMelbourne\u2019s independent bookshops often have the best curated selections of greeting cards and high-quality flat-sheet wrapping paper:\n*   **Readings** (*Carlton, CBD, Hawthorn, St Kilda, Emporium*)\n*   **Hill of Content** (*CBD - top of Bourke St*)\n*   **Avenue Bookstore** (*Albert Park, Elsternwick, Richmond*)\n*   **Sun Bookshop** (*Yarraville*)\n\n### 3. Gift & Lifestyle Boutiques (Best for cute, colorful, and fun designs)\n*   **Monsterthreads** (*CBD, Fitzroy*): Colorful, illustrative, and often quirky cards and gift wrap by local and international artists.\n*   **Melbournalia** (*CBD - Bourke St*): Focuses exclusively on Melbourne and Victorian-made products, perfect for Australiana-themed or locally illustrated cards.\n*   **Pinky\u2019s Store** (*Preston*): An eclectic northern-suburbs boutique packed with fun, bright wrapping paper and independent artist cards.\n*   **Third Drawer Down** (*Online & local stockists*): Known for witty, irreverent, and art-based designs.\n\n### 4. Large Retailers (Best for budget, convenience, and large-roll wrapping paper)\n*   **Kmart / Target / Big W**: Best for buying wrapping paper rolls, gift bags, and ribbons in bulk on a budget.\n*   **Typo** (*Various shopping centers across Melbourne*): Fun, trendy, pop-culture, and humorous cards, along with affordable gift wrap.\n*   **Dymocks** (*CBD - Collins St*): A massive basement store with a surprisingly large selection of traditional, vintage, and modern cards and wrapping papers.\n*   **Officeworks**: Ideal for basic kraft paper, packaging supplies, ribbons, and standard cards.\n\n### 5. Newsagencies and Post Offices\n*   Nearly every local suburban strip in Melbourne has an **LPO (Post Office)** or a **traditional Newsagency**, which stock vast selections of commercial greeting cards (Hallmark, John Sands) and basic gift-wrapping supplies.",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  }
+ ]
+}

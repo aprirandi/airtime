@@ -1,0 +1,107 @@
+{
+ "store": {
+  "slug": "handworks",
+  "name": "Handworks"
+ },
+ "run": {
+  "id": 12,
+  "agent": "asker,analyst",
+  "kind": "shift",
+  "run_date": "2026-11-04",
+  "started_at": "2026-11-04T00:36:34+00:00",
+  "finished_at": "2026-11-04T00:41:52+00:00",
+  "status": "failed",
+  "error": "http.client.RemoteDisconnected: Remote end closed connection without response",
+  "steps": [
+   {
+    "step": 1,
+    "name": "write_questions",
+    "kind": "AI",
+    "agent": "asker",
+    "started_at": "2026-11-04T00:36:34+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-04T00:36:35+00:00",
+    "result": {
+     "core": {
+      "action": "reused",
+      "count": 3
+     },
+     "daily": {
+      "action": "created",
+      "mode": "explore",
+      "count": 6,
+      "topics": [
+       {
+        "topic": "Stationery",
+        "planned": 2,
+        "answers": 29,
+        "ours": 0,
+        "competitor": "Milligram"
+       },
+       {
+        "topic": "Greeting cards",
+        "planned": 2,
+        "answers": 27,
+        "ours": 0,
+        "competitor": "Readings"
+       },
+       {
+        "topic": "Wrapping paper",
+        "planned": 2,
+        "answers": 25,
+        "ours": 0,
+        "competitor": "Readings"
+       }
+      ],
+      "questions": [
+       "Where can I find colourful pencil sets and cute stationery for kids in Prahran?",
+       "Looking for gold nib calligraphy pens and heavy-duty desk accessories in Australia.",
+       "Where is a good place to buy a funny birthday card for my teenage brother in Brighton?",
+       "Need to find an illustrated card and a wedding card for this weekend in Melbourne.",
+       "Where can I buy patterned wrapping paper and matching ribbon rolls in Prahran?",
+       "Shops in Melbourne that sell thick gift wrapping and elegant satin ribbon."
+      ],
+      "dropped": []
+     }
+    },
+    "description": "Kept the same 3 core questions and wrote 6 new ones for the topics where Handworks is named least: Stationery, Greeting cards, Wrapping paper.",
+    "description_id": "Memakai 3 pertanyaan inti yang sama dan menulis 6 pertanyaan baru untuk topik di mana Handworks paling jarang disebut: Stationery, Greeting cards, Wrapping paper."
+   },
+   {
+    "step": 2,
+    "name": "validate_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-11-04T00:36:35+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-04T00:36:35+00:00",
+    "result": {
+     "count": 9,
+     "core": 3,
+     "daily": 6,
+     "naming_area": 4,
+     "removed_as_duplicate": 0
+    },
+    "description": "Checked the 9 questions: no empty or duplicate ones, 4 name a store area.",
+    "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 4 menyebut area toko."
+   },
+   {
+    "step": 3,
+    "name": "ask_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-11-04T00:36:35+00:00",
+    "status": "failed",
+    "error": "RemoteDisconnected: Remote end closed connection without response",
+    "description": "Stopped here: RemoteDisconnected: Remote end closed connection without response",
+    "description_id": "Berhenti di sini: RemoteDisconnected: Remote end closed connection without response"
+   }
+  ],
+  "quotes_verified": 0,
+  "questions": []
+ },
+ "summary": null,
+ "comparison": [],
+ "comparison_id": [],
+ "answers": []
+}
