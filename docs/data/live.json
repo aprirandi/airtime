@@ -1,11 +1,11 @@
 {
- "status": "failed",
+ "status": "running",
  "agent": "Asker & Analyst",
  "store": "handworks",
- "run_date": "2026-11-04",
- "run_id": 12,
- "started_at": "2026-11-04T00:36:34+00:00",
- "updated_at": "2026-11-04T00:41:52+00:00",
+ "run_date": "2026-11-05",
+ "run_id": 13,
+ "started_at": "2026-11-05T00:52:59+00:00",
+ "updated_at": "2026-11-05T00:53:01+00:00",
  "steps": [
   {
    "step": 1,
@@ -32,7 +32,7 @@
    "agent": "asker",
    "title": "Asking Gemini",
    "title_id": "Bertanya ke Gemini",
-   "status": "failed"
+   "status": "working"
   },
   {
    "step": 4,
@@ -71,10 +71,10 @@
    "status": "todo"
   }
  ],
- "current": null,
+ "current": "ask_questions",
  "progress": null,
- "last_event": "Stopped here: RemoteDisconnected: Remote end closed connection without response",
- "last_event_id": "Berhenti di sini: RemoteDisconnected: Remote end closed connection without response",
+ "last_event": "Asking Gemini.",
+ "last_event_id": "Bertanya ke Gemini.",
  "agents": [
   "asker",
   "analyst"
