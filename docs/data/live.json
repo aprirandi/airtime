@@ -5,7 +5,7 @@
  "run_date": "2026-11-05",
  "run_id": 13,
  "started_at": "2026-11-05T00:52:59+00:00",
- "updated_at": "2026-11-05T00:53:01+00:00",
+ "updated_at": "2026-11-05T01:06:28+00:00",
  "steps": [
   {
    "step": 1,
@@ -72,9 +72,15 @@
   }
  ],
  "current": "ask_questions",
- "progress": null,
- "last_event": "Asking Gemini.",
- "last_event_id": "Bertanya ke Gemini.",
+ "progress": {
+  "done": 1,
+  "total": 12,
+  "unit": "questions asked",
+  "ok": 0,
+  "no_answer": 1
+ },
+ "last_event": "Asked \"Best stationery shops in Melbourne\" (try 1): no answer.",
+ "last_event_id": "Bertanya \"Best stationery shops in Melbourne\" (percobaan 1): tanpa jawaban.",
  "agents": [
   "asker",
   "analyst"
