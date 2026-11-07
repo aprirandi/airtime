@@ -5,7 +5,7 @@
  "run_date": "2026-11-07",
  "run_id": 15,
  "started_at": "2026-11-07T00:06:30+00:00",
- "updated_at": "2026-11-07T00:06:31+00:00",
+ "updated_at": "2026-11-07T00:11:59+00:00",
  "steps": [
   {
    "step": 1,
@@ -72,9 +72,15 @@
   }
  ],
  "current": "ask_questions",
- "progress": null,
- "last_event": "Asking Gemini.",
- "last_event_id": "Bertanya ke Gemini.",
+ "progress": {
+  "done": 2,
+  "total": 12,
+  "unit": "questions asked",
+  "ok": 2,
+  "no_answer": 0
+ },
+ "last_event": "Asked \"Where can I buy greeting cards and wrapping paper in Melbourne?\" (try 1): answered.",
+ "last_event_id": "Bertanya \"Where can I buy greeting cards and wrapping paper in Melbourne?\" (percobaan 1): dijawab.",
  "agents": [
   "asker",
   "analyst"
