@@ -5,7 +5,7 @@
  "run_date": "2026-11-07",
  "run_id": 15,
  "started_at": "2026-11-07T00:06:30+00:00",
- "updated_at": "2026-11-07T00:48:43+00:00",
+ "updated_at": "2026-11-07T00:56:35+00:00",
  "steps": [
   {
    "step": 1,
@@ -32,7 +32,7 @@
    "agent": "asker",
    "title": "Asking Gemini",
    "title_id": "Bertanya ke Gemini",
-   "status": "working"
+   "status": "done"
   },
   {
    "step": 4,
@@ -41,7 +41,7 @@
    "agent": "analyst",
    "title": "Reading the answers",
    "title_id": "Membaca jawaban",
-   "status": "todo"
+   "status": "working"
   },
   {
    "step": 5,
@@ -71,19 +71,17 @@
    "status": "todo"
   }
  ],
- "current": "ask_questions",
+ "current": "extract_mentions",
  "progress": {
-  "done": 11,
+  "done": 9,
   "total": 12,
-  "unit": "questions asked",
-  "ok": 11,
-  "no_answer": 0
+  "unit": "answers read"
  },
- "last_event": "Asked \"Where can I buy greeting cards and wrapping paper in Melbourne?\" (try 2): answered.",
- "last_event_id": "Bertanya \"Where can I buy greeting cards and wrapping paper in Melbourne?\" (percobaan 2): dijawab.",
+ "last_event": "Reading the answer to \"Best stationery shops in Melbourne\".",
+ "last_event_id": "Membaca jawaban untuk \"Best stationery shops in Melbourne\".",
  "agents": [
   "asker",
   "analyst"
  ],
- "agent_now": "asker"
+ "agent_now": "analyst"
 }
