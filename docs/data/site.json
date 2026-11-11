@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-10T03:41:06+00:00",
+ "generated_at": "2026-11-11T01:26:17+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
@@ -11938,6 +11938,663 @@
      "daily_mentions": 0,
      "daily_answers": 5,
      "label": "Gemini (API)"
+    },
+    {
+     "id": 17,
+     "store_id": 1,
+     "date": "2026-11-11",
+     "provider": "gemini",
+     "channel": "api",
+     "run_id": 19,
+     "asked": 6,
+     "no_answer": 0,
+     "needs_review": 0,
+     "our_mentions": 0,
+     "total_answers": 6,
+     "top_competitor": "Milligram",
+     "top_competitor_mentions": 4,
+     "area_mentions": 0,
+     "area_answers": 2,
+     "area_rate": 0.0,
+     "no_area_mentions": 0,
+     "no_area_answers": 4,
+     "no_area_rate": 0.0,
+     "web_search_answers": 0,
+     "competitors": [
+      {
+       "key": "milligram",
+       "name": "Milligram",
+       "mentions": 4,
+       "answer_ids": [
+        172,
+        173,
+        175,
+        176
+       ],
+       "spellings": [
+        "Milligram"
+       ]
+      },
+      {
+       "key": "bookbinders design",
+       "name": "Bookbinders Design",
+       "mentions": 3,
+       "answer_ids": [
+        172,
+        173,
+        175
+       ],
+       "spellings": [
+        "Bookbinders Design"
+       ]
+      },
+      {
+       "key": "il papiro",
+       "name": "Il Papiro",
+       "mentions": 3,
+       "answer_ids": [
+        172,
+        173,
+        175
+       ],
+       "spellings": [
+        "Il Papiro"
+       ]
+      },
+      {
+       "key": "readings",
+       "name": "Readings",
+       "mentions": 3,
+       "answer_ids": [
+        173,
+        176,
+        177
+       ],
+       "spellings": [
+        "Readings"
+       ]
+      },
+      {
+       "key": "third drawer down",
+       "name": "Third Drawer Down",
+       "mentions": 3,
+       "answer_ids": [
+        173,
+        174,
+        177
+       ],
+       "spellings": [
+        "Third Drawer Down"
+       ]
+      },
+      {
+       "key": "dymocks",
+       "name": "Dymocks",
+       "mentions": 2,
+       "answer_ids": [
+        173,
+        176
+       ],
+       "spellings": [
+        "Dymocks"
+       ]
+      },
+      {
+       "key": "hill of content",
+       "name": "Hill of Content",
+       "mentions": 2,
+       "answer_ids": [
+        173,
+        176
+       ],
+       "spellings": [
+        "Hill of Content"
+       ]
+      },
+      {
+       "key": "kmart target",
+       "name": "Kmart / Target",
+       "mentions": 2,
+       "answer_ids": [
+        173,
+        176
+       ],
+       "spellings": [
+        "Kmart / Target"
+       ]
+      },
+      {
+       "key": "melbournalia",
+       "name": "Melbournalia",
+       "mentions": 2,
+       "answer_ids": [
+        173,
+        176
+       ],
+       "spellings": [
+        "Melbournalia"
+       ]
+      },
+      {
+       "key": "monsterthreads",
+       "name": "Monsterthreads",
+       "mentions": 2,
+       "answer_ids": [
+        173,
+        176
+       ],
+       "spellings": [
+        "Monsterthreads"
+       ]
+      },
+      {
+       "key": "spoilt gift and homewares",
+       "name": "Spoilt Gift & Homewares",
+       "mentions": 2,
+       "answer_ids": [
+        173,
+        176
+       ],
+       "spellings": [
+        "Spoilt Gift & Homewares"
+       ]
+      },
+      {
+       "key": "essential ingredient",
+       "name": "The Essential Ingredient",
+       "mentions": 2,
+       "answer_ids": [
+        174,
+        177
+       ],
+       "spellings": [
+        "The Essential Ingredient"
+       ]
+      },
+      {
+       "key": "typo",
+       "name": "Typo",
+       "mentions": 2,
+       "answer_ids": [
+        173,
+        176
+       ],
+       "spellings": [
+        "Typo"
+       ]
+      },
+      {
+       "key": "avenue bookstore",
+       "name": "Avenue Bookstore",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "Avenue Bookstore"
+       ]
+      },
+      {
+       "key": "avid diva metropolis bookshop",
+       "name": "Avid Diva / Metropolis Bookshop",
+       "mentions": 1,
+       "answer_ids": [
+        176
+       ],
+       "spellings": [
+        "Avid Diva / Metropolis Bookshop"
+       ]
+      },
+      {
+       "key": "bazaar antique market",
+       "name": "Bazaar Antique Market",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "Bazaar Antique Market"
+       ]
+      },
+      {
+       "key": "bazaar prahran",
+       "name": "Bazaar Prahran",
+       "mentions": 1,
+       "answer_ids": [
+        174
+       ],
+       "spellings": [
+        "Bazaar Prahran"
+       ]
+      },
+      {
+       "key": "bespoke botanical",
+       "name": "Bespoke Botanical",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "Bespoke Botanical"
+       ]
+      },
+      {
+       "key": "bespoke letterpress",
+       "name": "Bespoke Letterpress",
+       "mentions": 1,
+       "answer_ids": [
+        176
+       ],
+       "spellings": [
+        "Bespoke Letterpress"
+       ]
+      },
+      {
+       "key": "brighton antique centre",
+       "name": "Brighton Antique Centre",
+       "mentions": 1,
+       "answer_ids": [
+        174
+       ],
+       "spellings": [
+        "Brighton Antique Centre"
+       ]
+      },
+      {
+       "key": "bunyip toys and novelties bunyip books",
+       "name": "Bunyip Toys & Novelties / Bunyip Books",
+       "mentions": 1,
+       "answer_ids": [
+        172
+       ],
+       "spellings": [
+        "Bunyip Toys & Novelties / Bunyip Books"
+       ]
+      },
+      {
+       "key": "charing cross quilt and craft",
+       "name": "Charing Cross Quilt & Craft",
+       "mentions": 1,
+       "answer_ids": [
+        174
+       ],
+       "spellings": [
+        "Charing Cross Quilt & Craft"
+       ]
+      },
+      {
+       "key": "cheese shop deli",
+       "name": "Cheese Shop Deli",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "Cheese Shop Deli"
+       ]
+      },
+      {
+       "key": "crate expectations",
+       "name": "Crate Expectations",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "Crate Expectations"
+       ]
+      },
+      {
+       "key": "david jones and myer",
+       "name": "David Jones & Myer",
+       "mentions": 1,
+       "answer_ids": [
+        176
+       ],
+       "spellings": [
+        "David Jones & Myer"
+       ]
+      },
+      {
+       "key": "deans art",
+       "name": "Deans Art",
+       "mentions": 1,
+       "answer_ids": [
+        175
+       ],
+       "spellings": [
+        "Deans Art"
+       ]
+      },
+      {
+       "key": "kami",
+       "name": "Kami",
+       "mentions": 1,
+       "answer_ids": [
+        175
+       ],
+       "spellings": [
+        "Kami"
+       ]
+      },
+      {
+       "key": "kikki k",
+       "name": "Kikki.K",
+       "mentions": 1,
+       "answer_ids": [
+        173
+       ],
+       "spellings": [
+        "Kikki.K"
+       ]
+      },
+      {
+       "key": "koko black",
+       "name": "Koko Black",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "Koko Black"
+       ]
+      },
+      {
+       "key": "leo and bella",
+       "name": "Leo & Bella",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "Leo & Bella"
+       ]
+      },
+      {
+       "key": "local newsagents",
+       "name": "Local Newsagents",
+       "mentions": 1,
+       "answer_ids": [
+        176
+       ],
+       "spellings": [
+        "Local Newsagents"
+       ]
+      },
+      {
+       "key": "maison rustique",
+       "name": "Maison Rustique",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "Maison Rustique"
+       ]
+      },
+      {
+       "key": "melbourne pen depot",
+       "name": "Melbourne Pen Depot",
+       "mentions": 1,
+       "answer_ids": [
+        172
+       ],
+       "spellings": [
+        "Melbourne Pen Depot"
+       ]
+      },
+      {
+       "key": "metropolis bookshop",
+       "name": "Metropolis Bookshop",
+       "mentions": 1,
+       "answer_ids": [
+        173
+       ],
+       "spellings": [
+        "Metropolis Bookshop"
+       ]
+      },
+      {
+       "key": "mookah",
+       "name": "Mookah",
+       "mentions": 1,
+       "answer_ids": [
+        174
+       ],
+       "spellings": [
+        "Mookah"
+       ]
+      },
+      {
+       "key": "morning",
+       "name": "Morning",
+       "mentions": 1,
+       "answer_ids": [
+        172
+       ],
+       "spellings": [
+        "Morning"
+       ]
+      },
+      {
+       "key": "muji",
+       "name": "MUJI",
+       "mentions": 1,
+       "answer_ids": [
+        172
+       ],
+       "spellings": [
+        "MUJI"
+       ]
+      },
+      {
+       "key": "muuji",
+       "name": "Muuji",
+       "mentions": 1,
+       "answer_ids": [
+        175
+       ],
+       "spellings": [
+        "Muuji"
+       ]
+      },
+      {
+       "key": "officeworks",
+       "name": "Officeworks",
+       "mentions": 1,
+       "answer_ids": [
+        173
+       ],
+       "spellings": [
+        "Officeworks"
+       ]
+      },
+      {
+       "key": "pen city",
+       "name": "Pen City",
+       "mentions": 1,
+       "answer_ids": [
+        175
+       ],
+       "spellings": [
+        "Pen City"
+       ]
+      },
+      {
+       "key": "pinky s",
+       "name": "Pinky\u2019s",
+       "mentions": 1,
+       "answer_ids": [
+        176
+       ],
+       "spellings": [
+        "Pinky\u2019s"
+       ]
+      },
+      {
+       "key": "pinky s store",
+       "name": "Pinky\u2019s Store",
+       "mentions": 1,
+       "answer_ids": [
+        173
+       ],
+       "spellings": [
+        "Pinky\u2019s Store"
+       ]
+      },
+      {
+       "key": "post industrial design",
+       "name": "Post Industrial Design",
+       "mentions": 1,
+       "answer_ids": [
+        172
+       ],
+       "spellings": [
+        "Post Industrial Design"
+       ]
+      },
+      {
+       "key": "pulp addict",
+       "name": "Pulp Addict",
+       "mentions": 1,
+       "answer_ids": [
+        175
+       ],
+       "spellings": [
+        "Pulp Addict"
+       ]
+      },
+      {
+       "key": "ruby rabbit",
+       "name": "Ruby Rabbit",
+       "mentions": 1,
+       "answer_ids": [
+        176
+       ],
+       "spellings": [
+        "Ruby Rabbit"
+       ]
+      },
+      {
+       "key": "senior art supplies",
+       "name": "Senior Art Supplies",
+       "mentions": 1,
+       "answer_ids": [
+        175
+       ],
+       "spellings": [
+        "Senior Art Supplies"
+       ]
+      },
+      {
+       "key": "signed and numbered",
+       "name": "Signed & Numbered",
+       "mentions": 1,
+       "answer_ids": [
+        174
+       ],
+       "spellings": [
+        "Signed & Numbered"
+       ]
+      },
+      {
+       "key": "squire shoppe",
+       "name": "Squire Shoppe",
+       "mentions": 1,
+       "answer_ids": [
+        174
+       ],
+       "spellings": [
+        "Squire Shoppe"
+       ]
+      },
+      {
+       "key": "store 161",
+       "name": "Store 161",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "Store 161"
+       ]
+      },
+      {
+       "key": "t and h stationery",
+       "name": "T&H Stationery",
+       "mentions": 1,
+       "answer_ids": [
+        172
+       ],
+       "spellings": [
+        "T&H Stationery"
+       ]
+      },
+      {
+       "key": "tafts",
+       "name": "Tafts",
+       "mentions": 1,
+       "answer_ids": [
+        175
+       ],
+       "spellings": [
+        "Tafts"
+       ]
+      },
+      {
+       "key": "grumpy swimmer",
+       "name": "The Grumpy Swimmer",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "The Grumpy Swimmer"
+       ]
+      },
+      {
+       "key": "hamptons bakery the store",
+       "name": "The Hamptons Bakery (The Store)",
+       "mentions": 1,
+       "answer_ids": [
+        174
+       ],
+       "spellings": [
+        "The Hamptons Bakery (The Store)"
+       ]
+      },
+      {
+       "key": "reject shop daiso",
+       "name": "The Reject Shop / Daiso",
+       "mentions": 1,
+       "answer_ids": [
+        176
+       ],
+       "spellings": [
+        "The Reject Shop / Daiso"
+       ]
+      },
+      {
+       "key": "woodshed",
+       "name": "The Woodshed",
+       "mentions": 1,
+       "answer_ids": [
+        177
+       ],
+       "spellings": [
+        "The Woodshed"
+       ]
+      }
+     ],
+     "our_answer_ids": [],
+     "text": "Today, Gemini (API) recorded 6 responses, of which 0 answers named Handworks. This resulted in an appearance rate of 0. The most frequently named alternative business was Milligram with 4 mentions.",
+     "text_source": "ai",
+     "note": null,
+     "core_mentions": 0,
+     "core_answers": 6,
+     "daily_mentions": 0,
+     "daily_answers": 0,
+     "label": "Gemini (API)"
     }
    ],
    "ranges": {
@@ -11950,13 +12607,244 @@
     },
     "gemini:api": {
      "runs": 7,
-     "from": "2026-11-01",
-     "to": "2026-11-10",
+     "from": "2026-11-02",
+     "to": "2026-11-11",
      "min_pct": 0,
      "max_pct": 0
     }
    },
    "runs": [
+    {
+     "id": 19,
+     "agent": "asker,analyst",
+     "kind": "shift",
+     "run_date": "2026-11-11",
+     "started_at": "2026-11-11T00:40:12+00:00",
+     "finished_at": "2026-11-11T01:26:17+00:00",
+     "status": "ok",
+     "error": null,
+     "steps": [
+      {
+       "step": 1,
+       "name": "write_questions",
+       "kind": "AI",
+       "agent": "asker",
+       "started_at": "2026-11-11T00:40:12+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-11T00:40:13+00:00",
+       "result": {
+        "core": {
+         "action": "reused",
+         "count": 3
+        },
+        "daily": {
+         "action": "failed",
+         "mode": "explore",
+         "count": 0,
+         "error": "RateLimitError: HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n"
+        }
+       },
+       "description": "Kept the same 3 core questions; could not write new ones today, so only the core questions are asked.",
+       "description_id": "Memakai 3 pertanyaan inti yang sama; gagal menulis pertanyaan baru hari ini, jadi hanya pertanyaan inti yang diajukan."
+      },
+      {
+       "step": 2,
+       "name": "validate_questions",
+       "kind": "CODE",
+       "agent": "asker",
+       "started_at": "2026-11-11T00:40:13+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-11T00:40:13+00:00",
+       "result": {
+        "count": 3,
+        "core": 3,
+        "daily": 0,
+        "naming_area": 1,
+        "removed_as_duplicate": 0
+       },
+       "description": "Checked the 3 questions: no empty or duplicate ones, 1 names a store area.",
+       "description_id": "Mengecek 3 pertanyaan: tidak ada yang kosong atau dobel, 1 menyebut area toko."
+      },
+      {
+       "step": 3,
+       "name": "ask_questions",
+       "kind": "CODE",
+       "agent": "asker",
+       "started_at": "2026-11-11T00:40:13+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-11T01:23:57+00:00",
+       "result": {
+        "asked": 6,
+        "ok": 6,
+        "no_answer": 0,
+        "retries": 9,
+        "calls_made": 15
+       },
+       "description": "Asked 6 questions: 6 answered, 0 no answer. Retried 9 times after errors.",
+       "description_id": "Mengajukan 6 pertanyaan: 6 dijawab, 0 tanpa jawaban. Mencoba ulang 9 kali setelah error."
+      },
+      {
+       "step": "M",
+       "name": "master_answers_complete",
+       "kind": "CODE",
+       "agent": "master",
+       "checks": "asker",
+       "started_at": "2026-11-11T01:23:57+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-11T01:23:57+00:00",
+       "result": {
+        "recorded": 6,
+        "planned": 6,
+        "questions": 3,
+        "answered": 6,
+        "no_answer": 0,
+        "problems": []
+       },
+       "description": "Master checked the Asker's work: 6 of 6 answers recorded for 3 questions. Passed.",
+       "description_id": "Master mengecek hasil Asker: 6 dari 6 jawaban tercatat untuk 3 pertanyaan. Lolos."
+      },
+      {
+       "step": 4,
+       "name": "extract_mentions",
+       "kind": "AI",
+       "agent": "analyst",
+       "started_at": "2026-11-11T01:23:57+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-11T01:26:11+00:00",
+       "result": {
+        "extracted": 6,
+        "failed_calls": 0
+       },
+       "description": "Read 6 answers and listed every shop named.",
+       "description_id": "Membaca 6 jawaban dan mencatat setiap toko yang disebut."
+      },
+      {
+       "step": 5,
+       "name": "verify_and_count",
+       "kind": "CODE",
+       "agent": "analyst",
+       "started_at": "2026-11-11T01:26:11+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-11T01:26:11+00:00",
+       "result": {
+        "retried": 0,
+        "asked": 6,
+        "ok": 6,
+        "no_answer": 0,
+        "needs_review": 0,
+        "our_mentions": 0,
+        "top_competitor": "Milligram",
+        "top_competitor_mentions": 4
+       },
+       "description": "Checked every quote word for word: 6 answers counted, 0 set aside for review. Handworks named in 0 of 6.",
+       "description_id": "Mengecek setiap kutipan kata per kata: 6 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 6."
+      },
+      {
+       "step": 6,
+       "name": "compare_previous",
+       "kind": "CODE",
+       "agent": "analyst",
+       "started_at": "2026-11-11T01:26:11+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-11T01:26:11+00:00",
+       "result": {
+        "lines": [
+         "Compared with the previous run on 2026-11-10:",
+         "Handworks named in 0 of 6 answers (0%), previously 0 of 8 (0%): no change.",
+         "Top competitor Milligram in 4 of 6; previously Milligram in 3 of 8 (same store).",
+         "Questions naming an area: 0 of 2, previously 0 of 4: no change.",
+         "Questions not naming an area: 0 of 4, previously 0 of 4: no change.",
+         "No answer: 0 of 6 asked (previously 4 of 12); set aside for review: 0 (previously 0)."
+        ],
+        "previous_date": "2026-11-10",
+        "range": {
+         "runs": 7,
+         "from": "2026-11-02",
+         "to": "2026-11-11",
+         "min_pct": 0,
+         "max_pct": 0
+        }
+       },
+       "description": "Handworks named in 0 of 6 answers (0%), previously 0 of 8 (0%): no change.",
+       "description_id": "Membandingkan dengan shift sebelumnya."
+      },
+      {
+       "step": 7,
+       "name": "write_summary",
+       "kind": "AI",
+       "agent": "analyst",
+       "started_at": "2026-11-11T01:26:11+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-11T01:26:17+00:00",
+       "result": {
+        "source": "ai",
+        "rejected": [],
+        "text": "Today, Gemini (API) recorded 6 responses, of which 0 answers named Handworks. This resulted in an appearance rate of 0. The most frequently named alternative business was Milligram with 4 mentions."
+       },
+       "description": "Wrote the summary; code checked every number in it against the counts.",
+       "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+      },
+      {
+       "step": "M",
+       "name": "master_numbers_match",
+       "kind": "CODE",
+       "agent": "master",
+       "checks": "analyst",
+       "started_at": "2026-11-11T01:26:17+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-11T01:26:17+00:00",
+       "result": {
+        "quotes_checked": 74,
+        "fields_checked": 10,
+        "our_mentions": 0,
+        "total_answers": 6,
+        "problems": []
+       },
+       "description": "Master checked the Analyst's work: 10 numbers match the answers, 74 quotes still verbatim. Passed.",
+       "description_id": "Master mengecek hasil Analyst: 10 angka cocok dengan jawaban, 74 kutipan masih persis sama. Lolos."
+      }
+     ],
+     "quotes_verified": 74,
+     "questions": [
+      {
+       "text": "Best stationery shops in Melbourne",
+       "kind": "core",
+       "names_area": 0,
+       "reason": null,
+       "asked": 2,
+       "counted": 2,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+       "kind": "core",
+       "names_area": 0,
+       "reason": null,
+       "asked": 2,
+       "counted": 2,
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Wrapping paper"
+       ]
+      },
+      {
+       "text": "Unique gift shops in Prahran or Brighton Melbourne",
+       "kind": "core",
+       "names_area": 1,
+       "reason": null,
+       "asked": 2,
+       "counted": 2,
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
+      }
+     ]
+    },
     {
      "id": 18,
      "agent": "asker,analyst",
@@ -17340,11 +18228,11 @@
     {
      "topic": "Stationery",
      "weight": 1.0,
-     "answers": 45,
+     "answers": 47,
      "ours": 0,
      "rate": 0.0,
      "competitor": "Milligram",
-     "competitor_mentions": 35,
+     "competitor_mentions": 37,
      "question_count": 20,
      "terms": [
       "stationery",
@@ -17358,11 +18246,11 @@
     {
      "topic": "Greeting cards",
      "weight": 1.0,
-     "answers": 43,
+     "answers": 45,
      "ours": 0,
      "rate": 0.0,
      "competitor": "Readings",
-     "competitor_mentions": 29,
+     "competitor_mentions": 31,
      "question_count": 19,
      "terms": [
       "greeting card",
@@ -17374,11 +18262,11 @@
     {
      "topic": "Wrapping paper",
      "weight": 1.0,
-     "answers": 40,
+     "answers": 42,
      "ours": 0,
      "rate": 0.0,
      "competitor": "Readings",
-     "competitor_mentions": 28,
+     "competitor_mentions": 30,
      "question_count": 16,
      "terms": [
       "wrapping paper",
@@ -17408,11 +18296,11 @@
     {
      "topic": "Gifts",
      "weight": 1.0,
-     "answers": 38,
+     "answers": 40,
      "ours": 0,
      "rate": 0.0,
      "competitor": "Third Drawer Down",
-     "competitor_mentions": 19,
+     "competitor_mentions": 21,
      "question_count": 18,
      "terms": [
       "gift",
@@ -17422,12 +18310,12 @@
     }
    ],
    "totals": {
-    "days_on_duty": 15,
+    "days_on_duty": 16,
     "first_day": "2026-10-24",
-    "questions_asked": 171,
-    "answers_read": 128,
-    "quotes_verified": 1395,
-    "shops_seen": 457
+    "questions_asked": 177,
+    "answers_read": 134,
+    "quotes_verified": 1469,
+    "shops_seen": 474
    }
   }
  ]
