@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-12T02:52:23+00:00",
+ "generated_at": "2026-11-13T02:13:09+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
@@ -12627,6 +12627,38 @@
      "daily_mentions": 0,
      "daily_answers": 0,
      "label": "Gemini (API)"
+    },
+    {
+     "id": 19,
+     "store_id": 1,
+     "date": "2026-11-13",
+     "provider": "gemini",
+     "channel": "api",
+     "run_id": 21,
+     "asked": 12,
+     "no_answer": 12,
+     "needs_review": 0,
+     "our_mentions": 0,
+     "total_answers": 0,
+     "top_competitor": null,
+     "top_competitor_mentions": 0,
+     "area_mentions": 0,
+     "area_answers": 0,
+     "area_rate": null,
+     "no_area_mentions": 0,
+     "no_area_answers": 0,
+     "no_area_rate": null,
+     "web_search_answers": 0,
+     "competitors": [],
+     "our_answer_ids": [],
+     "text": "Today, Gemini (API) recorded 0 answers regarding Handworks. Out of these, 0 answers named Handworks, accounting for 0 of the total.",
+     "text_source": "ai",
+     "note": null,
+     "core_mentions": 0,
+     "core_answers": 0,
+     "daily_mentions": 0,
+     "daily_answers": 0,
+     "label": "Gemini (API)"
     }
    ],
    "ranges": {
@@ -12646,6 +12678,383 @@
     }
    },
    "runs": [
+    {
+     "id": 21,
+     "agent": "asker,analyst",
+     "kind": "shift",
+     "run_date": "2026-11-13",
+     "started_at": "2026-11-13T01:04:17+00:00",
+     "finished_at": "2026-11-13T02:13:09+00:00",
+     "status": "ok",
+     "error": null,
+     "steps": [
+      {
+       "step": 1,
+       "name": "write_questions",
+       "kind": "AI",
+       "agent": "asker",
+       "started_at": "2026-11-13T01:04:17+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-13T01:04:20+00:00",
+       "result": {
+        "core": {
+         "action": "reused",
+         "count": 3
+        },
+        "daily": {
+         "action": "created",
+         "mode": "explore",
+         "count": 6,
+         "topics": [
+          {
+           "topic": "Stationery",
+           "planned": 2,
+           "answers": 47,
+           "ours": 0,
+           "competitor": "Milligram"
+          },
+          {
+           "topic": "Greeting cards",
+           "planned": 2,
+           "answers": 45,
+           "ours": 0,
+           "competitor": "Readings"
+          },
+          {
+           "topic": "Wrapping paper",
+           "planned": 2,
+           "answers": 42,
+           "ours": 0,
+           "competitor": "Readings"
+          }
+         ],
+         "questions": [
+          "Where can I find pastel ink pens and a sleek desk accessory for my study in Brighton?",
+          "Looking for professional art supplies and a sketching pencil set available in Australia.",
+          "Where can I find a milestone birthday card and a sweet greeting card in Prahran this morning?",
+          "Need a romantic wedding card for my sister getting married in Melbourne next month.",
+          "Shops in Prahran that sell floral wrapping paper and colorful ribbon for baby showers.",
+          "Where can I buy recycled gift wrapping and simple ribbon rolls in Brighton today?"
+         ],
+         "dropped": []
+        }
+       },
+       "description": "Kept the same 3 core questions and wrote 6 new ones for the topics where Handworks is named least: Stationery, Greeting cards, Wrapping paper.",
+       "description_id": "Memakai 3 pertanyaan inti yang sama dan menulis 6 pertanyaan baru untuk topik di mana Handworks paling jarang disebut: Stationery, Greeting cards, Wrapping paper."
+      },
+      {
+       "step": 2,
+       "name": "validate_questions",
+       "kind": "CODE",
+       "agent": "asker",
+       "started_at": "2026-11-13T01:04:20+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-13T01:04:20+00:00",
+       "result": {
+        "count": 9,
+        "core": 3,
+        "daily": 6,
+        "naming_area": 5,
+        "removed_as_duplicate": 0
+       },
+       "description": "Checked the 9 questions: no empty or duplicate ones, 5 name a store area.",
+       "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 5 menyebut area toko."
+      },
+      {
+       "step": 3,
+       "name": "ask_questions",
+       "kind": "CODE",
+       "agent": "asker",
+       "started_at": "2026-11-13T01:04:20+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-13T02:13:08+00:00",
+       "result": {
+        "asked": 12,
+        "ok": 0,
+        "no_answer": 12,
+        "retries": 15,
+        "calls_made": 18
+       },
+       "description": "Asked 12 questions: 0 answered, 12 no answer. Retried 15 times after errors.",
+       "description_id": "Mengajukan 12 pertanyaan: 0 dijawab, 12 tanpa jawaban. Mencoba ulang 15 kali setelah error."
+      },
+      {
+       "step": "M",
+       "name": "master_answers_complete",
+       "kind": "CODE",
+       "agent": "master",
+       "checks": "asker",
+       "started_at": "2026-11-13T02:13:08+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-13T02:13:08+00:00",
+       "result": {
+        "recorded": 12,
+        "planned": 12,
+        "questions": 9,
+        "answered": 0,
+        "no_answer": 12,
+        "problems": []
+       },
+       "description": "Master checked the Asker's work: 12 of 12 answers recorded for 9 questions. Passed.",
+       "description_id": "Master mengecek hasil Asker: 12 dari 12 jawaban tercatat untuk 9 pertanyaan. Lolos."
+      },
+      {
+       "step": 4,
+       "name": "extract_mentions",
+       "kind": "AI",
+       "agent": "analyst",
+       "started_at": "2026-11-13T02:13:08+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-13T02:13:08+00:00",
+       "result": {
+        "extracted": 0,
+        "failed_calls": 0
+       },
+       "description": "Read 0 answers and listed every shop named.",
+       "description_id": "Membaca 0 jawaban dan mencatat setiap toko yang disebut."
+      },
+      {
+       "step": 5,
+       "name": "verify_and_count",
+       "kind": "CODE",
+       "agent": "analyst",
+       "started_at": "2026-11-13T02:13:08+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-13T02:13:08+00:00",
+       "result": {
+        "retried": 0,
+        "asked": 12,
+        "ok": 0,
+        "no_answer": 12,
+        "needs_review": 0,
+        "our_mentions": 0,
+        "top_competitor": null,
+        "top_competitor_mentions": 0
+       },
+       "description": "Checked every quote word for word: 0 answers counted, 0 set aside for review. Handworks named in 0 of 0.",
+       "description_id": "Mengecek setiap kutipan kata per kata: 0 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 0."
+      },
+      {
+       "step": 6,
+       "name": "compare_previous",
+       "kind": "CODE",
+       "agent": "analyst",
+       "started_at": "2026-11-13T02:13:08+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-13T02:13:08+00:00",
+       "result": {
+        "lines": [
+         "Compared with the previous run on 2026-11-12:",
+         "Handworks named in 0 of 0 answers (n/a), previously 0 of 0 (n/a): not comparable (no counted answers on one of the days).",
+         "Top competitor none in 0 of 0; previously none in 0 of 0 (same store).",
+         "Questions naming an area: 0 of 0, previously 0 of 0: not comparable (no counted answers on one of the days).",
+         "Questions not naming an area: 0 of 0, previously 0 of 0: not comparable (no counted answers on one of the days).",
+         "No answer: 12 of 12 asked (previously 12 of 12); set aside for review: 0 (previously 0)."
+        ],
+        "previous_date": "2026-11-12",
+        "range": {
+         "runs": 7,
+         "from": "2026-11-02",
+         "to": "2026-11-11",
+         "min_pct": 0,
+         "max_pct": 0
+        }
+       },
+       "description": "Handworks named in 0 of 0 answers (n/a), previously 0 of 0 (n/a): not comparable (no counted answers on one of the days).",
+       "description_id": "Membandingkan dengan shift sebelumnya."
+      },
+      {
+       "step": 7,
+       "name": "write_summary",
+       "kind": "AI",
+       "agent": "analyst",
+       "started_at": "2026-11-13T02:13:08+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-13T02:13:09+00:00",
+       "result": {
+        "source": "ai",
+        "rejected": [],
+        "text": "Today, Gemini (API) recorded 0 answers regarding Handworks. Out of these, 0 answers named Handworks, accounting for 0 of the total."
+       },
+       "description": "Wrote the summary; code checked every number in it against the counts.",
+       "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+      },
+      {
+       "step": "M",
+       "name": "master_numbers_match",
+       "kind": "CODE",
+       "agent": "master",
+       "checks": "analyst",
+       "started_at": "2026-11-13T02:13:09+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-13T02:13:09+00:00",
+       "result": {
+        "quotes_checked": 0,
+        "fields_checked": 10,
+        "our_mentions": 0,
+        "total_answers": 0,
+        "problems": []
+       },
+       "description": "Master checked the Analyst's work: 10 numbers match the answers, 0 quotes still verbatim. Passed.",
+       "description_id": "Master mengecek hasil Analyst: 10 angka cocok dengan jawaban, 0 kutipan masih persis sama. Lolos."
+      }
+     ],
+     "quotes_verified": 0,
+     "questions": [
+      {
+       "text": "Best stationery shops in Melbourne",
+       "kind": "core",
+       "names_area": 0,
+       "reason": null,
+       "asked": 2,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+       "kind": "core",
+       "names_area": 0,
+       "reason": null,
+       "asked": 2,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Wrapping paper"
+       ]
+      },
+      {
+       "text": "Unique gift shops in Prahran or Brighton Melbourne",
+       "kind": "core",
+       "names_area": 1,
+       "reason": null,
+       "asked": 2,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
+      },
+      {
+       "text": "Where can I find pastel ink pens and a sleek desk accessory for my study in Brighton?",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Stationery",
+        "answers": 47,
+        "ours": 0,
+        "competitor": "Milligram",
+        "competitor_mentions": 37,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Looking for professional art supplies and a sketching pencil set available in Australia.",
+       "kind": "daily",
+       "names_area": 0,
+       "reason": {
+        "topic": "Stationery",
+        "answers": 47,
+        "ours": 0,
+        "competitor": "Milligram",
+        "competitor_mentions": 37,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Where can I find a milestone birthday card and a sweet greeting card in Prahran this morning?",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Greeting cards",
+        "answers": 45,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 31,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Greeting cards"
+       ]
+      },
+      {
+       "text": "Need a romantic wedding card for my sister getting married in Melbourne next month.",
+       "kind": "daily",
+       "names_area": 0,
+       "reason": {
+        "topic": "Greeting cards",
+        "answers": 45,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 31,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Greeting cards"
+       ]
+      },
+      {
+       "text": "Shops in Prahran that sell floral wrapping paper and colorful ribbon for baby showers.",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Wrapping paper",
+        "answers": 42,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 30,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Wrapping paper"
+       ]
+      },
+      {
+       "text": "Where can I buy recycled gift wrapping and simple ribbon rolls in Brighton today?",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Wrapping paper",
+        "answers": 42,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 30,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Wrapping paper",
+        "Gifts"
+       ]
+      }
+     ]
+    },
     {
      "id": 20,
      "agent": "asker,analyst",
@@ -18722,9 +19131,9 @@
     }
    ],
    "totals": {
-    "days_on_duty": 17,
+    "days_on_duty": 18,
     "first_day": "2026-10-24",
-    "questions_asked": 189,
+    "questions_asked": 201,
     "answers_read": 134,
     "quotes_verified": 1469,
     "shops_seen": 474
