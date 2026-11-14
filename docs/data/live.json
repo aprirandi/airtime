@@ -5,7 +5,7 @@
  "run_date": "2026-11-14",
  "run_id": 22,
  "started_at": "2026-11-14T00:53:35+00:00",
- "updated_at": "2026-11-14T01:21:54+00:00",
+ "updated_at": "2026-11-14T01:48:50+00:00",
  "steps": [
   {
    "step": 1,
@@ -73,14 +73,14 @@
  ],
  "current": "ask_questions",
  "progress": {
-  "done": 5,
+  "done": 7,
   "total": 12,
   "unit": "questions asked",
-  "ok": 5,
-  "no_answer": 0
+  "ok": 6,
+  "no_answer": 1
  },
- "last_event": "Asked \"Looking for premium art supplies and professional calligraphy sets in Melbourne.\" (try 1): answered.",
- "last_event_id": "Bertanya \"Looking for premium art supplies and professional calligraphy sets in Melbourne.\" (percobaan 1): dijawab.",
+ "last_event": "Asked \"Need a handmade wedding card for my cousin getting married in Melbourne.\" (try 1): answered.",
+ "last_event_id": "Bertanya \"Need a handmade wedding card for my cousin getting married in Melbourne.\" (percobaan 1): dijawab.",
  "agents": [
   "asker",
   "analyst"
