@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-14T01:59:07+00:00",
+ "generated_at": "2026-11-15T01:13:36+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
@@ -13385,6 +13385,182 @@
      "daily_mentions": 0,
      "daily_answers": 5,
      "label": "Gemini (API)"
+    },
+    {
+     "id": 21,
+     "store_id": 1,
+     "date": "2026-11-15",
+     "provider": "gemini",
+     "channel": "api",
+     "run_id": 23,
+     "asked": 12,
+     "no_answer": 10,
+     "needs_review": 0,
+     "our_mentions": 0,
+     "total_answers": 2,
+     "top_competitor": "Bookbinders Design",
+     "top_competitor_mentions": 1,
+     "area_mentions": 0,
+     "area_answers": 1,
+     "area_rate": 0.0,
+     "no_area_mentions": 0,
+     "no_area_answers": 1,
+     "no_area_rate": 0.0,
+     "web_search_answers": 0,
+     "competitors": [
+      {
+       "key": "bookbinders design",
+       "name": "Bookbinders Design",
+       "mentions": 1,
+       "answer_ids": [
+        214
+       ],
+       "spellings": [
+        "Bookbinders Design"
+       ]
+      },
+      {
+       "key": "cass art",
+       "name": "Cass Art",
+       "mentions": 1,
+       "answer_ids": [
+        217
+       ],
+       "spellings": [
+        "Cass Art"
+       ]
+      },
+      {
+       "key": "clarkes of sussex",
+       "name": "Clarkes of Sussex",
+       "mentions": 1,
+       "answer_ids": [
+        217
+       ],
+       "spellings": [
+        "Clarkes of Sussex"
+       ]
+      },
+      {
+       "key": "daiso",
+       "name": "Daiso",
+       "mentions": 1,
+       "answer_ids": [
+        214
+       ],
+       "spellings": [
+        "Daiso"
+       ]
+      },
+      {
+       "key": "deans art",
+       "name": "Deans Art",
+       "mentions": 1,
+       "answer_ids": [
+        214
+       ],
+       "spellings": [
+        "Deans Art"
+       ]
+      },
+      {
+       "key": "il papiro",
+       "name": "Il Papiro",
+       "mentions": 1,
+       "answer_ids": [
+        214
+       ],
+       "spellings": [
+        "Il Papiro"
+       ]
+      },
+      {
+       "key": "melbourne pen depot",
+       "name": "Melbourne Pen Depot",
+       "mentions": 1,
+       "answer_ids": [
+        214
+       ],
+       "spellings": [
+        "Melbourne Pen Depot"
+       ]
+      },
+      {
+       "key": "milligram",
+       "name": "Milligram",
+       "mentions": 1,
+       "answer_ids": [
+        214
+       ],
+       "spellings": [
+        "Milligram"
+       ]
+      },
+      {
+       "key": "monsterthreads",
+       "name": "Monsterthreads",
+       "mentions": 1,
+       "answer_ids": [
+        214
+       ],
+       "spellings": [
+        "Monsterthreads"
+       ]
+      },
+      {
+       "key": "papermates",
+       "name": "Papermates",
+       "mentions": 1,
+       "answer_ids": [
+        214
+       ],
+       "spellings": [
+        "Papermates"
+       ]
+      },
+      {
+       "key": "pulp stationery",
+       "name": "Pulp Stationery",
+       "mentions": 1,
+       "answer_ids": [
+        214
+       ],
+       "spellings": [
+        "Pulp Stationery"
+       ]
+      },
+      {
+       "key": "university of brighton art shop",
+       "name": "University of Brighton Art Shop",
+       "mentions": 1,
+       "answer_ids": [
+        217
+       ],
+       "spellings": [
+        "University of Brighton Art Shop"
+       ]
+      },
+      {
+       "key": "whsmith",
+       "name": "WHSmith",
+       "mentions": 1,
+       "answer_ids": [
+        217
+       ],
+       "spellings": [
+        "WHSmith"
+       ]
+      }
+     ],
+     "our_answer_ids": [],
+     "text": "Today, Handworks was named in 0 out of 2 answers from Gemini (API). This represents 0 of the total counted answers. The mention rate has remained unchanged compared to 2026-11-14.",
+     "text_source": "ai",
+     "note": null,
+     "core_mentions": 0,
+     "core_answers": 1,
+     "daily_mentions": 0,
+     "daily_answers": 1,
+     "label": "Gemini (API)"
     }
    ],
    "ranges": {
@@ -13397,13 +13573,391 @@
     },
     "gemini:api": {
      "runs": 7,
-     "from": "2026-11-06",
-     "to": "2026-11-14",
+     "from": "2026-11-07",
+     "to": "2026-11-15",
      "min_pct": 0,
      "max_pct": 0
     }
    },
    "runs": [
+    {
+     "id": 23,
+     "agent": "asker,analyst",
+     "kind": "shift",
+     "run_date": "2026-11-15",
+     "started_at": "2026-11-14T23:54:25+00:00",
+     "finished_at": "2026-11-15T01:13:36+00:00",
+     "status": "ok",
+     "error": null,
+     "steps": [
+      {
+       "step": 1,
+       "name": "write_questions",
+       "kind": "AI",
+       "agent": "asker",
+       "started_at": "2026-11-14T23:54:25+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-14T23:54:27+00:00",
+       "result": {
+        "core": {
+         "action": "reused",
+         "count": 3
+        },
+        "daily": {
+         "action": "created",
+         "mode": "explore",
+         "count": 6,
+         "topics": [
+          {
+           "topic": "Stationery",
+           "planned": 2,
+           "answers": 50,
+           "ours": 0,
+           "competitor": "Milligram"
+          },
+          {
+           "topic": "Greeting cards",
+           "planned": 2,
+           "answers": 47,
+           "ours": 0,
+           "competitor": "Readings"
+          },
+          {
+           "topic": "Wrapping paper",
+           "planned": 2,
+           "answers": 45,
+           "ours": 0,
+           "competitor": "Readings"
+          }
+         ],
+         "questions": [
+          "Where can I buy heavy-duty sketch pads and a refillable pencil for drawing classes in Brighton?",
+          "Looking for gold calligraphy ink and elegant desk accessories to decorate my home office in Melbourne.",
+          "Where can I pick up a sympathy card and a thoughtful greeting card for a neighbor in Prahran today?",
+          "Need a belated birthday card and a cute card for a pet's adoption day in Brighton.",
+          "Shops in Melbourne that sell vintage-style wrapping paper and cotton ribbon for holiday gifts.",
+          "Where can I buy pastel gift wrap and shiny ribbon for a baby shower in Prahran?"
+         ],
+         "dropped": []
+        }
+       },
+       "description": "Kept the same 3 core questions and wrote 6 new ones for the topics where Handworks is named least: Stationery, Greeting cards, Wrapping paper.",
+       "description_id": "Memakai 3 pertanyaan inti yang sama dan menulis 6 pertanyaan baru untuk topik di mana Handworks paling jarang disebut: Stationery, Greeting cards, Wrapping paper."
+      },
+      {
+       "step": 2,
+       "name": "validate_questions",
+       "kind": "CODE",
+       "agent": "asker",
+       "started_at": "2026-11-14T23:54:27+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-14T23:54:27+00:00",
+       "result": {
+        "count": 9,
+        "core": 3,
+        "daily": 6,
+        "naming_area": 5,
+        "removed_as_duplicate": 0
+       },
+       "description": "Checked the 9 questions: no empty or duplicate ones, 5 name a store area.",
+       "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 5 menyebut area toko."
+      },
+      {
+       "step": 3,
+       "name": "ask_questions",
+       "kind": "CODE",
+       "agent": "asker",
+       "started_at": "2026-11-14T23:54:27+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-15T01:13:21+00:00",
+       "result": {
+        "asked": 12,
+        "ok": 2,
+        "no_answer": 10,
+        "retries": 13,
+        "calls_made": 18
+       },
+       "description": "Asked 12 questions: 2 answered, 10 no answer. Retried 13 times after errors.",
+       "description_id": "Mengajukan 12 pertanyaan: 2 dijawab, 10 tanpa jawaban. Mencoba ulang 13 kali setelah error."
+      },
+      {
+       "step": "M",
+       "name": "master_answers_complete",
+       "kind": "CODE",
+       "agent": "master",
+       "checks": "asker",
+       "started_at": "2026-11-15T01:13:21+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-15T01:13:21+00:00",
+       "result": {
+        "recorded": 12,
+        "planned": 12,
+        "questions": 9,
+        "answered": 2,
+        "no_answer": 10,
+        "problems": []
+       },
+       "description": "Master checked the Asker's work: 12 of 12 answers recorded for 9 questions. Passed.",
+       "description_id": "Master mengecek hasil Asker: 12 dari 12 jawaban tercatat untuk 9 pertanyaan. Lolos."
+      },
+      {
+       "step": 4,
+       "name": "extract_mentions",
+       "kind": "AI",
+       "agent": "analyst",
+       "started_at": "2026-11-15T01:13:21+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-15T01:13:29+00:00",
+       "result": {
+        "extracted": 2,
+        "failed_calls": 0
+       },
+       "description": "Read 2 answers and listed every shop named.",
+       "description_id": "Membaca 2 jawaban dan mencatat setiap toko yang disebut."
+      },
+      {
+       "step": 5,
+       "name": "verify_and_count",
+       "kind": "CODE",
+       "agent": "analyst",
+       "started_at": "2026-11-15T01:13:29+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-15T01:13:29+00:00",
+       "result": {
+        "retried": 0,
+        "asked": 12,
+        "ok": 2,
+        "no_answer": 10,
+        "needs_review": 0,
+        "our_mentions": 0,
+        "top_competitor": "Bookbinders Design",
+        "top_competitor_mentions": 1
+       },
+       "description": "Checked every quote word for word: 2 answers counted, 0 set aside for review. Handworks named in 0 of 2.",
+       "description_id": "Mengecek setiap kutipan kata per kata: 2 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 2."
+      },
+      {
+       "step": 6,
+       "name": "compare_previous",
+       "kind": "CODE",
+       "agent": "analyst",
+       "started_at": "2026-11-15T01:13:29+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-15T01:13:29+00:00",
+       "result": {
+        "lines": [
+         "Compared with the previous run on 2026-11-14:",
+         "Handworks named in 0 of 2 answers (0%), previously 0 of 8 (0%): no change.",
+         "Top competitor Bookbinders Design in 1 of 2; previously Il Papiro in 3 of 8 (different store).",
+         "Questions naming an area: 0 of 1, previously 0 of 3: no change.",
+         "Questions not naming an area: 0 of 1, previously 0 of 5: no change.",
+         "No answer: 10 of 12 asked (previously 4 of 12); set aside for review: 0 (previously 0)."
+        ],
+        "previous_date": "2026-11-14",
+        "range": {
+         "runs": 7,
+         "from": "2026-11-07",
+         "to": "2026-11-15",
+         "min_pct": 0,
+         "max_pct": 0
+        }
+       },
+       "description": "Handworks named in 0 of 2 answers (0%), previously 0 of 8 (0%): no change.",
+       "description_id": "Membandingkan dengan shift sebelumnya."
+      },
+      {
+       "step": 7,
+       "name": "write_summary",
+       "kind": "AI",
+       "agent": "analyst",
+       "started_at": "2026-11-15T01:13:29+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-15T01:13:36+00:00",
+       "result": {
+        "source": "ai",
+        "rejected": [],
+        "text": "Today, Handworks was named in 0 out of 2 answers from Gemini (API). This represents 0 of the total counted answers. The mention rate has remained unchanged compared to 2026-11-14."
+       },
+       "description": "Wrote the summary; code checked every number in it against the counts.",
+       "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+      },
+      {
+       "step": "M",
+       "name": "master_numbers_match",
+       "kind": "CODE",
+       "agent": "master",
+       "checks": "analyst",
+       "started_at": "2026-11-15T01:13:36+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-15T01:13:36+00:00",
+       "result": {
+        "quotes_checked": 13,
+        "fields_checked": 10,
+        "our_mentions": 0,
+        "total_answers": 2,
+        "problems": []
+       },
+       "description": "Master checked the Analyst's work: 10 numbers match the answers, 13 quotes still verbatim. Passed.",
+       "description_id": "Master mengecek hasil Analyst: 10 angka cocok dengan jawaban, 13 kutipan masih persis sama. Lolos."
+      }
+     ],
+     "quotes_verified": 13,
+     "questions": [
+      {
+       "text": "Best stationery shops in Melbourne",
+       "kind": "core",
+       "names_area": 0,
+       "reason": null,
+       "asked": 2,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+       "kind": "core",
+       "names_area": 0,
+       "reason": null,
+       "asked": 2,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Greeting cards",
+        "Wrapping paper"
+       ]
+      },
+      {
+       "text": "Unique gift shops in Prahran or Brighton Melbourne",
+       "kind": "core",
+       "names_area": 1,
+       "reason": null,
+       "asked": 2,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Gifts"
+       ]
+      },
+      {
+       "text": "Where can I buy heavy-duty sketch pads and a refillable pencil for drawing classes in Brighton?",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Stationery",
+        "answers": 50,
+        "ours": 0,
+        "competitor": "Milligram",
+        "competitor_mentions": 38,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 1,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Looking for gold calligraphy ink and elegant desk accessories to decorate my home office in Melbourne.",
+       "kind": "daily",
+       "names_area": 0,
+       "reason": {
+        "topic": "Stationery",
+        "answers": 50,
+        "ours": 0,
+        "competitor": "Milligram",
+        "competitor_mentions": 38,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Stationery"
+       ]
+      },
+      {
+       "text": "Where can I pick up a sympathy card and a thoughtful greeting card for a neighbor in Prahran today?",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Greeting cards",
+        "answers": 47,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 32,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Greeting cards"
+       ]
+      },
+      {
+       "text": "Need a belated birthday card and a cute card for a pet's adoption day in Brighton.",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Greeting cards",
+        "answers": 47,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 32,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Greeting cards"
+       ]
+      },
+      {
+       "text": "Shops in Melbourne that sell vintage-style wrapping paper and cotton ribbon for holiday gifts.",
+       "kind": "daily",
+       "names_area": 0,
+       "reason": {
+        "topic": "Wrapping paper",
+        "answers": 45,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 31,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Wrapping paper",
+        "Gifts"
+       ]
+      },
+      {
+       "text": "Where can I buy pastel gift wrap and shiny ribbon for a baby shower in Prahran?",
+       "kind": "daily",
+       "names_area": 1,
+       "reason": {
+        "topic": "Wrapping paper",
+        "answers": 45,
+        "ours": 0,
+        "competitor": "Readings",
+        "competitor_mentions": 31,
+        "window_days": 28
+       },
+       "asked": 1,
+       "counted": 0,
+       "ours": 0,
+       "topics": [
+        "Wrapping paper",
+        "Gifts"
+       ]
+      }
+     ]
+    },
     {
      "id": 22,
      "agent": "asker,analyst",
@@ -20152,12 +20706,12 @@
     {
      "topic": "Stationery",
      "weight": 1.0,
-     "answers": 50,
+     "answers": 52,
      "ours": 0,
      "rate": 0.0,
      "competitor": "Milligram",
-     "competitor_mentions": 38,
-     "question_count": 22,
+     "competitor_mentions": 39,
+     "question_count": 23,
      "terms": [
       "stationery",
       "pen",
@@ -20234,12 +20788,12 @@
     }
    ],
    "totals": {
-    "days_on_duty": 19,
+    "days_on_duty": 20,
     "first_day": "2026-10-24",
-    "questions_asked": 213,
-    "answers_read": 142,
-    "quotes_verified": 1542,
-    "shops_seen": 489
+    "questions_asked": 225,
+    "answers_read": 144,
+    "quotes_verified": 1555,
+    "shops_seen": 493
    }
   }
  ]

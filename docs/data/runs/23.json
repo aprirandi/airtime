@@ -1,0 +1,994 @@
+{
+ "store": {
+  "slug": "handworks",
+  "name": "Handworks"
+ },
+ "run": {
+  "id": 23,
+  "agent": "asker,analyst",
+  "kind": "shift",
+  "run_date": "2026-11-15",
+  "started_at": "2026-11-14T23:54:25+00:00",
+  "finished_at": "2026-11-15T01:13:36+00:00",
+  "status": "ok",
+  "error": null,
+  "steps": [
+   {
+    "step": 1,
+    "name": "write_questions",
+    "kind": "AI",
+    "agent": "asker",
+    "started_at": "2026-11-14T23:54:25+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-14T23:54:27+00:00",
+    "result": {
+     "core": {
+      "action": "reused",
+      "count": 3
+     },
+     "daily": {
+      "action": "created",
+      "mode": "explore",
+      "count": 6,
+      "topics": [
+       {
+        "topic": "Stationery",
+        "planned": 2,
+        "answers": 50,
+        "ours": 0,
+        "competitor": "Milligram"
+       },
+       {
+        "topic": "Greeting cards",
+        "planned": 2,
+        "answers": 47,
+        "ours": 0,
+        "competitor": "Readings"
+       },
+       {
+        "topic": "Wrapping paper",
+        "planned": 2,
+        "answers": 45,
+        "ours": 0,
+        "competitor": "Readings"
+       }
+      ],
+      "questions": [
+       "Where can I buy heavy-duty sketch pads and a refillable pencil for drawing classes in Brighton?",
+       "Looking for gold calligraphy ink and elegant desk accessories to decorate my home office in Melbourne.",
+       "Where can I pick up a sympathy card and a thoughtful greeting card for a neighbor in Prahran today?",
+       "Need a belated birthday card and a cute card for a pet's adoption day in Brighton.",
+       "Shops in Melbourne that sell vintage-style wrapping paper and cotton ribbon for holiday gifts.",
+       "Where can I buy pastel gift wrap and shiny ribbon for a baby shower in Prahran?"
+      ],
+      "dropped": []
+     }
+    },
+    "description": "Kept the same 3 core questions and wrote 6 new ones for the topics where Handworks is named least: Stationery, Greeting cards, Wrapping paper.",
+    "description_id": "Memakai 3 pertanyaan inti yang sama dan menulis 6 pertanyaan baru untuk topik di mana Handworks paling jarang disebut: Stationery, Greeting cards, Wrapping paper."
+   },
+   {
+    "step": 2,
+    "name": "validate_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-11-14T23:54:27+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-14T23:54:27+00:00",
+    "result": {
+     "count": 9,
+     "core": 3,
+     "daily": 6,
+     "naming_area": 5,
+     "removed_as_duplicate": 0
+    },
+    "description": "Checked the 9 questions: no empty or duplicate ones, 5 name a store area.",
+    "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 5 menyebut area toko."
+   },
+   {
+    "step": 3,
+    "name": "ask_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-11-14T23:54:27+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-15T01:13:21+00:00",
+    "result": {
+     "asked": 12,
+     "ok": 2,
+     "no_answer": 10,
+     "retries": 13,
+     "calls_made": 18
+    },
+    "description": "Asked 12 questions: 2 answered, 10 no answer. Retried 13 times after errors.",
+    "description_id": "Mengajukan 12 pertanyaan: 2 dijawab, 10 tanpa jawaban. Mencoba ulang 13 kali setelah error."
+   },
+   {
+    "step": "M",
+    "name": "master_answers_complete",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "asker",
+    "started_at": "2026-11-15T01:13:21+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-15T01:13:21+00:00",
+    "result": {
+     "recorded": 12,
+     "planned": 12,
+     "questions": 9,
+     "answered": 2,
+     "no_answer": 10,
+     "problems": []
+    },
+    "description": "Master checked the Asker's work: 12 of 12 answers recorded for 9 questions. Passed.",
+    "description_id": "Master mengecek hasil Asker: 12 dari 12 jawaban tercatat untuk 9 pertanyaan. Lolos."
+   },
+   {
+    "step": 4,
+    "name": "extract_mentions",
+    "kind": "AI",
+    "agent": "analyst",
+    "started_at": "2026-11-15T01:13:21+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-15T01:13:29+00:00",
+    "result": {
+     "extracted": 2,
+     "failed_calls": 0
+    },
+    "description": "Read 2 answers and listed every shop named.",
+    "description_id": "Membaca 2 jawaban dan mencatat setiap toko yang disebut."
+   },
+   {
+    "step": 5,
+    "name": "verify_and_count",
+    "kind": "CODE",
+    "agent": "analyst",
+    "started_at": "2026-11-15T01:13:29+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-15T01:13:29+00:00",
+    "result": {
+     "retried": 0,
+     "asked": 12,
+     "ok": 2,
+     "no_answer": 10,
+     "needs_review": 0,
+     "our_mentions": 0,
+     "top_competitor": "Bookbinders Design",
+     "top_competitor_mentions": 1
+    },
+    "description": "Checked every quote word for word: 2 answers counted, 0 set aside for review. Handworks named in 0 of 2.",
+    "description_id": "Mengecek setiap kutipan kata per kata: 2 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 2."
+   },
+   {
+    "step": 6,
+    "name": "compare_previous",
+    "kind": "CODE",
+    "agent": "analyst",
+    "started_at": "2026-11-15T01:13:29+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-15T01:13:29+00:00",
+    "result": {
+     "lines": [
+      "Compared with the previous run on 2026-11-14:",
+      "Handworks named in 0 of 2 answers (0%), previously 0 of 8 (0%): no change.",
+      "Top competitor Bookbinders Design in 1 of 2; previously Il Papiro in 3 of 8 (different store).",
+      "Questions naming an area: 0 of 1, previously 0 of 3: no change.",
+      "Questions not naming an area: 0 of 1, previously 0 of 5: no change.",
+      "No answer: 10 of 12 asked (previously 4 of 12); set aside for review: 0 (previously 0)."
+     ],
+     "previous_date": "2026-11-14",
+     "range": {
+      "runs": 7,
+      "from": "2026-11-07",
+      "to": "2026-11-15",
+      "min_pct": 0,
+      "max_pct": 0
+     }
+    },
+    "description": "Handworks named in 0 of 2 answers (0%), previously 0 of 8 (0%): no change.",
+    "description_id": "Membandingkan dengan shift sebelumnya."
+   },
+   {
+    "step": 7,
+    "name": "write_summary",
+    "kind": "AI",
+    "agent": "analyst",
+    "started_at": "2026-11-15T01:13:29+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-15T01:13:36+00:00",
+    "result": {
+     "source": "ai",
+     "rejected": [],
+     "text": "Today, Handworks was named in 0 out of 2 answers from Gemini (API). This represents 0 of the total counted answers. The mention rate has remained unchanged compared to 2026-11-14."
+    },
+    "description": "Wrote the summary; code checked every number in it against the counts.",
+    "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+   },
+   {
+    "step": "M",
+    "name": "master_numbers_match",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "analyst",
+    "started_at": "2026-11-15T01:13:36+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-15T01:13:36+00:00",
+    "result": {
+     "quotes_checked": 13,
+     "fields_checked": 10,
+     "our_mentions": 0,
+     "total_answers": 2,
+     "problems": []
+    },
+    "description": "Master checked the Analyst's work: 10 numbers match the answers, 13 quotes still verbatim. Passed.",
+    "description_id": "Master mengecek hasil Analyst: 10 angka cocok dengan jawaban, 13 kutipan masih persis sama. Lolos."
+   }
+  ],
+  "quotes_verified": 13,
+  "questions": [
+   {
+    "text": "Best stationery shops in Melbourne",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 2,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 2,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Greeting cards",
+     "Wrapping paper"
+    ]
+   },
+   {
+    "text": "Unique gift shops in Prahran or Brighton Melbourne",
+    "kind": "core",
+    "names_area": 1,
+    "reason": null,
+    "asked": 2,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
+   },
+   {
+    "text": "Where can I buy heavy-duty sketch pads and a refillable pencil for drawing classes in Brighton?",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Stationery",
+     "answers": 50,
+     "ours": 0,
+     "competitor": "Milligram",
+     "competitor_mentions": 38,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Looking for gold calligraphy ink and elegant desk accessories to decorate my home office in Melbourne.",
+    "kind": "daily",
+    "names_area": 0,
+    "reason": {
+     "topic": "Stationery",
+     "answers": 50,
+     "ours": 0,
+     "competitor": "Milligram",
+     "competitor_mentions": 38,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Where can I pick up a sympathy card and a thoughtful greeting card for a neighbor in Prahran today?",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Greeting cards",
+     "answers": 47,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 32,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Greeting cards"
+    ]
+   },
+   {
+    "text": "Need a belated birthday card and a cute card for a pet's adoption day in Brighton.",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Greeting cards",
+     "answers": 47,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 32,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Greeting cards"
+    ]
+   },
+   {
+    "text": "Shops in Melbourne that sell vintage-style wrapping paper and cotton ribbon for holiday gifts.",
+    "kind": "daily",
+    "names_area": 0,
+    "reason": {
+     "topic": "Wrapping paper",
+     "answers": 45,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 31,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Wrapping paper",
+     "Gifts"
+    ]
+   },
+   {
+    "text": "Where can I buy pastel gift wrap and shiny ribbon for a baby shower in Prahran?",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Wrapping paper",
+     "answers": 45,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 31,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Wrapping paper",
+     "Gifts"
+    ]
+   }
+  ]
+ },
+ "summary": {
+  "id": 21,
+  "store_id": 1,
+  "date": "2026-11-15",
+  "provider": "gemini",
+  "channel": "api",
+  "run_id": 23,
+  "asked": 12,
+  "no_answer": 10,
+  "needs_review": 0,
+  "our_mentions": 0,
+  "total_answers": 2,
+  "top_competitor": "Bookbinders Design",
+  "top_competitor_mentions": 1,
+  "area_mentions": 0,
+  "area_answers": 1,
+  "area_rate": 0.0,
+  "no_area_mentions": 0,
+  "no_area_answers": 1,
+  "no_area_rate": 0.0,
+  "web_search_answers": 0,
+  "competitors": [
+   {
+    "key": "bookbinders design",
+    "name": "Bookbinders Design",
+    "mentions": 1,
+    "answer_ids": [
+     214
+    ],
+    "spellings": [
+     "Bookbinders Design"
+    ]
+   },
+   {
+    "key": "cass art",
+    "name": "Cass Art",
+    "mentions": 1,
+    "answer_ids": [
+     217
+    ],
+    "spellings": [
+     "Cass Art"
+    ]
+   },
+   {
+    "key": "clarkes of sussex",
+    "name": "Clarkes of Sussex",
+    "mentions": 1,
+    "answer_ids": [
+     217
+    ],
+    "spellings": [
+     "Clarkes of Sussex"
+    ]
+   },
+   {
+    "key": "daiso",
+    "name": "Daiso",
+    "mentions": 1,
+    "answer_ids": [
+     214
+    ],
+    "spellings": [
+     "Daiso"
+    ]
+   },
+   {
+    "key": "deans art",
+    "name": "Deans Art",
+    "mentions": 1,
+    "answer_ids": [
+     214
+    ],
+    "spellings": [
+     "Deans Art"
+    ]
+   },
+   {
+    "key": "il papiro",
+    "name": "Il Papiro",
+    "mentions": 1,
+    "answer_ids": [
+     214
+    ],
+    "spellings": [
+     "Il Papiro"
+    ]
+   },
+   {
+    "key": "melbourne pen depot",
+    "name": "Melbourne Pen Depot",
+    "mentions": 1,
+    "answer_ids": [
+     214
+    ],
+    "spellings": [
+     "Melbourne Pen Depot"
+    ]
+   },
+   {
+    "key": "milligram",
+    "name": "Milligram",
+    "mentions": 1,
+    "answer_ids": [
+     214
+    ],
+    "spellings": [
+     "Milligram"
+    ]
+   },
+   {
+    "key": "monsterthreads",
+    "name": "Monsterthreads",
+    "mentions": 1,
+    "answer_ids": [
+     214
+    ],
+    "spellings": [
+     "Monsterthreads"
+    ]
+   },
+   {
+    "key": "papermates",
+    "name": "Papermates",
+    "mentions": 1,
+    "answer_ids": [
+     214
+    ],
+    "spellings": [
+     "Papermates"
+    ]
+   },
+   {
+    "key": "pulp stationery",
+    "name": "Pulp Stationery",
+    "mentions": 1,
+    "answer_ids": [
+     214
+    ],
+    "spellings": [
+     "Pulp Stationery"
+    ]
+   },
+   {
+    "key": "university of brighton art shop",
+    "name": "University of Brighton Art Shop",
+    "mentions": 1,
+    "answer_ids": [
+     217
+    ],
+    "spellings": [
+     "University of Brighton Art Shop"
+    ]
+   },
+   {
+    "key": "whsmith",
+    "name": "WHSmith",
+    "mentions": 1,
+    "answer_ids": [
+     217
+    ],
+    "spellings": [
+     "WHSmith"
+    ]
+   }
+  ],
+  "our_answer_ids": [],
+  "text": "Today, Handworks was named in 0 out of 2 answers from Gemini (API). This represents 0 of the total counted answers. The mention rate has remained unchanged compared to 2026-11-14.",
+  "text_source": "ai",
+  "note": null,
+  "core_mentions": 0,
+  "core_answers": 1,
+  "daily_mentions": 0,
+  "daily_answers": 1,
+  "label": "Gemini (API)"
+ },
+ "comparison": [
+  "Compared with the previous run on 2026-11-14:",
+  "Handworks named in 0 of 2 answers (0%), previously 0 of 8 (0%): no change.",
+  "Top competitor Bookbinders Design in 1 of 2; previously Il Papiro in 3 of 8 (different store).",
+  "Questions naming an area: 0 of 1, previously 0 of 3: no change.",
+  "Questions not naming an area: 0 of 1, previously 0 of 5: no change.",
+  "No answer: 10 of 12 asked (previously 4 of 12); set aside for review: 0 (previously 0)."
+ ],
+ "comparison_id": [
+  "Dibandingkan dengan shift sebelumnya (2026-11-14):",
+  "Handworks disebut di 0 dari 2 jawaban (0%), sebelumnya 0 dari 8 (0%): tidak berubah.",
+  "Kompetitor teratas Bookbinders Design di 1 dari 2; sebelumnya Il Papiro di 3 dari 8 (toko berbeda).",
+  "Pertanyaan yang menyebut area: 0 dari 1, sebelumnya 0 dari 3: tidak berubah.",
+  "Pertanyaan lain: 0 dari 1, sebelumnya 0 dari 5: tidak berubah.",
+  "Tanpa jawaban: 10 dari 12 (sebelumnya 4 dari 12); disisihkan untuk dicek: 0 (sebelumnya 0)."
+ ],
+ "answers": [
+  {
+   "id": 214,
+   "question": "Best stationery shops in Melbourne",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-11-15T00:15:39+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Melbourne is arguably the stationery capital of Australia, with a thriving culture of independent boutiques, specialist paper stores, and Japanese imports. \n\nHere are the best stationery shops in Melbourne, broken down by what they do best:\n\n---\n\n### 1. The Heritage & Specialist Icons\n* **Bookbinders Design (CBD)**\n  * **The Vibe:** Minimalist, sophisticated European craftsmanship.\n  * **What they do best:** Custom cloth-bound notebooks, photo albums, high-end fountain pens (Kaweco, Lamy), and personalized embossing services done in-store.\n  * **Location:** 348 Little Collins St, CBD.\n\n* **Il Papiro (CBD)**\n  * **The Vibe:** Old-world Florence. \n  * **What they do best:** Authentic Italian marbling, sealing wax, calligraphic quills, leather journals, and ornate correspondence sets. Stepping inside feels like a trip back in time.\n  * **Location:** 10 Degraves St, CBD.\n\n* **Melbourne Pen Depot (Chadstone)**\n  * **The Vibe:** For serious writing instrument enthusiasts.\n  * **What they do best:** Fine fountain pens, rare inks, and refills. They carry brands like Montblanc, Pelikan, Sailor, and Caran d\u2019Ache, with staff who deeply understand nibs and ink flow.\n  * **Location:** Chadstone Shopping Centre.\n\n---\n\n### 2. The Indie Boutiques & Paper Lovers\n* **Milligram (CBD & suburbs)**\n  * **The Vibe:** The ultimate modern stationery department. \n  * **What they do best:** They curate the best stationery from around the globe, including Midori, Rhodia, Leuchtturm1917, and Delfonics, alongside their own locally designed notebooks and desk accessories.\n  * **Locations:** Melbourne Central (CBD), QV (CBD), and various suburban shopping centres.\n\n* **Pulp Stationery (Ascot Vale)**\n  * **The Vibe:** Quirky, local, and community-focused.\n  * **What they do best:** A curated mix of everyday useful pens, high-quality Japanese notebooks, stickers, and artistic greeting cards.\n  * **Location:** 191 Union Rd, Ascot Vale.\n\n* **Deans Art (Collingwood & Brunswick)**\n  * **The Vibe:** Art supply wonderland.\n  * **What they do best:** While primarily for artists, they carry an unmatched selection of heavy-grade papers, specialty cardstocks, markers, and drawing pens.\n  * **Locations:** 17-19 Park St, Collingwood; 467 Sydney Rd, Brunswick.\n\n---\n\n### 3. Japanese Stationery Specialists\n* **Daiso (Multiple Locations)**\n  * **The Vibe:** High volume, ultra-cheap, highly functional.\n  * **What they do best:** Incredible value. Great for washi tape, grid notebooks, daily-use gel pens, brush pens, and desk organizers, mostly priced under $4.\n  * **Locations:** Midtown Plaza (Swanston St), Flinders St Station, and major shopping centres.\n\n* **Kinokuniya Pop-up / Specialty Bookstores (CBD)**\n  * Keep an eye out for Japanese lifestyle stores like **Morning Market** or **Tokyu Hands-style imports** found around Chinatown and Swanston Street for hard-to-find Pilot, Uni-ball, and Tombow gear.\n\n---\n\n### 4. Giftable & Lifestyle Stationery\n* **Papermates (Canterbury)**\n  * **The Vibe:** Classic suburban paper shop.\n  * **What they do best:** Excellent greeting card collections, boxed stationery sets, gift wrap, and daily planners. \n  * **Location:** 101 Maling Rd, Canterbury.\n\n* **Monsterthreads (CBD)**\n  * **The Vibe:** Playful, artistic, and colorful.\n  * **What they do best:** Illustrated notebooks, quirky sticky notes, cute pencil cases, and collaborations with local and international artists.\n  * **Location:** Melbourne Central, plus various suburban centres.\n\n---\n\n### Best Walking Route for a Stationery Crawl:\nIf you want to hit several great spots in an hour or two, stay in the **CBD**:\n1. Start at **Bookbinders Design** on Little Collins St.\n2. Walk down to Degraves Street to visit **Il Papiro**.\n3. Walk north to **Milligram** at QV or Melbourne Central.\n4. Finish at the giant **Daiso** on Swanston Street for budget essentials.",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-11-14T23:59:27+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-11-15T00:01:27+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-11-15T00:02:32+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 120.0
+    },
+    {
+     "at": "2026-11-15T00:09:32+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 240.0
+    }
+   ],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Bookbinders Design",
+     "store_key": "bookbinders design",
+     "is_ours": 0,
+     "position": 1,
+     "rank": null,
+     "tone": null,
+     "quote": "Bookbinders Design (CBD)"
+    },
+    {
+     "store_name": "Il Papiro",
+     "store_key": "il papiro",
+     "is_ours": 0,
+     "position": 2,
+     "rank": null,
+     "tone": null,
+     "quote": "Il Papiro (CBD)"
+    },
+    {
+     "store_name": "Melbourne Pen Depot",
+     "store_key": "melbourne pen depot",
+     "is_ours": 0,
+     "position": 3,
+     "rank": null,
+     "tone": null,
+     "quote": "Melbourne Pen Depot (Chadstone)"
+    },
+    {
+     "store_name": "Milligram",
+     "store_key": "milligram",
+     "is_ours": 0,
+     "position": 4,
+     "rank": null,
+     "tone": null,
+     "quote": "Milligram (CBD & suburbs)"
+    },
+    {
+     "store_name": "Pulp Stationery",
+     "store_key": "pulp stationery",
+     "is_ours": 0,
+     "position": 5,
+     "rank": null,
+     "tone": null,
+     "quote": "Pulp Stationery (Ascot Vale)"
+    },
+    {
+     "store_name": "Deans Art",
+     "store_key": "deans art",
+     "is_ours": 0,
+     "position": 6,
+     "rank": null,
+     "tone": null,
+     "quote": "Deans Art (Collingwood & Brunswick)"
+    },
+    {
+     "store_name": "Daiso",
+     "store_key": "daiso",
+     "is_ours": 0,
+     "position": 7,
+     "rank": null,
+     "tone": null,
+     "quote": "Daiso (Multiple Locations)"
+    },
+    {
+     "store_name": "Papermates",
+     "store_key": "papermates",
+     "is_ours": 0,
+     "position": 8,
+     "rank": null,
+     "tone": null,
+     "quote": "Papermates (Canterbury)"
+    },
+    {
+     "store_name": "Monsterthreads",
+     "store_key": "monsterthreads",
+     "is_ours": 0,
+     "position": 9,
+     "rank": null,
+     "tone": null,
+     "quote": "Monsterthreads (CBD)"
+    }
+   ]
+  },
+  {
+   "id": 223,
+   "question": "Best stationery shops in Melbourne",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-11-15T01:13:21+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "QuotaExhausted: gemini/gemini-3.8-flash: daily quota used up, not calling again today",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 215,
+   "question": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-11-15T00:15:39+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "RateLimitError: network error: The read operation timed out",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-11-15T00:20:39+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-11-15T00:21:17+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-11-15T00:27:18+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 120.0
+    },
+    {
+     "at": "2026-11-15T00:34:18+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 240.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 224,
+   "question": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-11-15T01:13:21+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "QuotaExhausted: gemini/gemini-3.8-flash: daily quota used up, not calling again today",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 216,
+   "question": "Unique gift shops in Prahran or Brighton Melbourne",
+   "names_area": true,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-11-15T00:43:18+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "RateLimitError: network error: The read operation timed out",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-11-15T00:48:18+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-11-15T00:53:48+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-11-15T00:59:48+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 120.0
+    },
+    {
+     "at": "2026-11-15T01:01:51+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 240.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 225,
+   "question": "Unique gift shops in Prahran or Brighton Melbourne",
+   "names_area": true,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-11-15T01:13:21+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "QuotaExhausted: gemini/gemini-3.8-flash: daily quota used up, not calling again today",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 217,
+   "question": "Where can I buy heavy-duty sketch pads and a refillable pencil for drawing classes in Brighton?",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-15T01:13:21+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Brighton has a fantastic independent arts scene, so you have several great options for buying heavy-duty sketch pads (look for **200+ gsm** for heavy-duty/mixed media) and refillable pencils (clutch or mechanical). \n\nHere are the best places to go:\n\n### 1. Cass Art (Top Recommendation)\n* **Location:** 21 Market Street (in The Lanes)\n* **Why go:** This is the UK\u2019s leading art supplies specialist. It spans multiple floors and has the widest selection in town. \n* **What they have:** \n  * **Sketch pads:** Massive variety of heavy-weight cartridge paper (Cass Art\u2019s own brand jumbo pads, Daler-Rowney, Seawhite, and Fabriano). \n  * **Pencils:** Extensive range of mechanical pencils (0.3mm to 0.9mm) and traditional artist clutch pencils (2mm and 5.6mm lead holders) by brands like Caran d'Ache, Staedtler, and Koh-I-Noor, along with lead refills in various grades (HB, 2B, 4B, etc.).\n\n### 2. Clarkes of Sussex\n* **Location:** 22 Bond Street (North Laine)\n* **Why go:** A long-standing, family-run, traditional art supply and stationery shop. The staff are incredibly knowledgeable and can give you specific advice tailored to your drawing class.\n* **What they have:** High-grade art papers (including individual heavy sheets and bound pads) and a curated collection of quality technical pencils and drafting supplies. \n\n### 3. University of Brighton Art Shop\n* **Location:** Grand Parade (City Campus, Ground Floor)\n* **Why go:** Primarily meant for arts students, but usually accessible to the general public. \n* **What they have:** Because it caters to fine art and illustration students, it stocks rugged, student-budget-friendly materials. It is the best place to find **Seawhite of Brighton** sketchbooks (a locally made, industry-standard heavy cartridge paper sketchbook) at great prices, alongside standard mechanical pencils.\n\n### 4. WHSmith (Backup Option)\n* **Location:** 48\u201349 Churchill Square\n* **Why go:** Only as a backup if the independents are closed (e.g., late on a Sunday).\n* **What they have:** Basic 0.5mm/0.7mm Pentel or Parker mechanical pencils and standard sketch pads (though heavyweight options will be limited compared to Cass Art).\n\n### What to ask for when you get there:\n* **For the sketch pad:** Ask for **\"Heavyweight cartridge\"** (around 200\u2013250 gsm) if you plan to do heavy shading, erasing, or light ink/wash work without the paper buckling or tearing.\n* **For the pencil:** If you want expressive, shading-heavy life drawing, ask for a **\"2mm or 5.6mm clutch pencil\"** (lead holder) with soft lead (2B\u20134B). If you are doing precise, technical drawing, ask for a standard **\"0.5mm mechanical pencil.\"**",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-11-15T01:10:55+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 30.0
+    }
+   ],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Cass Art",
+     "store_key": "cass art",
+     "is_ours": 0,
+     "position": 1,
+     "rank": 1,
+     "tone": null,
+     "quote": "Here are the best places to go:  ### 1. Cass Art (Top Recommendation)"
+    },
+    {
+     "store_name": "Clarkes of Sussex",
+     "store_key": "clarkes of sussex",
+     "is_ours": 0,
+     "position": 2,
+     "rank": 2,
+     "tone": null,
+     "quote": "### 2. Clarkes of Sussex  * **Location:** 22 Bond Street (North Laine)"
+    },
+    {
+     "store_name": "University of Brighton Art Shop",
+     "store_key": "university of brighton art shop",
+     "is_ours": 0,
+     "position": 3,
+     "rank": 3,
+     "tone": null,
+     "quote": "### 3. University of Brighton Art Shop  * **Location:** Grand Parade"
+    },
+    {
+     "store_name": "WHSmith",
+     "store_key": "whsmith",
+     "is_ours": 0,
+     "position": 4,
+     "rank": 4,
+     "tone": null,
+     "quote": "### 4. WHSmith (Backup Option)  * **Location:** 48\u201349 Churchill Square"
+    }
+   ]
+  },
+  {
+   "id": 218,
+   "question": "Looking for gold calligraphy ink and elegant desk accessories to decorate my home office in Melbourne.",
+   "names_area": false,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-15T01:13:21+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "QuotaExhausted: HTTP 429 daily quota used up: {\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 219,
+   "question": "Where can I pick up a sympathy card and a thoughtful greeting card for a neighbor in Prahran today?",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-15T01:13:21+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "QuotaExhausted: gemini/gemini-3.8-flash: daily quota used up, not calling again today",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 220,
+   "question": "Need a belated birthday card and a cute card for a pet's adoption day in Brighton.",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-15T01:13:21+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "QuotaExhausted: gemini/gemini-3.8-flash: daily quota used up, not calling again today",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 221,
+   "question": "Shops in Melbourne that sell vintage-style wrapping paper and cotton ribbon for holiday gifts.",
+   "names_area": false,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-15T01:13:21+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "QuotaExhausted: gemini/gemini-3.8-flash: daily quota used up, not calling again today",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 222,
+   "question": "Where can I buy pastel gift wrap and shiny ribbon for a baby shower in Prahran?",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-15T01:13:21+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "QuotaExhausted: gemini/gemini-3.8-flash: daily quota used up, not calling again today",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  }
+ ]
+}
