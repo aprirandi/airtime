@@ -5,7 +5,7 @@
  "run_date": "2026-11-16",
  "run_id": 24,
  "started_at": "2026-11-15T23:57:46+00:00",
- "updated_at": "2026-11-16T00:05:34+00:00",
+ "updated_at": "2026-11-16T00:10:45+00:00",
  "steps": [
   {
    "step": 1,
@@ -73,14 +73,14 @@
  ],
  "current": "ask_questions",
  "progress": {
-  "done": 6,
+  "done": 8,
   "total": 12,
   "unit": "questions asked",
-  "ok": 6,
+  "ok": 8,
   "no_answer": 0
  },
- "last_event": "Asked \"Where can I pick up a housewarming card for my best friend in Prahran today?\" (try 1): answered.",
- "last_event_id": "Bertanya \"Where can I pick up a housewarming card for my best friend in Prahran today?\" (percobaan 1): dijawab.",
+ "last_event": "Asked \"Where can I find kraft gift wrapping and twine ribbon in Brighton?\" (try 1): answered.",
+ "last_event_id": "Bertanya \"Where can I find kraft gift wrapping and twine ribbon in Brighton?\" (percobaan 1): dijawab.",
  "agents": [
   "asker",
   "analyst"
