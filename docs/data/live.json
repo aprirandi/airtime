@@ -5,7 +5,7 @@
  "run_date": "2026-11-17",
  "run_id": 25,
  "started_at": "2026-11-17T02:55:13+00:00",
- "updated_at": "2026-11-17T02:57:13+00:00",
+ "updated_at": "2026-11-17T03:10:08+00:00",
  "steps": [
   {
    "step": 1,
@@ -73,14 +73,14 @@
  ],
  "current": "ask_questions",
  "progress": {
-  "done": 3,
+  "done": 6,
   "total": 12,
   "unit": "questions asked",
-  "ok": 3,
+  "ok": 6,
   "no_answer": 0
  },
- "last_event": "Asked \"Unique gift shops in Prahran or Brighton Melbourne\" (try 1): answered.",
- "last_event_id": "Bertanya \"Unique gift shops in Prahran or Brighton Melbourne\" (percobaan 1): dijawab.",
+ "last_event": "Asked \"Need a funny wedding card for my best mates getting hitched in Brighton this weekend.\" (try 1): answered.",
+ "last_event_id": "Bertanya \"Need a funny wedding card for my best mates getting hitched in Brighton this weekend.\" (percobaan 1): dijawab.",
  "agents": [
   "asker",
   "analyst"
