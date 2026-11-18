@@ -137,6 +137,7 @@ then fails so it is visible. One-time setup:
   Give it a `MasterCheck` (`after=<agent name>`) in `master.py`; a failed check stops the shift.
 - **Another store**: add `config/stores/<slug>.toml` and a line in the workflow.
 - **Weekly Asker with GSC questions**: planned in [`plans/asker.md`](plans/asker.md).
+- **Auditor** (website readiness for AI agents, first in the flow): planned in [`plans/auditor.md`](plans/auditor.md).
 
 ## Settled and open questions
 
