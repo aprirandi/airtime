@@ -28,16 +28,47 @@ The Auditor takes the structure of both: Is Agentic's "access first, then other 
 Cloudflare's categories with a ready-to-use fix prompt per problem. It runs the checks itself instead
 of calling either scanner, so it does not depend on them and costs nothing per scan.
 
+## What each scanner covers, and what the Auditor takes
+
+The Auditor takes the **union** of both scanners, not one of them. Counted as capabilities (one row
+can bundle several small checks). The full lists, with what each scanner tests, are in the research
+page that goes with this plan.
+
+| Overlap (both scanners) | Only Is Agentic | Only Cloudflare |
+|---|---|---|
+| Crawler and AI bot rules (Is Agentic tests real access, Cloudflare reads robots.txt) | Content without JavaScript (characters, H1, heading order, content ratio) | Link headers (RFC 8288) |
+| Sitemap | Clean redirects; content without sign-in | DNS-AID |
+| Markdown negotiation | Agent-friendly 404 (Markdown error body) | Content Signals in robots.txt |
+| OAuth / OIDC discovery | Homepage not hidden from search (noindex) | Web Bot Auth (informational) |
+| OAuth Protected Resource (RFC 9728) | Controls and forms understandable; page token budget | Agent Skills index |
+| Agent registration (agent auth metadata vs `auth.md`) | Structured data: JSON-LD, Organization completeness, schema breadth, prices | WebMCP |
+| MCP server (live connection vs MCP Server Card) | Page metadata (canonical, lang, og tags) | ARD manifest |
+| API discovery (OpenAPI vs API Catalog) | Trust pages (About, Contact, Privacy) | Agent payments: x402, MPP |
+| | `agents.md`, `llms.txt` quality, "when to use" guidance | Agent checkout: ACP |
+| | MCP tool quality (descriptions, parameter schemas, naming, resources) | |
+| | Discoverability through web search (developer docs, brand name) | |
+| | API surface: scoped permissions, JSON errors, agent onboarding, function calling | |
+
+That is 8 overlapping, 14 Is Agentic only and 9 Cloudflare only. Rules for combining them:
+
+- Each stored check carries its source: `is_agentic`, `cloudflare` or `both`.
+- An overlapping capability is reported once, using the deeper method of the two (for example the
+  stricter Markdown rule from Is Agentic plus Cloudflare's `x-markdown-tokens` header).
+- Groups 1 and 2 come almost entirely from Is Agentic, and group 3 almost entirely from Cloudflare,
+  so one scanner alone would miss half of what the Auditor needs.
+- Is Agentic's list was read from a PDF and a copied prompt, and not all 23 of its bonus signals
+  were readable. There may be Is Agentic checks missing from this table.
+
 ## Checks, in four groups
 
 Every check is code: an HTTP request and a rule. No AI decides pass or fail.
 
 | Group | Checks (as named by the scanners) | Scored for a store? |
 |---|---|---|
-| **A. Access and content** | robots.txt exists; sitemap exists and is listed in robots.txt; AI crawlers not blocked (ChatGPT-User, OAI-SearchBot, Claude-User, PerplexityBot); main text in raw HTML without JavaScript, a clear H1, headings in order; homepage not hidden from search; redirects resolve cleanly | Yes |
-| **B. Trust and identity** | JSON-LD Organization with description, contactPoint and address; About, Contact and Privacy pages with real content; metadata (canonical, lang, og tags); prices readable in structured data | Yes |
-| **C. Agent discovery (advanced)** | llms.txt and agents.md; Markdown for agents (`Accept: text/markdown`); Markdown body on 404 pages; Link headers with useful relations; Content Signals in robots.txt; API catalog; MCP server card; agent skills index; DNS-AID | Yes, lower priority. Some may not be changeable on the store's platform. |
-| **D. Not for stores** | OpenAPI spec, scoped permissions, JSON error responses, MCP resources, API docs, function-calling schemas, x402, MPP, ACP | **No.** These are for API products or agent payments. Shown as "not applicable", never as a failure. |
+| **1. Access and content** | robots.txt exists; sitemap exists and is listed in robots.txt; AI crawlers not blocked (ChatGPT-User, OAI-SearchBot, Claude-User, PerplexityBot); main text in raw HTML without JavaScript, a clear H1, headings in order; homepage not hidden from search; redirects resolve cleanly | Yes |
+| **2. Trust and identity** | JSON-LD Organization with description, contactPoint and address; About, Contact and Privacy pages with real content; metadata (canonical, lang, og tags); prices readable in structured data | Yes |
+| **3. Agent discovery (advanced)** | llms.txt and agents.md; Markdown for agents (`Accept: text/markdown`); Markdown body on 404 pages; Link headers with useful relations; Content Signals in robots.txt; API catalog; MCP server card; agent skills index; DNS-AID | Yes, lower priority. Some may not be changeable on the store's platform. |
+| **4. Not for stores** | OpenAPI spec, scoped permissions, JSON error responses, MCP resources, API docs, function-calling schemas, x402, MPP, ACP | **No.** These are for API products or agent payments. Shown as "not applicable", never as a failure. |
 
 Weights between groups are **not set yet**. They are decided after the first before/after tests with
 the Asker, not guessed now.
@@ -46,13 +77,13 @@ the Asker, not guessed now.
 
 - **Already passing:** robots.txt, sitemap, AI crawlers not blocked, llms.txt (48 lines), agents.md,
   an MCP server with 14 tools, OAuth discovery, prices in structured data, metadata.
-- **Group A and B gaps:** main text is 1.9% of the page and headings jump from H1 to H4;
+- **Group 1 and 2 gaps:** main text is 1.9% of the page and headings jump from H1 to H4;
   Organization data lacks description, contactPoint and address; no Privacy page.
-- **Group C gaps:** no Markdown negotiation (fails in both scanners), no Markdown 404 body, no
+- **Group 3 gaps:** no Markdown negotiation (fails in both scanners), no Markdown 404 body, no
   agent-useful Link headers, no Content Signals, no API catalog, MCP server card, skills index or
   DNS-AID records.
 - Handworks is on **Shopify** (confirmed by the owner, 19 Nov 2026). Much of the baseline is platform
-  default, and some group C items are controlled by the platform. See the next section.
+  default, and some group 3 items are controlled by the platform. See the next section.
 
 ## What Shopify provides and what a store owner can change
 
@@ -76,9 +107,9 @@ owner to do them.
 What this means for the Auditor on a Shopify store:
 - The basics of agent readiness are already provided by Shopify, so the Auditor does not report them
   as achievements or sell them.
-- Group C items the platform controls are shown as "platform-controlled" (informational), not as a
+- Group 3 items the platform controls are shown as "platform-controlled" (informational), not as a
   failure the owner should fix.
-- The work an owner can actually do is mostly groups A and B: theme content and headings,
+- The work an owner can actually do is mostly groups 1 and 2: theme content and headings,
   Organization data, a Privacy page, `robots.txt.liquid`. The Auditor puts these first.
 
 ## Steps
@@ -87,7 +118,7 @@ What this means for the Auditor on a Shopify store:
 |---|------|------|--------------|
 | 1 | Fetch | CODE | Request the homepage, robots.txt, sitemap, llms.txt, agents.md, well-known files, a probe 404 and one product page, with and without `Accept: text/markdown`. Public pages only. |
 | 2 | Check | CODE | Apply each check's rule to the stored responses. Store pass, partial or fail, with the evidence (URL, status, the text that was found or missing). |
-| 3 | Group and score | CODE | Group A first, then B, then C. Group D is marked not applicable. |
+| 3 | Group and score | CODE | Group 1 first, then 2, then 3. Group 4 is marked not applicable. |
 | 4 | Fix text | CODE + AI | Each check has a fixed fix text. AI only adapts the wording to the store's platform and writes the "copy prompt". Code verifies the prompt names the same check and the same URL. |
 | 5 | Hand off | CODE | Findings go to the Planner (later). A change since the last scan is recorded. |
 
