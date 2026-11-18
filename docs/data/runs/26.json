@@ -1,0 +1,963 @@
+{
+ "store": {
+  "slug": "handworks",
+  "name": "Handworks"
+ },
+ "run": {
+  "id": 26,
+  "agent": "asker,analyst",
+  "kind": "shift",
+  "run_date": "2026-11-18",
+  "started_at": "2026-11-18T02:26:03+00:00",
+  "finished_at": "2026-11-18T03:29:52+00:00",
+  "status": "ok",
+  "error": null,
+  "steps": [
+   {
+    "step": 1,
+    "name": "write_questions",
+    "kind": "AI",
+    "agent": "asker",
+    "started_at": "2026-11-18T02:26:03+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-18T02:26:05+00:00",
+    "result": {
+     "core": {
+      "action": "reused",
+      "count": 3
+     },
+     "daily": {
+      "action": "created",
+      "mode": "explore",
+      "count": 6,
+      "topics": [
+       {
+        "topic": "Stationery",
+        "planned": 2,
+        "answers": 60,
+        "ours": 0,
+        "competitor": "Milligram"
+       },
+       {
+        "topic": "Greeting cards",
+        "planned": 2,
+        "answers": 55,
+        "ours": 0,
+        "competitor": "Readings"
+       },
+       {
+        "topic": "Wrapping paper",
+        "planned": 2,
+        "answers": 53,
+        "ours": 0,
+        "competitor": "Readings"
+       }
+      ],
+      "questions": [
+       "Where can I find pastel gel pens and a minimalist desk accessory in Melbourne?",
+       "Looking for budget-friendly art supplies and a wooden pencil holder in Prahran.",
+       "Where can I get a funny retirement card and a greeting card for a colleague in Melbourne today?",
+       "Need a sweet card for a newborn baby and a birthday card in Brighton this morning.",
+       "Shops in Brighton that sell striped wrapping paper and satin ribbon for anniversary gifts.",
+       "Where can I find compostable gift wrapping and jute ribbon in Prahran?"
+      ],
+      "dropped": []
+     }
+    },
+    "description": "Kept the same 3 core questions and wrote 6 new ones for the topics where Handworks is named least: Stationery, Greeting cards, Wrapping paper.",
+    "description_id": "Memakai 3 pertanyaan inti yang sama dan menulis 6 pertanyaan baru untuk topik di mana Handworks paling jarang disebut: Stationery, Greeting cards, Wrapping paper."
+   },
+   {
+    "step": 2,
+    "name": "validate_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-11-18T02:26:05+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-18T02:26:05+00:00",
+    "result": {
+     "count": 9,
+     "core": 3,
+     "daily": 6,
+     "naming_area": 5,
+     "removed_as_duplicate": 0
+    },
+    "description": "Checked the 9 questions: no empty or duplicate ones, 5 name a store area.",
+    "description_id": "Mengecek 9 pertanyaan: tidak ada yang kosong atau dobel, 5 menyebut area toko."
+   },
+   {
+    "step": 3,
+    "name": "ask_questions",
+    "kind": "CODE",
+    "agent": "asker",
+    "started_at": "2026-11-18T02:26:05+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-18T03:29:44+00:00",
+    "result": {
+     "asked": 12,
+     "ok": 1,
+     "no_answer": 11,
+     "retries": 15,
+     "calls_made": 18
+    },
+    "description": "Asked 12 questions: 1 answered, 11 no answer. Retried 15 times after errors.",
+    "description_id": "Mengajukan 12 pertanyaan: 1 dijawab, 11 tanpa jawaban. Mencoba ulang 15 kali setelah error."
+   },
+   {
+    "step": "M",
+    "name": "master_answers_complete",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "asker",
+    "started_at": "2026-11-18T03:29:44+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-18T03:29:44+00:00",
+    "result": {
+     "recorded": 12,
+     "planned": 12,
+     "questions": 9,
+     "answered": 1,
+     "no_answer": 11,
+     "problems": []
+    },
+    "description": "Master checked the Asker's work: 12 of 12 answers recorded for 9 questions. Passed.",
+    "description_id": "Master mengecek hasil Asker: 12 dari 12 jawaban tercatat untuk 9 pertanyaan. Lolos."
+   },
+   {
+    "step": 4,
+    "name": "extract_mentions",
+    "kind": "AI",
+    "agent": "analyst",
+    "started_at": "2026-11-18T03:29:44+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-18T03:29:45+00:00",
+    "result": {
+     "extracted": 1,
+     "failed_calls": 0
+    },
+    "description": "Read 1 answer and listed every shop named.",
+    "description_id": "Membaca 1 jawaban dan mencatat setiap toko yang disebut."
+   },
+   {
+    "step": 5,
+    "name": "verify_and_count",
+    "kind": "CODE",
+    "agent": "analyst",
+    "started_at": "2026-11-18T03:29:45+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-18T03:29:45+00:00",
+    "result": {
+     "retried": 0,
+     "asked": 12,
+     "ok": 1,
+     "no_answer": 11,
+     "needs_review": 0,
+     "our_mentions": 0,
+     "top_competitor": "Bibelot",
+     "top_competitor_mentions": 1
+    },
+    "description": "Checked every quote word for word: 1 answers counted, 0 set aside for review. Handworks named in 0 of 1.",
+    "description_id": "Mengecek setiap kutipan kata per kata: 1 jawaban dihitung, 0 disisihkan untuk dicek. Handworks disebut di 0 dari 1."
+   },
+   {
+    "step": 6,
+    "name": "compare_previous",
+    "kind": "CODE",
+    "agent": "analyst",
+    "started_at": "2026-11-18T03:29:45+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-18T03:29:45+00:00",
+    "result": {
+     "lines": [
+      "Compared with the previous run on 2026-11-17:",
+      "Handworks named in 0 of 1 answers (0%), previously 0 of 12 (0%): no change.",
+      "Top competitor Bibelot in 1 of 1; previously Milligram in 6 of 12 (different store).",
+      "Questions naming an area: 0 of 1, previously 0 of 5: no change.",
+      "Questions not naming an area: 0 of 0, previously 0 of 7: not comparable (no counted answers on one of the days).",
+      "No answer: 11 of 12 asked (previously 0 of 12); set aside for review: 0 (previously 0)."
+     ],
+     "previous_date": "2026-11-17",
+     "range": {
+      "runs": 7,
+      "from": "2026-11-10",
+      "to": "2026-11-18",
+      "min_pct": 0,
+      "max_pct": 0
+     }
+    },
+    "description": "Handworks named in 0 of 1 answers (0%), previously 0 of 12 (0%): no change.",
+    "description_id": "Membandingkan dengan shift sebelumnya."
+   },
+   {
+    "step": 7,
+    "name": "write_summary",
+    "kind": "AI",
+    "agent": "analyst",
+    "started_at": "2026-11-18T03:29:45+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-18T03:29:52+00:00",
+    "result": {
+     "source": "ai",
+     "rejected": [],
+     "text": "Today, Gemini (API) generated 1 responses, of which 0 explicitly named Handworks. Compared to the previous run on 2026-11-17, your mention rate remained unchanged."
+    },
+    "description": "Wrote the summary; code checked every number in it against the counts.",
+    "description_id": "Menulis ringkasan; code mengecek setiap angkanya dengan hasil hitungan."
+   },
+   {
+    "step": "M",
+    "name": "master_numbers_match",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "analyst",
+    "started_at": "2026-11-18T03:29:52+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-18T03:29:52+00:00",
+    "result": {
+     "quotes_checked": 11,
+     "fields_checked": 10,
+     "our_mentions": 0,
+     "total_answers": 1,
+     "problems": []
+    },
+    "description": "Master checked the Analyst's work: 10 numbers match the answers, 11 quotes still verbatim. Passed.",
+    "description_id": "Master mengecek hasil Analyst: 10 angka cocok dengan jawaban, 11 kutipan masih persis sama. Lolos."
+   }
+  ],
+  "quotes_verified": 11,
+  "questions": [
+   {
+    "text": "Best stationery shops in Melbourne",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 2,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+    "kind": "core",
+    "names_area": 0,
+    "reason": null,
+    "asked": 2,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Greeting cards",
+     "Wrapping paper"
+    ]
+   },
+   {
+    "text": "Unique gift shops in Prahran or Brighton Melbourne",
+    "kind": "core",
+    "names_area": 1,
+    "reason": null,
+    "asked": 2,
+    "counted": 1,
+    "ours": 0,
+    "topics": [
+     "Gifts"
+    ]
+   },
+   {
+    "text": "Where can I find pastel gel pens and a minimalist desk accessory in Melbourne?",
+    "kind": "daily",
+    "names_area": 0,
+    "reason": {
+     "topic": "Stationery",
+     "answers": 60,
+     "ours": 0,
+     "competitor": "Milligram",
+     "competitor_mentions": 44,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Looking for budget-friendly art supplies and a wooden pencil holder in Prahran.",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Stationery",
+     "answers": 60,
+     "ours": 0,
+     "competitor": "Milligram",
+     "competitor_mentions": 44,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Stationery"
+    ]
+   },
+   {
+    "text": "Where can I get a funny retirement card and a greeting card for a colleague in Melbourne today?",
+    "kind": "daily",
+    "names_area": 0,
+    "reason": {
+     "topic": "Greeting cards",
+     "answers": 55,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 37,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Greeting cards"
+    ]
+   },
+   {
+    "text": "Need a sweet card for a newborn baby and a birthday card in Brighton this morning.",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Greeting cards",
+     "answers": 55,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 37,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Greeting cards"
+    ]
+   },
+   {
+    "text": "Shops in Brighton that sell striped wrapping paper and satin ribbon for anniversary gifts.",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Wrapping paper",
+     "answers": 53,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 35,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Wrapping paper",
+     "Gifts"
+    ]
+   },
+   {
+    "text": "Where can I find compostable gift wrapping and jute ribbon in Prahran?",
+    "kind": "daily",
+    "names_area": 1,
+    "reason": {
+     "topic": "Wrapping paper",
+     "answers": 53,
+     "ours": 0,
+     "competitor": "Readings",
+     "competitor_mentions": 35,
+     "window_days": 28
+    },
+    "asked": 1,
+    "counted": 0,
+    "ours": 0,
+    "topics": [
+     "Wrapping paper",
+     "Gifts"
+    ]
+   }
+  ]
+ },
+ "summary": {
+  "id": 24,
+  "store_id": 1,
+  "date": "2026-11-18",
+  "provider": "gemini",
+  "channel": "api",
+  "run_id": 26,
+  "asked": 12,
+  "no_answer": 11,
+  "needs_review": 0,
+  "our_mentions": 0,
+  "total_answers": 1,
+  "top_competitor": "Bibelot",
+  "top_competitor_mentions": 1,
+  "area_mentions": 0,
+  "area_answers": 1,
+  "area_rate": 0.0,
+  "no_area_mentions": 0,
+  "no_area_answers": 0,
+  "no_area_rate": null,
+  "web_search_answers": 0,
+  "competitors": [
+   {
+    "key": "bibelot",
+    "name": "Bibelot",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "Bibelot"
+    ]
+   },
+   {
+    "key": "brighton bay antiques vintage collectibles",
+    "name": "Brighton Bay Antiques / Vintage Collectibles",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "Brighton Bay Antiques / Vintage Collectibles"
+    ]
+   },
+   {
+    "key": "crate elegance",
+    "name": "Crate Elegance",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "Crate Elegance"
+    ]
+   },
+   {
+    "key": "ecru",
+    "name": "Ecru",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "Ecru"
+    ]
+   },
+   {
+    "key": "greenhouse interiors",
+    "name": "Greenhouse Interiors",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "Greenhouse Interiors"
+    ]
+   },
+   {
+    "key": "mio tesoro",
+    "name": "Mio Tesoro",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "Mio Tesoro"
+    ]
+   },
+   {
+    "key": "bazaar",
+    "name": "The Bazaar",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "The Bazaar"
+    ]
+   },
+   {
+    "key": "cheese shop",
+    "name": "The Cheese Shop",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "The Cheese Shop"
+    ]
+   },
+   {
+    "key": "little bookroom avenue bookstore",
+    "name": "The Little Bookroom / Avenue Bookstore",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "The Little Bookroom / Avenue Bookstore"
+    ]
+   },
+   {
+    "key": "melbourne wine store",
+    "name": "The Melbourne Wine Store",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "The Melbourne Wine Store"
+    ]
+   },
+   {
+    "key": "third drawer down",
+    "name": "Third Drawer Down",
+    "mentions": 1,
+    "answer_ids": [
+     252
+    ],
+    "spellings": [
+     "Third Drawer Down"
+    ]
+   }
+  ],
+  "our_answer_ids": [],
+  "text": "Today, Gemini (API) generated 1 responses, of which 0 explicitly named Handworks. Compared to the previous run on 2026-11-17, your mention rate remained unchanged.",
+  "text_source": "ai",
+  "note": null,
+  "core_mentions": 0,
+  "core_answers": 1,
+  "daily_mentions": 0,
+  "daily_answers": 0,
+  "label": "Gemini (API)"
+ },
+ "comparison": [
+  "Compared with the previous run on 2026-11-17:",
+  "Handworks named in 0 of 1 answers (0%), previously 0 of 12 (0%): no change.",
+  "Top competitor Bibelot in 1 of 1; previously Milligram in 6 of 12 (different store).",
+  "Questions naming an area: 0 of 1, previously 0 of 5: no change.",
+  "Questions not naming an area: 0 of 0, previously 0 of 7: not comparable (no counted answers on one of the days).",
+  "No answer: 11 of 12 asked (previously 0 of 12); set aside for review: 0 (previously 0)."
+ ],
+ "comparison_id": [
+  "Dibandingkan dengan shift sebelumnya (2026-11-17):",
+  "Handworks disebut di 0 dari 1 jawaban (0%), sebelumnya 0 dari 12 (0%): tidak berubah.",
+  "Kompetitor teratas Bibelot di 1 dari 1; sebelumnya Milligram di 6 dari 12 (toko berbeda).",
+  "Pertanyaan yang menyebut area: 0 dari 1, sebelumnya 0 dari 5: tidak berubah.",
+  "Pertanyaan lain: 0 dari 0, sebelumnya 0 dari 7: tidak bisa dibandingkan (tidak ada jawaban terhitung di salah satu hari).",
+  "Tanpa jawaban: 11 dari 12 (sebelumnya 0 dari 12); disisihkan untuk dicek: 0 (sebelumnya 0)."
+ ],
+ "answers": [
+  {
+   "id": 250,
+   "question": "Best stationery shops in Melbourne",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-11-18T02:26:05+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "RateLimitError: HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-11-18T02:31:05+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-11-18T02:31:37+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-11-18T02:33:04+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 120.0
+    },
+    {
+     "at": "2026-11-18T02:36:38+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 240.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 259,
+   "question": "Best stationery shops in Melbourne",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-11-18T03:29:44+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 251,
+   "question": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-11-18T02:40:39+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "RateLimitError: HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-11-18T02:41:13+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-11-18T02:42:01+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-11-18T02:48:01+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 120.0
+    },
+    {
+     "at": "2026-11-18T02:55:02+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 240.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 260,
+   "question": "Where can I buy greeting cards and wrapping paper in Melbourne?",
+   "names_area": false,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-11-18T03:29:44+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 252,
+   "question": "Unique gift shops in Prahran or Brighton Melbourne",
+   "names_area": true,
+   "kind": "core",
+   "attempt": 1,
+   "asked_at": "2026-11-18T03:20:32+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "ok",
+   "error": null,
+   "our_tone": "none",
+   "text": "Here are some of the best, most unique gift shops in Prahran and Brighton, covering everything from quirky design pieces and luxury home decor to local artisan goods and vintage finds.\n\n---\n\n### **Prahran**\n*Vibe: Trendy, eclectic, design-forward, and retro.*\n\n1. **Third Drawer Down** \n   * *Best for:* Witty, artistic, and quirky gifts.\n   * *What you\u2019ll find:* Famous for collaborating with international artists (like David Shrigley, Yayoi Kusama, and Guerrilla Girls) to create functional art. Expect humorous stationery, quirky kitchenware, art-inspired textiles, and unexpected novelty items. \n\n2. **The Prahran Market (Specialty Stalls)**\n   * *Best for:* The ultimate foodie gifts.\n   * *What you\u2019ll find:* While it's a food market, it\u2019s unbeatable for artisanal gift hampers. Check out **The Cheese Shop**, specialty hot sauce purveyors, high-end truffle oils, and **The Melbourne Wine Store** inside for rare spirits and craft drinks.\n\n3. **Bibelot (South Yarra/Prahran border)**\n   * *Best for:* Sweet-toothed luxury lovers.\n   * *What you\u2019ll find:* Beautifully boxed artisanal chocolates, intricate macarons, and gourmet sweets presented in high-end, jewelry-box-style packaging. \n\n4. **The Bazaar (Chapel Street Bazaar - near Windsor border)**\n   * *Best for:* One-of-a-kind vintage & nostalgic gifts.\n   * *What you\u2019ll find:* An iconic Melbourne treasure trove. If you are looking for mid-century barware, antique jewelry, rare vintage toys, or retro advertising posters, you\u2019ll find something completely unique here.\n\n5. **Greenhouse Interiors (Nearby in Malvern/Prahran outskirts)**\n   * *Best for:* Bold, vibrant Australian art and design.\n   * *What you\u2019ll find:* Incredible boutique homewares, limited edition art prints by Aussie artists, bright ceramics, and colorful luxury linens.\n\n---\n\n### **Brighton**\n*Vibe: Coastal chic, high-end luxury, classic, and curated.*\n\n1. **Ecru** *(Church Street)*\n   * *Best for:* Elegant, classic gifting.\n   * *What you\u2019ll find:* A Brighton staple for curated, sophisticated gifts. They stock high-end fragrances, soft Italian leather accessories, beautiful baby gifts, and chic coffee table books.\n\n2. **Crate Elegance** *(Church Street)*\n   * *Best for:* Boutique homewares and entertaining.\n   * *What you\u2019ll find:* Gorgeous kitchen and dining gifts\u2014think marble serving boards, luxury candle brands (like Trudon or Baobab), resin salad servers, and tactile ceramics. Perfect for a housewarming gift.\n\n3. **Mio Tesoro** *(Church Street)*\n   * *Best for:* European luxury, leather goods, and accessories.\n   * *What you\u2019ll find:* \"My Treasure\" in Italian, this boutique features curated European imports, from fine jewelry and cashmere scarves to artisan-made home scents. \n\n4. **Brighton Bay Antiques / Vintage Collectibles** *(Bay Street)*\n   * *Best for:* Timeless, distinctive heritage gifts.\n   * *What you\u2019ll find:* Bay Street has a slightly more relaxed, eclectic vibe than Church Street. Here you\u2019ll find estate jewelry, vintage silver, and classic decorative items that have a story behind them.\n\n5. **The Little Bookroom / Avenue Bookstore** *(Nearby on Church St / Elsternwick border)*\n   * *Best for:* Thoughtful books and design stationary.\n   * *What you\u2019ll find:* Excellent curation of hardback coffee-table books, art and architecture monographs, cookbooks, and high-end diaries/planners.\n\n---\n\n### **Summary Recommendation:**\n* Go to **Prahran (Chapel St & Greville St areas)** if your recipient appreciates **humor, modern art, edge, or vintage culture**.\n* Go to **Brighton (Church St)** if your recipient appreciates **coastal luxury, premium candles, fine homewares, and classic elegance**.",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-11-18T03:04:09+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-11-18T03:04:42+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-11-18T03:05:44+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 120.0
+    },
+    {
+     "at": "2026-11-18T03:12:44+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 240.0
+    }
+   ],
+   "used_search": false,
+   "mentions": [
+    {
+     "store_name": "Third Drawer Down",
+     "store_key": "third drawer down",
+     "is_ours": 0,
+     "position": 1,
+     "rank": 1,
+     "tone": null,
+     "quote": "1. Third Drawer Down \n   * *Best for:* Witty, artistic, and quirky gifts."
+    },
+    {
+     "store_name": "The Cheese Shop",
+     "store_key": "cheese shop",
+     "is_ours": 0,
+     "position": 2,
+     "rank": null,
+     "tone": null,
+     "quote": "Check out **The Cheese Shop**, specialty hot sauce purveyors, high-end truffle oils, and"
+    },
+    {
+     "store_name": "The Melbourne Wine Store",
+     "store_key": "melbourne wine store",
+     "is_ours": 0,
+     "position": 3,
+     "rank": null,
+     "tone": null,
+     "quote": "high-end truffle oils, and **The Melbourne Wine Store** inside for rare spirits and craft drinks."
+    },
+    {
+     "store_name": "Bibelot",
+     "store_key": "bibelot",
+     "is_ours": 0,
+     "position": 4,
+     "rank": 3,
+     "tone": null,
+     "quote": "3. Bibelot (South Yarra/Prahran border)"
+    },
+    {
+     "store_name": "The Bazaar",
+     "store_key": "bazaar",
+     "is_ours": 0,
+     "position": 5,
+     "rank": 4,
+     "tone": null,
+     "quote": "4. The Bazaar (Chapel Street Bazaar - near Windsor border)"
+    },
+    {
+     "store_name": "Greenhouse Interiors",
+     "store_key": "greenhouse interiors",
+     "is_ours": 0,
+     "position": 6,
+     "rank": 5,
+     "tone": null,
+     "quote": "5. Greenhouse Interiors (Nearby in Malvern/Prahran outskirts)"
+    },
+    {
+     "store_name": "Ecru",
+     "store_key": "ecru",
+     "is_ours": 0,
+     "position": 7,
+     "rank": 1,
+     "tone": null,
+     "quote": "1. Ecru *(Church Street)*"
+    },
+    {
+     "store_name": "Crate Elegance",
+     "store_key": "crate elegance",
+     "is_ours": 0,
+     "position": 8,
+     "rank": 2,
+     "tone": null,
+     "quote": "2. Crate Elegance *(Church Street)*"
+    },
+    {
+     "store_name": "Mio Tesoro",
+     "store_key": "mio tesoro",
+     "is_ours": 0,
+     "position": 9,
+     "rank": 3,
+     "tone": null,
+     "quote": "3. Mio Tesoro *(Church Street)*"
+    },
+    {
+     "store_name": "Brighton Bay Antiques / Vintage Collectibles",
+     "store_key": "brighton bay antiques vintage collectibles",
+     "is_ours": 0,
+     "position": 10,
+     "rank": 4,
+     "tone": null,
+     "quote": "4. Brighton Bay Antiques / Vintage Collectibles *(Bay Street)*"
+    },
+    {
+     "store_name": "The Little Bookroom / Avenue Bookstore",
+     "store_key": "little bookroom avenue bookstore",
+     "is_ours": 0,
+     "position": 11,
+     "rank": 5,
+     "tone": null,
+     "quote": "5. The Little Bookroom / Avenue Bookstore *(Nearby on Church St / Elsternwick border)*"
+    }
+   ]
+  },
+  {
+   "id": 261,
+   "question": "Unique gift shops in Prahran or Brighton Melbourne",
+   "names_area": true,
+   "kind": "core",
+   "attempt": 2,
+   "asked_at": "2026-11-18T03:29:44+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 253,
+   "question": "Where can I find pastel gel pens and a minimalist desk accessory in Melbourne?",
+   "names_area": false,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-18T03:20:32+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [
+    {
+     "at": "2026-11-18T03:25:33+00:00",
+     "error": "network error: The read operation timed out",
+     "wait_seconds": 30.0
+    },
+    {
+     "at": "2026-11-18T03:26:36+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 60.0
+    },
+    {
+     "at": "2026-11-18T03:27:44+00:00",
+     "error": "HTTP 503: {\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+     "wait_seconds": 120.0
+    }
+   ],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 254,
+   "question": "Looking for budget-friendly art supplies and a wooden pencil holder in Prahran.",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-18T03:29:44+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 255,
+   "question": "Where can I get a funny retirement card and a greeting card for a colleague in Melbourne today?",
+   "names_area": false,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-18T03:29:44+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 256,
+   "question": "Need a sweet card for a newborn baby and a birthday card in Brighton this morning.",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-18T03:29:44+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 257,
+   "question": "Shops in Brighton that sell striped wrapping paper and satin ribbon for anniversary gifts.",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-18T03:29:44+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  },
+  {
+   "id": 258,
+   "question": "Where can I find compostable gift wrapping and jute ribbon in Prahran?",
+   "names_area": true,
+   "kind": "daily",
+   "attempt": 1,
+   "asked_at": "2026-11-18T03:29:44+00:00",
+   "provider": "gemini",
+   "channel": "api",
+   "model": "gemini-3.8-flash",
+   "status": "no_answer",
+   "error": "BudgetExceeded: gemini/gemini-3.8-flash: call budget of 18 used",
+   "our_tone": null,
+   "text": "",
+   "sources": [],
+   "retries": [],
+   "used_search": false,
+   "mentions": []
+  }
+ ]
+}
