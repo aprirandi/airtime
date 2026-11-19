@@ -112,6 +112,39 @@ What this means for the Auditor on a Shopify store:
 - The work an owner can actually do is mostly groups 1 and 2: theme content and headings,
   Organization data, a Privacy page, `robots.txt.liquid`. The Auditor puts these first.
 
+## Technical model of the two scanners
+
+Researched 19 Nov 2026. The `is-agentic` npm package was read directly: it is only a client, the checks
+run on Vercel's server and are not public. Everything else is from vendor documentation and write-ups
+found through search (the vendor pages could not be opened), so figures like "118 checks" are unverified.
+
+| | Is Agentic (Vercel, checks by Ora) | Cloudflare isitagentready |
+|---|---|---|
+| Interfaces | Web page, public read-only API (no key), CLI, MCP | Web page, URL Scanner API (needs an account), MCP server with `scan_site`, Radar API |
+| Scan | `GET /api/v1/report?url=` returns the stored report; `GET /api/scan/stream?target=` runs a scan and streams events (check roster, check start, check complete, scan complete) | HTTP requests to the site; WebMCP tested in a real browser session; `llms.txt` only if "Customize scan" adds it |
+| Output | `score`, `score_label`, `score_breakdown` (essential, recommended, bonus), `issues[]` with id, result, tier, name, evidence, fix, plus `eligible_checks` | Score, level, per-category scores; per check a goal, result, fix, prompt and a "Skill" file |
+| Scoring | Essential up to 80, Recommended up to 20, Bonus up to +5 (never lowers); partial checks earn a percentage; not-applicable checks left out | Pass or fail per check rolled up per category; commerce checked but optional |
+| Limits | 120 requests per IP per 60 s; errors follow RFC 9457 | None found |
+
+Known issues reported by users for Cloudflare (unconfirmed by Cloudflare): the DNS-AID check fails valid
+records when the resolver does not return authenticated data, and the `Accept` header can be stripped
+between two Cloudflare-proxied sites, which may give a false negative on Markdown negotiation. For
+Handworks the Markdown failure is probably real, because Is Agentic is not Cloudflare and also got HTML.
+
+What this means for the Auditor:
+
+1. **A score is a snapshot of a tool that is still changing.** A score can change with no change to the
+   site. Every stored result records the tool, the date and the raw evidence, and before/after is
+   compared only within the same tool, ideally on the same day.
+2. **Our own code checks stay the core.** Reproducible, evidence stored, no cost per scan. They are
+   what is reported to owners and used for the before/after test.
+3. **The public APIs are an extra signal, not the core.** Is Agentic's is free, keyless and returns
+   evidence and a fix per issue; Cloudflare's needs an account. Terms for automated or commercial use
+   are not verified. Check them before depending on either.
+4. **Data model to copy:** per check an id, tier, result (pass, partial with a percentage, fail, not
+   applicable), evidence, fix text and source; per tier points earned and available; the number of
+   applicable checks, with not-applicable checks left out of the score.
+
 ## Steps
 
 | # | Step | Kind | What happens |
@@ -148,11 +181,12 @@ reported as a cause until the data shows it.
 
 1. Test the "unverified" Shopify items on a real store before the Auditor recommends them (Link
    headers, `/privacy` redirect, Organization JSON-LD in the theme, well-known files).
-2. Rescan Is Agentic (the snapshot is from 6 Nov) before using it as a baseline, and rescan
+2. Check the terms of use of both scanners' APIs (not reachable from the research environment).
+3. Rescan Is Agentic (the snapshot is from 6 Nov) before using it as a baseline, and rescan
    Cloudflare to see whether the WebMCP timeout repeats.
-3. How many pages to sample per store besides the homepage and one product page.
-4. Which checks matter most for being named by AI assistants. Answered later, with Asker data.
-5. Other platforms (WordPress, Wix, custom) need their own "what can the owner change" table.
+4. How many pages to sample per store besides the homepage and one product page.
+5. Which checks matter most for being named by AI assistants. Answered later, with Asker data.
+6. Other platforms (WordPress, Wix, custom) need their own "what can the owner change" table.
 
 ## Sources for the Shopify section
 
