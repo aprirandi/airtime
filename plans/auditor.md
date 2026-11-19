@@ -1,9 +1,19 @@
-# Auditor: plan (not built yet)
+# Auditor: plan (checks and scoring built, 19 Nov 2026)
 
 The Auditor is the first agent in the flow: **Auditor -> Asker -> Analyst -> Planner -> Owner -> Fixer
 -> Reporter**, with the Master checking each hand-off. It checks whether the store's own website is
 ready to be read and used by AI agents, and hands the findings on. Only the Asker and Analyst exist
 today; this plan covers the Auditor only.
+
+**Built:** the engine in `airtime/agents/auditor/`: an HTTP fetcher, a snapshot of the site, 24 checks
+(`registry.py` lists them with their group, tier, source scanner and fix text in English and
+Indonesian), scoring, the agent with its five steps, a Master check, the `audits` and `audit_checks`
+tables, `python -m airtime audit`, a manual workflow (`audit.yml`), the export to the site and a
+"Website readiness" card on the dashboard. 24 of the 33 checks that apply to a store are implemented. **Not built:**
+the checks marked planned in the registry (MCP quality and live connection, WebMCP, DNS-AID, Web Bot
+Auth, web-search discovery, controls and token budget, schema breadth), the AI step that adapts fix
+text, and a schedule. **Not yet verified:** a scan of the real site (the research environment cannot
+reach it), and the scores against Is Agentic (52) and Cloudflare (33) on the same day.
 
 ## What it is, and what it is not
 
@@ -144,6 +154,19 @@ What this means for the Auditor:
 4. **Data model to copy:** per check an id, tier, result (pass, partial with a percentage, fail, not
    applicable), evidence, fix text and source; per tier points earned and available; the number of
    applicable checks, with not-applicable checks left out of the score.
+
+## Scoring (as built)
+
+- Tiers follow Is Agentic: essential up to 80 points, recommended up to 20, bonus up to 5 more that never
+  lowers the score. A partial check earns its percentage; checks that do not apply, are planned, or
+  that the platform controls are left out. Group scores (1 to 3) are the share of points earned in the
+  group and need no weights.
+- Labels: 80 and above "strong", 60 and above "needs work", below that "important blockers remain".
+  These thresholds are the ones Is Agentic's command-line tool uses to colour its score.
+- The weights are provisional. They exist to order the gaps, and are tuned with before and after data
+  from the Asker. Scores are only comparable between scans by the same `engine` version.
+- On a platform that controls a check (Shopify: Markdown negotiation, Link headers, the `.well-known`
+  files), the check is run and shown but not scored, and never appears in the list of gaps.
 
 ## Steps
 

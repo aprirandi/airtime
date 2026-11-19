@@ -10,6 +10,7 @@ import json
 import shutil
 from pathlib import Path
 
+from airtime.agents.auditor.report import audit_json
 from airtime.agents.visibility.compare import compare_days, mention_range, scope_label
 from airtime.agents.visibility.topics import topic_stats, topics_for
 from airtime.config import REPO_ROOT, load_store_config
@@ -29,14 +30,14 @@ AGENT = {
                "mana yang direkomendasikan. Master mengecek setiap serah-terima.",
 }
 
-# The team in the order of the "Airtime at work" flow. Asker, Analyst and the Master's hand-off
+# The team in the order of the "Airtime at work" flow. Auditor, Asker, Analyst and the Master's hand-off
 # checks work today; the others are listed so the site shows where each one will sit.
 TEAM = [
-    {"id": "auditor", "name": "Auditor", "title": "Site auditor", "title_id": "Auditor situs", "status": "planned",
-     "job": "Will check the store's own website for what AI assistants can and cannot read.",
-     "job_id": "Akan mengecek website toko: apa yang bisa dan tidak bisa dibaca asisten AI.",
-     "inputs": ["Store website"], "outputs": ["Audit report"],
-     "inputs_id": ["Website toko"], "outputs_id": ["Laporan audit"]},
+    {"id": "auditor", "name": "Auditor", "title": "Site auditor", "title_id": "Auditor situs", "status": "active",
+     "job": "Checks the store's own website for what AI agents can and cannot read: access, content, trust pages and agent discovery files. Every check is plain code with its evidence stored, and the result is a score and a list of gaps.",
+     "job_id": "Mengecek website toko: apa yang bisa dan tidak bisa dibaca agent AI, yaitu akses, isi, halaman kepercayaan, dan berkas penemuan agent. Setiap cek adalah code biasa dengan bukti yang disimpan, hasilnya skor dan daftar celah.",
+     "inputs": ["Store website"], "outputs": ["Audit score", "Gap list"],
+     "inputs_id": ["Website toko"], "outputs_id": ["Skor audit", "Daftar celah"]},
     {"id": "asker", "name": "Asker", "title": "Asks the AI assistants", "title_id": "Bertanya ke asisten AI",
      "status": "active", "steps": [1, 2, 3],
      "job": "Keeps the same core questions for the trend and writes new ones aimed at the topics where the store is named least, learning from what was asked before. Checks them and asks each one to Gemini. Every answer is stored, empty ones too.",
@@ -78,9 +79,14 @@ TEAM = [
      "inputs_id": ["Hasil setiap agent"], "outputs_id": ["Lolos atau dikembalikan"]},
 ]
 
-STEP_AGENT = {"write_questions": "asker", "validate_questions": "asker", "ask_questions": "asker",
+STEP_AGENT = {"fetch_pages": "auditor", "run_checks": "auditor", "score_audit": "auditor",
+              "list_gaps": "auditor", "save_audit": "auditor", "write_questions": "asker", "validate_questions": "asker", "ask_questions": "asker",
               "import_answers": "import", "extract_mentions": "analyst", "verify_and_count": "analyst",
               "compare_previous": "analyst", "write_summary": "analyst"}
+
+
+def is_audit(agent: str) -> bool:
+    return agent == "auditor"
 
 
 def is_shift(agent: str) -> bool:
@@ -122,6 +128,12 @@ def _describe_master(step: dict, lang: str) -> str:
         return (f"Master mengecek hasil Analyst: {r.get('fields_checked')} angka cocok dengan jawaban, {r.get('quotes_checked')} kutipan masih persis sama. Lolos."
                 if id_ else
                 f"Master checked the Analyst's work: {r.get('fields_checked')} numbers match the answers, {r.get('quotes_checked')} quotes still verbatim. Passed.")
+    if step["name"] == "master_audit_complete":
+        if problems:
+            return ("Master mengembalikan hasil Auditor: " if id_ else "Master sent the Auditor's work back: ") + "; ".join(problems)
+        return (f"Master mengecek hasil Auditor: {r.get('checks')} cek tersimpan dan skor {r.get('score')} cocok dengan hasilnya. Lolos."
+                if id_ else
+                f"Master checked the Auditor's work: {r.get('checks')} checks stored and the score of {r.get('score')} matches them. Passed.")
     return "Master check." if not problems else "; ".join(problems)
 
 
@@ -155,6 +167,18 @@ def _describe(step: dict, store_name: str) -> str:
         if r.get("retries"):
             text += f" Retried {_n(r['retries'], 'time')} after errors."
         return text
+    if name == "fetch_pages":
+        text = f"Fetched {r.get('requests')} pages and files from {r.get('target')}"
+        return text + (f"; {_n(r['unreachable'], 'request')} got no response." if r.get("unreachable") else ".")
+    if name == "run_checks":
+        return (f"Ran {r.get('checks')} checks: {r.get('passed')} passed, {r.get('partial')} partial, "
+                f"{r.get('failed')} failed, {r.get('not_applicable')} not applicable; {r.get('planned')} more are planned.")
+    if name == "score_audit":
+        return f"Scored the site {r.get('score')} out of 100 ({str(r.get('label')).replace('_', ' ')})."
+    if name == "list_gaps":
+        return f"Listed {_n(r.get('gaps') or 0, 'gap')} the owner can fix, most important first."
+    if name == "save_audit":
+        return f"Stored the audit with {r.get('rows')} check results and their evidence."
     if name == "import_answers":
         return f"Imported {r.get('imported')} pasted answers ({r.get('empty')} empty)."
     if name == "extract_mentions":
@@ -204,6 +228,18 @@ def _describe_id(step: dict, store_name: str) -> str:
         if r.get("retries"):
             text += f" Mencoba ulang {r['retries']} kali setelah error."
         return text
+    if name == "fetch_pages":
+        text = f"Mengambil {r.get('requests')} halaman dan berkas dari {r.get('target')}"
+        return text + (f"; {r['unreachable']} permintaan tidak dijawab." if r.get("unreachable") else ".")
+    if name == "run_checks":
+        return (f"Menjalankan {r.get('checks')} cek: {r.get('passed')} lolos, {r.get('partial')} sebagian, "
+                f"{r.get('failed')} gagal, {r.get('not_applicable')} tidak berlaku; {r.get('planned')} lagi direncanakan.")
+    if name == "score_audit":
+        return f"Menilai situs {r.get('score')} dari 100 ({str(r.get('label')).replace('_', ' ')})."
+    if name == "list_gaps":
+        return f"Mendaftar {r.get('gaps') or 0} celah yang bisa diperbaiki pemilik, dari yang terpenting."
+    if name == "save_audit":
+        return f"Menyimpan audit dengan {r.get('rows')} hasil cek beserta buktinya."
     if name == "import_answers":
         return f"Mengimpor {r.get('imported')} jawaban yang di-paste ({r.get('empty')} kosong)."
     if name == "extract_mentions":
@@ -242,7 +278,7 @@ def _run_json(conn, run, store_name: str, topics=()) -> dict:
     for q in questions:
         q["reason"] = _loads(q["reason"], None)
         q["topics"] = topics_for(q["text"], topics)
-    return {"id": run["id"], "agent": run["agent"], "kind": "shift" if is_shift(run["agent"]) else "import",
+    return {"id": run["id"], "agent": run["agent"], "kind": "shift" if is_shift(run["agent"]) else "audit" if is_audit(run["agent"]) else "import",
             "run_date": run["run_date"],
             "started_at": run["started_at"], "finished_at": run["finished_at"],
             "status": run["status"], "error": run["error"], "steps": steps,
@@ -354,6 +390,7 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
             "slug": store["slug"], "name": store["name"], "domain": store["domain"], "setup": setup,
             "areas": _loads(store["areas"], []), "categories": _loads(store["categories"], []),
             "series": series, "ranges": ranges, "runs": run_items, "topics": topic_rows,
+            "audit": audit_json(conn, store["id"]),
             "totals": {
                 "days_on_duty": len({r["run_date"] for r in api_runs}),
                 "first_day": min((r["run_date"] for r in api_runs), default=None),

@@ -104,6 +104,34 @@ def cmd_run(args) -> int:
     return 0
 
 
+def cmd_audit(args) -> int:
+    """Scan the store's own website with the Auditor's checks. No AI key is needed."""
+    from airtime.agents.auditor.agent import audit_flow
+    from airtime.agents.auditor.http import HttpFetcher
+    from airtime.agents.auditor.registry import BY_ID
+    from airtime.agents.auditor.score import gaps
+    from airtime.export import export_site
+    cfg = load_store_config(args.store)
+    conn = db.connect(args.db)
+    try:
+        ctx = _context(conn, cfg, args.date or _today(cfg.timezone), ask=False, work=False)
+        audit_flow(HttpFetcher()).run(ctx)
+    except RunFailed as exc:
+        print(f"AUDIT FAILED: {exc}", file=sys.stderr)
+        export_site(conn)
+        return 2
+    score = ctx.data["score_audit"]
+    print(f"{cfg.name} ({ctx.data['fetch_pages']['target']}): {score['score']} / 100, {score['label']}")
+    print("groups: " + ", ".join(f"{g}={'-' if v is None else str(v) + '%'}" for g, v in score["groups"].items()))
+    print(f"{ctx.data['fetch_pages']['requests']} requests, "
+          f"{ctx.data['run_checks']['checks']} checks, platform: {ctx.data['fetch_pages']['platform']}")
+    for g in gaps(ctx.data["_rows"])[:8]:
+        d = BY_ID[g["check_id"]]
+        print(f"- [{g['tier']}] {d.name}: {g['evidence']}")
+    export_site(conn)
+    return 0
+
+
 def cmd_import(args) -> int:
     from airtime.importer import import_file
     from airtime.export import export_site
@@ -180,6 +208,10 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--store", required=True)
     s.add_argument("--date")
     s.set_defaults(fn=cmd_due)
+    s = sub.add_parser("audit", help="scan the store's own website with the Auditor's checks")
+    s.add_argument("--store", required=True)
+    s.add_argument("--date", help="run date, default today in the store's timezone")
+    s.set_defaults(fn=cmd_audit)
     s = sub.add_parser("import", help="import answers pasted from apps (CSV or JSON)")
     s.add_argument("--store", required=True)
     s.add_argument("file")

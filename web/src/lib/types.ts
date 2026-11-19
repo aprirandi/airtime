@@ -16,10 +16,71 @@ export interface Step {
   result?: Record<string, unknown>
 }
 
+export type CheckResult = "pass" | "partial" | "fail" | "na" | "planned"
+
+export interface AuditCheck {
+  id: string
+  group: number
+  tier: "essential" | "recommended" | "bonus"
+  source: "is_agentic" | "cloudflare" | "both"
+  result: CheckResult
+  percent: number
+  scored: boolean
+  name: string
+  name_id: string
+  evidence: string
+  fix: string
+  fix_id: string
+  platform_fix: string
+  platform_fix_id: string
+  controlled_by: string
+  controlled_note: string
+  controlled_note_id: string
+}
+
+export interface AuditTier {
+  total: number
+  passing: number
+  partial: number
+  failed: number
+  available?: number
+  earned?: number
+  points?: number
+  positive?: number
+}
+
+export interface AuditGroup {
+  percent: number | null
+  scored: number
+  passing: number
+  partial: number
+  failed: number
+  platform_controlled: number
+  planned: number
+}
+
+export interface Audit {
+  id: number
+  run_id: number | null
+  scanned_at: string
+  target: string
+  platform: string
+  engine: string
+  score: number | null
+  label: "strong" | "needs_work" | "blockers" | "none"
+  breakdown: { essential: AuditTier; recommended: AuditTier; bonus: AuditTier }
+  groups: Record<string, AuditGroup>
+  group_names: Record<string, { en: string; id: string }>
+  coverage: { planned: string[]; not_applicable: string[]; platform_controlled: string[] }
+  checks: AuditCheck[]
+  gaps: string[]
+  history: { scanned_at: string; score: number | null; engine: string }[]
+}
+
 export interface Run {
   id: number
   agent: string
-  kind?: "shift" | "import"
+  kind?: "shift" | "import" | "audit"
   run_date: string
   started_at: string
   finished_at: string | null
@@ -130,6 +191,7 @@ export interface Store {
   ranges: Record<string, Range | null>
   runs: Run[]
   topics?: TopicRow[]
+  audit?: Audit | null
   totals: {
     days_on_duty: number
     first_day: string | null

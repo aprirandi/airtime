@@ -48,6 +48,7 @@
   --agent-asker: #2a78d6;
   --agent-analyst: #0b7a75;
   --agent-master: #5a3e9e;
+  --agent-auditor: #b4540a;
 }
 
 .dark {
@@ -91,6 +92,7 @@
   --agent-asker: #3987e5;
   --agent-analyst: #3cc4bc;
   --agent-master: #b7a3f0;
+  --agent-auditor: #f0a258;
 }
 
 @theme inline {
@@ -121,6 +123,7 @@
   --color-agent-asker: var(--agent-asker);
   --color-agent-analyst: var(--agent-analyst);
   --color-agent-master: var(--agent-master);
+  --color-agent-auditor: var(--agent-auditor);
   --color-success: var(--success);
   --color-warning: var(--warning);
 }
