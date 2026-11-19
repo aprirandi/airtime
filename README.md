@@ -2,9 +2,10 @@
 
 Airtime agents measure how often AI assistants name a store when shoppers ask them for help.
 
-This MVP runs the first two agents of the "Airtime at work" flow
-(Auditor -> **Asker** -> **Analyst** -> Planner -> Owner -> Fixer -> Reporter), with the
-**Master** checking each hand-off:
+This MVP runs the first three agents of the "Airtime at work" flow
+(**Auditor** -> **Asker** -> **Analyst** -> Planner -> Owner -> Fixer -> Reporter), with the
+**Master** checking each hand-off. The Auditor runs on its own (see "Website audit" below); the
+Asker and Analyst run together as the daily shift:
 
 - **Asker** (steps 1-3): writes the day's buyer questions and asks them to Gemini.
 - **Master check**: every planned ask has a stored answer, for every question.
@@ -16,8 +17,8 @@ This MVP runs the first two agents of the "Airtime at work" flow
 Both agents and both checks run as one shift (one row in `runs`, each step tagged with its
 agent). The first test store is Handworks (handworks.com.au, Prahran and Brighton, Melbourne).
 
-What it does not do: change any website, recommend fixes, promise rankings or sales, use paid
-APIs, or show any UI beyond a static report.
+What it does not do: change any website, promise rankings or sales, or use paid APIs. The Auditor
+lists what an owner can fix, but nothing is changed for them.
 
 ## The daily shift
 
@@ -55,6 +56,7 @@ airtime/
   providers/gemini.py        GeminiProvider (REST, free-tier key)
   providers/fake.py          Deterministic provider used by tests
   agents/visibility/         The 7 steps, one module per concern
+  agents/auditor/            The Auditor: http, snapshot (fetch), checks, registry, score, agent, master, report
   importer.py                Import answers pasted from ChatGPT / Claude / Gemini apps
   channels.py                Compare two sources, e.g. Gemini API vs Gemini app
   report.py                  Static HTML report in docs/
@@ -65,8 +67,9 @@ web/                         Report website (React + Vite + Tailwind + shadcn/ui
 docs/                        GitHub Pages: built website + docs/data/*.json exported from SQLite
 ```
 
-Tables: `stores`, `questions`, `runs`, `answers`, `mentions`, `daily_summary`. Every
-`daily_summary` row points to its `run_id`, which leads to every answer and every verified quote.
+Tables: `stores`, `questions`, `runs`, `answers`, `mentions`, `daily_summary`, plus `audits` and
+`audit_checks` for the Auditor. Every `daily_summary` row points to its `run_id`, which leads to every
+answer and every verified quote; every `audit_checks` row keeps the evidence for its result.
 
 ## Running it
 
@@ -78,6 +81,7 @@ python -m airtime seed --store handworks        # register store, load 14 Oct ba
 python -m airtime plan --store handworks        # planned calls vs budget
 python -m airtime run --store handworks         # one shift (skipped on a day off; --force), then rewrites docs/data/
 python -m airtime due --store handworks         # is today a shift day?
+python -m airtime audit --store handworks       # scan the store's own website (no AI key needed)
 python -m airtime import --store handworks data/seed/my_pasted_answers.csv
 python -m airtime compare --store handworks --a gemini:api --b gemini:app_pasted
 python -m airtime export                        # rewrite docs/data/*.json only
@@ -109,6 +113,34 @@ The daily run only rewrites `docs/data/`, so it needs no Node. After changing an
 cd web && npm ci && npm run build   # builds into docs/, then re-exports docs/data/
 ```
 
+### Website audit
+
+`python -m airtime audit --store handworks` runs the Auditor: roughly 30 to 40 plain HTTP requests to the store's
+own public website (`[audit] url` in the config), then 24 checks. No AI is used; every result is
+plain code with its evidence stored (`audit_checks`). The checks are the union of what Is Agentic
+and Cloudflare's isitagentready test, in four groups: 1 access and content, 2 trust and identity,
+3 agent discovery, 4 not for stores (shown as not applicable). Another 9 are listed as planned and
+never scored (`agents/auditor/registry.py`).
+
+- **Score.** Essential checks are worth up to 80 points, recommended up to 20, bonus up to 5 more
+  (never lowers the score); a partial check earns its percentage. The weights are provisional, to be
+  tuned with Asker results before and after a fix. Group scores need no weights.
+- **Platform.** `platform = "shopify"` in the store config marks the checks Shopify provides or
+  controls (Markdown negotiation, Link headers, `.well-known` files). They are run and shown, but not
+  scored, because the owner cannot fix them. Fix hints for Shopify come from its documentation.
+- **Safety.** Links on the site are followed only on the same site, and hosts that resolve to private
+  or local addresses are refused.
+- **Master check.** Every check has a stored result, no check crashed, every failure has evidence,
+  and the stored score matches the stored checks.
+- **Dashboard.** The "Website readiness" card shows the score, group scores, the gaps to fix first
+  with evidence and fix text (English and Indonesian), and what the platform controls.
+- **Comparing scans.** Scores are only comparable between scans by the same version of the checks
+  (`audits.engine`).
+
+`.github/workflows/audit.yml` runs it by hand (Actions > Website audit > Run workflow). The
+research environment cannot reach customer sites, so a first run there is also the first check of the
+scores against the two scanners (`plans/auditor.md`).
+
 ### Pasted app answers
 
 ChatGPT, Claude and Gemini app answers can be pasted into a CSV or JSON file
@@ -132,11 +164,13 @@ then fails so it is visible. One-time setup:
 
 - **Another AI** (ChatGPT, Claude): subclass `Provider` with `_ask` and `_complete`, register
   it in `airtime/providers/__init__.py:make_provider`, add its key as a secret. Nothing else changes.
-- **Another agent** (Auditor, Planner, Fixer, Reporter): subclass `Agent`, list its `Step`s
+- **Another agent** (Planner, Fixer, Reporter): subclass `Agent`, list its `Step`s
   with their kind, and add it to the flow in `airtime/agents/visibility/agent.py:shift_flow`.
   Give it a `MasterCheck` (`after=<agent name>`) in `master.py`; a failed check stops the shift.
 - **Another store**: add `config/stores/<slug>.toml` and a line in the workflow.
 - **Weekly Asker with GSC questions**: planned in [`plans/asker.md`](plans/asker.md).
+- **Auditor**: checks and scoring are built (see "Website audit"); the plan, the Shopify notes and what is
+  still open are in [`plans/auditor.md`](plans/auditor.md).
 
 ## Settled and open questions
 

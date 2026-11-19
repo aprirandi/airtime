@@ -76,6 +76,7 @@ function livePositions(beat: Beat): Record<AgentId, [number, number]> {
 }
 
 const AGENT_BADGE: Record<string, string> = {
+  auditor: "bg-agent-auditor text-white",
   asker: "bg-agent-asker text-white",
   analyst: "bg-agent-analyst text-white",
   master: "bg-agent-master text-white",
@@ -200,7 +201,7 @@ export function AgentHQ({ site, store, live }: { site: Site; store: Store; live:
               {i > 0 && <ArrowRight className="size-3" />}
               {m.status === "active" ? (
                 <Badge className={cn("gap-1 border-transparent", AGENT_BADGE[m.id])}>
-                  <Bot /> {t("hq.onDuty", { name: m.name })}
+                  <Bot /> {t(m.id === "auditor" ? "hq.onDemand" : "hq.onDuty", { name: m.name })}
                 </Badge>
               ) : m.status === "human" ? (
                 <Badge variant="outline" className="border-warning text-warning font-normal">

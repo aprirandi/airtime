@@ -62,6 +62,13 @@ class StoreConfig:
     explore_window_days: int = 28      # explore mode: how far back results are read
     topics: tuple[Topic, ...] = ()
     weekdays: tuple[str, ...] = WEEKDAYS  # days the shift runs, in the store's timezone
+    platform: str = ""                 # shopify | wordpress | ... decides which checks the owner can act on
+    audit_url: str = ""                # the site the Auditor scans; defaults to https://<domain>
+    audit_product_url: str = ""        # a product page to read prices from; found in the sitemap if empty
+
+    @property
+    def base_url(self) -> str:
+        return (self.audit_url or f"https://{self.domain}").rstrip("/")
     timezone: str = "Australia/Melbourne"
     provider: ProviderConfig = field(default_factory=ProviderConfig)
 
@@ -112,6 +119,9 @@ def parse_store_config(slug: str, data: dict) -> StoreConfig:
         explore_window_days=questions.get("explore_window_days", 28),
         topics=topics,
         weekdays=weekdays,
+        platform=store.get("platform", "").strip().lower(),
+        audit_url=data.get("audit", {}).get("url", ""),
+        audit_product_url=data.get("audit", {}).get("product_url", ""),
         timezone=run.get("timezone", "Australia/Melbourne"),
         provider=provider,
     )

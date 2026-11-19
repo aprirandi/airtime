@@ -10,11 +10,20 @@ areas = ["Prahran", "Brighton"]
 categories = ["stationery", "greeting cards", "wrapping paper", "journals", "notebooks", "gifts"]
 # Other spellings that count as our store when an answer names it.
 aliases = ["Handworks Stationery", "Hand Works"]
+# The platform the website runs on. It decides which Auditor checks the owner can act on
+# (Shopify provides some agent files itself and controls others).
+platform = "shopify"
 
 # Spellings that should be counted as the same competitor.
 [competitor_aliases]
 "Milligram" = ["Milligram Studio", "Milligram Stationery"]
 "kikki.K" = ["kikki K", "Kikki.K Melbourne"]
+
+[audit]
+# The Auditor checks this website for how ready it is for AI agents. product_url is one product page
+# to read prices from; when empty it is taken from the sitemap.
+url = "https://handworks.com.au"
+product_url = ""
 
 [questions]
 # Two kinds of questions are asked every day:
