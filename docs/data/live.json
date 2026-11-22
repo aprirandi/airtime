@@ -5,7 +5,7 @@
  "run_date": "2026-11-22",
  "run_id": 30,
  "started_at": "2026-11-22T00:19:37+00:00",
- "updated_at": "2026-11-22T00:22:42+00:00",
+ "updated_at": "2026-11-22T00:31:36+00:00",
  "steps": [
   {
    "step": 1,
@@ -73,14 +73,14 @@
  ],
  "current": "ask_questions",
  "progress": {
-  "done": 1,
+  "done": 3,
   "total": 6,
   "unit": "questions asked",
-  "ok": 1,
+  "ok": 3,
   "no_answer": 0
  },
- "last_event": "Asked \"Best stationery shops in Melbourne\" (try 1): answered.",
- "last_event_id": "Bertanya \"Best stationery shops in Melbourne\" (percobaan 1): dijawab.",
+ "last_event": "Asked \"Unique gift shops in Prahran or Brighton Melbourne\" (try 1): answered.",
+ "last_event_id": "Bertanya \"Unique gift shops in Prahran or Brighton Melbourne\" (percobaan 1): dijawab.",
  "agents": [
   "asker",
   "analyst"
