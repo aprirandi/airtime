@@ -74,6 +74,39 @@ CREATE TABLE IF NOT EXISTS mentions (
     quote TEXT NOT NULL            -- verified verbatim quote from answers.text
 );
 
+-- The Auditor: one row per scan of a store's own website, and one row per check in it.
+CREATE TABLE IF NOT EXISTS audits (
+    id INTEGER PRIMARY KEY,
+    run_id INTEGER REFERENCES runs(id),
+    store_id INTEGER NOT NULL REFERENCES stores(id),
+    scanned_at TEXT NOT NULL,
+    target TEXT NOT NULL,          -- origin that was scanned
+    platform TEXT,                 -- shopify | ... | empty if unknown
+    engine TEXT NOT NULL,          -- which version of the checks produced this (scores are only comparable within one)
+    score REAL,                    -- NULL when nothing could be scored
+    score_label TEXT,              -- strong | needs_work | blockers | none
+    breakdown TEXT NOT NULL DEFAULT '{}',   -- JSON: essential / recommended / bonus
+    groups TEXT NOT NULL DEFAULT '{}',      -- JSON: score per group
+    coverage TEXT NOT NULL DEFAULT '{}',    -- JSON: planned, not applicable, platform-controlled checks
+    fetches TEXT NOT NULL DEFAULT '[]'      -- JSON: every request made (url, status, bytes), as evidence
+);
+
+CREATE TABLE IF NOT EXISTS audit_checks (
+    id INTEGER PRIMARY KEY,
+    audit_id INTEGER NOT NULL REFERENCES audits(id),
+    check_id TEXT NOT NULL,
+    grp INTEGER NOT NULL,          -- 1 access and content | 2 trust | 3 agent discovery | 4 not for stores
+    tier TEXT NOT NULL,            -- essential | recommended | bonus
+    source TEXT NOT NULL,          -- is_agentic | cloudflare | both
+    result TEXT NOT NULL,          -- pass | partial | fail | na | planned
+    percent INTEGER NOT NULL,
+    scored INTEGER NOT NULL,       -- 0 when not applicable, planned, or controlled by the platform
+    controlled_by TEXT NOT NULL DEFAULT '',
+    evidence TEXT NOT NULL DEFAULT '',
+    details TEXT NOT NULL DEFAULT '{}',
+    UNIQUE (audit_id, check_id)
+);
+
 CREATE TABLE IF NOT EXISTS daily_summary (
     id INTEGER PRIMARY KEY,
     store_id INTEGER NOT NULL REFERENCES stores(id),

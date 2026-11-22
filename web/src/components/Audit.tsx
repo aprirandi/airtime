@@ -1,0 +1,184 @@
+import { ShieldAlert } from "lucide-react"
+
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { fmtDate } from "@/lib/format"
+import { useI18n, type T } from "@/lib/i18n"
+import type { Audit, AuditCheck, AuditTier, Store } from "@/lib/types"
+
+function ResultBadge({ c, t }: { c: AuditCheck; t: T }) {
+  if (c.result === "pass") return <Badge variant="success">{t("audit.result.pass")}</Badge>
+  if (c.result === "partial") return <Badge variant="warning">{t("audit.result.partial", { p: c.percent })}</Badge>
+  if (c.result === "fail") return <Badge variant="destructive">{t("audit.result.fail")}</Badge>
+  return <Badge variant="outline">{t("audit.result.na")}</Badge>
+}
+
+function TierRow({ label, line, value }: { label: string; line: string; value: number }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between gap-2 text-sm">
+        <span className="font-medium">{label}</span>
+        <span className="text-muted-foreground text-xs tabular-nums">{line}</span>
+      </div>
+      <Progress value={value} indicatorClassName="bg-chart-1" />
+    </div>
+  )
+}
+
+const pctOf = (earned = 0, available = 0) => (available ? (100 * earned) / available : 0)
+
+function tierLine(t: T, tier: AuditTier) {
+  return t("audit.tierLine", { earned: tier.earned ?? 0, available: tier.available ?? 0, passing: tier.passing, total: tier.total })
+}
+
+function GapItem({ c, t, pick, audit }: { c: AuditCheck; t: T; pick: <V>(o: object, f: string) => V; audit: Audit }) {
+  const hint = pick<string>(c, "platform_fix")
+  return (
+    <AccordionItem value={c.id}>
+      <AccordionTrigger>
+        <span className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <Badge variant="outline">{t(`audit.tier.${c.tier}`)}</Badge>
+          <span className="min-w-0">{pick<string>(c, "name")}</span>
+          <ResultBadge c={c} t={t} />
+        </span>
+      </AccordionTrigger>
+      <AccordionContent className="space-y-3">
+        <div>
+          <div className="text-muted-foreground text-xs font-medium">{t("audit.evidence")}</div>
+          <p>{c.evidence}</p>
+        </div>
+        <div>
+          <div className="text-muted-foreground text-xs font-medium">{t("audit.how")}</div>
+          <p>{pick<string>(c, "fix")}</p>
+          {hint && (
+            <p className="text-muted-foreground mt-1">
+              {audit.platform ? `${audit.platform.charAt(0).toUpperCase()}${audit.platform.slice(1)}: ` : ""}
+              {hint}
+            </p>
+          )}
+        </div>
+        <div className="text-muted-foreground text-xs">{t("audit.source", { s: t(`audit.source.${c.source}`) })}</div>
+      </AccordionContent>
+    </AccordionItem>
+  )
+}
+
+export function AuditCard({ store }: { store: Store }) {
+  const { t, pick, lang } = useI18n()
+  const audit = store.audit
+  if (!audit) return null
+  const byId = new Map(audit.checks.map((c) => [c.id, c]))
+  const gaps = audit.gaps.map((id) => byId.get(id)).filter((c): c is AuditCheck => Boolean(c))
+  const controlled = audit.checks.filter((c) => c.controlled_by && ["pass", "partial", "fail"].includes(c.result))
+  const passed = audit.checks.filter((c) => c.scored && c.result === "pass")
+  const { essential, recommended, bonus } = audit.breakdown
+  const platform = audit.platform ? `${audit.platform.charAt(0).toUpperCase()}${audit.platform.slice(1)}` : ""
+  const built = audit.checks.filter((c) => c.result !== "planned" && c.group !== 4).length
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ShieldAlert className="size-4" /> {t("audit.title")}
+        </CardTitle>
+        <CardDescription>{t("audit.sub", { store: store.name, d: fmtDate(audit.scanned_at.slice(0, 10)) })}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid gap-6 md:grid-cols-[200px_1fr]">
+          <div className="space-y-2">
+            <div className="text-muted-foreground text-xs">{t("audit.score")}</div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-5xl font-semibold tabular-nums">{audit.score ?? "—"}</span>
+              <span className="text-muted-foreground text-sm">/ 100</span>
+            </div>
+            <Badge variant={audit.label === "strong" ? "success" : audit.label === "needs_work" ? "warning" : "destructive"}>
+              {t(`audit.label.${audit.label}`)}
+            </Badge>
+          </div>
+          <div className="space-y-3">
+            <TierRow label={t("audit.tier.essential")} line={tierLine(t, essential)} value={pctOf(essential.earned, essential.available)} />
+            <TierRow label={t("audit.tier.recommended")} line={tierLine(t, recommended)} value={pctOf(recommended.earned, recommended.available)} />
+            <TierRow
+              label={t("audit.tier.bonus")}
+              line={t("audit.bonusLine", { points: bonus.points ?? 0, positive: bonus.positive ?? 0 })}
+              value={pctOf(bonus.points, 5)}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-sm font-medium">{t("audit.groups")}</div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {["1", "2", "3"].map((g) => {
+              const grp = audit.groups[g]
+              return (
+                <div key={g} className="rounded-lg border p-3">
+                  <div className="text-muted-foreground text-xs">{audit.group_names[g]?.[lang]}</div>
+                  <div className="text-xl font-semibold tabular-nums">{grp?.percent == null ? "—" : `${grp.percent}%`}</div>
+                  <div className="text-muted-foreground text-xs">
+                    {t("audit.groupLine", { p: grp?.passing ?? 0, n: grp?.scored ?? 0 })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-sm font-medium">{t("audit.gaps")}</div>
+          <p className="text-muted-foreground text-xs">{t("audit.gapsSub")}</p>
+          {gaps.length ? (
+            <Accordion type="multiple" className="rounded-lg border px-4 text-sm">
+              {gaps.map((c) => (
+                <GapItem key={c.id} c={c} t={t} pick={pick} audit={audit} />
+              ))}
+            </Accordion>
+          ) : (
+            <p className="text-sm">{t("audit.noGaps")}</p>
+          )}
+        </div>
+
+        {controlled.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-sm font-medium">{t("audit.platform")}</div>
+            <p className="text-muted-foreground text-xs">{t("audit.platformSub", { platform })}</p>
+            <ul className="divide-y rounded-lg border text-sm">
+              {controlled.map((c) => (
+                <li key={c.id} className="flex flex-wrap items-center gap-2 px-3 py-2">
+                  <span className="min-w-0 flex-1">
+                    {pick<string>(c, "name")}
+                    <span className="text-muted-foreground block text-xs">{pick<string>(c, "controlled_note")}</span>
+                  </span>
+                  <ResultBadge c={c} t={t} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {passed.length > 0 && (
+          <details className="text-sm">
+            <summary className="cursor-pointer font-medium">{t("audit.passed", { n: passed.length })}</summary>
+            <ul className="text-muted-foreground mt-2 list-disc space-y-1 pl-5">
+              {passed.map((c) => (
+                <li key={c.id}>{pick<string>(c, "name")}</li>
+              ))}
+            </ul>
+          </details>
+        )}
+
+        <p className="text-muted-foreground text-xs leading-relaxed">
+          {t("audit.foot", {
+            done: built,
+            planned: audit.coverage.planned.length,
+            d: fmtDate(audit.scanned_at.slice(0, 10)),
+            platform: platform ? t("audit.onPlatform", { platform }) : "",
+            engine: audit.engine,
+          })}
+        </p>
+      </CardContent>
+    </Card>
+  )
+}

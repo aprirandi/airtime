@@ -77,7 +77,7 @@ def test_daily_run_end_to_end(conn, cfg, fake_work, tmp_path):
     assert [s["step"] for s in store["runs"][0]["steps"]] == [1, 2, 3, "M", 4, 5, 6, 7, "M"]
     assert store["runs"][0]["kind"] == "shift"
     assert store["runs"][0]["steps"][3]["description"].startswith("Master checked the Asker's work: 18 of 18")
-    assert [m["id"] for m in site["team"] if m["status"] == "active"] == ["asker", "analyst", "master"]
+    assert [m["id"] for m in site["team"] if m["status"] == "active"] == ["auditor", "asker", "analyst", "master"]
     assert store["runs"][0]["steps"][2]["description"].startswith("Asked 18 questions: 15 answered, 3 no answer.")
     detail = json.loads((tmp_path / "data" / "runs" / f"{ctx.run_id}.json").read_text())
     assert detail["summary"]["our_mentions"] == 3 and len(detail["answers"]) == 18

@@ -1,0 +1,48 @@
+name: Airtime website audit
+
+# The Auditor scans the store's own website (robots.txt, sitemap, headings, structured data, agent files)
+# and stores the result. No AI key is needed. Run it by hand for now; a schedule can be added once the
+# scores have been checked against Is Agentic and Cloudflare's isitagentready on a real store.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: airtime-daily   # one at a time with the daily shift: both commit the database
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Tests
+        run: |
+          pip install pytest
+          python -m pytest -q
+      - name: Run the audit
+        id: run
+        run: |
+          set +e
+          python -m airtime seed --store handworks
+          python -m airtime audit --store handworks
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+      - name: Commit results (also on a failed run, so the failure is recorded)
+        run: |
+          git config user.name "airtime-bot"
+          git config user.email "airtime-bot@users.noreply.github.com"
+          git add data/airtime.sqlite docs
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "Website audit $(TZ=Australia/Melbourne date +%F)"
+          git push
+      - name: Fail loudly if the audit failed
+        if: steps.run.outputs.code != '0'
+        run: |
+          echo "Audit failed with exit code ${{ steps.run.outputs.code }}; see the audit step log."
+          exit 1

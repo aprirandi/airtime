@@ -1,4 +1,4 @@
-import { ArrowRight, Bot, CalendarClock, ShieldCheck, UserCheck, UserPlus } from "lucide-react"
+import { ArrowRight, Bot, CalendarClock, ScanSearch, ShieldCheck, UserCheck, UserPlus } from "lucide-react"
 
 import { agentFor } from "@/components/office/stations"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,7 @@ import type { Live, Site, Store, TeamMember } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 const AVATAR: Record<string, string> = {
+  auditor: "bg-agent-auditor",
   asker: "bg-agent-asker",
   analyst: "bg-agent-analyst",
   master: "bg-agent-master",
@@ -104,6 +105,55 @@ function ActiveCard({ m, site, store, live }: { m: TeamMember; site: Site; store
   )
 }
 
+function AuditorCard({ m, store }: { m: TeamMember; store: Store }) {
+  const { t, pick } = useI18n()
+  const audit = store.audit
+  const run = store.runs.find((r) => r.kind === "audit")
+  const last = run?.steps.filter((s) => s.agent === "auditor").at(-1)
+  const scored = audit ? audit.checks.filter((c) => c.scored && ["pass", "partial", "fail"].includes(c.result)).length : 0
+  return (
+    <Card className="gap-4">
+      <CardHeader>
+        <div className="flex items-start gap-3">
+          <div className={cn("relative grid size-12 shrink-0 place-items-center rounded-2xl text-white shadow-sm", AVATAR.auditor)}>
+            <ScanSearch className="size-6" />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className="text-base">{m.name}</CardTitle>
+              <Badge variant="secondary">{t("team.onDemand")}</Badge>
+            </div>
+            <CardDescription>{pick<string>(m, "title")}</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <p className="text-muted-foreground">{pick<string>(m, "job")}</p>
+        <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
+          <CalendarClock className="size-3.5" /> {audit ? t("team.auditLast", { d: fmtDate(audit.scanned_at.slice(0, 10)) }) : t("team.auditHow")}
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            [t("team.auditScore"), audit?.score ?? "—"],
+            [t("team.auditChecks"), scored],
+            [t("team.auditGaps"), audit ? audit.gaps.length : "—"],
+          ].map(([k, v]) => (
+            <div key={String(k)} className="rounded-lg border p-2">
+              <div className="text-muted-foreground text-[11px] leading-tight">{k}</div>
+              <div className="text-lg font-semibold tabular-nums">{v}</div>
+            </div>
+          ))}
+        </div>
+        <InOut m={m} />
+        <div className="bg-muted/40 rounded-lg p-3 text-xs">
+          <div className="text-muted-foreground mb-0.5">{t("team.lastAudit")}</div>
+          {last ? pick<string>(last, "description") : t("team.noAudit")}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function OtherCard({ m, index }: { m: TeamMember; index: number }) {
   const { t, pick } = useI18n()
   const human = m.status === "human"
@@ -141,9 +191,13 @@ export function Team({ site, store, live }: { site: Site; store: Store; live: Li
   return (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {active.map((m) => (
-          <ActiveCard key={m.id} m={m} site={site} store={store} live={live} />
-        ))}
+        {active.map((m) =>
+          m.id === "auditor" ? (
+            <AuditorCard key={m.id} m={m} store={store} />
+          ) : (
+            <ActiveCard key={m.id} m={m} site={site} store={store} live={live} />
+          )
+        )}
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {others.map((m) => (
