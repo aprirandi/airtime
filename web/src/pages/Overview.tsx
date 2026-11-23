@@ -21,17 +21,34 @@ function FixCard({ fix }: { fix: Fix }) {
   return (
     <Card>
       <CardHeader className="gap-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-start justify-between gap-3">
           <CardTitle className="text-base">{pick<string>(fix, "title")}</CardTitle>
-          <Badge variant={STATUS_VARIANT[fix.status]}>{t(`ov.status.${fix.status}`)}</Badge>
+          <Badge variant={STATUS_VARIANT[fix.status]} className="shrink-0">
+            {t(`ov.status.${fix.status}`)}
+          </Badge>
         </div>
         <CardDescription>{pick<string>(fix, "why")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
         <p>{pick<string>(fix, "summary")}</p>
+        {fix.confirm && fix.confirm.length > 0 && (
+          <div className="bg-muted/50 space-y-2 rounded-lg p-3">
+            <div className="text-xs font-medium">{t("ov.confirm")}</div>
+            <dl className="space-y-1.5">
+              {fix.confirm.map((c) => (
+                <div key={c.kind}>
+                  <dt className="text-muted-foreground text-xs">
+                    {pick<string>(c, "label")} · {t(`ov.from.${c.source}`)}
+                  </dt>
+                  <dd>{c.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
         {fix.questions.length > 0 && (
           <div className="bg-muted/50 space-y-1.5 rounded-lg p-3">
-            <div className="text-xs font-medium">{t("ov.questions")}</div>
+            <div className="text-xs font-medium">{fix.confirm?.length ? t("ov.still") : t("ov.questions")}</div>
             <ul className="list-disc space-y-1 pl-5">
               {fix.questions.map((q) => (
                 <li key={q.en}>{lang === "id" ? q.id : q.en}</li>
@@ -51,7 +68,17 @@ export function Overview({ site, store }: { site: Site; store: Store }) {
   const waiting = fixes.filter((f) => f.status === "needs_owner").length
   const lastShift = store.runs.find((r) => r.kind === "shift")
   const team = site.team.filter((m) => m.status === "active" && m.id !== "master")
-  const recent = store.runs.filter((r) => r.kind === "shift" || r.kind === "audit").slice(0, 6)
+  // one line per day and kind: an audit run five times in a day is still one "re-checked" line
+  const seen = new Set<string>()
+  const recent = store.runs
+    .filter((r) => r.kind === "shift" || r.kind === "audit")
+    .filter((r) => {
+      const key = `${r.run_date}|${r.kind}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+    .slice(0, 6)
 
   const line = (id: string): string | null => {
     if (id === "auditor") return audit ? t("ov.checked", { d: fmtDate(audit.scanned_at.slice(0, 10)) }) : null

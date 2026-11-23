@@ -18,6 +18,7 @@ import json
 
 from airtime.agents.auditor.registry import BY_ID
 from airtime.agents.auditor.score import gaps, limited_gaps
+from airtime.agents.fixer.drafts import draft_for
 from airtime.agents.fixer.texts import CLIENT, QUESTIONS, STATUS_TEXT
 from airtime.core.agent import Agent, RunContext, Step, StepKind
 from airtime.providers.base import utc_now
@@ -25,30 +26,41 @@ from airtime.providers.base import utc_now
 TIER_ORDER = {"essential": 0, "recommended": 1, "bonus": 2}
 
 
-def plan_fix(row: dict, platform: str, position: int) -> dict:
-    """One fix from one gap row. Pure: the same row always gives the same fix."""
+def plan_fix(row: dict, platform: str, position: int, draft: dict | None = None) -> dict:
+    """One fix from one gap row. Pure: the same row and draft always give the same fix.
+
+    A draft (facts found on the owner's own pages) turns "waiting for your answer" into "draft ready": the owner
+    confirms instead of typing, and is only asked for what the pages did not have."""
     cid = row["check_id"]
     title_en, title_id, why_en, why_id = CLIENT[cid]
     limited = bool(row.get("controlled_by"))
     questions = QUESTIONS.get(cid, [])
     if limited:
         status = "platform_held"
+    elif draft and not questions:
+        draft = None                      # nothing to prepare for a check that asks nothing
+        status = "not_started"
+    elif draft:
+        status = "draft_ready"
+        questions = [q for i, q in enumerate(questions) if i not in draft["answered"]]
     elif questions:
         status = "needs_owner"
     else:
         status = "not_started"
     name = platform.capitalize() if platform else ""
     say_en, say_id = STATUS_TEXT[status]
-    return {"check_id": cid, "position": position, "status": status, "tier": row["tier"],
+    keep = status in ("needs_owner", "draft_ready")
+    return {"check_id": cid, "position": position, "status": status, "tier": row["tier"], "draft": draft,
             "title": title_en, "title_id": title_id, "why": why_en, "why_id": why_id,
             "summary": say_en.format(platform=name), "summary_id": say_id.format(platform=name),
-            "questions": [{"en": en, "id": idn} for en, idn in questions] if status == "needs_owner" else []}
+            "questions": [{"en": en, "id": idn} for en, idn in questions] if keep else []}
 
 
-def plan_all(rows: list[dict], platform: str) -> list[dict]:
+def plan_all(rows: list[dict], platform: str, drafts: dict[str, dict | None] | None = None) -> list[dict]:
     """Fixes the owner can act on come first, then the ones the platform holds back."""
     ordered = gaps(rows) + limited_gaps(rows)
-    return [plan_fix(r, platform, i) for i, r in enumerate(ordered, 1)]
+    drafts = drafts or {}
+    return [plan_fix(r, platform, i, drafts.get(r["check_id"])) for i, r in enumerate(ordered, 1)]
 
 
 class FixerAgent(Agent):
@@ -67,7 +79,10 @@ class FixerAgent(Agent):
                 "platform": ctx.store.platform or "unknown"}
 
     def _plan(self, ctx: RunContext) -> dict:
-        fixes = plan_all(ctx.data["_fix_rows"], ctx.store.platform)
+        snapshot = ctx.data["_snapshot"]
+        drafts = {r["check_id"]: draft_for(r["check_id"], snapshot, ctx.store.name) for r in ctx.data["_fix_rows"]
+                  if not r.get("controlled_by")}
+        fixes = plan_all(ctx.data["_fix_rows"], ctx.store.platform, drafts)
         ctx.data["_fixes"] = fixes
         count = lambda s: sum(f["status"] == s for f in fixes)  # noqa: E731
         return {"fixes": len(fixes), "needs_owner": count("needs_owner"), "not_started": count("not_started"),
@@ -79,8 +94,9 @@ class FixerAgent(Agent):
             ctx.conn.execute(
                 """INSERT INTO fixes (audit_id, check_id, position, status, tier, title, title_id, why, why_id,
                                       summary, summary_id, questions, draft, created_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)""",
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (audit_id, f["check_id"], f["position"], f["status"], f["tier"], f["title"], f["title_id"], f["why"],
-                 f["why_id"], f["summary"], f["summary_id"], json.dumps(f["questions"], ensure_ascii=False), utc_now()))
+                 f["why_id"], f["summary"], f["summary_id"], json.dumps(f["questions"], ensure_ascii=False),
+                 json.dumps(f["draft"], ensure_ascii=False) if f["draft"] else None, utc_now()))
         ctx.conn.commit()
         return {"saved": len(ctx.data["_fixes"]), "audit_id": audit_id}

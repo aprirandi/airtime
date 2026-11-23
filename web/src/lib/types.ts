@@ -102,6 +102,8 @@ export interface Fix {
   summary: string
   summary_id: string
   questions: { en: string; id: string }[]
+  /** Facts the Fixer found on the owner's own pages, for the owner to confirm. */
+  confirm?: { kind: string; value: string; source: "contact" | "about" | "home"; label: string; label_id: string }[]
 }
 
 export interface Audit {

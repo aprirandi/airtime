@@ -25,6 +25,11 @@ def fixes_complete(ctx: RunContext) -> tuple[list[str], dict]:
     silent = [f["check_id"] for f in stored if f["status"] == "needs_owner" and not json.loads(f["questions"] or "[]")]
     if silent:
         problems.append(f"waiting on the owner with no question: {', '.join(silent)}")
+    for f in stored:
+        if f["status"] == "draft_ready":
+            draft = json.loads(f["draft"] or "null")
+            if not draft or not draft.get("confirm"):
+                problems.append(f"draft ready with nothing to confirm: {f['check_id']}")
     return problems, {"fixes": len(stored)}
 
 
