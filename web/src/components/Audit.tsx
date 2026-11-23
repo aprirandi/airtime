@@ -189,7 +189,6 @@ function GapItem({ c, t, pick, audit }: { c: AuditCheck; t: T; pick: <V>(o: obje
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <CopyButton text={prompt} label={t("audit.copy")} t={t} />
-              <span className="text-muted-foreground text-xs">{t("audit.source", { s: t(`audit.source.${c.source}`) })}</span>
             </div>
             <details>
               <summary className="text-muted-foreground cursor-pointer text-xs">{t("audit.showPrompt")}</summary>
