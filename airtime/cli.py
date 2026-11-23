@@ -125,9 +125,14 @@ def cmd_audit(args) -> int:
     print("groups: " + ", ".join(f"{g}={'-' if v is None else str(v) + '%'}" for g, v in score["groups"].items()))
     print(f"{ctx.data['fetch_pages']['requests']} requests, "
           f"{ctx.data['run_checks']['checks']} checks, platform: {ctx.data['fetch_pages']['platform']}")
-    for g in gaps(ctx.data["_rows"])[:8]:
+    found = gaps(ctx.data["_rows"])
+    for g in found[:8]:
         d = BY_ID[g["check_id"]]
         print(f"- [{g['tier']}] {d.name}: {g['evidence']}")
+    if args.prompt:
+        from airtime.agents.auditor.prompts import all_prompt
+        print("\n" + all_prompt(found, ctx.data["fetch_pages"]["target"], cfg.platform, args.lang,
+                               ctx.run_date))
     export_site(conn)
     return 0
 
@@ -211,6 +216,8 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("audit", help="scan the store's own website with the Auditor's checks")
     s.add_argument("--store", required=True)
     s.add_argument("--date", help="run date, default today in the store's timezone")
+    s.add_argument("--prompt", action="store_true", help="also print one prompt that fixes every gap")
+    s.add_argument("--lang", choices=("en", "id"), default="en", help="language of the prompt")
     s.set_defaults(fn=cmd_audit)
     s = sub.add_parser("import", help="import answers pasted from apps (CSV or JSON)")
     s.add_argument("--store", required=True)

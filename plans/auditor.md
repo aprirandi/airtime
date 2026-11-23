@@ -71,6 +71,9 @@ That is 8 overlapping, 14 Is Agentic only and 9 Cloudflare only. Rules for combi
 
 ## Checks, in four groups
 
+The full list of 37 checks, the platform rules and the verify command for each built check are in
+[check-registry.md](check-registry.md), generated from the code.
+
 Every check is code: an HTTP request and a rule. No AI decides pass or fail.
 
 | Group | Checks (as named by the scanners) | Scored for a store? |

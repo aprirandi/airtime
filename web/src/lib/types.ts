@@ -36,6 +36,8 @@ export interface AuditCheck {
   controlled_by: string
   controlled_note: string
   controlled_note_id: string
+  prompt: string
+  prompt_id: string
 }
 
 export interface AuditTier {
@@ -74,6 +76,8 @@ export interface Audit {
   coverage: { planned: string[]; not_applicable: string[]; platform_controlled: string[] }
   checks: AuditCheck[]
   gaps: string[]
+  prompt_all: string
+  prompt_all_id: string
   history: { scanned_at: string; score: number | null; engine: string }[]
 }
 

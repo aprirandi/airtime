@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 
+from airtime.agents.auditor.prompts import all_prompt, fix_prompt
 from airtime.agents.auditor.registry import BY_ID, GROUPS, REGISTRY
 from airtime.agents.auditor.score import gaps
 
@@ -37,10 +38,18 @@ def audit_json(conn, store_id: int) -> dict | None:
             "platform_fix": hint[0] if hint else "", "platform_fix_id": hint[1] if hint else "",
             "controlled_by": r["controlled_by"],
             "controlled_note": controlled[0] if controlled else "", "controlled_note_id": controlled[1] if controlled else "",
-            "details": _loads(r["details"], {}),
+            "details": _loads(r["details"], {}), "prompt": "", "prompt_id": "",
         })
     ordered_gaps = gaps([{"check_id": c["id"], "group": c["group"], "tier": c["tier"], "result": c["result"],
                           "percent": c["percent"], "scored": c["scored"]} for c in checks])
+    by_id = {c["id"]: c for c in checks}
+    gap_rows = [{"check_id": g["check_id"], "tier": g["tier"], "evidence": by_id[g["check_id"]]["evidence"]}
+                for g in ordered_gaps]
+    site, platform = latest["target"], latest["platform"] or ""
+    for g in gap_rows:   # a prompt only for gaps the owner can act on
+        for lang, key in (("en", "prompt"), ("id", "prompt_id")):
+            by_id[g["check_id"]][key] = fix_prompt(g["check_id"], g, site, platform, lang)
+    scanned = latest["scanned_at"][:10]
     history = [{"scanned_at": h["scanned_at"], "score": h["score"], "engine": h["engine"]} for h in conn.execute(
         "SELECT scanned_at, score, engine FROM audits WHERE store_id = ? ORDER BY scanned_at, id", (store_id,))]
     return {
@@ -51,4 +60,6 @@ def audit_json(conn, store_id: int) -> dict | None:
         "group_names": {str(k): {"en": v[0], "id": v[1]} for k, v in GROUPS.items()},
         "coverage": _loads(latest["coverage"], {}), "checks": checks,
         "gaps": [g["check_id"] for g in ordered_gaps], "history": history,
+        "prompt_all": all_prompt(gap_rows, site, platform, "en", scanned),
+        "prompt_all_id": all_prompt(gap_rows, site, platform, "id", scanned),
     }

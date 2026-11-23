@@ -11,7 +11,7 @@ still run and shown, but left out of the score, because they are not a gap the o
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Callable
 
 from airtime.agents.auditor import checks as c
@@ -39,6 +39,7 @@ class CheckDef:
     platform_controlled: dict[str, tuple[str, str]] = field(default_factory=dict)  # platform -> (en, id)
     platform_fix: dict[str, tuple[str, str]] = field(default_factory=dict)         # platform -> (en, id)
     na_reason: tuple[str, str] | None = None   # group 4: why it does not apply to a store
+    verify: tuple[str, str, str] | None = None  # (shell command with {site}, what to expect in English, in Indonesian)
 
 
 SHOPIFY = "shopify"
@@ -227,6 +228,80 @@ REGISTRY: list[CheckDef] = [
     _not_store("agent_payments", "cloudflare", "Agent payments (x402, MPP)", "Pembayaran antar-agent (x402, MPP)"),
     _not_store("agent_checkout", "cloudflare", "Agent checkout (ACP)", "Checkout antar-agent (ACP)"),
 ]
+
+# How to check a fix by hand: a command (with {site} for the store's origin) and what a fixed site shows.
+# They go into the fix prompts, so whoever makes the change can prove it worked.
+VERIFY = {
+    "robots_txt": ("curl -sS -i {site}/robots.txt",
+                   "HTTP 200, at least one User-agent line, and a Sitemap line.",
+                   "HTTP 200, minimal satu baris User-agent, dan satu baris Sitemap."),
+    "ai_crawlers_allowed": ("curl -sS -o /dev/null -w '%{http_code}\\n' -A 'Mozilla/5.0 (compatible; ChatGPT-User/1.0)' {site}/",
+                            "200 for ChatGPT-User, OAI-SearchBot, Claude-User and PerplexityBot (change the name after -A), and no Disallow for them in robots.txt.",
+                            "200 untuk ChatGPT-User, OAI-SearchBot, Claude-User dan PerplexityBot (ganti nama setelah -A), dan tidak ada Disallow untuk mereka di robots.txt."),
+    "sitemap": ("curl -sS {site}/sitemap.xml | head -20",
+                "A <urlset> or <sitemapindex> with <loc> entries, and a Sitemap line in robots.txt.",
+                "<urlset> atau <sitemapindex> dengan entri <loc>, dan baris Sitemap di robots.txt."),
+    "raw_html_content": ("curl -sS {site}/ | grep -io '<h[1-6][^>]*>' | head -20",
+                         "The first heading is <h1> and levels never skip (h1, h2, h3). The raw HTML has at least 500 characters of text.",
+                         "Judul pertama adalah <h1> dan tingkatnya tidak melompat (h1, h2, h3). HTML mentah punya minimal 500 karakter teks."),
+    "redirects_clean": ("curl -sSIL {site}/ | grep -iE '^(HTTP|location)'",
+                        "At most three redirects (301), ending in HTTP 200, and no meta-refresh in the HTML.",
+                        "Paling banyak tiga redirect (301), berakhir di HTTP 200, dan tidak ada meta-refresh di HTML."),
+    "public_no_login": ("curl -sS -o /dev/null -w '%{http_code} %{url_effective}\\n' -L {site}/",
+                        "200, and the final URL is not a login or password page.",
+                        "200, dan URL akhirnya bukan halaman login atau kata sandi."),
+    "not_noindex": ("curl -sSI {site}/ | grep -i x-robots-tag; curl -sS {site}/ | grep -i 'name=\"robots\"'",
+                    "No noindex in either result.", "Tidak ada noindex di kedua hasil."),
+    "not_found_markdown": ("curl -sS -i -H 'Accept: text/markdown' {site}/a-page-that-does-not-exist",
+                           "HTTP 404 with Content-Type: text/markdown and a short message that links to the sitemap.",
+                           "HTTP 404 dengan Content-Type: text/markdown dan pesan singkat yang menautkan ke sitemap."),
+    "jsonld_organization": ("curl -sS {site}/ | grep -o 'application/ld+json' | head -3",
+                            "An Organization (or LocalBusiness) JSON-LD block with a name and a description. Test it at validator.schema.org.",
+                            "Satu blok JSON-LD Organization (atau LocalBusiness) dengan nama dan deskripsi. Uji di validator.schema.org."),
+    "organization_completeness": ("curl -sS {site}/ | grep -o 'contactPoint\\|PostalAddress' | sort -u",
+                                  "Both contactPoint and PostalAddress appear in the Organization JSON-LD.",
+                                  "contactPoint dan PostalAddress sama-sama ada di JSON-LD Organization."),
+    "metadata_complete": ("curl -sS {site}/ | grep -iE 'rel=\"canonical\"|og:image|og:type|<html[^>]*lang'",
+                          "A canonical link, lang on <html>, og:image and og:type.",
+                          "Link canonical, lang di <html>, og:image dan og:type."),
+    "pricing_structured": ("curl -sS <product-page-url> | grep -o '\"price\"[^,]*\\|priceCurrency[^,]*'",
+                           "offers.price and offers.priceCurrency in the product's JSON-LD.",
+                           "offers.price dan offers.priceCurrency di JSON-LD produk."),
+    "trust_pages": ("curl -sS -o /dev/null -w '%{http_code}\\n' {site}/policies/privacy-policy",
+                    "HTTP 200 for each of the About, Contact and Privacy pages (use their real URLs), each with at least 500 characters of text and linked from the footer.",
+                    "HTTP 200 untuk halaman About, Contact dan Privacy (pakai URL aslinya), masing-masing minimal 500 karakter teks dan ditautkan dari footer."),
+    "markdown_negotiation": ("curl -sS -i -H 'Accept: text/markdown' {site}/",
+                             "Content-Type: text/markdown, Vary: Accept and a Markdown body. The same URL with Accept: text/html still returns HTML.",
+                             "Content-Type: text/markdown, Vary: Accept dan isi Markdown. URL yang sama dengan Accept: text/html tetap menghasilkan HTML."),
+    "llms_txt": ("curl -sS -i {site}/llms.txt", "HTTP 200 text with Markdown links that all open.",
+                 "HTTP 200 berupa teks dengan tautan Markdown yang semuanya terbuka."),
+    "agents_md": ("curl -sS -i {site}/agents.md", "HTTP 200 and Content-Type text/markdown or text/plain.",
+                  "HTTP 200 dan Content-Type text/markdown atau text/plain."),
+    "content_signals": ("curl -sS {site}/robots.txt | grep -i content-signal",
+                        "A Content-Signal line with ai-train, search and ai-input each set to yes or no.",
+                        "Satu baris Content-Signal dengan ai-train, search dan ai-input, masing-masing yes atau no."),
+    "link_headers": ("curl -sSI {site}/ | grep -i '^link'",
+                     "A Link header with rel=\"api-catalog\", \"service-doc\" or a similar useful relation.",
+                     "Header Link dengan rel=\"api-catalog\", \"service-doc\" atau relasi berguna lainnya."),
+    "mcp_server_card": ("curl -sS -i {site}/.well-known/mcp/server-card.json",
+                        "HTTP 200 JSON with serverInfo.name and serverInfo.version.",
+                        "HTTP 200 JSON dengan serverInfo.name dan serverInfo.version."),
+    "agent_skills_index": ("curl -sS -i {site}/.well-known/agent-skills/index.json",
+                           "HTTP 200 JSON with $schema and a skills array; each entry has name, type, description, url and sha256.",
+                           "HTTP 200 JSON dengan $schema dan array skills; tiap entri punya name, type, description, url dan sha256."),
+    "ard_manifest": ("curl -sS -i {site}/.well-known/ai-catalog.json",
+                     "HTTP 200 JSON with specVersion, host and entries.",
+                     "HTTP 200 JSON dengan specVersion, host dan entries."),
+    "auth_md": ("curl -sS -i {site}/auth.md", "HTTP 200 text with agent registration instructions.",
+                "HTTP 200 berupa teks dengan petunjuk registrasi agent."),
+    "oauth_discovery": ("curl -sS -i {site}/.well-known/openid-configuration", "HTTP 200 JSON with an issuer.",
+                        "HTTP 200 JSON dengan issuer."),
+    "oauth_protected_resource": ("curl -sS -i {site}/.well-known/oauth-protected-resource",
+                                 "HTTP 200 JSON with a resource.", "HTTP 200 JSON dengan resource."),
+}
+REGISTRY = [replace(d, verify=VERIFY[d.id]) if d.id in VERIFY else d for d in REGISTRY]
+assert all(d.verify for d in REGISTRY if d.run), "every built check needs a verify command"
+assert set(VERIFY) <= {d.id for d in REGISTRY}, "VERIFY names an unknown check"
 
 BY_ID = {d.id: d for d in REGISTRY}
 assert len(BY_ID) == len(REGISTRY), "duplicate check id"
