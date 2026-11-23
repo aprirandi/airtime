@@ -108,6 +108,7 @@ def cmd_audit(args) -> int:
     """Scan the store's own website with the Auditor's checks. No AI key is needed."""
     from airtime.agents.auditor.agent import audit_flow
     from airtime.agents.auditor.http import HttpFetcher
+    from airtime.agents.auditor.isagentic import IsAgenticClient
     from airtime.agents.auditor.registry import BY_ID
     from airtime.agents.auditor.score import gaps
     from airtime.export import export_site
@@ -115,7 +116,8 @@ def cmd_audit(args) -> int:
     conn = db.connect(args.db)
     try:
         ctx = _context(conn, cfg, args.date or _today(cfg.timezone), ask=False, work=False)
-        audit_flow(HttpFetcher()).run(ctx)
+        external = IsAgenticClient() if cfg.audit_external and not args.no_external else None
+        audit_flow(HttpFetcher(), external).run(ctx)
     except RunFailed as exc:
         print(f"AUDIT FAILED: {exc}", file=sys.stderr)
         export_site(conn)
@@ -125,6 +127,10 @@ def cmd_audit(args) -> int:
     print("groups: " + ", ".join(f"{g}={'-' if v is None else str(v) + '%'}" for g, v in score["groups"].items()))
     print(f"{ctx.data['fetch_pages']['requests']} requests, "
           f"{ctx.data['run_checks']['checks']} checks, platform: {ctx.data['fetch_pages']['platform']}")
+    ext = ctx.data.get("external_scan")
+    if ext:
+        print("Is Agentic (second opinion): " + (f"{ext['score']} / 100, {ext['issues']} issues, {ext['extra']} not in our checks"
+                                                if ext["status"] == "ok" else f"unavailable ({ext['reason']})"))
     found = gaps(ctx.data["_rows"])
     for g in found[:8]:
         d = BY_ID[g["check_id"]]
@@ -218,6 +224,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--date", help="run date, default today in the store's timezone")
     s.add_argument("--prompt", action="store_true", help="also print one prompt that fixes every gap")
     s.add_argument("--lang", choices=("en", "id"), default="en", help="language of the prompt")
+    s.add_argument("--no-external", action="store_true", help="skip the Is Agentic second opinion even if the store turns it on")
     s.set_defaults(fn=cmd_audit)
     s = sub.add_parser("import", help="import answers pasted from apps (CSV or JSON)")
     s.add_argument("--store", required=True)

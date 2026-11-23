@@ -18,7 +18,33 @@ export interface Step {
 
 export type CheckResult = "pass" | "partial" | "fail" | "na" | "planned"
 
+export interface ExternalIssue {
+  id: string
+  name: string
+  tier: "essential" | "recommended" | "bonus"
+  result: "failed" | "partial"
+  details: string
+  recommendation: string
+  kind: "mapped" | "api_product" | "extra"
+  maps_to: string
+}
+
+export interface ExternalReport {
+  source: "is-agentic"
+  status: "ok" | "unavailable"
+  error: string
+  fetched_at: string
+  report_url: string
+  score: number | null
+  label: string
+  scanned_at: string
+  eligible_checks: number | null
+  issues: ExternalIssue[]
+  agreement: { compared: number; agree: number } | null
+}
+
 export interface AuditCheck {
+  external?: { id: string; result: "partial" | "failed" | "not_listed"; details: string } | null
   id: string
   group: number
   tier: "essential" | "recommended" | "bonus"
@@ -78,6 +104,7 @@ export interface Audit {
   gaps: string[]
   prompt_all: string
   prompt_all_id: string
+  external?: ExternalReport | null
   history: { scanned_at: string; score: number | null; engine: string }[]
 }
 
@@ -96,6 +123,7 @@ export interface RegistryCheck {
   controlled: Record<string, { en: string; id: string }>
   platform_fix: Record<string, { en: string; id: string }>
   verify: { command: string; en: string; id: string } | null
+  external_id?: string
 }
 
 export interface Registry {

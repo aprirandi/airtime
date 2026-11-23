@@ -5,12 +5,46 @@ from __future__ import annotations
 import json
 
 from airtime.agents.auditor.prompts import all_prompt, fix_prompt
+from airtime.agents.auditor.isagentic import MAPPED
 from airtime.agents.auditor.registry import BY_ID, GROUPS, REGISTRY
 from airtime.agents.auditor.score import gaps
 
 
 def _loads(value, default):
     return json.loads(value) if value else default
+
+
+_OURS_TO_THEIRS = {ours: theirs for theirs, ours in MAPPED.items()}
+
+
+def _external_json(conn, audit_id: int, checks: list[dict]) -> dict | None:
+    """Is Agentic's report beside ours. Their score is their own number and is never mixed into ours."""
+    r = conn.execute("SELECT * FROM external_reports WHERE audit_id = ? AND source = 'is-agentic'", (audit_id,)).fetchone()
+    if r is None:
+        return None
+    issues = _loads(r["issues"], [])
+    out = {"source": "is-agentic", "status": r["status"], "error": r["error"], "fetched_at": r["fetched_at"],
+           "report_url": r["report_url"], "score": r["score"], "label": r["score_label"],
+           "scanned_at": r["scanned_at"], "eligible_checks": r["eligible_checks"],
+           "breakdown": _loads(r["breakdown"], {}), "issues": issues, "agreement": None}
+    if r["status"] != "ok":
+        return out
+    listed = {i["maps_to"]: i for i in issues if i["maps_to"]}
+    compared = agree = 0
+    for c in checks:
+        theirs = _OURS_TO_THEIRS.get(c["id"])
+        if theirs is None or c["result"] in ("na", "planned"):
+            continue
+        issue = listed.get(c["id"])
+        if c["tier"] == "bonus" and issue is None:
+            continue   # their report never lists a bonus check that was missed, so silence says nothing
+        c["external"] = {"id": theirs, "result": issue["result"] if issue else "not_listed",
+                         "details": issue["details"] if issue else ""}
+        ours_bad = c["result"] in ("fail", "partial")
+        compared += 1
+        agree += ours_bad == bool(issue)
+    out["agreement"] = {"compared": compared, "agree": agree}
+    return out
 
 
 def audit_json(conn, store_id: int) -> dict | None:
@@ -38,7 +72,7 @@ def audit_json(conn, store_id: int) -> dict | None:
             "platform_fix": hint[0] if hint else "", "platform_fix_id": hint[1] if hint else "",
             "controlled_by": r["controlled_by"],
             "controlled_note": controlled[0] if controlled else "", "controlled_note_id": controlled[1] if controlled else "",
-            "details": _loads(r["details"], {}), "prompt": "", "prompt_id": "",
+            "details": _loads(r["details"], {}), "prompt": "", "prompt_id": "", "external": None,
         })
     ordered_gaps = gaps([{"check_id": c["id"], "group": c["group"], "tier": c["tier"], "result": c["result"],
                           "percent": c["percent"], "scored": c["scored"]} for c in checks])
@@ -52,6 +86,7 @@ def audit_json(conn, store_id: int) -> dict | None:
     scanned = latest["scanned_at"][:10]
     history = [{"scanned_at": h["scanned_at"], "score": h["score"], "engine": h["engine"]} for h in conn.execute(
         "SELECT scanned_at, score, engine FROM audits WHERE store_id = ? ORDER BY scanned_at, id", (store_id,))]
+    external = _external_json(conn, latest["id"], checks)
     return {
         "id": latest["id"], "run_id": latest["run_id"], "scanned_at": latest["scanned_at"],
         "target": latest["target"], "platform": latest["platform"] or "", "engine": latest["engine"],
@@ -61,7 +96,7 @@ def audit_json(conn, store_id: int) -> dict | None:
         "coverage": _loads(latest["coverage"], {}), "checks": checks,
         "gaps": [g["check_id"] for g in ordered_gaps], "history": history,
         "prompt_all": all_prompt(gap_rows, site, platform, "en", scanned),
-        "prompt_all_id": all_prompt(gap_rows, site, platform, "id", scanned),
+        "prompt_all_id": all_prompt(gap_rows, site, platform, "id", scanned), "external": external,
     }
 
 
@@ -77,5 +112,6 @@ def registry_json() -> dict:
             "controlled": {p: {"en": v[0], "id": v[1]} for p, v in d.platform_controlled.items()},
             "platform_fix": {p: {"en": v[0], "id": v[1]} for p, v in d.platform_fix.items()},
             "verify": {"command": d.verify[0], "en": d.verify[1], "id": d.verify[2]} if d.verify else None,
+            "external_id": _OURS_TO_THEIRS.get(d.id, ""),
         })
     return {"groups": {str(k): {"en": v[0], "id": v[1]} for k, v in GROUPS.items()}, "checks": checks}

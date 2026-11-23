@@ -80,7 +80,7 @@ TEAM = [
 ]
 
 STEP_AGENT = {"fetch_pages": "auditor", "run_checks": "auditor", "score_audit": "auditor",
-              "list_gaps": "auditor", "save_audit": "auditor", "write_questions": "asker", "validate_questions": "asker", "ask_questions": "asker",
+              "list_gaps": "auditor", "save_audit": "auditor", "external_scan": "auditor", "write_questions": "asker", "validate_questions": "asker", "ask_questions": "asker",
               "import_answers": "import", "extract_mentions": "analyst", "verify_and_count": "analyst",
               "compare_previous": "analyst", "write_summary": "analyst"}
 
@@ -179,6 +179,11 @@ def _describe(step: dict, store_name: str) -> str:
         return f"Listed {_n(r.get('gaps') or 0, 'gap')} the owner can fix, most important first."
     if name == "save_audit":
         return f"Stored the audit with {r.get('rows')} check results and their evidence."
+    if name == "external_scan":
+        if r.get("status") != "ok":
+            return f"Could not read Is Agentic's report ({r.get('reason')}). The audit went on without it."
+        return (f"Read Is Agentic's report as a second opinion: {_n(r.get('issues') or 0, 'issue')}, "
+                f"{r.get('extra')} of them on checks we do not run, {r.get('api_product')} for API products.")
     if name == "import_answers":
         return f"Imported {r.get('imported')} pasted answers ({r.get('empty')} empty)."
     if name == "extract_mentions":
@@ -240,6 +245,11 @@ def _describe_id(step: dict, store_name: str) -> str:
         return f"Mendaftar {r.get('gaps') or 0} celah yang bisa diperbaiki pemilik, dari yang terpenting."
     if name == "save_audit":
         return f"Menyimpan audit dengan {r.get('rows')} hasil cek beserta buktinya."
+    if name == "external_scan":
+        if r.get("status") != "ok":
+            return f"Tidak bisa membaca laporan Is Agentic ({r.get('reason')}). Audit tetap jalan tanpanya."
+        return (f"Membaca laporan Is Agentic sebagai pendapat kedua: {r.get('issues') or 0} temuan, "
+                f"{r.get('extra')} di antaranya pada cek yang belum kita jalankan, {r.get('api_product')} untuk produk API.")
     if name == "import_answers":
         return f"Mengimpor {r.get('imported')} jawaban yang di-paste ({r.get('empty')} kosong)."
     if name == "extract_mentions":
