@@ -1,0 +1,33 @@
+name: Is Agentic probe
+
+# One-off, read-only: fetch Is Agentic's public OpenAPI spec and one report for the store's site, and print
+# them to the log, so the Auditor can be written against the real response shape. Nothing is committed.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: OpenAPI spec
+        run: |
+          curl -sS -m 30 -H "User-Agent: airtime-probe" https://is-agentic.com/openapi.json -o openapi.json -w "openapi http=%{http_code} bytes=%{size_download}\n"
+          echo "=== openapi.json ==="; head -c 60000 openapi.json; echo
+      - name: Report for the store
+        run: |
+          U="https://www.handworks.com.au"
+          code=$(curl -sS -m 30 -H "Accept: application/json" -H "User-Agent: airtime-probe" -G --data-urlencode "url=$U" https://is-agentic.com/api/v1/report -o report.json -w "%{http_code}")
+          echo "report http=$code"
+          if [ "$code" != "200" ]; then
+            echo "=== no stored report, body: ==="; head -c 3000 report.json; echo
+            echo "=== starting a scan (stream, first 120 s) ==="
+            curl -sS -N -m 120 -H "Accept: text/event-stream" -H "User-Agent: airtime-probe" -G --data-urlencode "target=$U" https://is-agentic.com/api/scan/stream -o stream.txt -w "stream http=%{http_code}\n" || true
+            echo "stream bytes: $(wc -c < stream.txt)"; head -c 4000 stream.txt; echo
+            code=$(curl -sS -m 30 -H "Accept: application/json" -H "User-Agent: airtime-probe" -G --data-urlencode "url=$U" https://is-agentic.com/api/v1/report -o report.json -w "%{http_code}")
+            echo "report after scan http=$code"
+          fi
+          echo "=== report.json ==="; head -c 90000 report.json; echo
