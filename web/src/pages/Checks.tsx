@@ -11,11 +11,12 @@ import type { AuditCheck, RegistryCheck, Site, Store } from "@/lib/types"
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
 
-function Stat({ label, value, tone }: { label: string; value: number; tone?: string }) {
+function Stat({ label, value, tone, sub }: { label: string; value: number; tone?: string; sub?: string }) {
   return (
     <div className="rounded-lg border p-3">
       <div className="text-muted-foreground text-xs">{label}</div>
       <div className={`text-3xl font-semibold tabular-nums ${tone ?? ""}`}>{value}</div>
+      {sub && <div className="text-muted-foreground text-xs">{sub}</div>}
     </div>
   )
 }
@@ -123,6 +124,9 @@ export function Checks({ site, store }: { site: Site; store: Store }) {
   const rules = [1, 2, 3, 4, 5, 6]
   const audit = store.audit
   const results = new Map((audit?.checks ?? []).map((c) => [c.id, c]))
+  const scored = (audit?.checks ?? []).filter((c) => c.group !== 4)
+  const count = (r: string) => scored.filter((c) => c.result === r).length
+  const heldBack = (r: string) => scored.filter((c) => c.result === r && c.controlled_by).length
   return (
     <div className="space-y-6">
       <div>
@@ -160,16 +164,41 @@ export function Checks({ site, store }: { site: Site; store: Store }) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-        <Stat label={t("checks.total")} value={reg.checks.length} />
-        <Stat label={t("checks.status.built")} value={n((c) => c.status === "built")} tone="text-success" />
-        <Stat label={t("checks.status.planned")} value={n((c) => c.status === "planned")} tone="text-warning" />
-        <Stat label={t("checks.status.na")} value={n((c) => c.status === "na")} />
-        <Stat
-          label={platform ? t("checks.controlledStat", { p: cap(platform) }) : t("checks.noPlatform")}
-          value={platform ? n((c) => !!c.controlled[platform]) : 0}
-        />
-      </div>
+      {audit ? (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+            <Stat label={t("checks.pass")} value={count("pass")} tone="text-success" />
+            <Stat
+              label={t("checks.partial")}
+              value={count("partial")}
+              tone="text-warning"
+              sub={heldBack("partial") ? t("checks.heldSub", { n: heldBack("partial"), p: cap(platform) }) : undefined}
+            />
+            <Stat
+              label={t("checks.failed")}
+              value={count("fail")}
+              tone="text-destructive"
+              sub={heldBack("fail") ? t("checks.heldSub", { n: heldBack("fail"), p: cap(platform) }) : undefined}
+            />
+            <Stat label={t("checks.notRun")} value={n((c) => c.status === "planned")} sub={t("checks.notRunSub")} />
+            <Stat label={t("checks.status.na")} value={n((c) => c.status === "na")} />
+          </div>
+          <p className="text-muted-foreground text-xs">
+            {t("checks.totalNote", { n: reg.checks.length, b: n((c) => c.status === "built") })}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+          <Stat label={t("checks.total")} value={reg.checks.length} />
+          <Stat label={t("checks.status.built")} value={n((c) => c.status === "built")} tone="text-success" />
+          <Stat label={t("checks.status.planned")} value={n((c) => c.status === "planned")} tone="text-warning" />
+          <Stat label={t("checks.status.na")} value={n((c) => c.status === "na")} />
+          <Stat
+            label={platform ? t("checks.controlledStat", { p: cap(platform) }) : t("checks.noPlatform")}
+            value={platform ? n((c) => !!c.controlled[platform]) : 0}
+          />
+        </div>
+      )}
 
       {Object.entries(reg.groups).map(([g, name]) => {
         const rows = reg.checks.filter((c) => String(c.group) === g)
