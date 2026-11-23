@@ -81,9 +81,14 @@ def _locality(before: str, between: str) -> str:
 
 
 def find_addresses(pages: list[tuple[str, Page]]) -> tuple[list[dict], str] | None:
-    """Every distinct street address (state + postcode) on the first page that has any. Version 0 reads Australian ones."""
+    """Every distinct street address (state + postcode) on the first page that has any. Version 0 reads Australian ones.
+
+    A page often repeats its store list (menu, footer, body) with the suburb labels in a different place each time, so
+    each reading votes for a suburb; the most repeated suburb wins and a suburb belongs to one address only."""
     for kind, page in pages:
-        found: list[dict] = []
+        order: list[tuple[str, str]] = []
+        base: dict[tuple[str, str], dict] = {}
+        votes: Counter = Counter()
         for m in STATE_POSTCODE.finditer(page.text):
             window = page.text[max(0, m.start() - 90):m.start()]
             for s in reversed([x.start() for x in STREET_START.finditer(window)]):
@@ -92,12 +97,22 @@ def find_addresses(pages: list[tuple[str, Page]]) -> tuple[list[dict], str] | No
                 if not w:
                     continue
                 street = _clean(chunk[: w.end()])
+                key = (street.lower(), m.group(2))
+                if key not in base:
+                    base[key] = {"street": street, "locality": "", "region": m.group(1), "postcode": m.group(2)}
+                    order.append(key)
                 locality = _locality(window[:s], chunk[w.end():])
-                a = {"street": street, "locality": locality, "region": m.group(1), "postcode": m.group(2)}
-                a["text"] = _clean(f"{street} {locality} {m.group(1)} {m.group(2)}")
-                if a["text"] not in {x["text"] for x in found}:
-                    found.append(a)
+                if locality:
+                    votes[(key, locality)] += 1
                 break
+        used: set[str] = set()
+        for (key, locality), _ in sorted(votes.items(), key=lambda kv: (-kv[1], order.index(kv[0][0]))):
+            if not base[key]["locality"] and locality not in used:
+                base[key]["locality"] = locality
+                used.add(locality)
+        found = [base[k] for k in order]
+        for a in found:
+            a["text"] = _clean(f"{a['street']} {a['locality']} {a['region']} {a['postcode']}")
         if found:
             return found[:3], kind
     return None
