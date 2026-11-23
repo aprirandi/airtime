@@ -36,7 +36,7 @@ function FixCard({ fix }: { fix: Fix }) {
             <div className="text-xs font-medium">{t("ov.confirm")}</div>
             <dl className="space-y-1.5">
               {fix.confirm.map((c) => (
-                <div key={c.kind}>
+                <div key={`${c.kind}-${c.value}`}>
                   <dt className="text-muted-foreground text-xs">
                     {pick<string>(c, "label")} · {t(`ov.from.${c.source}`)}
                   </dt>

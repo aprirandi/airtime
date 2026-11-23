@@ -42,34 +42,64 @@ def _clean(value: str) -> str:
     return " ".join(value.split())
 
 
-def find_phone(pages: list[tuple[str, Page]]) -> tuple[str, str] | None:
-    return _most_common(pages, lambda text: [_clean(m) for m in PHONE.findall(text)])
+def find_phones(pages: list[tuple[str, Page]]) -> tuple[list[str], str] | None:
+    """Every distinct phone number on the first page that has any (a shop with two stores has two)."""
+    for kind, page in pages:
+        found = list(dict.fromkeys(_clean(m) for m in PHONE.findall(page.text)))
+        if found:
+            return found[:3], kind
+    return None
 
 
 def find_email(pages: list[tuple[str, Page]]) -> tuple[str, str] | None:
-    return _most_common(pages, lambda text: [m.lower() for m in EMAIL.findall(text) if not any(b in m.lower() for b in NOT_EMAIL)])
-
-
-def _most_common(pages, finder) -> tuple[str, str] | None:
     for kind, page in pages:                     # the first page that has any wins; the best source comes first
-        found = finder(page.text)
+        found = [m.lower() for m in EMAIL.findall(page.text) if not any(b in m.lower() for b in NOT_EMAIL)]
         if found:
             return Counter(found).most_common(1)[0][0], kind
     return None
 
 
-def find_address(pages: list[tuple[str, Page]]) -> tuple[dict, str] | None:
+PLACE_STOP = {"store", "shop", "address", "visit", "us", "contact", "location", "find", "phone", "ph", "tel", "call",
+              "our", "the", "open", "at", "email", "stores", "locations", "map"}
+PLACE_PREFIX = {"south", "north", "east", "west", "port", "mount", "mt", "glen", "box", "st", "new", "point"}
+
+
+def _locality(before: str, between: str) -> str:
+    """The suburb: written after the street ("123 Smith St Richmond VIC") or just before the number ("Richmond 123 Smith St")."""
+    after = between.strip(" ,.")
+    words = after.split()
+    if 0 < len(words) <= 3 and all(w[:1].isupper() and w.replace("'", "").replace("-", "").isalpha() for w in words):
+        return after
+    tokens = before.split()
+    if tokens:
+        last = tokens[-1].strip(",.:")
+        if last[:1].isupper() and last.isalpha() and last.lower() not in PLACE_STOP:
+            if len(tokens) > 1 and tokens[-2].strip(",.:").lower() in PLACE_PREFIX:
+                return f"{tokens[-2].strip(',.:')} {last}"
+            return last
+    return ""
+
+
+def find_addresses(pages: list[tuple[str, Page]]) -> tuple[list[dict], str] | None:
+    """Every distinct street address (state + postcode) on the first page that has any. Version 0 reads Australian ones."""
     for kind, page in pages:
+        found: list[dict] = []
         for m in STATE_POSTCODE.finditer(page.text):
-            window = page.text[max(0, m.start() - 90):m.end()]
-            starts = [s.start() for s in STREET_START.finditer(window)]
-            # the street number closest to the postcode that is followed by a street word
-            for s in reversed(starts):
+            window = page.text[max(0, m.start() - 90):m.start()]
+            for s in reversed([x.start() for x in STREET_START.finditer(window)]):
                 chunk = window[s:]
-                if STREET_WORD.search(chunk[: len(chunk) - len(m.group(0))]):
-                    street_and_suburb = _clean(chunk[: len(chunk) - len(m.group(0))]).rstrip(" ,")
-                    return {"text": _clean(chunk), "street_and_suburb": street_and_suburb,
-                            "region": m.group(1), "postcode": m.group(2)}, kind
+                w = STREET_WORD.search(chunk)
+                if not w:
+                    continue
+                street = _clean(chunk[: w.end()])
+                locality = _locality(window[:s], chunk[w.end():])
+                a = {"street": street, "locality": locality, "region": m.group(1), "postcode": m.group(2)}
+                a["text"] = _clean(f"{street} {locality} {m.group(1)} {m.group(2)}")
+                if a["text"] not in {x["text"] for x in found}:
+                    found.append(a)
+                break
+        if found:
+            return found[:3], kind
     return None
 
 
@@ -103,29 +133,39 @@ def _fact(kind: str, value: str, source: str, en: str, idn: str) -> dict:
 def draft_organization_completeness(snap: Snapshot, name: str) -> dict | None:
     """Contact point and address for the Organization entity. Lacking a fact leaves it out and keeps the question."""
     pages = _sources(snap)
-    phone, email, address = find_phone(pages), find_email(pages), find_address(pages)
-    if not (phone or email or address):
+    phones, email, addresses = find_phones(pages), find_email(pages), find_addresses(pages)
+    if not (phones or email or addresses):
         return None
     org: dict = {"@context": "https://schema.org", "@type": "Organization", "name": name, "url": snap.base}
     existing = _org(snap)
     if existing and isinstance(existing.get("@type"), str):
         org["@type"] = existing["@type"]
     facts, answered = [], set()
-    if phone or email:
-        point: dict = {"@type": "ContactPoint", "contactType": "customer service"}
-        if phone:
-            point["telephone"] = phone[0]
-            facts.append(_fact("phone", phone[0], phone[1], "Phone", "Telepon"))
+    if phones or email:
+        points = []
+        for number in (phones[0] if phones else [None]):
+            point: dict = {"@type": "ContactPoint", "contactType": "customer service"}
+            if number:
+                point["telephone"] = number
+            if email:
+                point["email"] = email[0]
+            points.append(point)
+        org["contactPoint"] = points[0] if len(points) == 1 else points
+        for number in (phones[0] if phones else []):
+            facts.append(_fact("phone", number, phones[1], "Phone", "Telepon"))
         if email:
-            point["email"] = email[0]
             facts.append(_fact("email", email[0], email[1], "Email", "Email"))
-        org["contactPoint"] = point
         answered.add(0)
-    if address:
-        a, source = address
-        org["address"] = {"@type": "PostalAddress", "streetAddress": a["street_and_suburb"],
-                          "addressRegion": a["region"], "postalCode": a["postcode"], "addressCountry": "AU"}
-        facts.append(_fact("address", a["text"], source, "Address", "Alamat"))
+    if addresses:
+        places = []
+        for a in addresses[0]:
+            place = {"@type": "PostalAddress", "streetAddress": a["street"], "addressRegion": a["region"],
+                     "postalCode": a["postcode"], "addressCountry": "AU"}
+            if a["locality"]:
+                place["addressLocality"] = a["locality"]
+            places.append(place)
+            facts.append(_fact("address", a["text"], addresses[1], "Address", "Alamat"))
+        org["address"] = places[0] if len(places) == 1 else places
         answered.add(1)
     return {"jsonld": org, "confirm": facts, "answered": sorted(answered)}
 

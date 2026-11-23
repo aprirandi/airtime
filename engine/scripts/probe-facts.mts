@@ -33,3 +33,13 @@ for (const m of home.matchAll(/<h([1-6])[^>]*>\s*(?:<[^>]+>\s*)*<\/h\1>/gi)) {
   console.log(`  H${m[1]} at byte ${at}:`, home.slice(Math.max(0, at - 160), at + (m[0]?.length ?? 0)).replace(/\s+/g, " "))
 }
 console.log("\n=== sameAs / social links in JSON-LD:", items.map((i) => i["sameAs"]).filter(Boolean))
+
+console.log("\n=== text around each state+postcode (140 chars before)")
+for (const [label, text] of [["home", snap.homePage.text], ["contact", snap.trust.contact?.[1].text ?? ""], ["about", snap.trust.about?.[1].text ?? ""]] as const) {
+  for (const m of text.matchAll(/\b(?:VIC|NSW|QLD|SA|WA|TAS|ACT|NT)\s+\d{4}\b/g)) {
+    const at = m.index ?? 0
+    console.log(`  [${label}]`, JSON.stringify(text.slice(Math.max(0, at - 140), at + m[0].length + 20)))
+  }
+}
+const [orgItems] = jsonldItems(snap.homePage)
+for (const it of orgItems) if (it["address"]) console.log("  JSON-LD address:", JSON.stringify(it["address"]))
