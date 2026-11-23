@@ -36,6 +36,6 @@ jobs:
         run: |
           SITES="${{ github.event.inputs.sites }}"
           if [ -z "$SITES" ]; then
-            SITES="https://www.handworks.com.au shopify https://www.allbirds.com shopify https://example.com https://wordpress.org https://vercel.com https://www.bbc.com"
+            SITES="https://www.handworks.com.au shopify https://www.allbirds.com shopify https://www.gymshark.com shopify https://woocommerce.com https://www.etsy.com https://www.nytimes.com https://example.com https://wordpress.org https://vercel.com https://www.bbc.com"
           fi
           python tests/live_parity.py $SITES

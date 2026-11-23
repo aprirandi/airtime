@@ -7,7 +7,7 @@
  */
 import dns from "node:dns"
 import net from "node:net"
-import { Agent, fetch as undiciFetch } from "undici"
+import { Agent, request } from "undici"
 
 export const USER_AGENT = "AirtimeAuditor/1.0 (+https://github.com/aprirandi/airtime)"
 export const MAX_BYTES = 1_500_000
@@ -134,11 +134,13 @@ export function httpFetcher({ timeoutMs = 15_000, allowPrivate = false }: HttpFe
       if (!allowPrivate && net.isIP(bare) && isPrivateAddress(bare)) {
         return new Response(url, { finalUrl: current, chain, error: `refused: ${bare} is not a public address` })
       }
-      let res: Awaited<ReturnType<typeof undiciFetch>>
+      let res: Awaited<ReturnType<typeof request>>
       try {
-        res = await undiciFetch(current, {
-          redirect: "manual",
-          headers: { "User-Agent": userAgent ?? USER_AGENT, Accept: "*/*", ...(headers ?? {}) },
+        // request(), not fetch(): it sends only the headers given here, as the Python engine does. fetch() adds its
+        // own (accept-language, accept-encoding), which can change what a site serves, such as the shop currency.
+        res = await request(current, {
+          method: "GET",
+          headers: { "user-agent": userAgent ?? USER_AGENT, accept: "*/*", ...lowercased(headers) },
           signal: AbortSignal.timeout(timeoutMs),
           dispatcher,
         })
@@ -147,47 +149,48 @@ export function httpFetcher({ timeoutMs = 15_000, allowPrivate = false }: HttpFe
         const message = cause?.message ?? (err as Error).message
         return new Response(url, { finalUrl: current, chain, error: `${(err as Error).name}: ${message}`.slice(0, 200) })
       }
+      res.body.on("error", () => undefined) // destroying a body we no longer need reports an abort: that is expected
       const out: Record<string, string> = {}
-      res.headers.forEach((value, name) => {
-        out[name.toLowerCase()] = value
-      })
+      for (const [name, value] of Object.entries(res.headers)) {
+        if (value !== undefined) out[name.toLowerCase()] = Array.isArray(value) ? value.join(", ") : String(value)
+      }
       const location = out["location"]
-      if (REDIRECTS.has(res.status) && location) {
-        await res.body?.cancel().catch(() => undefined)
-        chain.push([res.status, current])
+      if (REDIRECTS.has(res.statusCode) && location) {
+        res.body.destroy()
+        chain.push([res.statusCode, current])
         current = new URL(location, current).href
         continue
       }
-      const body = await readCapped(res)
+      const body = await readCapped(res.body)
       return new Response(url, {
-        status: res.status,
+        status: res.statusCode,
         finalUrl: current,
         headers: out,
-        body: body.bytes.slice(0, MAX_BYTES),
+        body: body.slice(0, MAX_BYTES),
         chain,
-        truncated: body.bytes.length > MAX_BYTES,
+        truncated: body.length > MAX_BYTES,
       })
     }
     return new Response(url, { finalUrl: current, chain, error: "too many redirects" })
   }
 }
 
-async function readCapped(res: Awaited<ReturnType<typeof undiciFetch>>): Promise<{ bytes: Uint8Array }> {
-  if (!res.body) return { bytes: new Uint8Array() }
-  const reader = res.body.getReader()
+const lowercased = (h?: Record<string, string>) => Object.fromEntries(Object.entries(h ?? {}).map(([k, v]) => [k.toLowerCase(), v]))
+
+/** Read a body, stopping once it is over the cap (one byte over is enough to know it was cut). */
+async function readCapped(stream: AsyncIterable<Uint8Array> & { destroy: (e?: Error) => unknown }): Promise<Uint8Array> {
   const chunks: Uint8Array[] = []
   let size = 0
   try {
-    while (size <= MAX_BYTES) {
-      const { done, value } = await reader.read()
-      if (done) break
-      chunks.push(value)
-      size += value.length
+    for await (const chunk of stream) {
+      chunks.push(chunk)
+      size += chunk.length
+      if (size > MAX_BYTES) break
     }
   } catch {
     /* a body cut off by the network: keep what was read */
   } finally {
-    await reader.cancel().catch(() => undefined)
+    stream.destroy()
   }
   const bytes = new Uint8Array(Math.min(size, MAX_BYTES + 1))
   let offset = 0
@@ -196,5 +199,5 @@ async function readCapped(res: Awaited<ReturnType<typeof undiciFetch>>): Promise
     bytes.set(c.subarray(0, bytes.length - offset), offset)
     offset += c.length
   }
-  return { bytes }
+  return bytes
 }

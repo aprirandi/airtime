@@ -20,6 +20,7 @@ beforeAll(async () => {
       res.writeHead(200, { "content-type": "text/plain" })
       res.end("x".repeat(MAX_BYTES + 5000))
     } else if (url === "/slow") setTimeout(() => res.end("late"), 2000)
+    else if (url === "/headers") res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(Object.keys(req.headers).sort()))
     else if (url === "/404") res.writeHead(404, { "content-type": "text/html" }).end("<h1>no</h1>")
     else res.writeHead(500).end()
   })
@@ -71,6 +72,12 @@ describe("the fetcher reads pages like the Python one", () => {
     expect(custom.header("x-seen-ua")).toBe("Claude-User/1.0")
     expect(custom.header("x-seen-accept")).toBe("text/markdown")
     expect(custom.contentType).toBe("text/plain")
+  })
+
+  it("sends only the headers we choose, so a site is not served differently from how the Python engine saw it", async () => {
+    const r = await f(`${base}/headers`)
+    const sent = JSON.parse(r.text) as string[]
+    expect(sent).toEqual(["accept", "connection", "host", "user-agent"])
   })
 
   it("follows redirects by hand and records the chain", async () => {
