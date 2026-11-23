@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { fmtDate } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
-import type { Fix, FixStatus, Site, Store } from "@/lib/types"
+import type { Change, ChangeTally, Fix, FixStatus, Site, Store } from "@/lib/types"
 
 /** What the owner sees: the agents at work, in plain words. No check ids, evidence, prompts or code (those stay
  *  on the Dashboard and Checks pages). */
@@ -56,6 +56,43 @@ function FixCard({ fix }: { fix: Fix }) {
             </ul>
           </div>
         )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function Tally({ label, tally }: { label: "before" | "after"; tally: ChangeTally }) {
+  const { t } = useI18n()
+  if (tally.pct === null) return <p>{t("ov.changes.beforeNone")}</p>
+  return (
+    <p>
+      {t(`ov.changes.${label}`, { m: tally.mentions, a: tally.answers, p: tally.pct, n: tally.shifts })}
+    </p>
+  )
+}
+
+function ChangeCard({ change }: { change: Change }) {
+  const { t, pick } = useI18n()
+  return (
+    <Card>
+      <CardHeader className="gap-1">
+        <CardTitle className="text-base">{pick<string>(change, "title")}</CardTitle>
+        <CardDescription>
+          {t("ov.changes.live", { d: fmtDate(change.applied_on) })}
+          {change.note ? ` · ${change.note}` : ""}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-1.5 text-sm">
+        <Tally label="before" tally={change.before} />
+        {change.enough ? (
+          <Tally label="after" tally={change.after} />
+        ) : (
+          <p>{t("ov.changes.waiting", { n: change.after.shifts, needed: change.needed })}</p>
+        )}
+        {change.score_before !== null && change.score_after !== null && (
+          <p>{t("ov.changes.score", { a: change.score_before, b: change.score_after })}</p>
+        )}
+        {change.enough && <p className="text-muted-foreground text-xs">{t("ov.changes.caveat")}</p>}
       </CardContent>
     </Card>
   )
@@ -142,6 +179,17 @@ export function Overview({ site, store }: { site: Site; store: Store }) {
           </div>
         )}
       </section>
+
+      {(store.changes?.length ?? 0) > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">{t("ov.changes")}</h2>
+          <div className="grid gap-3 lg:grid-cols-2">
+            {store.changes?.map((c) => (
+              <ChangeCard key={`${c.check_id}-${c.applied_on}`} change={c} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {recent.length > 0 && (
         <section className="space-y-3">

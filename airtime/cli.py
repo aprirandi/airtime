@@ -207,6 +207,30 @@ def cmd_compare(args) -> int:
     return 0
 
 
+def cmd_change(args) -> int:
+    """Record that a fix went live on a day, and keep the Asker's "before" for that day."""
+    from airtime.changes import compare_change, record_change
+    from airtime.export import export_site
+    cfg = load_store_config(args.store)
+    conn = db.connect(args.db)
+    store_id = db.upsert_store(conn, cfg)
+    try:
+        before = record_change(conn, store_id, args.check, args.date, args.note or "", today=_today(cfg.timezone))
+    except ValueError as exc:
+        print(f"NOT RECORDED: {exc}", file=sys.stderr)
+        return 2
+    row = conn.execute("SELECT * FROM changes WHERE store_id = ? AND check_id = ? AND applied_on = ?",
+                       (store_id, args.check, args.date)).fetchone()
+    asker, audit = before["asker"], before["audit"]
+    print(f"{cfg.name}: {args.check} went live on {args.date}")
+    print(f"before: named in {asker['mentions']} of {asker['answers']} core answers over {asker['shifts']} shifts"
+          + (f" ({asker['from']} to {asker['to']})" if asker["shifts"] else "")
+          + (f"; audit score {audit['score']}" if audit else ""))
+    print(f"after: {compare_change(conn, row)['after']['shifts']} of {compare_change(conn, row)['needed']} shifts needed so far")
+    export_site(conn)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="airtime")
     parser.add_argument("--db", default=str(db.DEFAULT_DB_PATH))
@@ -248,5 +272,11 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--a", default="gemini:api")
     s.add_argument("--b", default="gemini:app_pasted")
     s.set_defaults(fn=cmd_compare)
+    s = sub.add_parser("change", help="record the day a fix went live, to compare the Asker's results before and after")
+    s.add_argument("--store", required=True)
+    s.add_argument("--check", required=True, help="the check the fix was for, e.g. organization_completeness")
+    s.add_argument("--date", required=True, help="the day it went live, YYYY-MM-DD")
+    s.add_argument("--note", help="what was changed, in a few words")
+    s.set_defaults(fn=cmd_change)
     args = parser.parse_args(argv)
     return args.fn(args)

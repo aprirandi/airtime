@@ -123,6 +123,17 @@ CREATE TABLE IF NOT EXISTS fixes (
     UNIQUE (audit_id, check_id)
 );
 
+CREATE TABLE IF NOT EXISTS changes (
+    id INTEGER PRIMARY KEY,
+    store_id INTEGER NOT NULL REFERENCES stores(id),
+    check_id TEXT NOT NULL,
+    applied_on TEXT NOT NULL,               -- the day the owner says the fix went live
+    note TEXT NOT NULL DEFAULT '',
+    before TEXT NOT NULL,                   -- JSON: the Asker's core-question tally and the audit score before that day
+    created_at TEXT NOT NULL,
+    UNIQUE (store_id, check_id, applied_on)
+);
+
 CREATE TABLE IF NOT EXISTS external_reports (
     id INTEGER PRIMARY KEY,
     audit_id INTEGER NOT NULL REFERENCES audits(id),
