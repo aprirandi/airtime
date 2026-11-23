@@ -202,3 +202,14 @@ def test_a_label_like_our_store_is_not_taken_for_a_suburb(cfg):
     d = draft_for("organization_completeness", snap_with(cfg, {"/pages/contact": page}), "Shop")
     assert "addressLocality" not in d["jsonld"]["address"]
     assert d["confirm"][-1]["value"] == "244 Chapel St VIC 3181"
+
+
+REPEATED = html("<h1>Contact</h1><p>Our Store 244 Chapel St VIC 3181 ph (03)9533 8566 Prahran 80 Church Street VIC 3186 "
+                "ph (03) 95931286 Brighton</p><p>Our Store Prahran 244 Chapel St VIC 3181 ph (03)9533 8566 "
+                "Brighton 80 Church Street VIC 3186 ph (03) 95931286</p>")
+
+
+def test_a_store_list_repeated_with_the_labels_in_different_places_gives_one_address_per_store(cfg):
+    d = draft_for("organization_completeness", snap_with(cfg, {"/pages/contact": REPEATED}), "Shop")
+    assert [f["value"] for f in d["confirm"] if f["kind"] == "address"] == [
+        "244 Chapel St Prahran VIC 3181", "80 Church Street Brighton VIC 3186"]
