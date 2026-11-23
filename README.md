@@ -73,7 +73,7 @@ answer and every verified quote; every `audit_checks` row keeps the evidence for
 
 ## Running it
 
-Needs Python 3.11+, no runtime dependencies.
+Needs Python 3.13+ (its robots.txt reader follows RFC 9309, which the Auditor relies on), no runtime dependencies. The TypeScript engine in `engine/` needs Node 22.
 
 ```bash
 export GEMINI_API_KEY=...                       # from Google AI Studio; never commit it

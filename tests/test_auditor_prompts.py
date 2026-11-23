@@ -151,3 +151,8 @@ def test_the_files_the_typescript_engine_is_checked_against_are_up_to_date():
     registry, golden_json = golden.build()
     assert golden.REGISTRY_FILE.read_text() == registry and golden.GOLDEN_FILE.read_text() == golden_json, \
         "run: python -m airtime.agents.auditor.golden"
+
+
+def test_the_recorded_visits_the_typescript_engine_replays_are_up_to_date():
+    import engine_replay
+    assert engine_replay.OUT.read_text() == engine_replay.build(), "run: python tests/engine_replay.py"
