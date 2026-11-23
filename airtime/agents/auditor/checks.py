@@ -14,7 +14,7 @@ import urllib.parse
 from dataclasses import dataclass, field
 from urllib.robotparser import RobotFileParser
 
-from airtime.agents.auditor.htmlparse import jsonld_items, types_of
+from airtime.agents.auditor.htmlparse import collapse, jsonld_items, types_of
 from airtime.agents.auditor.snapshot import AI_USER_AGENTS, Snapshot
 from airtime.agents.auditor.http import Response
 
@@ -96,7 +96,9 @@ def _org_facts(org: dict) -> dict:
     """What the Organization entity on this site says about itself, for the fix prompt."""
     name = org.get("name")
     types = types_of(org)
-    return {"org_name": _clip(name, 80) if isinstance(name, str) else "", "org_type": types[0] if types else "",
+    # one line, whatever the site wrote: this text is quoted in the fix prompt
+    return {"org_name": _clip(collapse(name), 80) if isinstance(name, str) else "",
+            "org_type": _clip(collapse(types[0]), 60) if types else "",
             "present": [k for k, v in org.items() if not k.startswith("@") and _filled(v)]}
 
 
@@ -293,11 +295,11 @@ def trust_pages(snap: Snapshot) -> Outcome:
             pages[kind] = {"status": "missing", "url": "", "chars": 0}
         elif len(found[1].text) < MIN_TEXT:
             parts.append(f"{kind}: only {len(found[1].text)} characters")
-            pages[kind] = {"status": "thin", "url": found[0].url, "chars": len(found[1].text)}
+            pages[kind] = {"status": "thin", "url": _clip(collapse(found[0].url), 200), "chars": len(found[1].text)}
         else:
             ok_count += 1
             parts.append(f"{kind}: ok")
-            pages[kind] = {"status": "ok", "url": found[0].url, "chars": len(found[1].text)}
+            pages[kind] = {"status": "ok", "url": _clip(collapse(found[0].url), 200), "chars": len(found[1].text)}
     return graded(round(100 * ok_count / 3), "; ".join(parts) + ".", pages=pages)
 
 
@@ -355,7 +357,9 @@ def content_signals(snap: Snapshot) -> Outcome:
             if key.strip().lower() in CONTENT_SIGNAL_KEYS and value.strip().lower() in ("yes", "no"):
                 found[key.strip().lower()] = value.strip().lower()
     lines = snap.robots.text.splitlines()
-    head = [_clip(line, 120) for line in lines[:25]]
+    # Comments are free text written for readers and agents, not rules: the fix prompt never repeats them.
+    rules = [line for line in lines if line.strip() and not line.strip().startswith("#")]
+    head = [_clip(line, 120) for line in rules[:25]]
     if len(found) == len(CONTENT_SIGNAL_KEYS):
         return passed("robots.txt declares ai-train, search and ai-input preferences.", signals=found,
                       robots_head=head, robots_lines=len(lines))

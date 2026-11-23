@@ -7,7 +7,7 @@ import { contentRatio, jsonldItems, linkHref, metaContent, typesOf } from "./htm
 import type { Response } from "./http"
 import { Robots } from "./robots"
 import { AI_USER_AGENTS, isSitemapIndex, sitemapLocs, type Snapshot } from "./snapshot"
-import { clip, cpLen, fixed, isDict, pyIter, pyOr, pyRound, pyStrip, splitLines, truthy } from "./util"
+import { clip, collapse, cpLen, fixed, isDict, pyIter, pyOr, pyRound, pyStrip, splitLines, truthy } from "./util"
 
 const MIN_TEXT = 500
 const MIN_RATIO = 0.05
@@ -68,8 +68,9 @@ function orgFacts(org: Dict): Record<string, unknown> {
   const name = org["name"]
   const types = typesOf(org)
   return {
-    org_name: typeof name === "string" ? clip(name, 80) : "",
-    org_type: types[0] ?? "",
+    // one line, whatever the site wrote: this text is quoted in the fix prompt
+    org_name: typeof name === "string" ? clip(collapse(name), 80) : "",
+    org_type: types[0] !== undefined ? clip(collapse(types[0]), 60) : "",
     present: Object.entries(org).filter(([k, v]) => !k.startsWith("@") && filled(v)).map(([k]) => k),
   }
 }
@@ -271,11 +272,11 @@ function trust_pages(snap: Snapshot): Outcome {
       pages[kind] = { status: "missing", url: "", chars: 0 }
     } else if (cpLen(found[1].text) < MIN_TEXT) {
       parts.push(`${kind}: only ${cpLen(found[1].text)} characters`)
-      pages[kind] = { status: "thin", url: found[0].url, chars: cpLen(found[1].text) }
+      pages[kind] = { status: "thin", url: clip(collapse(found[0].url), 200), chars: cpLen(found[1].text) }
     } else {
       ok += 1
       parts.push(`${kind}: ok`)
-      pages[kind] = { status: "ok", url: found[0].url, chars: cpLen(found[1].text) }
+      pages[kind] = { status: "ok", url: clip(collapse(found[0].url), 200), chars: cpLen(found[1].text) }
     }
   }
   return graded(pyRound((100 * ok) / 3), parts.join("; ") + ".", { pages })
@@ -338,7 +339,9 @@ function content_signals(snap: Snapshot): Outcome {
     }
   }
   const lines = splitLines(snap.robots.text)
-  const head = lines.slice(0, 25).map((line) => clip(line, 120))
+  // Comments are free text written for readers and agents, not rules: the fix prompt never repeats them.
+  const rules = lines.filter((line) => pyStrip(line) !== "" && !pyStrip(line).startsWith("#"))
+  const head = rules.slice(0, 25).map((line) => clip(line, 120))
   const names = Object.keys(found)
   if (names.length === CONTENT_SIGNAL_KEYS.length) {
     return passed("robots.txt declares ai-train, search and ai-input preferences.", { signals: found, robots_head: head, robots_lines: lines.length })

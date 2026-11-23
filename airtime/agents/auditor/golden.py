@@ -56,7 +56,7 @@ SAMPLE_DETAILS = {
     "organization_completeness": {"org_name": "", "org_type": "Organization", "present": ["name", "url"],
                                   "missing": ["contactPoint", "address"]},
     "content_signals": {"signals": {"ai-train": "no"}, "robots_lines": 40,
-                        "robots_head": ["# we use Shopify", "User-agent: *", "Disallow: /admin", "Sitemap: https://shop.test/sitemap.xml"]},
+                        "robots_head": ["User-agent: *", "Disallow: /admin", "Sitemap: https://shop.test/sitemap.xml"]},
     "ai_crawlers_allowed": {"blocked": ["ChatGPT-User (robots.txt)", "PerplexityBot (HTTP 403)"]},
     "not_noindex": {"sources": ["meta tag", "X-Robots-Tag header"]},
     "trust_pages": {"pages": {"about": {"status": "ok", "url": "https://shop.test/pages/about", "chars": 900},
