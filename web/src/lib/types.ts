@@ -18,7 +18,33 @@ export interface Step {
 
 export type CheckResult = "pass" | "partial" | "fail" | "na" | "planned"
 
+export interface ExternalIssue {
+  id: string
+  name: string
+  tier: "essential" | "recommended" | "bonus"
+  result: "failed" | "partial"
+  details: string
+  recommendation: string
+  kind: "mapped" | "api_product" | "extra"
+  maps_to: string
+}
+
+export interface ExternalReport {
+  source: "is-agentic"
+  status: "ok" | "unavailable"
+  error: string
+  fetched_at: string
+  report_url: string
+  score: number | null
+  label: string
+  scanned_at: string
+  eligible_checks: number | null
+  issues: ExternalIssue[]
+  agreement: { compared: number; agree: number } | null
+}
+
 export interface AuditCheck {
+  external?: { id: string; result: "partial" | "failed" | "not_listed"; details: string } | null
   id: string
   group: number
   tier: "essential" | "recommended" | "bonus"
@@ -36,6 +62,8 @@ export interface AuditCheck {
   controlled_by: string
   controlled_note: string
   controlled_note_id: string
+  prompt: string
+  prompt_id: string
 }
 
 export interface AuditTier {
@@ -74,7 +102,33 @@ export interface Audit {
   coverage: { planned: string[]; not_applicable: string[]; platform_controlled: string[] }
   checks: AuditCheck[]
   gaps: string[]
+  prompt_all: string
+  prompt_all_id: string
+  external?: ExternalReport | null
   history: { scanned_at: string; score: number | null; engine: string }[]
+}
+
+export interface RegistryCheck {
+  id: string
+  group: number
+  tier: "essential" | "recommended" | "bonus"
+  source: "is_agentic" | "cloudflare" | "both"
+  status: "built" | "planned" | "na"
+  name: string
+  name_id: string
+  fix: string
+  fix_id: string
+  na_reason: string
+  na_reason_id: string
+  controlled: Record<string, { en: string; id: string }>
+  platform_fix: Record<string, { en: string; id: string }>
+  verify: { command: string; en: string; id: string } | null
+  external_id?: string
+}
+
+export interface Registry {
+  groups: Record<string, { en: string; id: string }>
+  checks: RegistryCheck[]
 }
 
 export interface Run {
@@ -222,6 +276,7 @@ export interface Site {
   schedule: { cron: string; utc_hour: number; utc_minute: number; weekdays?: string[] | null }
   agent: { name: string; role: string; role_id?: string }
   team: TeamMember[]
+  registry?: Registry
   stores: Store[]
 }
 

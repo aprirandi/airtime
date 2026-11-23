@@ -107,6 +107,25 @@ CREATE TABLE IF NOT EXISTS audit_checks (
     UNIQUE (audit_id, check_id)
 );
 
+CREATE TABLE IF NOT EXISTS external_reports (
+    id INTEGER PRIMARY KEY,
+    audit_id INTEGER NOT NULL REFERENCES audits(id),
+    source TEXT NOT NULL,          -- is-agentic
+    status TEXT NOT NULL,          -- ok | unavailable
+    error TEXT NOT NULL DEFAULT '',
+    fetched_at TEXT NOT NULL,
+    target TEXT NOT NULL,
+    requests INTEGER NOT NULL DEFAULT 0,
+    report_url TEXT NOT NULL DEFAULT '',
+    score REAL,                    -- the other tool's own score; never mixed into ours
+    score_label TEXT NOT NULL DEFAULT '',
+    scanned_at TEXT NOT NULL DEFAULT '',
+    eligible_checks INTEGER,
+    breakdown TEXT NOT NULL DEFAULT '{}',
+    issues TEXT NOT NULL DEFAULT '[]',      -- JSON: failed or partial checks, each tagged mapped | api_product | extra
+    UNIQUE (audit_id, source)
+);
+
 CREATE TABLE IF NOT EXISTS daily_summary (
     id INTEGER PRIMARY KEY,
     store_id INTEGER NOT NULL REFERENCES stores(id),

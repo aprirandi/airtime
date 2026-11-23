@@ -6,6 +6,7 @@ Steps (all CODE; no AI is used yet, the fix texts are written in advance for eac
   3 score_audit   turn the results into a score (essential, recommended, bonus) and group scores
   4 list_gaps     list what the owner can fix, most important first
   5 save_audit    store the audit and every check result with its evidence
+  6 external_scan (only when the store turns it on) read Is Agentic's report as a second opinion
 The Master then checks that every check has a stored result and that the stored score is right.
 """
 
@@ -16,6 +17,7 @@ import json
 from airtime.agents.auditor import snapshot as snap_mod
 from airtime.agents.auditor.checks import Outcome
 from airtime.agents.auditor.http import Fetcher
+from airtime.agents.auditor.isagentic import ExternalError, IsAgenticClient
 from airtime.agents.auditor.master import AUDIT_CHECKS
 from airtime.agents.auditor.registry import REGISTRY, CheckDef
 from airtime.agents.auditor.score import coverage, gaps, score_rows
@@ -53,17 +55,21 @@ class AuditorAgent(Agent):
     name = "auditor"
     title = "Auditor"
 
-    def __init__(self, fetch: Fetcher):
+    def __init__(self, fetch: Fetcher, external: IsAgenticClient | None = None):
         self.fetch = fetch
+        self.external = external
 
     def steps(self) -> list[Step]:
-        return [
+        steps = [
             Step(1, "fetch_pages", StepKind.CODE, self._fetch),
             Step(2, "run_checks", StepKind.CODE, self._run),
             Step(3, "score_audit", StepKind.CODE, self._score),
             Step(4, "list_gaps", StepKind.CODE, self._gaps),
             Step(5, "save_audit", StepKind.CODE, self._save),
         ]
+        if self.external is not None:
+            steps.append(Step(6, "external_scan", StepKind.CODE, self._external))
+        return steps
 
     def _fetch(self, ctx: RunContext) -> dict:
         try:
@@ -116,8 +122,35 @@ class AuditorAgent(Agent):
                 (audit_id, r["check_id"], r["group"], r["tier"], r["source"], r["result"], r["percent"],
                  int(r["scored"]), r["controlled_by"], r["evidence"], json.dumps(r["details"])))
         ctx.conn.commit()
+        ctx.data["_audit_id"] = audit_id
         return {"audit_id": audit_id, "rows": len(rows)}
 
+    def _external(self, ctx: RunContext) -> dict:
+        """Never fails the audit: when Is Agentic cannot be read, the reason is stored and the step reports it."""
+        target = ctx.data["_snapshot"].base
+        client = self.external
+        client.requests = 0
+        try:
+            report, error = client.fetch(target), ""
+        except ExternalError as exc:
+            report, error = None, str(exc)[:300]
+        ctx.conn.execute(
+            """INSERT INTO external_reports (audit_id, source, status, error, fetched_at, target, requests, report_url,
+                                              score, score_label, scanned_at, eligible_checks, breakdown, issues)
+               VALUES (?, 'is-agentic', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (ctx.data["_audit_id"], "ok" if report else "unavailable", error, utc_now(), target, client.requests,
+             report["report_url"] if report else "", report["score"] if report else None,
+             report["label"] if report else "", report["scanned_at"] if report else "",
+             report["eligible_checks"] if report else None, json.dumps(report["breakdown"] if report else {}),
+             json.dumps(report["issues"] if report else [])))
+        ctx.conn.commit()
+        if report is None:
+            return {"status": "unavailable", "reason": error, "requests": client.requests}
+        kinds = [i["kind"] for i in report["issues"]]
+        return {"status": "ok", "score": report["score"], "issues": len(kinds), "mapped": kinds.count("mapped"),
+                "extra": kinds.count("extra"), "api_product": kinds.count("api_product"),
+                "requests": client.requests}
 
-def audit_flow(fetch: Fetcher) -> Flow:
-    return Flow([AuditorAgent(fetch)], AUDIT_CHECKS)
+
+def audit_flow(fetch: Fetcher, external: IsAgenticClient | None = None) -> Flow:
+    return Flow([AuditorAgent(fetch, external)], AUDIT_CHECKS)

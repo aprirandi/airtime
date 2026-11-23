@@ -33,6 +33,12 @@ def audit_complete(ctx: RunContext) -> tuple[list[str], dict]:
     expected = score_rows(rows)["score"]
     if expected != audit["score"]:
         problems.append(f"stored score {audit['score']} but the stored checks give {expected}")
+    if "external_scan" in ctx.data:   # the second opinion ran, so its result (or why it failed) must be stored
+        ext = ctx.conn.execute("SELECT status, error FROM external_reports WHERE audit_id = ?", (audit["id"],)).fetchone()
+        if ext is None:
+            problems.append("the Is Agentic step ran but nothing was stored")
+        elif ext["status"] != "ok" and not ext["error"]:
+            problems.append("the Is Agentic report is unavailable and no reason was stored")
     return problems, {"checks": len(stored), "score": audit["score"]}
 
 

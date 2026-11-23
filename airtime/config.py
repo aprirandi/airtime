@@ -65,6 +65,7 @@ class StoreConfig:
     platform: str = ""                 # shopify | wordpress | ... decides which checks the owner can act on
     audit_url: str = ""                # the site the Auditor scans; defaults to https://<domain>
     audit_product_url: str = ""        # a product page to read prices from; found in the sitemap if empty
+    audit_external: bool = False       # also read Is Agentic's report as a second opinion
 
     @property
     def base_url(self) -> str:
@@ -122,6 +123,7 @@ def parse_store_config(slug: str, data: dict) -> StoreConfig:
         platform=store.get("platform", "").strip().lower(),
         audit_url=data.get("audit", {}).get("url", ""),
         audit_product_url=data.get("audit", {}).get("product_url", ""),
+        audit_external=bool(data.get("audit", {}).get("external", False)),
         timezone=run.get("timezone", "Australia/Melbourne"),
         provider=provider,
     )

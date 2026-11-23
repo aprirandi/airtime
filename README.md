@@ -115,12 +115,14 @@ cd web && npm ci && npm run build   # builds into docs/, then re-exports docs/da
 
 ### Website audit
 
-`python -m airtime audit --store handworks` runs the Auditor: roughly 30 to 40 plain HTTP requests to the store's
+`python -m airtime audit --store handworks` runs the Auditor: about 25 plain HTTP requests to the store's
 own public website (`[audit] url` in the config), then 24 checks. No AI is used; every result is
 plain code with its evidence stored (`audit_checks`). The checks are the union of what Is Agentic
 and Cloudflare's isitagentready test, in four groups: 1 access and content, 2 trust and identity,
 3 agent discovery, 4 not for stores (shown as not applicable). Another 9 are listed as planned and
-never scored (`agents/auditor/registry.py`).
+never scored (`agents/auditor/registry.py`). The dashboard's **Checks** page lists all 37 with the
+platform rules, and `plans/check-registry.md` is the same list generated as a document. Each gap also has
+a copyable fix prompt (`audit --prompt`, or the Copy prompt buttons on the dashboard).
 
 - **Score.** Essential checks are worth up to 80 points, recommended up to 20, bonus up to 5 more
   (never lowers the score); a partial check earns its percentage. The weights are provisional, to be
@@ -136,6 +138,16 @@ never scored (`agents/auditor/registry.py`).
   with evidence and fix text (English and Indonesian), and what the platform controls.
 - **Comparing scans.** Scores are only comparable between scans by the same version of the checks
   (`audits.engine`).
+
+- **Second opinion.** With `[audit] external = true` the Auditor also reads Is Agentic's free public
+  report (`GET https://is-agentic.com/api/v1/report`; if none is stored it starts one scan, as their own CLI
+  does, and reads again: at most 3 requests). It is shown beside our result and never mixed into our score,
+  because Is Agentic counts API-product checks (OpenAPI, scoped permissions) as essential, so a store scores
+  lower there. Their issues are sorted into the same check as ours, an API-product check, or a check we do
+  not run (brand search and similar, shown but not scored). If Is Agentic cannot be read, the audit still
+  finishes and says why. `audit --no-external` skips it. Their terms (read 23 Nov 2026): reports are public,
+  scores are informational snapshots that change with their method, limits can change, and nothing may imply
+  their endorsement.
 
 `.github/workflows/audit.yml` runs it by hand (Actions > Website audit > Run workflow). The
 research environment cannot reach customer sites, so a first run there is also the first check of the

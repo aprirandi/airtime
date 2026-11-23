@@ -1,12 +1,14 @@
-import { ShieldAlert } from "lucide-react"
+import { useState } from "react"
+import { Check, Copy, ShieldAlert } from "lucide-react"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { fmtDate } from "@/lib/format"
 import { useI18n, type T } from "@/lib/i18n"
-import type { Audit, AuditCheck, AuditTier, Store } from "@/lib/types"
+import type { Audit, AuditCheck, AuditTier, ExternalIssue, Store } from "@/lib/types"
 
 function ResultBadge({ c, t }: { c: AuditCheck; t: T }) {
   if (c.result === "pass") return <Badge variant="success">{t("audit.result.pass")}</Badge>
@@ -27,6 +29,129 @@ function TierRow({ label, line, value }: { label: string; line: string; value: n
   )
 }
 
+/** Copy text to the clipboard. Some in-app views refuse the Clipboard API, so fall back to a hidden textarea. */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch {
+    try {
+      const el = document.createElement("textarea")
+      el.value = text
+      el.style.position = "fixed"
+      el.style.opacity = "0"
+      document.body.appendChild(el)
+      el.select()
+      const ok = document.execCommand("copy")
+      document.body.removeChild(el)
+      return ok
+    } catch {
+      return false
+    }
+  }
+}
+
+function CopyButton({ text, label, t }: { text: string; label: string; t: T }) {
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle")
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      onClick={async (e) => {
+        e.stopPropagation()
+        setState((await copyText(text)) ? "copied" : "failed")
+        setTimeout(() => setState("idle"), 2500)
+      }}
+    >
+      {state === "copied" ? <Check /> : <Copy />}
+      {state === "copied" ? t("audit.copied") : state === "failed" ? t("audit.copyFailed") : label}
+    </Button>
+  )
+}
+
+function ExternalIssueItem({ i, t }: { i: ExternalIssue; t: T }) {
+  return (
+    <li className="space-y-1 px-3 py-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="outline">{t(`audit.tier.${i.tier}`)}</Badge>
+        <span className="min-w-0 font-medium">{i.name}</span>
+        <Badge variant={i.result === "partial" ? "warning" : "destructive"}>
+          {i.result === "partial" ? t("audit.result.partialShort") : t("audit.result.fail")}
+        </Badge>
+      </div>
+      <p className="text-muted-foreground text-xs">{i.details}</p>
+    </li>
+  )
+}
+
+function ExternalSection({ audit, t }: { audit: Audit; t: T }) {
+  const ext = audit.external
+  if (!ext) return null
+  if (ext.status !== "ok") {
+    return (
+      <div className="space-y-1">
+        <div className="text-sm font-medium">{t("audit.ext.title")}</div>
+        <p className="text-muted-foreground text-xs">{t("audit.ext.unavailable", { e: ext.error })}</p>
+      </div>
+    )
+  }
+  const extra = ext.issues.filter((i) => i.kind === "extra")
+  const api = ext.issues.filter((i) => i.kind === "api_product")
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-sm font-medium">{t("audit.ext.title")}</div>
+        <a href={ext.report_url} target="_blank" rel="noreferrer" className="text-xs underline underline-offset-2">
+          {t("audit.ext.open")}
+        </a>
+      </div>
+      <p className="text-muted-foreground text-xs">{t("audit.ext.sub")}</p>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-lg border p-3">
+          <div className="text-muted-foreground text-xs">{t("audit.ext.theirScore")}</div>
+          <div className="text-xl font-semibold tabular-nums">{ext.score ?? "—"}</div>
+          <div className="text-muted-foreground text-xs">{ext.label}</div>
+        </div>
+        <div className="rounded-lg border p-3">
+          <div className="text-muted-foreground text-xs">{t("audit.ext.agree")}</div>
+          <div className="text-xl font-semibold tabular-nums">
+            {ext.agreement ? `${ext.agreement.agree} / ${ext.agreement.compared}` : "—"}
+          </div>
+          <div className="text-muted-foreground text-xs">{t("audit.ext.agreeSub")}</div>
+        </div>
+        <div className="rounded-lg border p-3">
+          <div className="text-muted-foreground text-xs">{t("audit.ext.extra")}</div>
+          <div className="text-xl font-semibold tabular-nums">{extra.length}</div>
+          <div className="text-muted-foreground text-xs">{t("audit.ext.extraSub")}</div>
+        </div>
+      </div>
+      <p className="text-muted-foreground text-xs">{t("audit.ext.why")}</p>
+      {extra.length > 0 && (
+        <div className="space-y-1">
+          <div className="text-xs font-medium">{t("audit.ext.extraTitle")}</div>
+          <ul className="divide-y rounded-lg border text-sm">
+            {extra.map((i) => (
+              <ExternalIssueItem key={i.id} i={i} t={t} />
+            ))}
+          </ul>
+        </div>
+      )}
+      {api.length > 0 && (
+        <details className="text-sm">
+          <summary className="cursor-pointer text-xs font-medium">{t("audit.ext.apiTitle", { n: api.length })}</summary>
+          <ul className="mt-2 divide-y rounded-lg border">
+            {api.map((i) => (
+              <ExternalIssueItem key={i.id} i={i} t={t} />
+            ))}
+          </ul>
+        </details>
+      )}
+      <p className="text-muted-foreground text-xs">{t("audit.ext.credit", { d: fmtDate(ext.scanned_at.slice(0, 10)) })}</p>
+    </div>
+  )
+}
+
 const pctOf = (earned = 0, available = 0) => (available ? (100 * earned) / available : 0)
 
 function tierLine(t: T, tier: AuditTier) {
@@ -35,6 +160,7 @@ function tierLine(t: T, tier: AuditTier) {
 
 function GapItem({ c, t, pick, audit }: { c: AuditCheck; t: T; pick: <V>(o: object, f: string) => V; audit: Audit }) {
   const hint = pick<string>(c, "platform_fix")
+  const prompt = pick<string>(c, "prompt")
   return (
     <AccordionItem value={c.id}>
       <AccordionTrigger>
@@ -59,7 +185,18 @@ function GapItem({ c, t, pick, audit }: { c: AuditCheck; t: T; pick: <V>(o: obje
             </p>
           )}
         </div>
-        <div className="text-muted-foreground text-xs">{t("audit.source", { s: t(`audit.source.${c.source}`) })}</div>
+        {prompt && (
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <CopyButton text={prompt} label={t("audit.copy")} t={t} />
+              <span className="text-muted-foreground text-xs">{t("audit.source", { s: t(`audit.source.${c.source}`) })}</span>
+            </div>
+            <details>
+              <summary className="text-muted-foreground cursor-pointer text-xs">{t("audit.showPrompt")}</summary>
+              <pre className="bg-muted/50 mt-2 max-h-72 overflow-auto rounded-lg p-3 text-xs leading-relaxed whitespace-pre-wrap">{prompt}</pre>
+            </details>
+          </div>
+        )}
       </AccordionContent>
     </AccordionItem>
   )
@@ -127,8 +264,11 @@ export function AuditCard({ store }: { store: Store }) {
         </div>
 
         <div className="space-y-2">
-          <div className="text-sm font-medium">{t("audit.gaps")}</div>
-          <p className="text-muted-foreground text-xs">{t("audit.gapsSub")}</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-sm font-medium">{t("audit.gaps")}</div>
+            {gaps.length > 0 && <CopyButton text={pick<string>(audit, "prompt_all")} label={t("audit.copyAll", { n: gaps.length })} t={t} />}
+          </div>
+          <p className="text-muted-foreground text-xs">{t("audit.gapsSub")} {gaps.length > 0 && t("audit.promptNote")}</p>
           {gaps.length ? (
             <Accordion type="multiple" className="rounded-lg border px-4 text-sm">
               {gaps.map((c) => (
@@ -139,6 +279,8 @@ export function AuditCard({ store }: { store: Store }) {
             <p className="text-sm">{t("audit.noGaps")}</p>
           )}
         </div>
+
+        <ExternalSection audit={audit} t={t} />
 
         {controlled.length > 0 && (
           <div className="space-y-2">

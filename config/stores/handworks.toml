@@ -24,6 +24,8 @@ platform = "shopify"
 # to read prices from; when empty it is taken from the sitemap.
 url = "https://handworks.com.au"
 product_url = ""
+# true = also read Is Agentic's free public report as a second opinion (shown beside our score, never mixed in).
+external = true
 
 [questions]
 # Two kinds of questions are asked every day:
