@@ -141,7 +141,8 @@ def test_the_fixer_reads_contact_facts_from_the_owners_own_pages(cfg):
     org = d["jsonld"]
     assert org["contactPoint"] == {"@type": "ContactPoint", "contactType": "customer service",
                                    "telephone": "(03) 9123 4567", "email": "hello@shop.test"}
-    assert org["address"]["streetAddress"] == "123 Smith St Richmond" and org["address"]["postalCode"] == "3121"
+    assert org["address"]["streetAddress"] == "123 Smith St" and org["address"]["addressLocality"] == "Richmond"
+    assert org["address"]["postalCode"] == "3121"
     assert {f["kind"]: f["source"] for f in d["confirm"]} == {"phone": "contact", "email": "contact", "address": "contact"}
     assert d["answered"] == [0, 1]
 
@@ -180,3 +181,24 @@ def test_the_export_shows_the_facts_to_confirm_but_not_the_prepared_change(conn,
     got = fixes.get("organization_completeness")
     assert got is None or got["status"] in ("draft_ready", "not_started")
     assert "@context" not in raw and "ContactPoint" not in raw
+
+
+TWO_STORES = html("<h1>Contact</h1><p>Popular Searches: Lamy Jellycat Our Store Prahran 244 Chapel St VIC 3181 ph (03)9533 8566 "
+                  "Brighton 80 Church Street VIC 3186 ph (03) 95931286 Email shop@shop.test</p>")
+
+
+def test_the_suburb_is_read_when_it_comes_before_the_number_and_every_store_is_kept(cfg):
+    d = draft_for("organization_completeness", snap_with(cfg, {"/pages/contact": TWO_STORES}), "Shop")
+    places = d["jsonld"]["address"]
+    assert [(p["streetAddress"], p["addressLocality"], p["postalCode"]) for p in places] == [
+        ("244 Chapel St", "Prahran", "3181"), ("80 Church Street", "Brighton", "3186")]
+    assert [f["value"] for f in d["confirm"] if f["kind"] == "address"] == [
+        "244 Chapel St Prahran VIC 3181", "80 Church Street Brighton VIC 3186"]
+    assert [f["value"] for f in d["confirm"] if f["kind"] == "phone"] == ["(03)9533 8566", "(03) 95931286"]
+
+
+def test_a_label_like_our_store_is_not_taken_for_a_suburb(cfg):
+    page = html("<h1>Contact</h1><p>Our Store 244 Chapel St VIC 3181 ph (03)9533 8566</p>")
+    d = draft_for("organization_completeness", snap_with(cfg, {"/pages/contact": page}), "Shop")
+    assert "addressLocality" not in d["jsonld"]["address"]
+    assert d["confirm"][-1]["value"] == "244 Chapel St VIC 3181"
