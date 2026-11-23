@@ -107,6 +107,22 @@ CREATE TABLE IF NOT EXISTS audit_checks (
     UNIQUE (audit_id, check_id)
 );
 
+CREATE TABLE IF NOT EXISTS fixes (
+    id INTEGER PRIMARY KEY,
+    audit_id INTEGER NOT NULL REFERENCES audits(id),
+    check_id TEXT NOT NULL,
+    position INTEGER NOT NULL,     -- 1 is the most important
+    status TEXT NOT NULL,          -- not_started | needs_owner | draft_ready | platform_held | in_progress | done
+    tier TEXT NOT NULL,
+    title TEXT NOT NULL, title_id TEXT NOT NULL,       -- what is being fixed, in the owner's words
+    why TEXT NOT NULL, why_id TEXT NOT NULL,           -- one sentence on why it matters
+    summary TEXT NOT NULL, summary_id TEXT NOT NULL,   -- what happens next
+    questions TEXT NOT NULL DEFAULT '[]',              -- JSON: what the owner is asked [{en, id}]
+    draft TEXT,                                        -- JSON: the prepared change (never shown to the owner as is)
+    created_at TEXT NOT NULL,
+    UNIQUE (audit_id, check_id)
+);
+
 CREATE TABLE IF NOT EXISTS external_reports (
     id INTEGER PRIMARY KEY,
     audit_id INTEGER NOT NULL REFERENCES audits(id),

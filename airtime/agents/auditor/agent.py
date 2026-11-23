@@ -152,5 +152,10 @@ class AuditorAgent(Agent):
                 "requests": client.requests}
 
 
-def audit_flow(fetch: Fetcher, external: IsAgenticClient | None = None) -> Flow:
-    return Flow([AuditorAgent(fetch, external)], AUDIT_CHECKS)
+def audit_flow(fetch: Fetcher, external: IsAgenticClient | None = None, fixer: bool = True) -> Flow:
+    """The Auditor, then the Fixer, with the Master checking each hand-off."""
+    from airtime.agents.fixer.agent import FixerAgent
+    from airtime.agents.fixer.master import FIX_CHECKS
+    if not fixer:
+        return Flow([AuditorAgent(fetch, external)], AUDIT_CHECKS)
+    return Flow([AuditorAgent(fetch, external), FixerAgent()], AUDIT_CHECKS + FIX_CHECKS)

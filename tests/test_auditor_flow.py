@@ -101,10 +101,12 @@ def run_audit(conn, cfg, routes=None):
 def test_audit_run_stores_every_check_with_its_evidence(conn, acfg):
     ctx = run_audit(conn, acfg)
     run = conn.execute("SELECT * FROM runs").fetchone()
-    assert run["agent"] == "auditor" and run["status"] == "ok"
+    assert run["agent"] == "auditor,fixer" and run["status"] == "ok"
     steps = json.loads(run["steps"])
     assert [s["name"] for s in steps] == ["fetch_pages", "run_checks", "score_audit", "list_gaps", "save_audit",
-                                          "master_audit_complete"]
+                                          "master_audit_complete", "read_audit", "plan_fixes", "save_fixes",
+                                          "master_fixes_complete"]
+    assert steps[5]["status"] == "ok" and steps[5]["agent"] == "master"
     assert steps[-1]["status"] == "ok" and steps[-1]["agent"] == "master"
     audit = conn.execute("SELECT * FROM audits").fetchone()
     assert audit["score"] == 100.0 and audit["score_label"] == "strong" and audit["target"] == ORIGIN
@@ -312,7 +314,10 @@ def test_export_gives_the_site_the_audit_and_the_run(conn, acfg, tmp_path):
     assert [s["agent"] for s in run["steps"]][-1] == "master"
     first = run["steps"][0]
     assert first["description"].startswith("Fetched ") and first["description_id"].startswith("Mengambil ")
-    assert run["steps"][-1]["description"].startswith("Master checked the Auditor's work")
+    master = next(s for s in run["steps"] if s["name"] == "master_audit_complete")
+    assert master["description"].startswith("Master checked the Auditor's work")
+    assert run["steps"][-1]["description"].startswith("Master checked the Fixer's work")
+    assert run["steps"][-4]["description"].startswith("Fixer looked at what the Auditor found")
     assert store["totals"]["days_on_duty"] == 0                   # an audit is not a shift
     assert next(m for m in site["team"] if m["id"] == "auditor")["status"] == "active"
     assert (tmp_path / "data" / "runs" / f"{run['id']}.json").exists()

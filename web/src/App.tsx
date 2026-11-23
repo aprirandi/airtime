@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Bot, LayoutDashboard, ListChecks, Moon, Sun } from "lucide-react"
+import { Bot, Home, LayoutDashboard, ListChecks, Moon, Sun } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -10,10 +10,12 @@ import { Agents } from "@/pages/Agents"
 import { Checks } from "@/pages/Checks"
 import { Dashboard } from "@/pages/Dashboard"
 import { Day } from "@/pages/Day"
+import { Overview } from "@/pages/Overview"
 import { Scan } from "@/pages/Scan"
 
 type Route =
   | { page: "scan"; url: string; platform: string }
+  | { page: "overview" }
   | { page: "dashboard" }
   | { page: "run"; id: number }
   | { page: "agents"; view: "team" | "flow" }
@@ -28,6 +30,7 @@ function parse(hash: string): Route {
   if (run) return { page: "run", id: Number(run[1]) }
   if (hash.startsWith("#/checks")) return { page: "checks" }
   if (hash.startsWith("#/agents")) return { page: "agents", view: hash.endsWith("/flow") ? "flow" : "team" }
+  if (hash.startsWith("#/overview")) return { page: "overview" }
   if (hash.startsWith("#/dashboard")) return { page: "dashboard" }
   const check = hash.match(/^#\/check\/([^?]*)(?:\?(.*))?$/)
   if (check) {
@@ -106,6 +109,9 @@ function Header({ route, store, working }: { route: Route; store?: string; worki
         {analysis && store && <span className="text-muted-foreground hidden truncate text-sm md:inline">{store}</span>}
         {(analysis || SHOW_ANALYSIS) && (
           <nav className="flex items-center gap-1">
+            <NavLink href="#/overview" active={route.page === "overview"}>
+              <Home /> <span className="hidden sm:inline">{t("nav.overview")}</span>
+            </NavLink>
             <NavLink href="#/dashboard" active={route.page === "dashboard" || route.page === "run"}>
               <LayoutDashboard /> <span className="hidden sm:inline">{t("nav.dashboard")}</span>
             </NavLink>
@@ -144,6 +150,7 @@ function Analysis({ route, go }: { route: Exclude<Route, { page: "scan" }>; go: 
         )}
         {!site && !error && <p className="text-muted-foreground text-sm">{t("common.loading")}</p>}
         {site && store && route.page === "run" && <Day runId={route.id} onBack={() => go("#/dashboard")} storeData={store} />}
+        {site && store && route.page === "overview" && <Overview site={site} store={store} />}
         {site && store && route.page === "dashboard" && (
           <Dashboard site={site} store={store} live={live} liveCheckedAt={liveState.loadedAt} go={go} />
         )}

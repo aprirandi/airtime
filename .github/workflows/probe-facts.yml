@@ -1,0 +1,29 @@
+name: Probe facts
+
+# One-off: what a fixer could draft from a site's own public pages. Prints to the log; nothing is committed.
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        required: false
+        default: "https://www.handworks.com.au"
+  push:
+    branches: [claude/zen-ptolemy-884w50]
+    paths: [.github/workflows/probe-facts.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci
+        working-directory: engine
+      - run: npx tsx scripts/probe-facts.mts "${{ github.event.inputs.site || 'https://www.handworks.com.au' }}"
+        working-directory: engine
