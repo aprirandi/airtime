@@ -151,12 +151,44 @@ What this means for the Auditor:
    compared only within the same tool, ideally on the same day.
 2. **Our own code checks stay the core.** Reproducible, evidence stored, no cost per scan. They are
    what is reported to owners and used for the before/after test.
-3. **The public APIs are an extra signal, not the core.** Is Agentic's is free, keyless and returns
+3. **The public APIs are an extra signal, not the core. (Built 23 Nov 2026 for Is Agentic: see "Is Agentic as a second opinion".)** Is Agentic's is free, keyless and returns
    evidence and a fix per issue; Cloudflare's needs an account. Terms for automated or commercial use
    are not verified. Check them before depending on either.
 4. **Data model to copy:** per check an id, tier, result (pass, partial with a percentage, fail, not
    applicable), evidence, fix text and source; per tier points earned and available; the number of
    applicable checks, with not-applicable checks left out of the score.
+
+## Is Agentic as a second opinion (built 23 Nov 2026)
+
+Decision (23 Nov 2026): use Is Agentic's API as a second source, beside our own engine, not instead of it.
+
+What the live API showed for Handworks:
+- `GET /api/v1/report?url=` (documented, stable `v1`, free, no key, 120 requests per 60 s per IP) returns the
+  score, `score_breakdown` and only the **failed or partial** issues (id, name, tier, result, details,
+  recommendation). Passed checks are not listed. It never starts a scan: with no stored report it answers 404.
+- A scan is started through `/api/scan/stream` (not in their OpenAPI file; it is what their CLI does). Its
+  final event carries every check with pass, fail or na.
+- Their score for Handworks was **54** ("Important blockers remain") from the report API and **60** (grade C,
+  scoring version 2) from the scan stream, seconds apart. Four of the essential failures were API-product
+  checks (OpenAPI spec, scoped permissions, JSON error responses, MCP resources), which our registry files under
+  "not for stores". So their number is not a grade for a store and is never mixed into ours.
+- Their roster also has checks we cannot run from the site alone: brand name discoverability, developer
+  resource discoverability (both use web search), Wikipedia/Wikidata presence, MCP registry listings.
+
+Terms of use (is-agentic.com/terms, updated 19 Aug 2026, read 23 Nov 2026): reports are public; scores are
+"informational snapshots, not certifications" that can change with Ora's methodology; they may change limits
+or discontinue any part of the service without notice; do not overload, scrape or circumvent limits; do not
+imply endorsement. Commercial use for a client is not mentioned either way. We make at most 3 requests per
+audit, link to their report and label it as theirs.
+
+How it is built: `agents/auditor/isagentic.py` (client, id mapping, classification), step `external_scan`
+(stores the report in `external_reports`, or why it was unavailable; never fails the audit), `report.py`
+(exports it and an agreement count on the checks both sides run; bonus checks are left out of the count
+because their report never lists a missed bonus check). Each issue is `mapped` (same check as one of ours),
+`api_product` (not for stores) or `extra` (shown, not scored). For Handworks 7 of 7 comparable checks agree.
+
+Open: the passed checks and the per-check scores are only in the scan stream. We read the documented report
+and infer "not listed" for the rest. If the extra checks should one day be scored, that needs their stream.
 
 ## Scoring (as built)
 

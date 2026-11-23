@@ -139,6 +139,16 @@ a copyable fix prompt (`audit --prompt`, or the Copy prompt buttons on the dashb
 - **Comparing scans.** Scores are only comparable between scans by the same version of the checks
   (`audits.engine`).
 
+- **Second opinion.** With `[audit] external = true` the Auditor also reads Is Agentic's free public
+  report (`GET https://is-agentic.com/api/v1/report`; if none is stored it starts one scan, as their own CLI
+  does, and reads again: at most 3 requests). It is shown beside our result and never mixed into our score,
+  because Is Agentic counts API-product checks (OpenAPI, scoped permissions) as essential, so a store scores
+  lower there. Their issues are sorted into the same check as ours, an API-product check, or a check we do
+  not run (brand search and similar, shown but not scored). If Is Agentic cannot be read, the audit still
+  finishes and says why. `audit --no-external` skips it. Their terms (read 23 Nov 2026): reports are public,
+  scores are informational snapshots that change with their method, limits can change, and nothing may imply
+  their endorsement.
+
 `.github/workflows/audit.yml` runs it by hand (Actions > Website audit > Run workflow). The
 research environment cannot reach customer sites, so a first run there is also the first check of the
 scores against the two scanners (`plans/auditor.md`).
