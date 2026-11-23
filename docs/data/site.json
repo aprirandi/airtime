@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-23T04:26:45+00:00",
+ "generated_at": "2026-11-23T04:36:12+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
@@ -19503,6 +19503,151 @@
    },
    "runs": [
     {
+     "id": 34,
+     "agent": "auditor",
+     "kind": "audit",
+     "run_date": "2026-11-23",
+     "started_at": "2026-11-23T04:36:00+00:00",
+     "finished_at": "2026-11-23T04:36:11+00:00",
+     "status": "ok",
+     "error": null,
+     "steps": [
+      {
+       "step": 1,
+       "name": "fetch_pages",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:36:00+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:36:11+00:00",
+       "result": {
+        "target": "https://www.handworks.com.au",
+        "requests": 25,
+        "unreachable": 0,
+        "platform": "shopify",
+        "product_page": "https://www.handworks.com.au/products/gf60gatahaaaffaircandle"
+       },
+       "description": "Fetched 25 pages and files from https://www.handworks.com.au.",
+       "description_id": "Mengambil 25 halaman dan berkas dari https://www.handworks.com.au."
+      },
+      {
+       "step": 2,
+       "name": "run_checks",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:36:11+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:36:11+00:00",
+       "result": {
+        "checks": 24,
+        "passed": 13,
+        "partial": 3,
+        "failed": 8,
+        "not_applicable": 4,
+        "planned": 9,
+        "errors": []
+       },
+       "description": "Ran 24 checks: 13 passed, 3 partial, 8 failed, 4 not applicable; 9 more are planned.",
+       "description_id": "Menjalankan 24 cek: 13 lolos, 3 sebagian, 8 gagal, 4 tidak berlaku; 9 lagi direncanakan."
+      },
+      {
+       "step": 3,
+       "name": "score_audit",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:36:11+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:36:11+00:00",
+       "result": {
+        "score": 70.0,
+        "label": "needs_work",
+        "groups": {
+         "1": 88,
+         "2": 70,
+         "3": 36
+        }
+       },
+       "description": "Scored the site 70.0 out of 100 (needs work).",
+       "description_id": "Menilai situs 70.0 dari 100 (needs work)."
+      },
+      {
+       "step": 4,
+       "name": "list_gaps",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:36:11+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:36:11+00:00",
+       "result": {
+        "gaps": 4,
+        "limited": 7,
+        "first": [
+         "raw_html_content",
+         "organization_completeness",
+         "jsonld_organization",
+         "content_signals"
+        ]
+       },
+       "description": "Listed 4 gaps the owner can fix, most important first. 7 more count against the score but the platform controls them.",
+       "description_id": "Mendaftar 4 celah yang bisa diperbaiki pemilik, dari yang terpenting. 7 lagi dihitung dalam skor tetapi dikendalikan platform."
+      },
+      {
+       "step": 5,
+       "name": "save_audit",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:36:11+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:36:11+00:00",
+       "result": {
+        "audit_id": 3,
+        "rows": 37
+       },
+       "description": "Stored the audit with 37 check results and their evidence.",
+       "description_id": "Menyimpan audit dengan 37 hasil cek beserta buktinya."
+      },
+      {
+       "step": 6,
+       "name": "external_scan",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:36:11+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:36:11+00:00",
+       "result": {
+        "status": "ok",
+        "score": 54,
+        "issues": 17,
+        "mapped": 5,
+        "extra": 3,
+        "api_product": 9,
+        "requests": 1
+       },
+       "description": "Read Is Agentic's report as a second opinion: 17 issues, 3 of them on checks we do not run, 9 for API products.",
+       "description_id": "Membaca laporan Is Agentic sebagai pendapat kedua: 17 temuan, 3 di antaranya pada cek yang belum kita jalankan, 9 untuk produk API."
+      },
+      {
+       "step": "M",
+       "name": "master_audit_complete",
+       "kind": "CODE",
+       "agent": "master",
+       "checks": "auditor",
+       "started_at": "2026-11-23T04:36:11+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:36:11+00:00",
+       "result": {
+        "checks": 37,
+        "score": 70.0,
+        "problems": []
+       },
+       "description": "Master checked the Auditor's work: 37 checks stored and the score of 70.0 matches them. Passed.",
+       "description_id": "Master mengecek hasil Auditor: 37 cek tersimpan dan skor 70.0 cocok dengan hasilnya. Lolos."
+      }
+     ],
+     "quotes_verified": 0,
+     "questions": []
+    },
+    {
      "id": 33,
      "agent": "auditor",
      "kind": "audit",
@@ -29829,7 +29974,7 @@
      "answers": 1,
      "ours": 0,
      "rate": 0.0,
-     "competitor": "The Art Scene",
+     "competitor": "Oxlades",
      "competitor_mentions": 1,
      "question_count": 1,
      "terms": [
@@ -29857,22 +30002,22 @@
     }
    ],
    "audit": {
-    "id": 2,
-    "run_id": 33,
-    "scanned_at": "2026-11-23T04:26:44+00:00",
+    "id": 3,
+    "run_id": 34,
+    "scanned_at": "2026-11-23T04:36:11+00:00",
     "target": "https://www.handworks.com.au",
     "platform": "shopify",
-    "engine": "airtime-auditor/1",
-    "score": 89.4,
-    "label": "strong",
+    "engine": "airtime-auditor/2",
+    "score": 70.0,
+    "label": "needs_work",
     "breakdown": {
      "essential": {
-      "total": 4,
+      "total": 6,
       "passing": 3,
-      "partial": 1,
-      "failed": 0,
+      "partial": 2,
+      "failed": 1,
       "available": 80.0,
-      "earned": 70.0
+      "earned": 53.3
      },
      "recommended": {
       "total": 9,
@@ -29883,20 +30028,20 @@
       "earned": 14.4
      },
      "bonus": {
-      "total": 2,
-      "passing": 2,
+      "total": 9,
+      "passing": 4,
       "partial": 0,
-      "failed": 0,
-      "points": 5.0,
-      "positive": 2
+      "failed": 5,
+      "points": 2.2,
+      "positive": 4
      }
     },
     "groups": {
      "1": {
-      "percent": 93,
-      "scored": 7,
+      "percent": 88,
+      "scored": 8,
       "passing": 6,
-      "partial": 1,
+      "partial": 2,
       "failed": 0,
       "platform_controlled": 1,
       "planned": 2
@@ -29911,11 +30056,11 @@
       "planned": 1
      },
      "3": {
-      "percent": 67,
-      "scored": 3,
-      "passing": 2,
+      "percent": 36,
+      "scored": 11,
+      "passing": 4,
       "partial": 0,
-      "failed": 1,
+      "failed": 7,
       "platform_controlled": 8,
       "planned": 6
      }
@@ -30178,7 +30323,7 @@
       "source": "is_agentic",
       "result": "partial",
       "percent": 50,
-      "scored": false,
+      "scored": true,
       "name": "Agent-friendly 404 pages",
       "name_id": "Halaman 404 ramah agent",
       "evidence": "A missing page correctly returns 404, but there is no Markdown error body when the request asks for text/markdown.",
@@ -30400,7 +30545,7 @@
       "source": "both",
       "result": "fail",
       "percent": 0,
-      "scored": false,
+      "scored": true,
       "name": "Markdown content negotiation",
       "name_id": "Negosiasi konten Markdown",
       "evidence": "Accept: text/markdown returned text/html, not Markdown.",
@@ -30498,7 +30643,7 @@
       "source": "cloudflare",
       "result": "fail",
       "percent": 0,
-      "scored": false,
+      "scored": true,
       "name": "Link headers for agent discovery",
       "name_id": "Header Link untuk penemuan agent",
       "evidence": "12 Link headers, none with a relation useful to agents (found: preconnect, preload, ucp).",
@@ -30521,7 +30666,7 @@
       "source": "both",
       "result": "fail",
       "percent": 0,
-      "scored": false,
+      "scored": true,
       "name": "MCP server card",
       "name_id": "MCP server card",
       "evidence": "No MCP server card at /.well-known/mcp/server-card.json (HTTP 404).",
@@ -30544,7 +30689,7 @@
       "source": "cloudflare",
       "result": "fail",
       "percent": 0,
-      "scored": false,
+      "scored": true,
       "name": "Agent skills index",
       "name_id": "Indeks agent skills",
       "evidence": "No agent skills index at /.well-known/agent-skills/index.json (HTTP 404).",
@@ -30567,7 +30712,7 @@
       "source": "cloudflare",
       "result": "fail",
       "percent": 0,
-      "scored": false,
+      "scored": true,
       "name": "ARD manifest",
       "name_id": "Manifest ARD",
       "evidence": "No ARD manifest at /.well-known/ai-catalog.json (HTTP 404).",
@@ -30590,7 +30735,7 @@
       "source": "both",
       "result": "fail",
       "percent": 0,
-      "scored": false,
+      "scored": true,
       "name": "Agent registration (auth.md)",
       "name_id": "Registrasi agent (auth.md)",
       "evidence": "/auth.md returned HTTP 404.",
@@ -30613,7 +30758,7 @@
       "source": "both",
       "result": "pass",
       "percent": 100,
-      "scored": false,
+      "scored": true,
       "name": "OAuth / OpenID Connect discovery",
       "name_id": "Penemuan OAuth / OpenID Connect",
       "evidence": "OAuth or OpenID Connect discovery metadata is published.",
@@ -30636,7 +30781,7 @@
       "source": "both",
       "result": "pass",
       "percent": 100,
-      "scored": false,
+      "scored": true,
       "name": "OAuth protected-resource metadata",
       "name_id": "Metadata protected-resource OAuth",
       "evidence": "OAuth protected-resource metadata (RFC 9728) is published.",
@@ -30889,6 +31034,15 @@
      "jsonld_organization",
      "content_signals"
     ],
+    "limited_gaps": [
+     "not_found_markdown",
+     "markdown_negotiation",
+     "agent_skills_index",
+     "ard_manifest",
+     "auth_md",
+     "link_headers",
+     "mcp_server_card"
+    ],
     "history": [
      {
       "scanned_at": "2026-11-22T08:38:16+00:00",
@@ -30899,6 +31053,11 @@
       "scanned_at": "2026-11-23T04:26:44+00:00",
       "score": 89.4,
       "engine": "airtime-auditor/1"
+     },
+     {
+      "scanned_at": "2026-11-23T04:36:11+00:00",
+      "score": 70.0,
+      "engine": "airtime-auditor/2"
      }
     ],
     "prompt_all": "Fix 4 issues on https://www.handworks.com.au (Shopify store), found by an Airtime scan on 2026-11-23. Work in the order listed, most important first.\n\nRules:\n- Change only what the issue needs. Keep the existing design, text and behaviour.\n- Before you change a file or a setting, note its current value so it can be restored.\n- If you do not have the access you need (for example to the theme), say so and stop. Do not work around it.\n\nIssue 1 of 4: Content available without JavaScript (essential, Access and content)\nWhat the scan found: Missing in the raw HTML: headings in order starting at H1 (first is H4); text is at least 5% of the HTML (1.6%).\nWhat to do: Serve at least 500 characters of real homepage text in the HTML itself, with one clear H1, headings in order (H1, H2, H3 without skipping), and little markup around the text.\nOn Shopify: This comes from the theme: change the heading levels in the theme's sections so the first heading is an H1.\nHow to check:\n    curl -sS https://www.handworks.com.au/ | grep -io '<h[1-6][^>]*>' | head -20\nExpect: The first heading is <h1> and levels never skip (h1, h2, h3). The raw HTML has at least 500 characters of text.\n\nIssue 2 of 4: Organization contact details and address (recommended, Trust and identity)\nWhat the scan found: The Organization is missing: contactPoint, address.\nWhat to do: Add contactPoint (phone or email with a contactType) and address (PostalAddress) to the Organization JSON-LD.\nOn Shopify: Add them in the same JSON-LD block in the theme layout (not verified).\nHow to check:\n    curl -sS https://www.handworks.com.au/ | grep -o 'contactPoint\\|PostalAddress' | sort -u\nExpect: Both contactPoint and PostalAddress appear in the Organization JSON-LD.\n\nIssue 3 of 4: Organization data in JSON-LD (recommended, Trust and identity)\nWhat the scan found: An Organization entity is present but has no description.\nWhat to do: Add Organization (or LocalBusiness) JSON-LD to the homepage, with a name and a description.\nOn Shopify: Shopify's structured_data filter does not output Organization data: add a JSON-LD block to the theme layout (not verified).\nHow to check:\n    curl -sS https://www.handworks.com.au/ | grep -o 'application/ld+json' | head -3\nExpect: An Organization (or LocalBusiness) JSON-LD block with a name and a description. Test it at validator.schema.org.\n\nIssue 4 of 4: Content Signals in robots.txt (recommended, Agent discovery)\nWhat the scan found: robots.txt has no Content-Signal directive.\nWhat to do: Add a Content-Signal line to robots.txt stating your preferences, for example: Content-Signal: ai-train=no, search=yes, ai-input=no.\nOn Shopify: Add it through the robots.txt.liquid template.\nHow to check:\n    curl -sS https://www.handworks.com.au/robots.txt | grep -i content-signal\nExpect: A Content-Signal line with ai-train, search and ai-input each set to yes or no.\n\nWhen you finish, list exactly what you changed and how to undo each change, and say which issues are done and which are not.\n",
@@ -30907,7 +31066,7 @@
      "source": "is-agentic",
      "status": "ok",
      "error": "",
-     "fetched_at": "2026-11-23T04:26:45+00:00",
+     "fetched_at": "2026-11-23T04:36:11+00:00",
      "report_url": "https://is-agentic.com/scan/www.handworks.com.au",
      "score": 54.0,
      "label": "Important blockers remain",
