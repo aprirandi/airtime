@@ -10,7 +10,7 @@ import { fmtDate } from "@/lib/format"
 import { useI18n, type T } from "@/lib/i18n"
 import type { Audit, AuditCheck, AuditTier, ExternalIssue, Store } from "@/lib/types"
 
-function ResultBadge({ c, t }: { c: AuditCheck; t: T }) {
+export function ResultBadge({ c, t }: { c: AuditCheck; t: T }) {
   if (c.result === "pass") return <Badge variant="success">{t("audit.result.pass")}</Badge>
   if (c.result === "partial") return <Badge variant="warning">{t("audit.result.partial", { p: c.percent })}</Badge>
   if (c.result === "fail") return <Badge variant="destructive">{t("audit.result.fail")}</Badge>
