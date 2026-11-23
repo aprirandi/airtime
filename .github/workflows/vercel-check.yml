@@ -1,0 +1,72 @@
+name: Vercel check
+
+# Looks at the deployed website check: the page, the Indonesian page, and the service. Informational.
+# Pass a site address, or leave it empty to try the usual Vercel names for this project.
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: "Deployed address, e.g. https://airtime-ai.vercel.app"
+        required: false
+        default: ""
+  push:
+    branches: [claude/zen-ptolemy-884w50]
+    paths: [.github/workflows/vercel-check.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: The function file Vercel serves, run here with real internet
+        run: |
+          node engine/scripts/try-bundle.mjs https://www.handworks.com.au shopify
+          node engine/scripts/try-bundle.mjs https://wordpress.org
+      - name: Find and test the deployment
+        run: |
+          CANDIDATES="${{ github.event.inputs.site }}"
+          if [ -z "$CANDIDATES" ]; then
+            CANDIDATES="https://airtime-ai.vercel.app https://airtime.vercel.app https://airtime-kenari.vercel.app https://airtime-aprirandi.vercel.app https://airtime-web.vercel.app"
+          fi
+          FOUND=""
+          for u in $CANDIDATES; do
+            code=$(curl -sS -m 20 -o /tmp/home.html -w "%{http_code}" "$u/" || echo 000)
+            echo "$u -> HTTP $code"
+            if [ "$code" = "200" ] && grep -qi "<div id=\"root\"" /tmp/home.html; then FOUND="$u"; break; fi
+          done
+          if [ -z "$FOUND" ]; then echo "no candidate served the page; give the address as input"; exit 0; fi
+          echo; echo "=== using $FOUND"
+          echo "--- page headers"; curl -sS -m 20 -I "$FOUND/" | head -12
+          echo "--- /id/"; curl -sS -m 20 -o /dev/null -w "HTTP %{http_code}\n" "$FOUND/id/"
+          echo "--- a built asset is served"; A=$(grep -o 'assets/[^"]*\.js' /tmp/home.html | head -1); curl -sS -m 20 -o /dev/null -w "$A HTTP %{http_code} %{content_type}\n" "$FOUND/$A"
+          echo "--- API: handworks, shopify"
+          curl -sS -m 70 -X POST "$FOUND/api/audit" -H 'content-type: application/json' -d '{"url":"handworks.com.au","platform":"shopify"}' -o /tmp/a.json -w "HTTP %{http_code} in %{time_total}s\n"
+          python3 - <<'PY'
+          import json
+          try:
+              d = json.load(open("/tmp/a.json"))
+          except Exception as e:
+              print("not JSON:", open("/tmp/a.json").read()[:500]); raise SystemExit
+          if "error" in d:
+              print("error:", d)
+          else:
+              print({k: d[k] for k in ("engine", "target", "platform", "score", "label", "cached")}, "checks:", len(d["checks"]))
+              print("gaps:", d["gaps"], "| held back:", d["limited_gaps"])
+          PY
+          echo "--- API again (should be cached)"
+          curl -sS -m 30 -X POST "$FOUND/api/audit" -H 'content-type: application/json' -d '{"url":"handworks.com.au","platform":"shopify"}' | python3 -c "import json,sys; d=json.load(sys.stdin); print('cached:', d.get('cached'), 'score:', d.get('score'))"
+          echo "--- API: bad addresses"
+          for bad in '10.0.0.1' 'localhost' 'http://169.254.169.254/' 'not a url'; do
+            curl -sS -m 20 -X POST "$FOUND/api/audit" -H 'content-type: application/json' -d "{\"url\":\"$bad\"}" -w "  [HTTP %{http_code}]\n"
+          done
+          echo "--- API: GET works, CORS header"
+          curl -sS -m 30 -D - -o /dev/null "$FOUND/api/audit?url=example.com" | grep -iE "^HTTP|access-control|content-type|cache-control"
+          echo "--- API: unreachable site"
+          curl -sS -m 60 -X POST "$FOUND/api/audit" -H 'content-type: application/json' -d '{"url":"this-site-does-not-exist-12345.com"}' -w "  [HTTP %{http_code}]\n"

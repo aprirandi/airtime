@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "description": "Airtime. The Vercel project builds web/ and serves api/audit.js (bundled from engine/ by `npm run bundle:api` in engine/).",
+  "engines": {
+    "node": "22.x"
+  }
+}

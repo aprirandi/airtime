@@ -46,3 +46,7 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npx vitest run
+      - name: The Vercel function is up to date
+        run: |
+          npm run bundle:api
+          git diff --exit-code ../api/audit.js || { echo "run: cd engine && npm run bundle:api"; exit 1; }

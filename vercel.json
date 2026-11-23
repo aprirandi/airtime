@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm ci --prefix engine && npm ci --prefix web",
+  "installCommand": "npm ci --prefix web",
   "buildCommand": "npm run build:site --prefix web",
   "outputDirectory": "web/dist",
   "functions": {
-    "api/audit.ts": {
+    "api/audit.js": {
       "maxDuration": 60
     }
   },
