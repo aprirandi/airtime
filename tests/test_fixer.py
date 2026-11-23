@@ -7,7 +7,9 @@ import pytest
 
 from airtime.agents.auditor.agent import audit_flow
 from airtime.agents.auditor.registry import ASK, REGISTRY
+from airtime.agents.auditor.snapshot import collect
 from airtime.agents.fixer.agent import plan_all, plan_fix
+from airtime.agents.fixer.drafts import draft_for
 from airtime.agents.fixer.master import fixes_complete
 from airtime.agents.fixer.texts import CLIENT, QUESTIONS, STATUS_TEXT, STATUSES
 from airtime.core.agent import RunContext
@@ -102,7 +104,8 @@ def test_the_export_gives_the_owner_the_fixes_and_never_the_prepared_change(conn
     audit = json.loads(raw)["stores"][0]["audit"]
     fixes = audit["fixes"]
     assert fixes and fixes[0]["position"] == 1 and set(fixes[0]) == {
-        "check_id", "position", "status", "tier", "title", "title_id", "why", "why_id", "summary", "summary_id", "questions"}
+        "check_id", "position", "status", "tier", "title", "title_id", "why", "why_id", "summary", "summary_id", "questions",
+        "confirm"}
     assert "the prepared change" not in raw and '"draft"' not in raw
 
 
@@ -118,3 +121,62 @@ def test_an_audit_without_the_fixer_still_works(conn, acfg):
     ctx = make_ctx(conn, acfg, "2026-11-23")
     audit_flow(FakeSite(), fixer=False).run(ctx)
     assert conn.execute("SELECT COUNT(*) FROM fixes").fetchone()[0] == 0
+
+
+CONTACT = html("<h1>Contact us</h1><p>Visit us at 123 Smith St Richmond VIC 3121 or call (03) 9123 4567. "
+               "Email hello@shop.test any time. Open Mon 9 am to 5 pm.</p><p>hello@shop.test</p>")
+ABOUT = html("<h1>About us</h1><p>We are a family run paper shop in Richmond, selling handmade cards and journals. "
+             "Everything is chosen by people who love paper.</p>")
+
+
+def snap_with(cfg, routes):
+    r = good_routes()
+    r.update(routes)
+    return collect(FakeSite(r), replace(cfg, domain="shop.test", audit_url=ORIGIN, platform="shopify"))
+
+
+def test_the_fixer_reads_contact_facts_from_the_owners_own_pages(cfg):
+    snap = snap_with(cfg, {"/pages/contact": CONTACT, "/pages/about-us": ABOUT})
+    d = draft_for("organization_completeness", snap, "Shop")
+    org = d["jsonld"]
+    assert org["contactPoint"] == {"@type": "ContactPoint", "contactType": "customer service",
+                                   "telephone": "(03) 9123 4567", "email": "hello@shop.test"}
+    assert org["address"]["streetAddress"] == "123 Smith St Richmond" and org["address"]["postalCode"] == "3121"
+    assert {f["kind"]: f["source"] for f in d["confirm"]} == {"phone": "contact", "email": "contact", "address": "contact"}
+    assert d["answered"] == [0, 1]
+
+
+def test_a_draft_turns_waiting_for_the_owner_into_draft_ready_and_asks_only_what_is_missing(cfg):
+    snap = snap_with(cfg, {"/pages/contact": html("<h1>Contact</h1><p>Email hello@shop.test</p>")})
+    d = draft_for("organization_completeness", snap, "Shop")
+    fix = plan_fix(row("organization_completeness"), "shopify", 1, d)
+    assert fix["status"] == "draft_ready" and [q["en"] for q in fix["questions"]] == [
+        "What is the shop's street address (street, suburb, postcode)?"]
+    assert "address" not in d["jsonld"]
+    assert plan_fix(row("organization_completeness"), "shopify", 1, None)["status"] == "needs_owner"
+
+
+def test_the_description_is_the_owners_own_words_and_the_source_is_named(cfg):
+    snap = snap_with(cfg, {"/pages/about-us": ABOUT})
+    d = draft_for("jsonld_organization", snap, "Shop")
+    assert d["jsonld"]["description"].startswith("We are a family run paper shop in Richmond")
+    assert d["confirm"][0]["source"] == "about"
+
+
+def test_nothing_is_invented_when_the_pages_have_no_facts(cfg):
+    snap = snap_with(cfg, {"/pages/contact": html("<h1>Contact</h1><p>Come and say hello.</p>")})
+    assert draft_for("organization_completeness", snap, "Shop") is None
+    assert draft_for("content_signals", snap, "Shop") is None
+
+
+def test_the_export_shows_the_facts_to_confirm_but_not_the_prepared_change(conn, cfg, tmp_path):
+    c = replace(cfg, domain="shop.test", audit_url=ORIGIN, platform="shopify")
+    routes = weak_site()
+    routes["/pages/contact"] = CONTACT
+    audit_flow(FakeSite(routes)).run(make_ctx(conn, c, "2026-11-23"))
+    export_site(conn, tmp_path)
+    raw = (tmp_path / "data" / "site.json").read_text()
+    fixes = {f["check_id"]: f for f in json.loads(raw)["stores"][0]["audit"]["fixes"]}
+    got = fixes.get("organization_completeness")
+    assert got is None or got["status"] in ("draft_ready", "not_started")
+    assert "@context" not in raw and "ContactPoint" not in raw

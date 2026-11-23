@@ -47,11 +47,20 @@ def _external_json(conn, audit_id: int, checks: list[dict]) -> dict | None:
     return out
 
 
+def _confirm(draft_json) -> list[dict]:
+    """The facts the owner is asked to confirm. The prepared change itself (the JSON-LD) stays in the database."""
+    draft = _loads(draft_json, None)
+    keys = ("kind", "value", "source", "label", "label_id")
+    return [{k: f[k] for k in keys} for f in (draft or {}).get("confirm", [])]
+
+
 def fixes_json(conn, audit_id: int) -> list[dict]:
-    """What the owner sees about each fix. The prepared change itself (`draft`) is never exported."""
+    """What the owner sees about each fix. The prepared change itself (`draft`) is never exported, only the facts in
+    it, in plain words, for the owner to confirm."""
     return [{"check_id": f["check_id"], "position": f["position"], "status": f["status"], "tier": f["tier"],
              "title": f["title"], "title_id": f["title_id"], "why": f["why"], "why_id": f["why_id"],
-             "summary": f["summary"], "summary_id": f["summary_id"], "questions": _loads(f["questions"], [])}
+             "summary": f["summary"], "summary_id": f["summary_id"], "questions": _loads(f["questions"], []),
+             "confirm": _confirm(f["draft"])}
             for f in conn.execute("SELECT * FROM fixes WHERE audit_id = ? ORDER BY position", (audit_id,))]
 
 
