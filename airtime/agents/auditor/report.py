@@ -7,7 +7,7 @@ import json
 from airtime.agents.auditor.prompts import all_prompt, fix_prompt
 from airtime.agents.auditor.isagentic import MAPPED
 from airtime.agents.auditor.registry import BY_ID, GROUPS, REGISTRY
-from airtime.agents.auditor.score import gaps
+from airtime.agents.auditor.score import gaps, limited_gaps
 
 
 def _loads(value, default):
@@ -74,8 +74,9 @@ def audit_json(conn, store_id: int) -> dict | None:
             "controlled_note": controlled[0] if controlled else "", "controlled_note_id": controlled[1] if controlled else "",
             "details": _loads(r["details"], {}), "prompt": "", "prompt_id": "", "external": None,
         })
-    ordered_gaps = gaps([{"check_id": c["id"], "group": c["group"], "tier": c["tier"], "result": c["result"],
-                          "percent": c["percent"], "scored": c["scored"]} for c in checks])
+    as_rows = [{"check_id": c["id"], "group": c["group"], "tier": c["tier"], "result": c["result"],
+                "percent": c["percent"], "scored": c["scored"], "controlled_by": c["controlled_by"]} for c in checks]
+    ordered_gaps, limited = gaps(as_rows), limited_gaps(as_rows)
     by_id = {c["id"]: c for c in checks}
     gap_rows = [{"check_id": g["check_id"], "tier": g["tier"], "evidence": by_id[g["check_id"]]["evidence"]}
                 for g in ordered_gaps]
@@ -94,7 +95,8 @@ def audit_json(conn, store_id: int) -> dict | None:
         "breakdown": _loads(latest["breakdown"], {}), "groups": _loads(latest["groups"], {}),
         "group_names": {str(k): {"en": v[0], "id": v[1]} for k, v in GROUPS.items()},
         "coverage": _loads(latest["coverage"], {}), "checks": checks,
-        "gaps": [g["check_id"] for g in ordered_gaps], "history": history,
+        "gaps": [g["check_id"] for g in ordered_gaps], "limited_gaps": [g["check_id"] for g in limited],
+        "history": history,
         "prompt_all": all_prompt(gap_rows, site, platform, "en", scanned),
         "prompt_all_id": all_prompt(gap_rows, site, platform, "id", scanned), "external": external,
     }

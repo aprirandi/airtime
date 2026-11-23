@@ -120,8 +120,8 @@ owner to do them.
 What this means for the Auditor on a Shopify store:
 - The basics of agent readiness are already provided by Shopify, so the Auditor does not report them
   as achievements or sell them.
-- Group 3 items the platform controls are shown as "platform-controlled" (informational), not as a
-  failure the owner should fix.
+- Group 3 items the platform controls count in the score (changed 23 Nov 2026) but are listed as "held back
+  by the platform", with no fix prompt, because the owner cannot fix them.
 - The work an owner can actually do is mostly groups 1 and 2: theme content and headings,
   Organization data, a Privacy page, `robots.txt.liquid`. The Auditor puts these first.
 
@@ -193,15 +193,18 @@ and infer "not listed" for the rest. If the extra checks should one day be score
 ## Scoring (as built)
 
 - Tiers follow Is Agentic: essential up to 80 points, recommended up to 20, bonus up to 5 more that never
-  lowers the score. A partial check earns its percentage; checks that do not apply, are planned, or
-  that the platform controls are left out. Group scores (1 to 3) are the share of points earned in the
-  group and need no weights.
+  lowers the score. A partial check earns its percentage; checks that do not apply or are planned are
+  left out. Group scores (1 to 3) are the share of points earned in the group and need no weights.
 - Labels: 80 and above "strong", 60 and above "needs work", below that "important blockers remain".
   These thresholds are the ones Is Agentic's command-line tool uses to colour its score.
 - The weights are provisional. They exist to order the gaps, and are tuned with before and after data
   from the Asker. Scores are only comparable between scans by the same `engine` version.
-- On a platform that controls a check (Shopify: Markdown negotiation, Link headers, the `.well-known`
-  files), the check is run and shown but not scored, and never appears in the list of gaps.
+- **Platform rule (changed 23 Nov 2026, engine 2).** The product promise is a number for how ready a site
+  is for AI, and fixes for it, whatever the platform. So a check the platform controls (Shopify: Markdown
+  negotiation, Link headers, the `.well-known` files) **counts in the score**, because an agent is affected
+  whoever can change the cause. The platform only changes the fix: those gaps are listed separately as
+  "held back by the platform" with the reason, and get no fix prompt. Engine 1 left them out; on Handworks
+  that was 89.4 against 70.0 with them counted. Scores of engine 1 and 2 are not comparable.
 
 ## Steps
 

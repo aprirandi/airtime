@@ -102,6 +102,7 @@ export interface Audit {
   coverage: { planned: string[]; not_applicable: string[]; platform_controlled: string[] }
   checks: AuditCheck[]
   gaps: string[]
+  limited_gaps?: string[]
   prompt_all: string
   prompt_all_id: string
   external?: ExternalReport | null

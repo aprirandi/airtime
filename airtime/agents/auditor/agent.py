@@ -20,21 +20,21 @@ from airtime.agents.auditor.http import Fetcher
 from airtime.agents.auditor.isagentic import ExternalError, IsAgenticClient
 from airtime.agents.auditor.master import AUDIT_CHECKS
 from airtime.agents.auditor.registry import REGISTRY, CheckDef
-from airtime.agents.auditor.score import coverage, gaps, score_rows
+from airtime.agents.auditor.score import coverage, gaps, limited_gaps, score_rows
 from airtime.core.agent import Agent, Flow, RunContext, RunFailed, Step, StepKind
 from airtime.providers.base import utc_now
 
-ENGINE = "airtime-auditor/1"
+ENGINE = "airtime-auditor/2"   # 2: checks a platform controls now count in the score (scores of /1 and /2 are not comparable)
 
 
 def build_row(d: CheckDef, outcome: Outcome | None, platform: str) -> dict:
-    """One stored result. Platform-controlled checks keep their real result but are not scored."""
+    """One stored result. A platform-controlled check is scored like any other; `controlled_by` marks that the owner cannot fix it."""
     if d.group == 4:
         return _row(d, "na", 0, d.na_reason[0] if d.na_reason else "", {}, "", False)
     if d.run is None:
         return _row(d, "planned", 0, "", {}, "", False)
     controlled = platform if platform in d.platform_controlled else ""
-    scored = outcome.result != "na" and not controlled
+    scored = outcome.result != "na"
     return _row(d, outcome.result, outcome.percent, outcome.evidence, outcome.details, controlled, scored)
 
 
@@ -100,9 +100,9 @@ class AuditorAgent(Agent):
                 {g: v["percent"] for g, v in result["groups"].items()}}
 
     def _gaps(self, ctx: RunContext) -> dict:
-        found = gaps(ctx.data["_rows"])
+        found, limited = gaps(ctx.data["_rows"]), limited_gaps(ctx.data["_rows"])
         ctx.data["_gaps"] = found
-        return {"gaps": len(found), "first": [g["check_id"] for g in found[:5]]}
+        return {"gaps": len(found), "limited": len(limited), "first": [g["check_id"] for g in found[:5]]}
 
     def _save(self, ctx: RunContext) -> dict:
         snapshot, rows, result = ctx.data["_snapshot"], ctx.data["_rows"], ctx.data["_score"]

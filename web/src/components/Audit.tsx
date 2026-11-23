@@ -208,7 +208,7 @@ export function AuditCard({ store }: { store: Store }) {
   if (!audit) return null
   const byId = new Map(audit.checks.map((c) => [c.id, c]))
   const gaps = audit.gaps.map((id) => byId.get(id)).filter((c): c is AuditCheck => Boolean(c))
-  const controlled = audit.checks.filter((c) => c.controlled_by && ["pass", "partial", "fail"].includes(c.result))
+  const controlled = (audit.limited_gaps ?? []).map((id) => byId.get(id)).filter((c): c is AuditCheck => Boolean(c))
   const passed = audit.checks.filter((c) => c.scored && c.result === "pass")
   const { essential, recommended, bonus } = audit.breakdown
   const platform = audit.platform ? `${audit.platform.charAt(0).toUpperCase()}${audit.platform.slice(1)}` : ""

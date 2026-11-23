@@ -176,7 +176,8 @@ def _describe(step: dict, store_name: str) -> str:
     if name == "score_audit":
         return f"Scored the site {r.get('score')} out of 100 ({str(r.get('label')).replace('_', ' ')})."
     if name == "list_gaps":
-        return f"Listed {_n(r.get('gaps') or 0, 'gap')} the owner can fix, most important first."
+        text = f"Listed {_n(r.get('gaps') or 0, 'gap')} the owner can fix, most important first."
+        return text + (f" {r['limited']} more count against the score but the platform controls them." if r.get("limited") else "")
     if name == "save_audit":
         return f"Stored the audit with {r.get('rows')} check results and their evidence."
     if name == "external_scan":
@@ -242,7 +243,8 @@ def _describe_id(step: dict, store_name: str) -> str:
     if name == "score_audit":
         return f"Menilai situs {r.get('score')} dari 100 ({str(r.get('label')).replace('_', ' ')})."
     if name == "list_gaps":
-        return f"Mendaftar {r.get('gaps') or 0} celah yang bisa diperbaiki pemilik, dari yang terpenting."
+        text = f"Mendaftar {r.get('gaps') or 0} celah yang bisa diperbaiki pemilik, dari yang terpenting."
+        return text + (f" {r['limited']} lagi dihitung dalam skor tetapi dikendalikan platform." if r.get("limited") else "")
     if name == "save_audit":
         return f"Menyimpan audit dengan {r.get('rows')} hasil cek beserta buktinya."
     if name == "external_scan":
