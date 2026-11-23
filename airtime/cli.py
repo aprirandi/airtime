@@ -135,6 +135,9 @@ def cmd_audit(args) -> int:
     for g in found[:8]:
         d = BY_ID[g["check_id"]]
         print(f"- [{g['tier']}] {d.name}: {g['evidence']}")
+    from airtime.agents.auditor.score import limited_gaps
+    for g in limited_gaps(ctx.data["_rows"]):
+        print(f"- [{g['tier']}] {BY_ID[g['check_id']].name}: {g['evidence']} (counts in the score; {cfg.platform} controls it)")
     if args.prompt:
         from airtime.agents.auditor.prompts import all_prompt
         print("\n" + all_prompt(found, ctx.data["fetch_pages"]["target"], cfg.platform, args.lang,

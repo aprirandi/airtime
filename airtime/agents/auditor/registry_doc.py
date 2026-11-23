@@ -19,11 +19,13 @@ RULES = """\
 2. **Every check is code.** An HTTP request and a rule. No AI decides pass or fail.
 3. **A check is `built` or `planned`.** Planned checks are listed so coverage is honest, and are never scored.
 4. **Group 4 is never scored.** It is for API products and agent payments, so a store sees "not applicable".
-5. **A platform can control a check.** The check still runs and is shown, but it is left out of the score and
-   out of the gaps, and it gets no fix prompt, because the owner cannot change it. The reason is stored.
+5. **A platform can control a check.** The check is scored like any other, because the score says how ready the
+   site is for AI agents, and an agent is affected whoever can change the cause. It is listed as held back by the
+   platform and gets no fix prompt, because the owner cannot change it. The reason is stored.
 6. **A platform can have a fix hint.** The hint says where on that platform the owner makes the change. It only
    appears in the fix prompt and the dashboard. It never changes a result.
-7. **An unknown platform changes nothing.** Every check is scored and no platform hints are shown.
+7. **An unknown platform changes nothing.** Every check is scored, every gap gets a fix prompt, and no platform hints are shown.
+   The score is the same on every platform; only who can fix a gap differs.
 8. **A built check needs a way to verify it by hand** (a `curl` command and the result to expect), because a fix
    prompt without a check is a guess.
 
@@ -69,8 +71,8 @@ def registry_markdown() -> str:
     out += [RULES, "## Platform rules", ""]
     for platform, (controlled, hinted) in sorted(_platform_rows().items()):
         out += [f"### {platform.capitalize()}", "",
-                f"**Controlled by the platform ({len(controlled)}).** Run and shown, not scored, not in the gaps:", "",
-                "| Check | Why it is not scored |", "|---|---|",
+                f"**Controlled by the platform ({len(controlled)}).** Scored, but the owner cannot fix them, so no fix prompt:", "",
+                "| Check | Why the owner cannot fix it |", "|---|---|",
                 *[f"| `{d.id}` | {d.platform_controlled[platform][0]} |" for d in controlled], "",
                 f"**Where the owner makes the change ({len(hinted)}).** Shown in the fix prompt:", "",
                 "| Check | Hint |", "|---|---|",

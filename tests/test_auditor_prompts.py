@@ -97,6 +97,8 @@ def test_the_export_gives_each_gap_a_prompt_and_the_site_one_for_all(conn, acfg,
     # checks that are not gaps get no prompt, and neither do the ones Shopify controls
     assert by["robots_txt"]["prompt"] == "" and by["markdown_negotiation"]["prompt"] == ""
     assert "Markdown" not in audit["prompt_all"] and "Link headers" not in audit["prompt_all"]
+    assert "markdown_negotiation" in audit["limited_gaps"] and "markdown_negotiation" not in audit["gaps"]
+    assert by["markdown_negotiation"]["scored"] is True      # held back by Shopify, but it still counts in the score
     assert audit["prompt_all"].startswith(f"Fix {len(audit['gaps'])} issue")
     assert audit["prompt_all_id"].startswith("Perbaiki ")
 

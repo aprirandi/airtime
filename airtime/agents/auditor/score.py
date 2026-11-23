@@ -2,8 +2,10 @@
 
 The structure follows Is Agentic's: essential checks are worth up to 80 points, recommended up to 20,
 and bonus checks add up to 5 more without ever lowering the score. A partial check earns its
-percentage. Checks that do not apply, are planned, or that the platform controls (so the owner cannot
-fix them) are left out. Group scores need no weights: each is the share of points earned within the group.
+percentage. Checks that do not apply or are planned are left out. A check the platform controls still
+counts: the score says how ready the site is for AI, and an agent is affected whoever can change the
+cause. The platform only decides who can fix it (see `gaps` and `limited_gaps`). Group scores need no
+weights: each is the share of points earned within the group.
 
 These weights are provisional. They are meant to be tuned once Handworks has before-and-after data
 from the Asker (plans/auditor.md), so the numbers here are for ordering gaps, not for claims.
@@ -74,11 +76,19 @@ def score_rows(rows: list[dict]) -> dict:
     return {"score": score, "label": label_for(score), "tiers": tiers, "groups": groups}
 
 
-def gaps(rows: list[dict]) -> list[dict]:
-    """The gaps the owner can act on, most important first: essential before recommended before bonus."""
+def _ordered(found: list[dict]) -> list[dict]:
     order = {t: i for i, t in enumerate(TIERS)}
-    found = [r for r in _scored(rows) if r["result"] in ("fail", "partial")]
     return sorted(found, key=lambda r: (order[r["tier"]], r["group"], r["percent"], r["check_id"]))
+
+
+def gaps(rows: list[dict]) -> list[dict]:
+    """The gaps the owner can fix, most important first: essential before recommended before bonus."""
+    return _ordered([r for r in _scored(rows) if r["result"] in ("fail", "partial") and not r["controlled_by"]])
+
+
+def limited_gaps(rows: list[dict]) -> list[dict]:
+    """Gaps that count against the score but that the platform controls, so the owner cannot fix them directly."""
+    return _ordered([r for r in _scored(rows) if r["result"] in ("fail", "partial") and r["controlled_by"]])
 
 
 def coverage(rows: list[dict]) -> dict:

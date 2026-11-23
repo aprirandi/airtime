@@ -128,19 +128,24 @@ def test_a_weak_site_gets_a_lower_score_and_a_gap_list(conn, acfg):
     assert ctx.data["list_gaps"]["first"][:2] == ["raw_html_content", "markdown_negotiation"]   # essential first
 
 
-def test_platform_controlled_checks_are_shown_but_not_scored(conn, acfg):
+def test_platform_controlled_checks_count_in_the_score_but_get_no_fix(conn, acfg):
+    """The score says how ready the site is for AI, whatever the platform. The platform only decides who can fix it."""
     routes = good_routes()
     routes["/"] = html(HOME)                                        # no Markdown, no Link header
     routes["/__airtime-404-probe"] = html("<h1>x</h1>", 404)
     plain = run_audit(conn, acfg, routes)
     shopify = run_audit(conn, replace(acfg, platform="shopify"), routes)
-    assert plain.data["score_audit"]["score"] < shopify.data["score_audit"]["score"] == 100.0
+    assert plain.data["score_audit"]["score"] == shopify.data["score_audit"]["score"] < 100.0   # same score on any platform
     last = conn.execute("SELECT id FROM audits ORDER BY id DESC LIMIT 1").fetchone()["id"]
     md = conn.execute("SELECT * FROM audit_checks WHERE audit_id = ? AND check_id = 'markdown_negotiation'",
                       (last,)).fetchone()
-    assert md["result"] == "fail" and md["scored"] == 0 and md["controlled_by"] == "shopify"
+    assert md["result"] == "fail" and md["scored"] == 1 and md["controlled_by"] == "shopify"
     cov = json.loads(conn.execute("SELECT coverage FROM audits WHERE id = ?", (last,)).fetchone()["coverage"])
     assert "markdown_negotiation" in cov["platform_controlled"] and "dns_aid" in cov["planned"]
+    # on a platform that controls it the owner cannot fix it: it is a limited gap, not a gap with a prompt
+    assert plain.data["list_gaps"]["limited"] == 0 and shopify.data["list_gaps"]["limited"] >= 1
+    assert "markdown_negotiation" in plain.data["list_gaps"]["first"]
+    assert "markdown_negotiation" not in shopify.data["list_gaps"]["first"]
 
 
 def test_an_unreachable_homepage_fails_the_run_loudly(conn, acfg):
@@ -270,7 +275,7 @@ def test_audit_command_prints_the_score_and_stores_the_audit(tmp_path, monkeypat
     out = capsys.readouterr().out
     assert "/ 100" in out and "groups: 1=" in out and "platform: shopify" in out
     conn = db.connect(path)
-    assert conn.execute("SELECT platform, engine FROM audits").fetchone()[:] == ("shopify", "airtime-auditor/1")
+    assert conn.execute("SELECT platform, engine FROM audits").fetchone()[:] == ("shopify", "airtime-auditor/2")
 
 
 def test_audit_command_exits_2_when_the_site_is_down(tmp_path, monkeypatch, capsys):
@@ -294,12 +299,12 @@ def test_export_gives_the_site_the_audit_and_the_run(conn, acfg, tmp_path):
     site = json.loads((tmp_path / "data" / "site.json").read_text())
     store = site["stores"][0]
     audit = store["audit"]
-    assert audit["platform"] == "shopify" and audit["label"] == "strong" and audit["score"] == 100.0
-    assert len(audit["checks"]) == len(REGISTRY) and audit["history"][0]["engine"] == "airtime-auditor/1"
+    assert audit["platform"] == "shopify" and audit["label"] == "strong" and audit["score"] == 90.6
+    assert len(audit["checks"]) == len(REGISTRY) and audit["history"][0]["engine"] == "airtime-auditor/2"
     by = {c["id"]: c for c in audit["checks"]}
     assert by["llms_txt"]["result"] == "fail" and "404" in by["llms_txt"]["evidence"]
     assert by["llms_txt"]["platform_fix"].startswith("Shopify generates it") and by["llms_txt"]["fix_id"]
-    assert by["markdown_negotiation"]["scored"] is False and by["markdown_negotiation"]["controlled_note"]
+    assert by["markdown_negotiation"]["scored"] is True and by["markdown_negotiation"]["controlled_note"]
     assert audit["gaps"] == ["llms_txt"]      # Markdown and Link headers fail too, but Shopify controls them
     assert audit["group_names"]["1"]["id"] == "Akses dan isi"
     # the run shows up as an audit, not a shift, with a plain sentence per step in both languages

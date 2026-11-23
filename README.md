@@ -127,9 +127,12 @@ a copyable fix prompt (`audit --prompt`, or the Copy prompt buttons on the dashb
 - **Score.** Essential checks are worth up to 80 points, recommended up to 20, bonus up to 5 more
   (never lowers the score); a partial check earns its percentage. The weights are provisional, to be
   tuned with Asker results before and after a fix. Group scores need no weights.
-- **Platform.** `platform = "shopify"` in the store config marks the checks Shopify provides or
-  controls (Markdown negotiation, Link headers, `.well-known` files). They are run and shown, but not
-  scored, because the owner cannot fix them. Fix hints for Shopify come from its documentation.
+- **Platform.** The score says how ready the site is for AI agents, so it is the same on any platform.
+  `platform = "shopify"` in the store config changes who can fix a gap, not the number: checks Shopify
+  controls (Markdown negotiation, Link headers, `.well-known` files) still count, are listed as "held back
+  by the platform" and get no fix prompt, because the owner cannot change them. Fix hints for Shopify
+  come from its documentation. Engine `airtime-auditor/2` (23 Nov 2026) started counting them, so
+  scores of `/1` and `/2` are not comparable (Handworks went from 89.4 to 70.0 with no change to the site).
 - **Safety.** Links on the site are followed only on the same site, and hosts that resolve to private
   or local addresses are refused.
 - **Master check.** Every check has a stored result, no check crashed, every failure has evidence,
