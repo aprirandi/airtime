@@ -4,6 +4,9 @@ name: Is Agentic probe
 # them to the log, so the Auditor can be written against the real response shape. Nothing is committed.
 on:
   workflow_dispatch: {}
+  push:
+    branches: [claude/zen-ptolemy-884w50]
+    paths: [.github/workflows/isagentic-probe.yml]
 
 permissions:
   contents: read
