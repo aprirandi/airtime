@@ -40,6 +40,7 @@ class CheckDef:
     platform_fix: dict[str, tuple[str, str]] = field(default_factory=dict)         # platform -> (en, id)
     na_reason: tuple[str, str] | None = None   # group 4: why it does not apply to a store
     verify: tuple[str, str, str] | None = None  # (shell command with {site}, what to expect in English, in Indonesian)
+    ask: tuple[str, str] | None = None         # what the assistant must ask the owner before changing anything (en, id)
 
 
 SHOPIFY = "shopify"
@@ -299,9 +300,63 @@ VERIFY = {
     "oauth_protected_resource": ("curl -sS -i {site}/.well-known/oauth-protected-resource",
                                  "HTTP 200 JSON with a resource.", "HTTP 200 JSON dengan resource."),
 }
+# Fixes that need a decision or a fact only the owner has. The fix prompt tells the assistant to ask first and never
+# to invent contact details, legal text or policy choices.
+ASK = {
+    "organization_completeness": (
+        "Do not invent these. Ask the store owner for a contact phone number or email (and what it is for, such as customer "
+        "service) and for the street address (street, suburb, postcode, country). If the website already shows them, for "
+        "example in the footer or on the Contact page, use exactly those values.",
+        "Jangan mengarang. Tanyakan ke pemilik toko nomor telepon atau email kontak (dan untuk apa, misalnya layanan "
+        "pelanggan) serta alamat lengkap (jalan, kecamatan atau kota, kode pos, negara). Kalau website sudah menampilkannya, "
+        "misalnya di footer atau halaman Kontak, pakai persis nilai itu."),
+    "jsonld_organization": (
+        "Ask the store owner for a one or two sentence description of the business, or reuse the wording of the About page. "
+        "Do not add claims the owner has not approved.",
+        "Tanyakan ke pemilik toko deskripsi bisnis satu atau dua kalimat, atau pakai kata-kata dari halaman About. "
+        "Jangan menambah klaim yang belum disetujui pemilik."),
+    "content_signals": (
+        "This is a decision for the owner, not for you. Ask the owner three yes or no questions: may AI companies train "
+        "models on the site's content (ai-train), may the content appear in AI search results (search), and may it be used "
+        "to answer a user's question (ai-input). Write the line from the answers. Do not use the example values unless the "
+        "owner confirms them.",
+        "Ini keputusan pemilik, bukan kamu. Ajukan tiga pertanyaan ya atau tidak ke pemilik: bolehkah perusahaan AI melatih "
+        "model dengan konten situs (ai-train), bolehkah konten muncul di hasil pencarian AI (search), dan bolehkah dipakai "
+        "untuk menjawab pertanyaan pengguna (ai-input). Tulis barisnya dari jawaban itu. Jangan pakai nilai contoh kecuali "
+        "pemilik menyetujuinya."),
+    "ai_crawlers_allowed": (
+        "A block may be deliberate. Ask the owner whether it is meant before you remove it, and name the crawlers you would "
+        "unblock.",
+        "Pemblokiran bisa disengaja. Tanyakan ke pemilik apakah itu memang dimaksudkan sebelum kamu menghapusnya, dan "
+        "sebutkan crawler yang akan dibuka."),
+    "not_noindex": (
+        "Ask the owner whether hiding the homepage from search is intended (for example a site still being built) before "
+        "you change it.",
+        "Tanyakan ke pemilik apakah menyembunyikan beranda dari pencarian memang disengaja (misalnya situs yang masih "
+        "dibangun) sebelum kamu mengubahnya."),
+    "public_no_login": (
+        "A store password or login may be intentional. Ask the owner before you remove it.",
+        "Kata sandi toko atau login bisa disengaja. Tanyakan ke pemilik sebelum kamu menghapusnya."),
+    "trust_pages": (
+        "Write no legal text yourself. Ask the owner for the content of the missing pages, and for the privacy policy the text "
+        "from their lawyer or policy generator, then publish it as written.",
+        "Jangan menulis teks hukum sendiri. Minta ke pemilik isi halaman yang belum ada, dan untuk kebijakan privasi minta "
+        "teks dari pengacara atau pembuat kebijakan mereka, lalu terbitkan apa adanya."),
+    "llms_txt": (
+        "Ask the owner which pages matter most (about, products, policies). List only pages that exist.",
+        "Tanyakan ke pemilik halaman mana yang paling penting (tentang, produk, kebijakan). Cantumkan hanya halaman yang ada."),
+    "agents_md": (
+        "Ask the owner for a short description of the business and which pages matter most. Do not describe services the "
+        "business does not offer.",
+        "Tanyakan ke pemilik deskripsi singkat bisnis dan halaman mana yang paling penting. Jangan menjelaskan layanan yang "
+        "tidak ditawarkan bisnis."),
+}
+
 REGISTRY = [replace(d, verify=VERIFY[d.id]) if d.id in VERIFY else d for d in REGISTRY]
+REGISTRY = [replace(d, ask=ASK[d.id]) if d.id in ASK else d for d in REGISTRY]
 assert all(d.verify for d in REGISTRY if d.run), "every built check needs a verify command"
 assert set(VERIFY) <= {d.id for d in REGISTRY}, "VERIFY names an unknown check"
+assert set(ASK) <= {d.id for d in REGISTRY if d.run}, "ASK names an unknown or unbuilt check"
 
 BY_ID = {d.id: d for d in REGISTRY}
 assert len(BY_ID) == len(REGISTRY), "duplicate check id"

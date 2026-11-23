@@ -7,7 +7,7 @@ import { contentRatio, jsonldItems, linkHref, metaContent, typesOf } from "./htm
 import type { Response } from "./http"
 import { Robots } from "./robots"
 import { AI_USER_AGENTS, isSitemapIndex, sitemapLocs, type Snapshot } from "./snapshot"
-import { cpLen, fixed, isDict, pyIter, pyOr, pyRound, pyStrip, truthy } from "./util"
+import { clip, collapse, cpLen, fixed, isDict, pyIter, pyOr, pyRound, pyStrip, splitLines, truthy } from "./util"
 
 const MIN_TEXT = 500
 const MIN_RATIO = 0.05
@@ -61,6 +61,18 @@ function orgOf(snap: Snapshot): Dict | null {
     }
   }
   return null
+}
+
+/** What the Organization entity on this site says about itself, for the fix prompt. */
+function orgFacts(org: Dict): Record<string, unknown> {
+  const name = org["name"]
+  const types = typesOf(org)
+  return {
+    // one line, whatever the site wrote: this text is quoted in the fix prompt
+    org_name: typeof name === "string" ? clip(collapse(name), 80) : "",
+    org_type: types[0] !== undefined ? clip(collapse(types[0]), 60) : "",
+    present: Object.entries(org).filter(([k, v]) => !k.startsWith("@") && filled(v)).map(([k]) => k),
+  }
 }
 
 const filled = (v: unknown) => (typeof v === "string" ? pyStrip(v) !== "" : truthy(v))
@@ -121,6 +133,7 @@ function raw_html_content(snap: Snapshot): Outcome {
   if (!missing.length) return passed(`The raw HTML has ${chars} characters of text, an H1 and ordered headings.`)
   return graded(percent, "Missing in the raw HTML: " + missing.join("; ") + ".", {
     text_chars: chars, ratio: pyRound(ratio, 4), headings: levels.slice(0, 12),
+    outline: page.headings.slice(0, 12).map(([lvl, text]) => [lvl, clip(text, 60)]),
   })
 }
 
@@ -152,7 +165,10 @@ function public_no_login(snap: Snapshot): Outcome {
 function not_noindex(snap: Snapshot): Outcome {
   const robotsMeta = ["robots", "googlebot", "bingbot"].map((n) => metaContent(snap.homePage, n)).join(" ").toLowerCase()
   const header = snap.home.header("x-robots-tag").toLowerCase()
-  if (robotsMeta.includes("noindex") || header.includes("noindex")) return failed("The homepage tells search engines not to index it (noindex).")
+  if (robotsMeta.includes("noindex") || header.includes("noindex")) {
+    const sources = [...(robotsMeta.includes("noindex") ? ["meta tag"] : []), ...(header.includes("noindex") ? ["X-Robots-Tag header"] : [])]
+    return failed("The homepage tells search engines not to index it (noindex).", { sources })
+  }
   return passed("No noindex in the homepage's meta tags or headers.")
 }
 
@@ -170,13 +186,18 @@ function not_found_markdown(snap: Snapshot): Outcome {
 // ---- Group 2: trust and identity -------------------------------------------------------------------------
 
 function jsonld_organization(snap: Snapshot): Outcome {
-  const [, invalid] = jsonldItems(snap.homePage)
+  const [items, invalid] = jsonldItems(snap.homePage)
   const org = orgOf(snap)
   if (!org) {
-    return failed("No Organization or store entity in the homepage JSON-LD" + (invalid ? ` (${invalid} block(s) were not valid JSON).` : "."))
+    const found: string[] = []
+    for (const item of items) for (const t of typesOf(item)) if (!found.includes(t)) found.push(t)
+    return failed("No Organization or store entity in the homepage JSON-LD" + (invalid ? ` (${invalid} block(s) were not valid JSON).` : "."), {
+      jsonld_types: found.slice(0, 8), invalid_blocks: invalid,
+    })
   }
-  if (!filled(org["description"])) return partial(50, "An Organization entity is present but has no description.")
-  return passed("An Organization entity with a description is present in the JSON-LD.")
+  const facts = orgFacts(org)
+  if (!filled(org["description"])) return partial(50, "An Organization entity is present but has no description.", facts)
+  return passed("An Organization entity with a description is present in the JSON-LD.", facts)
 }
 
 function organization_completeness(snap: Snapshot): Outcome {
@@ -184,8 +205,9 @@ function organization_completeness(snap: Snapshot): Outcome {
   if (!org) return failed("No Organization entity to check for contact details and address.")
   const have: [string, boolean][] = [["contactPoint", filled(org["contactPoint"])], ["address", filled(org["address"])]]
   const missing = have.filter(([, ok]) => !ok).map(([k]) => k)
-  if (!missing.length) return passed("The Organization has a contactPoint and an address.")
-  return graded(50 * have.filter(([, ok]) => ok).length, "The Organization is missing: " + missing.join(", ") + ".")
+  const facts = { ...orgFacts(org), missing }
+  if (!missing.length) return passed("The Organization has a contactPoint and an address.", facts)
+  return graded(50 * have.filter(([, ok]) => ok).length, "The Organization is missing: " + missing.join(", ") + ".", facts)
 }
 
 function metadata_complete(snap: Snapshot): Outcome {
@@ -241,17 +263,23 @@ function pricing_structured(snap: Snapshot): Outcome {
 
 function trust_pages(snap: Snapshot): Outcome {
   const parts: string[] = []
+  const pages: Record<string, unknown> = {}
   let ok = 0
   for (const kind of ["about", "contact", "privacy"]) {
     const found = snap.trust[kind]
-    if (!found) parts.push(`${kind}: not found`)
-    else if (cpLen(found[1].text) < MIN_TEXT) parts.push(`${kind}: only ${cpLen(found[1].text)} characters`)
-    else {
+    if (!found) {
+      parts.push(`${kind}: not found`)
+      pages[kind] = { status: "missing", url: "", chars: 0 }
+    } else if (cpLen(found[1].text) < MIN_TEXT) {
+      parts.push(`${kind}: only ${cpLen(found[1].text)} characters`)
+      pages[kind] = { status: "thin", url: clip(collapse(found[0].url), 200), chars: cpLen(found[1].text) }
+    } else {
       ok += 1
       parts.push(`${kind}: ok`)
+      pages[kind] = { status: "ok", url: clip(collapse(found[0].url), 200), chars: cpLen(found[1].text) }
     }
   }
-  return graded(pyRound((100 * ok) / 3), parts.join("; ") + ".")
+  return graded(pyRound((100 * ok) / 3), parts.join("; ") + ".", { pages })
 }
 
 // ---- Group 3: agent discovery ----------------------------------------------------------------------------
@@ -310,12 +338,18 @@ function content_signals(snap: Snapshot): Outcome {
       if (CONTENT_SIGNAL_KEYS.includes(key) && (value === "yes" || value === "no")) found[key] = value
     }
   }
+  const lines = splitLines(snap.robots.text)
+  // Comments are free text written for readers and agents, not rules: the fix prompt never repeats them.
+  const rules = lines.filter((line) => pyStrip(line) !== "" && !pyStrip(line).startsWith("#"))
+  const head = rules.slice(0, 25).map((line) => clip(line, 120))
   const names = Object.keys(found)
-  if (names.length === CONTENT_SIGNAL_KEYS.length) return passed("robots.txt declares ai-train, search and ai-input preferences.", { signals: found })
+  if (names.length === CONTENT_SIGNAL_KEYS.length) {
+    return passed("robots.txt declares ai-train, search and ai-input preferences.", { signals: found, robots_head: head, robots_lines: lines.length })
+  }
   return graded(
     pyRound((100 * names.length) / CONTENT_SIGNAL_KEYS.length),
     !names.length ? "robots.txt has no Content-Signal directive." : "robots.txt declares only: " + names.join(", ") + ".",
-    { signals: found }
+    { signals: found, robots_head: head, robots_lines: lines.length }
   )
 }
 

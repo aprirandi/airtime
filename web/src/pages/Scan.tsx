@@ -95,31 +95,27 @@ export function Scan({ url, platform, go }: { url: string; platform: string; go:
             ))}
           </select>
         </label>
-        <p className="text-muted-foreground text-xs">{t("scan.platformNote")}</p>
       </form>
 
       {state.kind === "idle" && (
-        <>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              [Gauge, "scan.point1"],
-              [ListChecks, "scan.point2"],
-              [ClipboardCopy, "scan.point3"],
-            ].map(([Icon, key]) => {
-              const I = Icon as typeof Gauge
-              return (
-                <Card key={key as string}>
-                  <CardContent className="space-y-1 text-sm">
-                    <I className="text-chart-1 mb-2 size-5" />
-                    <div className="font-medium">{t(key as string)}</div>
-                    <p className="text-muted-foreground text-xs leading-relaxed">{t(`${key as string}Sub`)}</p>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-          <p className="text-muted-foreground text-center text-xs">{t("scan.privacy")}</p>
-        </>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[
+            [Gauge, "scan.point1"],
+            [ListChecks, "scan.point2"],
+            [ClipboardCopy, "scan.point3"],
+          ].map(([Icon, key]) => {
+            const I = Icon as typeof Gauge
+            return (
+              <Card key={key as string}>
+                <CardContent className="space-y-1 text-sm">
+                  <I className="text-chart-1 mb-2 size-5" />
+                  <div className="font-medium">{t(key as string)}</div>
+                  <p className="text-muted-foreground text-xs leading-relaxed">{t(`${key as string}Sub`)}</p>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
       )}
 
       {state.kind === "loading" && (
@@ -140,8 +136,8 @@ export function Scan({ url, platform, go }: { url: string; platform: string; go:
             <div className="text-destructive font-medium">
               {["bad_address", "too_many", "unreachable", "timeout", "network", "failed"].includes(state.code) ? t(`scan.error.${state.code}`) : t("scan.error.failed")}
             </div>
-            {["unreachable", "bad_address"].includes(state.code) && state.message !== state.code && (
-              <p className="text-muted-foreground text-xs">{state.message}</p>
+            {["unreachable", "bad_address"].includes(state.code) && (
+              <p className="text-muted-foreground text-xs">{t(`scan.hint.${state.code}`, { host: state.host })}</p>
             )}
             <Button variant="outline" size="sm" onClick={() => setAttempt((n) => n + 1)}>
               {t("scan.retry")}

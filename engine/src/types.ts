@@ -30,6 +30,7 @@ export interface RegistryCheck {
   platform_fix: Record<string, { en: string; id: string }>
   verify: { command: string; en: string; id: string } | null
   external_id: string
+  ask: { en: string; id: string } | null
 }
 
 export interface Registry {

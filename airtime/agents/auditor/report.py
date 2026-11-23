@@ -78,8 +78,8 @@ def audit_json(conn, store_id: int) -> dict | None:
                 "percent": c["percent"], "scored": c["scored"], "controlled_by": c["controlled_by"]} for c in checks]
     ordered_gaps, limited = gaps(as_rows), limited_gaps(as_rows)
     by_id = {c["id"]: c for c in checks}
-    gap_rows = [{"check_id": g["check_id"], "tier": g["tier"], "evidence": by_id[g["check_id"]]["evidence"]}
-                for g in ordered_gaps]
+    gap_rows = [{"check_id": g["check_id"], "tier": g["tier"], "evidence": by_id[g["check_id"]]["evidence"],
+                 "details": by_id[g["check_id"]]["details"]} for g in ordered_gaps]
     site, platform = latest["target"], latest["platform"] or ""
     for g in gap_rows:   # a prompt only for gaps the owner can act on
         for lang, key in (("en", "prompt"), ("id", "prompt_id")):
@@ -115,5 +115,6 @@ def registry_json() -> dict:
             "platform_fix": {p: {"en": v[0], "id": v[1]} for p, v in d.platform_fix.items()},
             "verify": {"command": d.verify[0], "en": d.verify[1], "id": d.verify[2]} if d.verify else None,
             "external_id": _OURS_TO_THEIRS.get(d.id, ""),
+            "ask": {"en": d.ask[0], "id": d.ask[1]} if d.ask else None,
         })
     return {"groups": {str(k): {"en": v[0], "id": v[1]} for k, v in GROUPS.items()}, "checks": checks}

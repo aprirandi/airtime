@@ -42,7 +42,8 @@
     "en": "HTTP 200, at least one User-agent line, and a Sitemap line.",
     "id": "HTTP 200, minimal satu baris User-agent, dan satu baris Sitemap."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "ai_crawlers_allowed",
@@ -63,7 +64,11 @@
     "en": "200 for ChatGPT-User, OAI-SearchBot, Claude-User and PerplexityBot (change the name after -A), and no Disallow for them in robots.txt.",
     "id": "200 untuk ChatGPT-User, OAI-SearchBot, Claude-User dan PerplexityBot (ganti nama setelah -A), dan tidak ada Disallow untuk mereka di robots.txt."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": {
+    "en": "A block may be deliberate. Ask the owner whether it is meant before you remove it, and name the crawlers you would unblock.",
+    "id": "Pemblokiran bisa disengaja. Tanyakan ke pemilik apakah itu memang dimaksudkan sebelum kamu menghapusnya, dan sebutkan crawler yang akan dibuka."
+   }
   },
   {
    "id": "sitemap",
@@ -84,7 +89,8 @@
     "en": "A <urlset> or <sitemapindex> with <loc> entries, and a Sitemap line in robots.txt.",
     "id": "<urlset> atau <sitemapindex> dengan entri <loc>, dan baris Sitemap di robots.txt."
    },
-   "external_id": "sitemap"
+   "external_id": "sitemap",
+   "ask": null
   },
   {
    "id": "raw_html_content",
@@ -110,7 +116,8 @@
     "en": "The first heading is <h1> and levels never skip (h1, h2, h3). The raw HTML has at least 500 characters of text.",
     "id": "Judul pertama adalah <h1> dan tingkatnya tidak melompat (h1, h2, h3). HTML mentah punya minimal 500 karakter teks."
    },
-   "external_id": "content-no-js"
+   "external_id": "content-no-js",
+   "ask": null
   },
   {
    "id": "redirects_clean",
@@ -131,7 +138,8 @@
     "en": "At most three redirects (301), ending in HTTP 200, and no meta-refresh in the HTML.",
     "id": "Paling banyak tiga redirect (301), berakhir di HTTP 200, dan tidak ada meta-refresh di HTML."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "public_no_login",
@@ -152,7 +160,11 @@
     "en": "200, and the final URL is not a login or password page.",
     "id": "200, dan URL akhirnya bukan halaman login atau kata sandi."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": {
+    "en": "A store password or login may be intentional. Ask the owner before you remove it.",
+    "id": "Kata sandi toko atau login bisa disengaja. Tanyakan ke pemilik sebelum kamu menghapusnya."
+   }
   },
   {
    "id": "not_noindex",
@@ -173,7 +185,11 @@
     "en": "No noindex in either result.",
     "id": "Tidak ada noindex di kedua hasil."
    },
-   "external_id": "noindex-directives"
+   "external_id": "noindex-directives",
+   "ask": {
+    "en": "Ask the owner whether hiding the homepage from search is intended (for example a site still being built) before you change it.",
+    "id": "Tanyakan ke pemilik apakah menyembunyikan beranda dari pencarian memang disengaja (misalnya situs yang masih dibangun) sebelum kamu mengubahnya."
+   }
   },
   {
    "id": "not_found_markdown",
@@ -199,7 +215,8 @@
     "en": "HTTP 404 with Content-Type: text/markdown and a short message that links to the sitemap.",
     "id": "HTTP 404 dengan Content-Type: text/markdown dan pesan singkat yang menautkan ke sitemap."
    },
-   "external_id": "agent-friendly-404"
+   "external_id": "agent-friendly-404",
+   "ask": null
   },
   {
    "id": "controls_labelled",
@@ -216,7 +233,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "page_token_budget",
@@ -233,7 +251,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "jsonld_organization",
@@ -259,7 +278,11 @@
     "en": "An Organization (or LocalBusiness) JSON-LD block with a name and a description. Test it at validator.schema.org.",
     "id": "Satu blok JSON-LD Organization (atau LocalBusiness) dengan nama dan deskripsi. Uji di validator.schema.org."
    },
-   "external_id": "json-ld"
+   "external_id": "json-ld",
+   "ask": {
+    "en": "Ask the store owner for a one or two sentence description of the business, or reuse the wording of the About page. Do not add claims the owner has not approved.",
+    "id": "Tanyakan ke pemilik toko deskripsi bisnis satu atau dua kalimat, atau pakai kata-kata dari halaman About. Jangan menambah klaim yang belum disetujui pemilik."
+   }
   },
   {
    "id": "organization_completeness",
@@ -285,7 +308,11 @@
     "en": "Both contactPoint and PostalAddress appear in the Organization JSON-LD.",
     "id": "contactPoint dan PostalAddress sama-sama ada di JSON-LD Organization."
    },
-   "external_id": "org-schema-completeness"
+   "external_id": "org-schema-completeness",
+   "ask": {
+    "en": "Do not invent these. Ask the store owner for a contact phone number or email (and what it is for, such as customer service) and for the street address (street, suburb, postcode, country). If the website already shows them, for example in the footer or on the Contact page, use exactly those values.",
+    "id": "Jangan mengarang. Tanyakan ke pemilik toko nomor telepon atau email kontak (dan untuk apa, misalnya layanan pelanggan) serta alamat lengkap (jalan, kecamatan atau kota, kode pos, negara). Kalau website sudah menampilkannya, misalnya di footer atau halaman Kontak, pakai persis nilai itu."
+   }
   },
   {
    "id": "metadata_complete",
@@ -306,7 +333,8 @@
     "en": "A canonical link, lang on <html>, og:image and og:type.",
     "id": "Link canonical, lang di <html>, og:image dan og:type."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "pricing_structured",
@@ -332,7 +360,8 @@
     "en": "offers.price and offers.priceCurrency in the product's JSON-LD.",
     "id": "offers.price dan offers.priceCurrency di JSON-LD produk."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "trust_pages",
@@ -358,7 +387,11 @@
     "en": "HTTP 200 for each of the About, Contact and Privacy pages (use their real URLs), each with at least 500 characters of text and linked from the footer.",
     "id": "HTTP 200 untuk halaman About, Contact dan Privacy (pakai URL aslinya), masing-masing minimal 500 karakter teks dan ditautkan dari footer."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": {
+    "en": "Write no legal text yourself. Ask the owner for the content of the missing pages, and for the privacy policy the text from their lawyer or policy generator, then publish it as written.",
+    "id": "Jangan menulis teks hukum sendiri. Minta ke pemilik isi halaman yang belum ada, dan untuk kebijakan privasi minta teks dari pengacara atau pembuat kebijakan mereka, lalu terbitkan apa adanya."
+   }
   },
   {
    "id": "schema_breadth",
@@ -375,7 +408,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "markdown_negotiation",
@@ -401,7 +435,8 @@
     "en": "Content-Type: text/markdown, Vary: Accept and a Markdown body. The same URL with Accept: text/html still returns HTML.",
     "id": "Content-Type: text/markdown, Vary: Accept dan isi Markdown. URL yang sama dengan Accept: text/html tetap menghasilkan HTML."
    },
-   "external_id": "markdown-negotiation-vary"
+   "external_id": "markdown-negotiation-vary",
+   "ask": null
   },
   {
    "id": "llms_txt",
@@ -427,7 +462,11 @@
     "en": "HTTP 200 text with Markdown links that all open.",
     "id": "HTTP 200 berupa teks dengan tautan Markdown yang semuanya terbuka."
    },
-   "external_id": "llms-txt-exists"
+   "external_id": "llms-txt-exists",
+   "ask": {
+    "en": "Ask the owner which pages matter most (about, products, policies). List only pages that exist.",
+    "id": "Tanyakan ke pemilik halaman mana yang paling penting (tentang, produk, kebijakan). Cantumkan hanya halaman yang ada."
+   }
   },
   {
    "id": "agents_md",
@@ -453,7 +492,11 @@
     "en": "HTTP 200 and Content-Type text/markdown or text/plain.",
     "id": "HTTP 200 dan Content-Type text/markdown atau text/plain."
    },
-   "external_id": "agent-discovery-file"
+   "external_id": "agent-discovery-file",
+   "ask": {
+    "en": "Ask the owner for a short description of the business and which pages matter most. Do not describe services the business does not offer.",
+    "id": "Tanyakan ke pemilik deskripsi singkat bisnis dan halaman mana yang paling penting. Jangan menjelaskan layanan yang tidak ditawarkan bisnis."
+   }
   },
   {
    "id": "content_signals",
@@ -479,7 +522,11 @@
     "en": "A Content-Signal line with ai-train, search and ai-input each set to yes or no.",
     "id": "Satu baris Content-Signal dengan ai-train, search dan ai-input, masing-masing yes atau no."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": {
+    "en": "This is a decision for the owner, not for you. Ask the owner three yes or no questions: may AI companies train models on the site's content (ai-train), may the content appear in AI search results (search), and may it be used to answer a user's question (ai-input). Write the line from the answers. Do not use the example values unless the owner confirms them.",
+    "id": "Ini keputusan pemilik, bukan kamu. Ajukan tiga pertanyaan ya atau tidak ke pemilik: bolehkah perusahaan AI melatih model dengan konten situs (ai-train), bolehkah konten muncul di hasil pencarian AI (search), dan bolehkah dipakai untuk menjawab pertanyaan pengguna (ai-input). Tulis barisnya dari jawaban itu. Jangan pakai nilai contoh kecuali pemilik menyetujuinya."
+   }
   },
   {
    "id": "link_headers",
@@ -505,7 +552,8 @@
     "en": "A Link header with rel=\"api-catalog\", \"service-doc\" or a similar useful relation.",
     "id": "Header Link dengan rel=\"api-catalog\", \"service-doc\" atau relasi berguna lainnya."
    },
-   "external_id": "link-headers-discovery"
+   "external_id": "link-headers-discovery",
+   "ask": null
   },
   {
    "id": "mcp_server_card",
@@ -531,7 +579,8 @@
     "en": "HTTP 200 JSON with serverInfo.name and serverInfo.version.",
     "id": "HTTP 200 JSON dengan serverInfo.name dan serverInfo.version."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "agent_skills_index",
@@ -557,7 +606,8 @@
     "en": "HTTP 200 JSON with $schema and a skills array; each entry has name, type, description, url and sha256.",
     "id": "HTTP 200 JSON dengan $schema dan array skills; tiap entri punya name, type, description, url dan sha256."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "ard_manifest",
@@ -583,7 +633,8 @@
     "en": "HTTP 200 JSON with specVersion, host and entries.",
     "id": "HTTP 200 JSON dengan specVersion, host dan entries."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "auth_md",
@@ -609,7 +660,8 @@
     "en": "HTTP 200 text with agent registration instructions.",
     "id": "HTTP 200 berupa teks dengan petunjuk registrasi agent."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "oauth_discovery",
@@ -635,7 +687,8 @@
     "en": "HTTP 200 JSON with an issuer.",
     "id": "HTTP 200 JSON dengan issuer."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "oauth_protected_resource",
@@ -661,7 +714,8 @@
     "en": "HTTP 200 JSON with a resource.",
     "id": "HTTP 200 JSON dengan resource."
    },
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "mcp_live",
@@ -678,7 +732,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "mcp_quality",
@@ -695,7 +750,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "web_search_discovery",
@@ -712,7 +768,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "webmcp",
@@ -729,7 +786,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "dns_aid",
@@ -746,7 +804,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "web_bot_auth",
@@ -763,7 +822,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "api_discovery",
@@ -780,7 +840,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "api_surface",
@@ -797,7 +858,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "agent_payments",
@@ -814,7 +876,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   },
   {
    "id": "agent_checkout",
@@ -831,7 +894,8 @@
    "controlled": {},
    "platform_fix": {},
    "verify": null,
-   "external_id": ""
+   "external_id": "",
+   "ask": null
   }
  ]
 }

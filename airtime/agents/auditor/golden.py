@@ -48,19 +48,50 @@ def score_cases(n: int = 80) -> list[dict]:
     return out
 
 
+# What the checks store for a gap on a site, so the prompts can say what is on this site.
+SAMPLE_DETAILS = {
+    "raw_html_content": {"text_chars": 412, "ratio": 0.0161, "headings": [1, 4, 2],
+                         "outline": [[1, "Handworks"], [4, "Cards \u2014 caf\u00e9 & gifts"], [2, "Journals"]]},
+    "jsonld_organization": {"org_name": "Handworks", "org_type": "OnlineStore", "present": ["name", "url", "logo"]},
+    "organization_completeness": {"org_name": "", "org_type": "Organization", "present": ["name", "url"],
+                                  "missing": ["contactPoint", "address"]},
+    "content_signals": {"signals": {"ai-train": "no"}, "robots_lines": 40,
+                        "robots_head": ["User-agent: *", "Disallow: /admin", "Sitemap: https://shop.test/sitemap.xml"]},
+    "ai_crawlers_allowed": {"blocked": ["ChatGPT-User (robots.txt)", "PerplexityBot (HTTP 403)"]},
+    "not_noindex": {"sources": ["meta tag", "X-Robots-Tag header"]},
+    "trust_pages": {"pages": {"about": {"status": "ok", "url": "https://shop.test/pages/about", "chars": 900},
+                              "contact": {"status": "thin", "url": "https://shop.test/pages/contact", "chars": 120},
+                              "privacy": {"status": "missing", "url": "", "chars": 0}}},
+}
+SAMPLE_DETAILS_NO_ORG = {"jsonld_organization": {"jsonld_types": ["Product", "WebSite"], "invalid_blocks": 0},
+                         "raw_html_content": {"text_chars": 0, "ratio": 0.0, "headings": [], "outline": []}}
+
+
 def prompt_cases() -> list[dict]:
     out = []
     rng = random.Random(7)
     for platform in ("", "shopify", "wix"):
         for lang in ("en", "id"):
             picks = rng.sample(BUILT, 4)
-            gap_rows = [{"check_id": d.id, "tier": d.tier, "evidence": f"found a problem with {d.id}"} for d in picks]
+            gap_rows = [{"check_id": d.id, "tier": d.tier, "evidence": f"found a problem with {d.id}",
+                         "details": SAMPLE_DETAILS.get(d.id, {})} for d in picks]
             site = "https://shop.test"
             out.append({
                 "platform": platform, "lang": lang, "site": site, "scanned": "2026-11-23", "gaps": gap_rows,
                 "all": all_prompt(gap_rows, site, platform, lang, "2026-11-23"),
                 "none": all_prompt([], site, platform, lang, "2026-11-23"),
                 "single": [fix_prompt(g["check_id"], g, site, platform, lang) for g in gap_rows],
+            })
+    # every built check at once: with the details above, with none, and with the other shapes a check can store
+    for label, details in (("all with details", SAMPLE_DETAILS), ("all with no details", {}), ("all without an organization", SAMPLE_DETAILS_NO_ORG)):
+        for lang in ("en", "id"):
+            gap_rows = [{"check_id": d.id, "tier": d.tier, "evidence": f"found a problem with {d.id}",
+                         "details": details.get(d.id, {})} for d in BUILT]
+            out.append({
+                "label": label, "platform": "shopify", "lang": lang, "site": "https://shop.test", "scanned": "2026-11-23",
+                "gaps": gap_rows, "all": all_prompt(gap_rows, "https://shop.test", "shopify", lang, "2026-11-23"),
+                "none": all_prompt([], "https://shop.test", "shopify", lang, "2026-11-23"),
+                "single": [fix_prompt(g["check_id"], g, "https://shop.test", "shopify", lang) for g in gap_rows],
             })
     return out
 

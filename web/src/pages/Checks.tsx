@@ -67,13 +67,7 @@ function Row({ c, result, platform, t, pick, site }: {
       </AccordionTrigger>
       <AccordionContent className="space-y-3">
         <div className="text-muted-foreground text-xs">
-          <code>{c.id}</code> · {t("audit.source", { s: t(`audit.source.${c.source}`) })}
-          {c.external_id && (
-            <>
-              {" · "}
-              {t("checks.externalId", { id: c.external_id })}
-            </>
-          )}
+          <code>{c.id}</code>
         </div>
         {c.status === "na" && <p>{pick<string>(c, "na_reason")}</p>}
         {result && result.result !== "planned" && result.evidence && (

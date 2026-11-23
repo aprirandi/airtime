@@ -67,3 +67,6 @@ export function pyIter(v: unknown): unknown[] {
   if (isDict(v)) return Object.keys(v)
   throw new TypeError(`'${v === null ? "NoneType" : typeof v}' object is not iterable`)
 }
+
+/** The first n characters (code points), as Python's text[:n]. */
+export const clip = (text: string, n: number) => [...text].slice(0, n).join("")

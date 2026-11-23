@@ -52,7 +52,7 @@ export async function runAudit(fetch: Fetcher, options: AuditOptions) {
   const scannedAt = options.scannedAt ?? new Date().toISOString()
   const fixable = gaps(rows)
   const limited = limitedGaps(rows)
-  const gapRows = fixable.map((g) => ({ check_id: g.check_id, tier: g.tier, evidence: g.evidence }))
+  const gapRows = fixable.map((g) => ({ check_id: g.check_id, tier: g.tier, evidence: g.evidence, details: (g as StoredRow).details }))
   const byId = Object.fromEntries(REGISTRY.checks.map((c) => [c.id, c]))
   const gapIds = new Set(fixable.map((g) => g.check_id))
 

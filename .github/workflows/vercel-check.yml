@@ -27,7 +27,7 @@ jobs:
           node-version: "22"
       - name: The function file Vercel serves, run here with real internet
         run: |
-          node engine/scripts/try-bundle.mjs https://www.handworks.com.au shopify
+          PRINT_PROMPT=1 node engine/scripts/try-bundle.mjs https://www.handworks.com.au shopify
           node engine/scripts/try-bundle.mjs https://wordpress.org
       - name: Find and test the deployment
         run: |

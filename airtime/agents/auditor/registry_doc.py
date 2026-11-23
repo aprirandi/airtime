@@ -77,6 +77,10 @@ def registry_markdown() -> str:
                 f"**Where the owner makes the change ({len(hinted)}).** Shown in the fix prompt:", "",
                 "| Check | Hint |", "|---|---|",
                 *[f"| `{d.id}` | {d.platform_fix[platform][0]} |" for d in hinted], ""]
+    asking = [d for d in REGISTRY if d.ask]
+    out += ["## Fixes that need the owner", "",
+            "The fix prompt for these tells the assistant to ask the owner first, and never to invent the answer.", "",
+            "| Check | Ask the owner first |", "|---|---|", *[f"| `{d.id}` | {d.ask[0]} |" for d in asking], ""]
     out += ["## How to verify a built check by hand", "", "| Check | Command | Expect |", "|---|---|---|",
             *[f"| `{d.id}` | `{d.verify[0]}` | {d.verify[1]} |" for d in built], ""]
     return "\n".join(out)
