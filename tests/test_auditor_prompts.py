@@ -144,3 +144,10 @@ def test_the_export_carries_the_whole_registry_for_the_checks_page(conn, acfg, t
     assert by["content_signals"]["verify"]["command"].startswith("curl")
     assert "shopify" in by["link_headers"]["controlled"] and by["webmcp"]["status"] == "planned"
     assert {c["status"] for c in reg["checks"] if c["group"] == 4} == {"na"}
+
+
+def test_the_files_the_typescript_engine_is_checked_against_are_up_to_date():
+    from airtime.agents.auditor import golden
+    registry, golden_json = golden.build()
+    assert golden.REGISTRY_FILE.read_text() == registry and golden.GOLDEN_FILE.read_text() == golden_json, \
+        "run: python -m airtime.agents.auditor.golden"

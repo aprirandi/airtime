@@ -1,0 +1,16 @@
+{
+  "name": "airtime-engine",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The Auditor's engine in TypeScript: runs in a Vercel function. Checked against the Python engine with golden files.",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
