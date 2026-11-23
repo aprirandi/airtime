@@ -10,6 +10,8 @@ type Dict = Record<string, string>
 const EN: Dict = {
   "nav.dashboard": "Dashboard",
   "nav.agents": "AI Agents",
+  "scan.hint.unreachable": "Check that the address is spelled right (for example yourshop.com) and that {host} is online, then try again.",
+  "scan.hint.bad_address": "Type the name of your website, for example yourshop.com.",
   "audit.subPublic": "How ready {store} is for AI agents, from technical checks on {d}.",
   "audit.footPublic": "{done} technical checks, scanned {d}{platform}. The points per check are provisional. A check the platform controls still counts in the score, because AI agents are affected either way. Scores can only be compared between scans made with the same version of the checks ({engine}).",
   "scan.title": "How ready is your website for AI?",
@@ -402,6 +404,8 @@ const EN: Dict = {
 const ID: Dict = {
   "nav.dashboard": "Dashboard",
   "nav.agents": "AI Agent",
+  "scan.hint.unreachable": "Pastikan alamatnya diketik dengan benar (misalnya tokoanda.com) dan {host} sedang online, lalu coba lagi.",
+  "scan.hint.bad_address": "Ketik nama website Anda, misalnya tokoanda.com.",
   "audit.subPublic": "Seberapa siap {store} untuk agent AI, dari cek teknis tanggal {d}.",
   "audit.footPublic": "{done} cek teknis, dipindai {d}{platform}. Poin tiap cek masih sementara. Cek yang dikendalikan platform tetap dihitung dalam skor, karena agent AI terkena dampaknya apa pun penyebabnya. Skor hanya bisa dibandingkan antar scan dengan versi cek yang sama ({engine}).",
   "scan.title": "Seberapa siap website Anda untuk AI?",

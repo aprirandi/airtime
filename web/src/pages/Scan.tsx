@@ -136,8 +136,8 @@ export function Scan({ url, platform, go }: { url: string; platform: string; go:
             <div className="text-destructive font-medium">
               {["bad_address", "too_many", "unreachable", "timeout", "network", "failed"].includes(state.code) ? t(`scan.error.${state.code}`) : t("scan.error.failed")}
             </div>
-            {["unreachable", "bad_address"].includes(state.code) && state.message !== state.code && (
-              <p className="text-muted-foreground text-xs">{state.message}</p>
+            {["unreachable", "bad_address"].includes(state.code) && (
+              <p className="text-muted-foreground text-xs">{t(`scan.hint.${state.code}`, { host: state.host })}</p>
             )}
             <Button variant="outline" size="sm" onClick={() => setAttempt((n) => n + 1)}>
               {t("scan.retry")}
