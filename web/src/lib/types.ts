@@ -87,6 +87,23 @@ export interface AuditGroup {
   planned: number
 }
 
+export type FixStatus = "not_started" | "needs_owner" | "draft_ready" | "platform_held" | "in_progress" | "done"
+
+/** One thing the Fixer tracks for the owner. Plain words only; the technical detail stays in the check list. */
+export interface Fix {
+  check_id: string
+  position: number
+  status: FixStatus
+  tier: "essential" | "recommended" | "bonus"
+  title: string
+  title_id: string
+  why: string
+  why_id: string
+  summary: string
+  summary_id: string
+  questions: { en: string; id: string }[]
+}
+
 export interface Audit {
   id?: number
   run_id?: number | null
@@ -103,6 +120,7 @@ export interface Audit {
   checks: AuditCheck[]
   gaps: string[]
   limited_gaps?: string[]
+  fixes?: Fix[]
   prompt_all: string
   prompt_all_id: string
   external?: ExternalReport | null

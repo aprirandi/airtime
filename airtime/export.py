@@ -61,9 +61,9 @@ TEAM = [
      "job_id": "Pemilik toko meninjau tugas dan buktinya. Tidak ada yang berubah di website tanpa persetujuan.",
      "inputs": ["Task list"], "outputs": ["Approved changes"],
      "inputs_id": ["Daftar tugas"], "outputs_id": ["Perubahan disetujui"]},
-    {"id": "fixer", "name": "Fixer", "title": "Fixer", "title_id": "Pelaksana", "status": "planned",
-     "job": "Will prepare and publish the approved changes, with a backup to restore.",
-     "job_id": "Akan menyiapkan dan menerbitkan perubahan yang disetujui, dengan backup untuk dipulihkan.",
+    {"id": "fixer", "name": "Fixer", "title": "Fixer", "title_id": "Pelaksana", "status": "active",
+     "job": "Turns each gap into a fix: asks you for what only you know, prepares the change as a draft, and tells you when something is held back by the platform. Nothing is published without your approval.",
+     "job_id": "Mengubah setiap celah menjadi perbaikan: menanyakan hal yang hanya Anda tahu, menyiapkan perubahan sebagai draf, dan memberi tahu kalau ada yang tertahan platform. Tidak ada yang diterbitkan tanpa persetujuan Anda.",
      "inputs": ["Approved changes"], "outputs": ["Published change"],
      "inputs_id": ["Perubahan disetujui"], "outputs_id": ["Perubahan terbit"]},
     {"id": "reporter", "name": "Reporter", "title": "Reporter", "title_id": "Pelapor", "status": "planned",
@@ -80,13 +80,15 @@ TEAM = [
 ]
 
 STEP_AGENT = {"fetch_pages": "auditor", "run_checks": "auditor", "score_audit": "auditor",
-              "list_gaps": "auditor", "save_audit": "auditor", "external_scan": "auditor", "write_questions": "asker", "validate_questions": "asker", "ask_questions": "asker",
+              "list_gaps": "auditor", "save_audit": "auditor", "external_scan": "auditor", "read_audit": "fixer", "plan_fixes": "fixer", "save_fixes": "fixer",
+              "write_questions": "asker", "validate_questions": "asker", "ask_questions": "asker",
               "import_answers": "import", "extract_mentions": "analyst", "verify_and_count": "analyst",
               "compare_previous": "analyst", "write_summary": "analyst"}
 
 
 def is_audit(agent: str) -> bool:
-    return agent == "auditor"
+    """An audit run: the Auditor, now followed by the Fixer."""
+    return "auditor" in agent.split(",")
 
 
 def is_shift(agent: str) -> bool:
@@ -134,6 +136,11 @@ def _describe_master(step: dict, lang: str) -> str:
         return (f"Master mengecek hasil Auditor: {r.get('checks')} cek tersimpan dan skor {r.get('score')} cocok dengan hasilnya. Lolos."
                 if id_ else
                 f"Master checked the Auditor's work: {r.get('checks')} checks stored and the score of {r.get('score')} matches them. Passed.")
+    if step["name"] == "master_fixes_complete":
+        if problems:
+            return ("Master mengembalikan hasil Fixer: " if id_ else "Master sent the Fixer's work back: ") + "; ".join(problems)
+        return (f"Master mengecek hasil Fixer: {r.get('fixes')} perbaikan sesuai dengan temuan Auditor. Lolos."
+                if id_ else f"Master checked the Fixer's work: {r.get('fixes')} fixes match what the Auditor found. Passed.")
     return "Master check." if not problems else "; ".join(problems)
 
 
@@ -185,6 +192,15 @@ def _describe(step: dict, store_name: str) -> str:
             return f"Could not read Is Agentic's report ({r.get('reason')}). The audit went on without it."
         return (f"Read Is Agentic's report as a second opinion: {_n(r.get('issues') or 0, 'issue')}, "
                 f"{r.get('extra')} of them on checks we do not run, {r.get('api_product')} for API products.")
+    if name == "read_audit":
+        held = r.get("held_back") or 0
+        return (f"Fixer looked at what the Auditor found: {_n(r.get('gaps') or 0, 'thing')} to fix"
+                + (f", and {held} that {str(r.get('platform')).capitalize()} controls." if held else "."))
+    if name == "plan_fixes":
+        return (f"Fixer sorted the work: {r.get('needs_owner')} waiting for your answers, {r.get('not_started')} it will prepare, "
+                f"{r.get('platform_held')} held back by the platform.")
+    if name == "save_fixes":
+        return f"Fixer saved {_n(r.get('saved') or 0, 'fix', 'fixes')} for you to review."
     if name == "import_answers":
         return f"Imported {r.get('imported')} pasted answers ({r.get('empty')} empty)."
     if name == "extract_mentions":
@@ -252,6 +268,15 @@ def _describe_id(step: dict, store_name: str) -> str:
             return f"Tidak bisa membaca laporan Is Agentic ({r.get('reason')}). Audit tetap jalan tanpanya."
         return (f"Membaca laporan Is Agentic sebagai pendapat kedua: {r.get('issues') or 0} temuan, "
                 f"{r.get('extra')} di antaranya pada cek yang belum kita jalankan, {r.get('api_product')} untuk produk API.")
+    if name == "read_audit":
+        held = r.get("held_back") or 0
+        return (f"Fixer membaca temuan Auditor: {r.get('gaps') or 0} hal yang perlu diperbaiki"
+                + (f", dan {held} yang dikendalikan {str(r.get('platform')).capitalize()}." if held else "."))
+    if name == "plan_fixes":
+        return (f"Fixer memilah pekerjaan: {r.get('needs_owner')} menunggu jawaban Anda, {r.get('not_started')} akan ia siapkan, "
+                f"{r.get('platform_held')} tertahan platform.")
+    if name == "save_fixes":
+        return f"Fixer menyimpan {r.get('saved') or 0} perbaikan untuk Anda tinjau."
     if name == "import_answers":
         return f"Mengimpor {r.get('imported')} jawaban yang di-paste ({r.get('empty')} kosong)."
     if name == "extract_mentions":

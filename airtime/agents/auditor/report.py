@@ -47,6 +47,14 @@ def _external_json(conn, audit_id: int, checks: list[dict]) -> dict | None:
     return out
 
 
+def fixes_json(conn, audit_id: int) -> list[dict]:
+    """What the owner sees about each fix. The prepared change itself (`draft`) is never exported."""
+    return [{"check_id": f["check_id"], "position": f["position"], "status": f["status"], "tier": f["tier"],
+             "title": f["title"], "title_id": f["title_id"], "why": f["why"], "why_id": f["why_id"],
+             "summary": f["summary"], "summary_id": f["summary_id"], "questions": _loads(f["questions"], [])}
+            for f in conn.execute("SELECT * FROM fixes WHERE audit_id = ? ORDER BY position", (audit_id,))]
+
+
 def audit_json(conn, store_id: int) -> dict | None:
     latest = conn.execute("SELECT * FROM audits WHERE store_id = ? ORDER BY scanned_at DESC, id DESC LIMIT 1",
                           (store_id,)).fetchone()
@@ -99,6 +107,7 @@ def audit_json(conn, store_id: int) -> dict | None:
         "history": history,
         "prompt_all": all_prompt(gap_rows, site, platform, "en", scanned),
         "prompt_all_id": all_prompt(gap_rows, site, platform, "id", scanned), "external": external,
+        "fixes": fixes_json(conn, latest["id"]),
     }
 
 

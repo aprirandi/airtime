@@ -127,6 +127,10 @@ def cmd_audit(args) -> int:
     print("groups: " + ", ".join(f"{g}={'-' if v is None else str(v) + '%'}" for g, v in score["groups"].items()))
     print(f"{ctx.data['fetch_pages']['requests']} requests, "
           f"{ctx.data['run_checks']['checks']} checks, platform: {ctx.data['fetch_pages']['platform']}")
+    fixer = ctx.data.get("plan_fixes")
+    if fixer:
+        print(f"Fixer: {fixer['fixes']} fixes ({fixer['needs_owner']} waiting for the owner, {fixer['not_started']} to prepare, "
+              f"{fixer['platform_held']} held back by the platform)")
     ext = ctx.data.get("external_scan")
     if ext:
         print("Is Agentic (second opinion): " + (f"{ext['score']} / 100, {ext['issues']} issues, {ext['extra']} not in our checks"
