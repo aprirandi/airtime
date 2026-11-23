@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       site:
-        description: "Deployed address, e.g. https://airtime.vercel.app"
+        description: "Deployed address, e.g. https://airtime-ai.vercel.app"
         required: false
         default: ""
   push:
@@ -21,11 +21,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: The function file Vercel serves, run here with real internet
+        run: |
+          node engine/scripts/try-bundle.mjs https://www.handworks.com.au shopify
+          node engine/scripts/try-bundle.mjs https://wordpress.org
       - name: Find and test the deployment
         run: |
           CANDIDATES="${{ github.event.inputs.site }}"
           if [ -z "$CANDIDATES" ]; then
-            CANDIDATES="https://airtime-xi.vercel.app https://airtime.vercel.app https://airtime-kenari.vercel.app https://airtime-aprirandi.vercel.app https://airtime-web.vercel.app"
+            CANDIDATES="https://airtime-ai.vercel.app https://airtime.vercel.app https://airtime-kenari.vercel.app https://airtime-aprirandi.vercel.app https://airtime-web.vercel.app"
           fi
           FOUND=""
           for u in $CANDIDATES; do

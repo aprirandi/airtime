@@ -8,7 +8,7 @@ for each fix (like Is Agentic or Cloudflare's checker). The page and the checkin
 | Part | Where | Notes |
 |---|---|---|
 | The page | `web/` (Vite + React) | `#/` is the address form, `#/check/<address>?platform=shopify` is a result you can link to. English at `/`, Indonesian at `/id/`. |
-| The checking service | `api/audit.ts` | A Vercel function. `GET /api/audit?url=...&platform=...` or `POST` with `{"url": "...", "platform": "shopify"}`. |
+| The checking service | `api/audit.js` | A Vercel function: one file bundled from `engine/` by `cd engine && npm run bundle:api` (committed; CI fails when it is out of date). Bundling means Vercel does not have to find or load any packages, which is what broke the first deploy (an ESM-only package and a Node version requirement). `GET /api/audit?url=...&platform=...` or `POST` with `{"url": "...", "platform": "shopify"}`. |
 | The engine | `engine/src/` (TypeScript) | Fetcher, HTML reader, robots.txt reader, 24 checks, scoring, fix prompts. Checked against the Python engine (see below). |
 | Settings | `vercel.json`, `tsconfig.json`, `.vercelignore` | Install and build commands, the output folder, 60 seconds for the function. |
 
@@ -19,7 +19,7 @@ still reachable at `#/dashboard`, `#/agents/team`, `#/checks`. Set `VITE_SHOW_AN
 
 1. Create a Vercel account and choose **Add New > Project**, then import `aprirandi/airtime` from GitHub.
 2. Leave **Root Directory** as the repo root and **Framework Preset** as "Other". Everything else comes from `vercel.json`
-   (install: `npm ci` in `engine` and `web`; build: `npm run build:site --prefix web`; output: `web/dist`).
+   (install: `npm ci` in `web`; build: `npm run build:site --prefix web`; output: `web/dist`; Node 22 from the root `package.json`).
 3. No environment variables are needed. Deploy.
 4. Try it: open the project address, type a website, and also run
    `curl -X POST https://YOUR-PROJECT.vercel.app/api/audit -H 'content-type: application/json' -d '{"url":"handworks.com.au","platform":"shopify"}'`.
