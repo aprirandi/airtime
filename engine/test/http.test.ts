@@ -33,7 +33,7 @@ describe("the fetcher never reaches private addresses", () => {
   it.each([
     ["127.0.0.1", true], ["10.1.2.3", true], ["172.16.0.1", true], ["172.32.0.1", false], ["192.168.1.1", true],
     ["169.254.169.254", true], ["100.64.0.1", true], ["0.0.0.0", true], ["224.0.0.1", true], ["8.8.8.8", false],
-    ["93.184.216.34", false], ["::1", true], ["::", true], ["fd00::1", true], ["fe80::1", true], ["::ffff:10.0.0.1", true],
+    ["93.184.216.34", false], ["192.0.78.24", false], ["192.0.66.1", false], ["192.0.2.1", true], ["192.0.0.9", true], ["198.51.100.7", true], ["203.0.113.5", true], ["198.18.0.1", true], ["::1", true], ["::", true], ["fd00::1", true], ["fe80::1", true], ["::ffff:10.0.0.1", true],
     ["2606:4700:4700::1111", false],
   ])("%s private: %s", (ip, expected) => expect(isPrivateAddress(ip)).toBe(expected))
 

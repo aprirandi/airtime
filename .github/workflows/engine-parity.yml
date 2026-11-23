@@ -1,7 +1,7 @@
 name: Engine parity
 
 # Runs the Python and the TypeScript Auditor on the same live sites and compares every check. Informational:
-# it prints both answers where they differ. Manual, and on pushes that change this file.
+# it prints both answers where they differ. Manual, and on pushes that change this file (last widened 23 Nov 2026).
 on:
   workflow_dispatch:
     inputs:

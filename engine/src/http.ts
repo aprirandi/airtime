@@ -74,11 +74,13 @@ export type Fetcher = (url: string, options?: FetchOptions) => Promise<Response>
 export function isPrivateAddress(address: string): boolean {
   const ip = address.split("%")[0] ?? address
   if (net.isIPv4(ip)) {
-    const [a, b] = ip.split(".").map(Number) as [number, number]
+    const [a, b, c] = ip.split(".").map(Number) as [number, number, number]
     return (
       a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254) ||
-      (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 192 && b === 0) ||
-      (a === 198 && (b === 18 || b === 19)) || a >= 224
+      (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) ||
+      (a === 192 && b === 0 && (c === 0 || c === 2)) || // only 192.0.0.0/24 and 192.0.2.0/24: 192.0.66.x and 192.0.78.x are public
+      (a === 198 && (b === 18 || b === 19)) || (a === 198 && b === 51 && c === 100) || (a === 203 && b === 0 && c === 113) ||
+      a >= 224
     )
   }
   if (net.isIPv6(ip)) {
