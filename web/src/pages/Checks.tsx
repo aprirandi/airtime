@@ -4,8 +4,10 @@ import { Check, Copy } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { fmtDate } from "@/lib/format"
 import { useI18n, type T } from "@/lib/i18n"
-import type { RegistryCheck, Site, Store } from "@/lib/types"
+import { ResultBadge } from "@/components/Audit"
+import type { AuditCheck, RegistryCheck, Site, Store } from "@/lib/types"
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
 
@@ -46,8 +48,8 @@ function Command({ text }: { text: string }) {
   )
 }
 
-function Row({ c, platform, t, pick, site }: {
-  c: RegistryCheck; platform: string; t: T; pick: <V>(o: object, f: string) => V; site: string
+function Row({ c, result, platform, t, pick, site }: {
+  c: RegistryCheck; result?: AuditCheck; platform: string; t: T; pick: <V>(o: object, f: string) => V; site: string
 }) {
   const controlled = platform ? c.controlled[platform] : undefined
   const hint = platform ? c.platform_fix[platform] : undefined
@@ -58,7 +60,7 @@ function Row({ c, platform, t, pick, site }: {
         <span className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
           <span className="min-w-0">{pick<string>(c, "name")}</span>
           <Badge variant="outline">{t(`audit.tier.${c.tier}`)}</Badge>
-          <StatusBadge status={c.status} t={t} />
+          {result && result.result !== "planned" ? <ResultBadge c={result} t={t} /> : <StatusBadge status={c.status} t={t} />}
           {controlled && <Badge variant="secondary">{t("checks.controlled", { p: cap(platform) })}</Badge>}
         </span>
       </AccordionTrigger>
@@ -73,6 +75,12 @@ function Row({ c, platform, t, pick, site }: {
           )}
         </div>
         {c.status === "na" && <p>{pick<string>(c, "na_reason")}</p>}
+        {result && result.result !== "planned" && result.evidence && (
+          <div>
+            <div className="text-muted-foreground text-xs font-medium">{t("audit.evidence")}</div>
+            <p>{result.evidence}</p>
+          </div>
+        )}
         {c.fix && (
           <div>
             <div className="text-muted-foreground text-xs font-medium">{t("audit.how")}</div>
@@ -113,12 +121,44 @@ export function Checks({ site, store }: { site: Site; store: Store }) {
   if (!reg) return <p className="text-muted-foreground text-sm">{t("checks.none")}</p>
   const n = (f: (c: RegistryCheck) => boolean) => reg.checks.filter(f).length
   const rules = [1, 2, 3, 4, 5, 6]
+  const audit = store.audit
+  const results = new Map((audit?.checks ?? []).map((c) => [c.id, c]))
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">{t("checks.title")}</h1>
         <p className="text-muted-foreground text-sm">{t("checks.sub")}</p>
       </div>
+
+      {audit && (
+        <div className="grid gap-3 sm:grid-cols-4">
+          <div className="rounded-lg border p-3 sm:col-span-1">
+            <div className="text-muted-foreground text-xs">{t("audit.score")}</div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl font-semibold tabular-nums">{audit.score ?? "—"}</span>
+              <span className="text-muted-foreground text-sm">/ 100</span>
+            </div>
+            <Badge variant={audit.label === "strong" ? "success" : audit.label === "needs_work" ? "warning" : "destructive"}>
+              {t(`audit.label.${audit.label}`)}
+            </Badge>
+          </div>
+          {["1", "2", "3"].map((g) => {
+            const grp = audit.groups[g]
+            return (
+              <div key={g} className="rounded-lg border p-3">
+                <div className="text-muted-foreground text-xs">{audit.group_names[g]?.[lang]}</div>
+                <div className="text-2xl font-semibold tabular-nums">{grp?.percent == null ? "—" : `${grp.percent}%`}</div>
+                <div className="text-muted-foreground text-xs">
+                  {t("audit.groupLine", { p: grp?.passing ?? 0, n: grp?.scored ?? 0 })}
+                </div>
+              </div>
+            )
+          })}
+          <p className="text-muted-foreground text-xs sm:col-span-4">
+            {t("checks.resultsNote", { d: fmtDate(audit.scanned_at.slice(0, 10)), site: audit.target })}
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <Stat label={t("checks.total")} value={reg.checks.length} />
@@ -144,7 +184,7 @@ export function Checks({ site, store }: { site: Site; store: Store }) {
             <CardContent>
               <Accordion type="multiple" className="rounded-lg border px-4 text-sm">
                 {rows.map((c) => (
-                  <Row key={c.id} c={c} platform={platform} t={t} pick={pick} site={target} />
+                  <Row key={c.id} c={c} result={results.get(c.id)} platform={platform} t={t} pick={pick} site={target} />
                 ))}
               </Accordion>
             </CardContent>
