@@ -130,3 +130,15 @@ def test_the_registry_document_is_up_to_date():
     doc = Path(__file__).resolve().parent.parent / "plans" / "check-registry.md"
     assert doc.read_text() == registry_markdown() + "\n" or doc.read_text() == registry_markdown(), \
         "run: python -m airtime.agents.auditor.registry_doc > plans/check-registry.md"
+
+
+def test_the_export_carries_the_whole_registry_for_the_checks_page(conn, acfg, tmp_path):
+    audit_flow(FakeSite()).run(make_ctx(conn, acfg, "2026-11-22"))
+    export_site(conn, tmp_path)
+    reg = json.loads((tmp_path / "data" / "site.json").read_text())["registry"]
+    assert len(reg["checks"]) == len(REGISTRY) and set(reg["groups"]) == {"1", "2", "3", "4"}
+    by = {c["id"]: c for c in reg["checks"]}
+    assert by["content_signals"]["status"] == "built" and "robots.txt.liquid" in by["content_signals"]["platform_fix"]["shopify"]["en"]
+    assert by["content_signals"]["verify"]["command"].startswith("curl")
+    assert "shopify" in by["link_headers"]["controlled"] and by["webmcp"]["status"] == "planned"
+    assert {c["status"] for c in reg["checks"] if c["group"] == 4} == {"na"}

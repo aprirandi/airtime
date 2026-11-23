@@ -10,7 +10,7 @@ import json
 import shutil
 from pathlib import Path
 
-from airtime.agents.auditor.report import audit_json
+from airtime.agents.auditor.report import audit_json, registry_json
 from airtime.agents.visibility.compare import compare_days, mention_range, scope_label
 from airtime.agents.visibility.topics import topic_stats, topics_for
 from airtime.config import REPO_ROOT, load_store_config
@@ -404,7 +404,7 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
         })
     weekdays = sorted({d for st in stores for d in ((st["setup"] or {}).get("weekdays") or [])},
                       key=lambda d: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"].index(d))
-    site = {"generated_at": utc_now(), "schedule": {**SCHEDULE, "weekdays": weekdays or None}, "agent": AGENT, "team": TEAM, "stores": stores}
+    site = {"generated_at": utc_now(), "schedule": {**SCHEDULE, "weekdays": weekdays or None}, "agent": AGENT, "team": TEAM, "registry": registry_json(), "stores": stores}
     path = data_dir / "site.json"
     path.write_text(json.dumps(site, indent=1))
     written.append(path)

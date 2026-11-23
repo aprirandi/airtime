@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Bot, LayoutDashboard, Moon, Sun } from "lucide-react"
+import { Bot, LayoutDashboard, ListChecks, Moon, Sun } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -7,14 +7,16 @@ import { useLive, useSite } from "@/lib/data"
 import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import { Agents } from "@/pages/Agents"
+import { Checks } from "@/pages/Checks"
 import { Dashboard } from "@/pages/Dashboard"
 import { Day } from "@/pages/Day"
 
-type Route = { page: "dashboard" } | { page: "run"; id: number } | { page: "agents"; view: "team" | "flow" }
+type Route = { page: "dashboard" } | { page: "run"; id: number } | { page: "agents"; view: "team" | "flow" } | { page: "checks" }
 
 function parse(hash: string): Route {
   const run = hash.match(/^#\/run\/(\d+)/)
   if (run) return { page: "run", id: Number(run[1]) }
+  if (hash.startsWith("#/checks")) return { page: "checks" }
   if (hash.startsWith("#/agents")) return { page: "agents", view: hash.endsWith("/flow") ? "flow" : "team" }
   return { page: "dashboard" }
 }
@@ -89,12 +91,15 @@ export default function App() {
           </a>
           {store && <span className="text-muted-foreground hidden truncate text-sm md:inline">{store.name}</span>}
           <nav className="flex items-center gap-1">
-            <NavLink href="#/" active={route.page !== "agents"}>
+            <NavLink href="#/" active={route.page !== "agents" && route.page !== "checks"}>
               <LayoutDashboard /> <span className="hidden sm:inline">{t("nav.dashboard")}</span>
             </NavLink>
             <NavLink href="#/agents/team" active={route.page === "agents"}>
               <Bot /> <span className="hidden sm:inline">{t("nav.agents")}</span>
               {working && <span className="bg-success size-1.5 animate-pulse rounded-full" />}
+            </NavLink>
+            <NavLink href="#/checks" active={route.page === "checks"}>
+              <ListChecks /> <span className="hidden sm:inline">{t("nav.checks")}</span>
             </NavLink>
           </nav>
           <div className="ml-auto flex items-center gap-1">
@@ -114,6 +119,7 @@ export default function App() {
         {site && store && route.page === "dashboard" && (
           <Dashboard site={site} store={store} live={live} liveCheckedAt={liveState.loadedAt} go={go} />
         )}
+        {site && store && route.page === "checks" && <Checks site={site} store={store} />}
         {site && store && route.page === "agents" && <Agents site={site} store={store} live={live} view={route.view} go={go} />}
       </main>
     </div>

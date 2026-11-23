@@ -81,6 +81,28 @@ export interface Audit {
   history: { scanned_at: string; score: number | null; engine: string }[]
 }
 
+export interface RegistryCheck {
+  id: string
+  group: number
+  tier: "essential" | "recommended" | "bonus"
+  source: "is_agentic" | "cloudflare" | "both"
+  status: "built" | "planned" | "na"
+  name: string
+  name_id: string
+  fix: string
+  fix_id: string
+  na_reason: string
+  na_reason_id: string
+  controlled: Record<string, { en: string; id: string }>
+  platform_fix: Record<string, { en: string; id: string }>
+  verify: { command: string; en: string; id: string } | null
+}
+
+export interface Registry {
+  groups: Record<string, { en: string; id: string }>
+  checks: RegistryCheck[]
+}
+
 export interface Run {
   id: number
   agent: string
@@ -226,6 +248,7 @@ export interface Site {
   schedule: { cron: string; utc_hour: number; utc_minute: number; weekdays?: string[] | null }
   agent: { name: string; role: string; role_id?: string }
   team: TeamMember[]
+  registry?: Registry
   stores: Store[]
 }
 

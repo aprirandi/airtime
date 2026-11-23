@@ -63,3 +63,19 @@ def audit_json(conn, store_id: int) -> dict | None:
         "prompt_all": all_prompt(gap_rows, site, platform, "en", scanned),
         "prompt_all_id": all_prompt(gap_rows, site, platform, "id", scanned),
     }
+
+
+def registry_json() -> dict:
+    """The whole check registry for the website's Checks page. Same for every store: the page picks the store's platform."""
+    checks = []
+    for d in REGISTRY:
+        checks.append({
+            "id": d.id, "group": d.group, "tier": d.tier, "source": d.source,
+            "status": "built" if d.run else ("na" if d.group == 4 else "planned"),
+            "name": d.name, "name_id": d.name_id, "fix": d.fix, "fix_id": d.fix_id,
+            "na_reason": d.na_reason[0] if d.na_reason else "", "na_reason_id": d.na_reason[1] if d.na_reason else "",
+            "controlled": {p: {"en": v[0], "id": v[1]} for p, v in d.platform_controlled.items()},
+            "platform_fix": {p: {"en": v[0], "id": v[1]} for p, v in d.platform_fix.items()},
+            "verify": {"command": d.verify[0], "en": d.verify[1], "id": d.verify[2]} if d.verify else None,
+        })
+    return {"groups": {str(k): {"en": v[0], "id": v[1]} for k, v in GROUPS.items()}, "checks": checks}
