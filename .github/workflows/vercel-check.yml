@@ -25,7 +25,7 @@ jobs:
         run: |
           CANDIDATES="${{ github.event.inputs.site }}"
           if [ -z "$CANDIDATES" ]; then
-            CANDIDATES="https://airtime.vercel.app https://airtime-kenari.vercel.app https://airtime-aprirandi.vercel.app https://airtime-web.vercel.app"
+            CANDIDATES="https://airtime-xi.vercel.app https://airtime.vercel.app https://airtime-kenari.vercel.app https://airtime-aprirandi.vercel.app https://airtime-web.vercel.app"
           fi
           FOUND=""
           for u in $CANDIDATES; do
