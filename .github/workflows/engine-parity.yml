@@ -1,0 +1,41 @@
+name: Engine parity
+
+# Runs the Python and the TypeScript Auditor on the same live sites and compares every check. Informational:
+# it prints both answers where they differ. Manual, and on pushes that change this file.
+on:
+  workflow_dispatch:
+    inputs:
+      sites:
+        description: "Sites to compare, space separated (optionally followed by a platform: https://x.com shopify)"
+        required: false
+        default: ""
+  push:
+    branches: [claude/zen-ptolemy-884w50]
+    paths: [.github/workflows/engine-parity.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: engine/package-lock.json
+      - run: npm ci
+        working-directory: engine
+      - name: Compare
+        run: |
+          SITES="${{ github.event.inputs.sites }}"
+          if [ -z "$SITES" ]; then
+            SITES="https://www.handworks.com.au shopify https://www.allbirds.com shopify https://example.com https://wordpress.org https://vercel.com https://www.bbc.com"
+          fi
+          python tests/live_parity.py $SITES
