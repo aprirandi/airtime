@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-23T01:40:09+00:00",
+ "generated_at": "2026-11-23T04:26:45+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
@@ -212,6 +212,843 @@
    ]
   }
  ],
+ "registry": {
+  "groups": {
+   "1": {
+    "en": "Access and content",
+    "id": "Akses dan isi"
+   },
+   "2": {
+    "en": "Trust and identity",
+    "id": "Kepercayaan dan identitas"
+   },
+   "3": {
+    "en": "Agent discovery",
+    "id": "Penemuan agent"
+   },
+   "4": {
+    "en": "Not for stores",
+    "id": "Bukan untuk toko"
+   }
+  },
+  "checks": [
+   {
+    "id": "robots_txt",
+    "group": 1,
+    "tier": "recommended",
+    "source": "cloudflare",
+    "status": "built",
+    "name": "robots.txt exists",
+    "name_id": "robots.txt ada",
+    "fix": "Publish /robots.txt with clear crawl rules and a Sitemap line.",
+    "fix_id": "Terbitkan /robots.txt dengan aturan crawl yang jelas dan baris Sitemap.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {
+     "shopify": {
+      "en": "Shopify generates robots.txt. Change it through the robots.txt.liquid template.",
+      "id": "Shopify membuat robots.txt. Ubah lewat template robots.txt.liquid."
+     }
+    },
+    "verify": {
+     "command": "curl -sS -i {site}/robots.txt",
+     "en": "HTTP 200, at least one User-agent line, and a Sitemap line.",
+     "id": "HTTP 200, minimal satu baris User-agent, dan satu baris Sitemap."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "ai_crawlers_allowed",
+    "group": 1,
+    "tier": "essential",
+    "source": "both",
+    "status": "built",
+    "name": "AI crawlers can reach the site",
+    "name_id": "Crawler AI bisa mengakses situs",
+    "fix": "Do not block ChatGPT-User, OAI-SearchBot, Claude-User or PerplexityBot in robots.txt, and check that firewall or bot protection lets them in.",
+    "fix_id": "Jangan blokir ChatGPT-User, OAI-SearchBot, Claude-User atau PerplexityBot di robots.txt, dan pastikan firewall atau perlindungan bot mengizinkan mereka masuk.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS -o /dev/null -w '%{http_code}\\n' -A 'Mozilla/5.0 (compatible; ChatGPT-User/1.0)' {site}/",
+     "en": "200 for ChatGPT-User, OAI-SearchBot, Claude-User and PerplexityBot (change the name after -A), and no Disallow for them in robots.txt.",
+     "id": "200 untuk ChatGPT-User, OAI-SearchBot, Claude-User dan PerplexityBot (ganti nama setelah -A), dan tidak ada Disallow untuk mereka di robots.txt."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "sitemap",
+    "group": 1,
+    "tier": "recommended",
+    "source": "both",
+    "status": "built",
+    "name": "Sitemap exists",
+    "name_id": "Sitemap ada",
+    "fix": "Publish a sitemap.xml and list it in robots.txt with a Sitemap line.",
+    "fix_id": "Terbitkan sitemap.xml dan cantumkan di robots.txt dengan baris Sitemap.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS {site}/sitemap.xml | head -20",
+     "en": "A <urlset> or <sitemapindex> with <loc> entries, and a Sitemap line in robots.txt.",
+     "id": "<urlset> atau <sitemapindex> dengan entri <loc>, dan baris Sitemap di robots.txt."
+    },
+    "external_id": "sitemap"
+   },
+   {
+    "id": "raw_html_content",
+    "group": 1,
+    "tier": "essential",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "Content available without JavaScript",
+    "name_id": "Konten tersedia tanpa JavaScript",
+    "fix": "Serve at least 500 characters of real homepage text in the HTML itself, with one clear H1, headings in order (H1, H2, H3 without skipping), and little markup around the text.",
+    "fix_id": "Sajikan minimal 500 karakter teks beranda langsung di HTML, dengan satu H1 yang jelas, judul berurutan (H1, H2, H3 tanpa melompat), dan sedikit markup di sekitar teks.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {
+     "shopify": {
+      "en": "This comes from the theme: change the heading levels in the theme's sections so the first heading is an H1.",
+      "id": "Ini berasal dari tema: ubah tingkat judul di bagian tema supaya judul pertama adalah H1."
+     }
+    },
+    "verify": {
+     "command": "curl -sS {site}/ | grep -io '<h[1-6][^>]*>' | head -20",
+     "en": "The first heading is <h1> and levels never skip (h1, h2, h3). The raw HTML has at least 500 characters of text.",
+     "id": "Judul pertama adalah <h1> dan tingkatnya tidak melompat (h1, h2, h3). HTML mentah punya minimal 500 karakter teks."
+    },
+    "external_id": "content-no-js"
+   },
+   {
+    "id": "redirects_clean",
+    "group": 1,
+    "tier": "essential",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "Redirects resolve cleanly",
+    "name_id": "Redirect berjalan bersih",
+    "fix": "Use plain HTTP redirects (301), not meta-refresh or JavaScript, and keep the chain to three hops or fewer.",
+    "fix_id": "Pakai redirect HTTP biasa (301), bukan meta-refresh atau JavaScript, dan jaga rantainya maksimal tiga lompatan.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sSIL {site}/ | grep -iE '^(HTTP|location)'",
+     "en": "At most three redirects (301), ending in HTTP 200, and no meta-refresh in the HTML.",
+     "id": "Paling banyak tiga redirect (301), berakhir di HTTP 200, dan tidak ada meta-refresh di HTML."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "public_no_login",
+    "group": 1,
+    "tier": "essential",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "Content available without signing in",
+    "name_id": "Konten tersedia tanpa login",
+    "fix": "Make sure the homepage and product pages can be read without logging in or entering a store password.",
+    "fix_id": "Pastikan beranda dan halaman produk bisa dibaca tanpa login atau kata sandi toko.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS -o /dev/null -w '%{http_code} %{url_effective}\\n' -L {site}/",
+     "en": "200, and the final URL is not a login or password page.",
+     "id": "200, dan URL akhirnya bukan halaman login atau kata sandi."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "not_noindex",
+    "group": 1,
+    "tier": "recommended",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "Homepage not hidden from search",
+    "name_id": "Beranda tidak disembunyikan dari pencarian",
+    "fix": "Remove noindex from the homepage's robots meta tag and from any X-Robots-Tag header.",
+    "fix_id": "Hapus noindex dari meta tag robots beranda dan dari header X-Robots-Tag.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sSI {site}/ | grep -i x-robots-tag; curl -sS {site}/ | grep -i 'name=\"robots\"'",
+     "en": "No noindex in either result.",
+     "id": "Tidak ada noindex di kedua hasil."
+    },
+    "external_id": "noindex-directives"
+   },
+   {
+    "id": "not_found_markdown",
+    "group": 1,
+    "tier": "essential",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "Agent-friendly 404 pages",
+    "name_id": "Halaman 404 ramah agent",
+    "fix": "Return a real HTTP 404 for missing pages, and a Markdown error message with a link to your sitemap or docs when the request asks for text/markdown.",
+    "fix_id": "Kembalikan HTTP 404 yang benar untuk halaman yang tidak ada, dan pesan error Markdown dengan tautan ke sitemap atau dokumentasi saat permintaan meminta text/markdown.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {
+     "shopify": {
+      "en": "Shopify serves 404 pages; a Markdown error body is not something the owner can change.",
+      "id": "Shopify yang menyajikan halaman 404; isi error Markdown tidak bisa diubah pemilik."
+     }
+    },
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS -i -H 'Accept: text/markdown' {site}/a-page-that-does-not-exist",
+     "en": "HTTP 404 with Content-Type: text/markdown and a short message that links to the sitemap.",
+     "id": "HTTP 404 dengan Content-Type: text/markdown dan pesan singkat yang menautkan ke sitemap."
+    },
+    "external_id": "agent-friendly-404"
+   },
+   {
+    "id": "controls_labelled",
+    "group": 1,
+    "tier": "essential",
+    "source": "is_agentic",
+    "status": "planned",
+    "name": "Controls and forms are understandable",
+    "name_id": "Kontrol dan form bisa dipahami",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "page_token_budget",
+    "group": 1,
+    "tier": "recommended",
+    "source": "is_agentic",
+    "status": "planned",
+    "name": "Pages fit an agent's context budget",
+    "name_id": "Halaman muat di anggaran konteks agent",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "jsonld_organization",
+    "group": 2,
+    "tier": "recommended",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "Organization data in JSON-LD",
+    "name_id": "Data Organization di JSON-LD",
+    "fix": "Add Organization (or LocalBusiness) JSON-LD to the homepage, with a name and a description.",
+    "fix_id": "Tambahkan JSON-LD Organization (atau LocalBusiness) di beranda, dengan nama dan deskripsi.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {
+     "shopify": {
+      "en": "Shopify's structured_data filter does not output Organization data: add a JSON-LD block to the theme layout (not verified).",
+      "id": "Filter structured_data Shopify tidak menghasilkan data Organization: tambahkan blok JSON-LD di layout tema (belum terverifikasi)."
+     }
+    },
+    "verify": {
+     "command": "curl -sS {site}/ | grep -o 'application/ld+json' | head -3",
+     "en": "An Organization (or LocalBusiness) JSON-LD block with a name and a description. Test it at validator.schema.org.",
+     "id": "Satu blok JSON-LD Organization (atau LocalBusiness) dengan nama dan deskripsi. Uji di validator.schema.org."
+    },
+    "external_id": "json-ld"
+   },
+   {
+    "id": "organization_completeness",
+    "group": 2,
+    "tier": "recommended",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "Organization contact details and address",
+    "name_id": "Kontak dan alamat Organization",
+    "fix": "Add contactPoint (phone or email with a contactType) and address (PostalAddress) to the Organization JSON-LD.",
+    "fix_id": "Tambahkan contactPoint (telepon atau email dengan contactType) dan address (PostalAddress) ke JSON-LD Organization.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {
+     "shopify": {
+      "en": "Add them in the same JSON-LD block in the theme layout (not verified).",
+      "id": "Tambahkan di blok JSON-LD yang sama di layout tema (belum terverifikasi)."
+     }
+    },
+    "verify": {
+     "command": "curl -sS {site}/ | grep -o 'contactPoint\\|PostalAddress' | sort -u",
+     "en": "Both contactPoint and PostalAddress appear in the Organization JSON-LD.",
+     "id": "contactPoint dan PostalAddress sama-sama ada di JSON-LD Organization."
+    },
+    "external_id": "org-schema-completeness"
+   },
+   {
+    "id": "metadata_complete",
+    "group": 2,
+    "tier": "recommended",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "Page metadata is complete",
+    "name_id": "Metadata halaman lengkap",
+    "fix": "Add a canonical link, the html lang attribute, og:image and og:type to the homepage head.",
+    "fix_id": "Tambahkan link canonical, atribut lang pada html, og:image dan og:type di head beranda.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS {site}/ | grep -iE 'rel=\"canonical\"|og:image|og:type|<html[^>]*lang'",
+     "en": "A canonical link, lang on <html>, og:image and og:type.",
+     "id": "Link canonical, lang di <html>, og:image dan og:type."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "pricing_structured",
+    "group": 2,
+    "tier": "recommended",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "Prices readable in structured data",
+    "name_id": "Harga terbaca di data terstruktur",
+    "fix": "Show price and currency in Product JSON-LD (offers.price and offers.priceCurrency) on product pages.",
+    "fix_id": "Tampilkan harga dan mata uang di JSON-LD Product (offers.price dan offers.priceCurrency) di halaman produk.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {
+     "shopify": {
+      "en": "Shopify's structured_data filter outputs Product data: check that the theme uses it.",
+      "id": "Filter structured_data Shopify menghasilkan data Product: pastikan tema memakainya."
+     }
+    },
+    "verify": {
+     "command": "curl -sS <product-page-url> | grep -o '\"price\"[^,]*\\|priceCurrency[^,]*'",
+     "en": "offers.price and offers.priceCurrency in the product's JSON-LD.",
+     "id": "offers.price dan offers.priceCurrency di JSON-LD produk."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "trust_pages",
+    "group": 2,
+    "tier": "recommended",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "About, Contact and Privacy pages",
+    "name_id": "Halaman About, Contact dan Privacy",
+    "fix": "Publish real About, Contact and Privacy pages with at least 500 characters each, and link them from the footer.",
+    "fix_id": "Terbitkan halaman About, Contact dan Privacy yang nyata dengan minimal 500 karakter masing-masing, dan tautkan dari footer.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {
+     "shopify": {
+      "en": "Privacy: Settings > Customer privacy > Privacy policy, published at /policies/privacy-policy.",
+      "id": "Privacy: Settings > Customer privacy > Privacy policy, terbit di /policies/privacy-policy."
+     }
+    },
+    "verify": {
+     "command": "curl -sS -o /dev/null -w '%{http_code}\\n' {site}/policies/privacy-policy",
+     "en": "HTTP 200 for each of the About, Contact and Privacy pages (use their real URLs), each with at least 500 characters of text and linked from the footer.",
+     "id": "HTTP 200 untuk halaman About, Contact dan Privacy (pakai URL aslinya), masing-masing minimal 500 karakter teks dan ditautkan dari footer."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "schema_breadth",
+    "group": 2,
+    "tier": "bonus",
+    "source": "is_agentic",
+    "status": "planned",
+    "name": "Breadth of schema types",
+    "name_id": "Keragaman tipe schema",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "markdown_negotiation",
+    "group": 3,
+    "tier": "essential",
+    "source": "both",
+    "status": "built",
+    "name": "Markdown content negotiation",
+    "name_id": "Negosiasi konten Markdown",
+    "fix": "Return Markdown when a request sends Accept: text/markdown (Content-Type: text/markdown, Vary: Accept) and keep serving HTML to browsers.",
+    "fix_id": "Kembalikan Markdown saat permintaan mengirim Accept: text/markdown (Content-Type: text/markdown, Vary: Accept) dan tetap sajikan HTML untuk browser.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {
+     "shopify": {
+      "en": "Shopify controls this and its Markdown route is not reliable yet.",
+      "id": "Shopify yang mengaturnya dan rute Markdown-nya belum andal."
+     }
+    },
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS -i -H 'Accept: text/markdown' {site}/",
+     "en": "Content-Type: text/markdown, Vary: Accept and a Markdown body. The same URL with Accept: text/html still returns HTML.",
+     "id": "Content-Type: text/markdown, Vary: Accept dan isi Markdown. URL yang sama dengan Accept: text/html tetap menghasilkan HTML."
+    },
+    "external_id": "markdown-negotiation-vary"
+   },
+   {
+    "id": "llms_txt",
+    "group": 3,
+    "tier": "bonus",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "llms.txt exists and its links work",
+    "name_id": "llms.txt ada dan tautannya berfungsi",
+    "fix": "Publish /llms.txt with Markdown links that all resolve.",
+    "fix_id": "Terbitkan /llms.txt dengan tautan Markdown yang semuanya berfungsi.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {
+     "shopify": {
+      "en": "Shopify generates it from agents.md; override it with the llms.txt.liquid template.",
+      "id": "Shopify membuatnya dari agents.md; timpa dengan template llms.txt.liquid."
+     }
+    },
+    "verify": {
+     "command": "curl -sS -i {site}/llms.txt",
+     "en": "HTTP 200 text with Markdown links that all open.",
+     "id": "HTTP 200 berupa teks dengan tautan Markdown yang semuanya terbuka."
+    },
+    "external_id": "llms-txt-exists"
+   },
+   {
+    "id": "agents_md",
+    "group": 3,
+    "tier": "bonus",
+    "source": "is_agentic",
+    "status": "built",
+    "name": "agents.md exists",
+    "name_id": "agents.md ada",
+    "fix": "Publish /agents.md, a Markdown guide that tells agents how to use the site.",
+    "fix_id": "Terbitkan /agents.md, panduan Markdown yang memberi tahu agent cara memakai situs.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {
+     "shopify": {
+      "en": "Shopify generates it; override it with the agents.md.liquid template.",
+      "id": "Shopify membuatnya; timpa dengan template agents.md.liquid."
+     }
+    },
+    "verify": {
+     "command": "curl -sS -i {site}/agents.md",
+     "en": "HTTP 200 and Content-Type text/markdown or text/plain.",
+     "id": "HTTP 200 dan Content-Type text/markdown atau text/plain."
+    },
+    "external_id": "agent-discovery-file"
+   },
+   {
+    "id": "content_signals",
+    "group": 3,
+    "tier": "recommended",
+    "source": "cloudflare",
+    "status": "built",
+    "name": "Content Signals in robots.txt",
+    "name_id": "Content Signals di robots.txt",
+    "fix": "Add a Content-Signal line to robots.txt stating your preferences, for example: Content-Signal: ai-train=no, search=yes, ai-input=no.",
+    "fix_id": "Tambahkan baris Content-Signal di robots.txt yang menyatakan preferensi Anda, misalnya: Content-Signal: ai-train=no, search=yes, ai-input=no.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {
+     "shopify": {
+      "en": "Add it through the robots.txt.liquid template.",
+      "id": "Tambahkan lewat template robots.txt.liquid."
+     }
+    },
+    "verify": {
+     "command": "curl -sS {site}/robots.txt | grep -i content-signal",
+     "en": "A Content-Signal line with ai-train, search and ai-input each set to yes or no.",
+     "id": "Satu baris Content-Signal dengan ai-train, search dan ai-input, masing-masing yes atau no."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "link_headers",
+    "group": 3,
+    "tier": "bonus",
+    "source": "cloudflare",
+    "status": "built",
+    "name": "Link headers for agent discovery",
+    "name_id": "Header Link untuk penemuan agent",
+    "fix": "Send Link response headers that point agents to useful resources, for example rel=\"api-catalog\" or rel=\"service-doc\".",
+    "fix_id": "Kirim header Link yang mengarahkan agent ke sumber berguna, misalnya rel=\"api-catalog\" atau rel=\"service-doc\".",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {
+     "shopify": {
+      "en": "Shopify sets Link headers itself; whether an owner can add their own is not documented.",
+      "id": "Shopify mengatur header Link sendiri; belum jelas apakah pemilik bisa menambah sendiri."
+     }
+    },
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sSI {site}/ | grep -i '^link'",
+     "en": "A Link header with rel=\"api-catalog\", \"service-doc\" or a similar useful relation.",
+     "id": "Header Link dengan rel=\"api-catalog\", \"service-doc\" atau relasi berguna lainnya."
+    },
+    "external_id": "link-headers-discovery"
+   },
+   {
+    "id": "mcp_server_card",
+    "group": 3,
+    "tier": "bonus",
+    "source": "both",
+    "status": "built",
+    "name": "MCP server card",
+    "name_id": "MCP server card",
+    "fix": "Serve an MCP server card at /.well-known/mcp/server-card.json with serverInfo (name, version).",
+    "fix_id": "Sajikan MCP server card di /.well-known/mcp/server-card.json dengan serverInfo (name, version).",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {
+     "shopify": {
+      "en": "Shopify controls this and the owner cannot change it.",
+      "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+     }
+    },
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS -i {site}/.well-known/mcp/server-card.json",
+     "en": "HTTP 200 JSON with serverInfo.name and serverInfo.version.",
+     "id": "HTTP 200 JSON dengan serverInfo.name dan serverInfo.version."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "agent_skills_index",
+    "group": 3,
+    "tier": "bonus",
+    "source": "cloudflare",
+    "status": "built",
+    "name": "Agent skills index",
+    "name_id": "Indeks agent skills",
+    "fix": "Publish /.well-known/agent-skills/index.json with a $schema and a skills array.",
+    "fix_id": "Terbitkan /.well-known/agent-skills/index.json dengan $schema dan array skills.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {
+     "shopify": {
+      "en": "Shopify controls this and the owner cannot change it.",
+      "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+     }
+    },
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS -i {site}/.well-known/agent-skills/index.json",
+     "en": "HTTP 200 JSON with $schema and a skills array; each entry has name, type, description, url and sha256.",
+     "id": "HTTP 200 JSON dengan $schema dan array skills; tiap entri punya name, type, description, url dan sha256."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "ard_manifest",
+    "group": 3,
+    "tier": "bonus",
+    "source": "cloudflare",
+    "status": "built",
+    "name": "ARD manifest",
+    "name_id": "Manifest ARD",
+    "fix": "Serve /.well-known/ai-catalog.json with specVersion, host and entries.",
+    "fix_id": "Sajikan /.well-known/ai-catalog.json dengan specVersion, host dan entries.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {
+     "shopify": {
+      "en": "Shopify controls this and the owner cannot change it.",
+      "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+     }
+    },
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS -i {site}/.well-known/ai-catalog.json",
+     "en": "HTTP 200 JSON with specVersion, host and entries.",
+     "id": "HTTP 200 JSON dengan specVersion, host dan entries."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "auth_md",
+    "group": 3,
+    "tier": "bonus",
+    "source": "both",
+    "status": "built",
+    "name": "Agent registration (auth.md)",
+    "name_id": "Registrasi agent (auth.md)",
+    "fix": "Serve /auth.md with agent registration instructions.",
+    "fix_id": "Sajikan /auth.md dengan petunjuk registrasi agent.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {
+     "shopify": {
+      "en": "Shopify controls this and the owner cannot change it.",
+      "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+     }
+    },
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS -i {site}/auth.md",
+     "en": "HTTP 200 text with agent registration instructions.",
+     "id": "HTTP 200 berupa teks dengan petunjuk registrasi agent."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "oauth_discovery",
+    "group": 3,
+    "tier": "bonus",
+    "source": "both",
+    "status": "built",
+    "name": "OAuth / OpenID Connect discovery",
+    "name_id": "Penemuan OAuth / OpenID Connect",
+    "fix": "Publish OAuth or OpenID Connect discovery metadata so agents can authenticate.",
+    "fix_id": "Terbitkan metadata penemuan OAuth atau OpenID Connect agar agent bisa mengautentikasi.",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {
+     "shopify": {
+      "en": "Shopify controls this and the owner cannot change it.",
+      "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+     }
+    },
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS -i {site}/.well-known/openid-configuration",
+     "en": "HTTP 200 JSON with an issuer.",
+     "id": "HTTP 200 JSON dengan issuer."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "oauth_protected_resource",
+    "group": 3,
+    "tier": "bonus",
+    "source": "both",
+    "status": "built",
+    "name": "OAuth protected-resource metadata",
+    "name_id": "Metadata protected-resource OAuth",
+    "fix": "Publish /.well-known/oauth-protected-resource (RFC 9728).",
+    "fix_id": "Terbitkan /.well-known/oauth-protected-resource (RFC 9728).",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {
+     "shopify": {
+      "en": "Shopify controls this and the owner cannot change it.",
+      "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+     }
+    },
+    "platform_fix": {},
+    "verify": {
+     "command": "curl -sS -i {site}/.well-known/oauth-protected-resource",
+     "en": "HTTP 200 JSON with a resource.",
+     "id": "HTTP 200 JSON dengan resource."
+    },
+    "external_id": ""
+   },
+   {
+    "id": "mcp_live",
+    "group": 3,
+    "tier": "bonus",
+    "source": "both",
+    "status": "planned",
+    "name": "MCP server answers a live connection",
+    "name_id": "Server MCP menjawab koneksi langsung",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "mcp_quality",
+    "group": 3,
+    "tier": "bonus",
+    "source": "is_agentic",
+    "status": "planned",
+    "name": "MCP tool quality",
+    "name_id": "Kualitas alat MCP",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "web_search_discovery",
+    "group": 3,
+    "tier": "bonus",
+    "source": "is_agentic",
+    "status": "planned",
+    "name": "Found through web search",
+    "name_id": "Ditemukan lewat pencarian web",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "webmcp",
+    "group": 3,
+    "tier": "bonus",
+    "source": "cloudflare",
+    "status": "planned",
+    "name": "WebMCP tools in the browser",
+    "name_id": "Alat WebMCP di browser",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "dns_aid",
+    "group": 3,
+    "tier": "bonus",
+    "source": "cloudflare",
+    "status": "planned",
+    "name": "DNS for AI Discovery (DNS-AID)",
+    "name_id": "DNS untuk AI Discovery (DNS-AID)",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "web_bot_auth",
+    "group": 3,
+    "tier": "bonus",
+    "source": "cloudflare",
+    "status": "planned",
+    "name": "Web Bot Auth",
+    "name_id": "Web Bot Auth",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "",
+    "na_reason_id": "",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "api_discovery",
+    "group": 4,
+    "tier": "bonus",
+    "source": "both",
+    "status": "na",
+    "name": "API discovery (OpenAPI, API catalog)",
+    "name_id": "Penemuan API (OpenAPI, katalog API)",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "Applies to API products or agent payments, not to a store.",
+    "na_reason_id": "Untuk produk API atau pembayaran antar-agent, bukan untuk toko.",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "api_surface",
+    "group": 4,
+    "tier": "bonus",
+    "source": "is_agentic",
+    "status": "na",
+    "name": "API surface (scopes, JSON errors, onboarding)",
+    "name_id": "Permukaan API (scope, error JSON, onboarding)",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "Applies to API products or agent payments, not to a store.",
+    "na_reason_id": "Untuk produk API atau pembayaran antar-agent, bukan untuk toko.",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "agent_payments",
+    "group": 4,
+    "tier": "bonus",
+    "source": "cloudflare",
+    "status": "na",
+    "name": "Agent payments (x402, MPP)",
+    "name_id": "Pembayaran antar-agent (x402, MPP)",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "Applies to API products or agent payments, not to a store.",
+    "na_reason_id": "Untuk produk API atau pembayaran antar-agent, bukan untuk toko.",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   },
+   {
+    "id": "agent_checkout",
+    "group": 4,
+    "tier": "bonus",
+    "source": "cloudflare",
+    "status": "na",
+    "name": "Agent checkout (ACP)",
+    "name_id": "Checkout antar-agent (ACP)",
+    "fix": "",
+    "fix_id": "",
+    "na_reason": "Applies to API products or agent payments, not to a store.",
+    "na_reason_id": "Untuk produk API atau pembayaran antar-agent, bukan untuk toko.",
+    "controlled": {},
+    "platform_fix": {},
+    "verify": null,
+    "external_id": ""
+   }
+  ]
+ },
  "stores": [
   {
    "slug": "handworks",
@@ -18666,6 +19503,150 @@
    },
    "runs": [
     {
+     "id": 33,
+     "agent": "auditor",
+     "kind": "audit",
+     "run_date": "2026-11-23",
+     "started_at": "2026-11-23T04:26:34+00:00",
+     "finished_at": "2026-11-23T04:26:45+00:00",
+     "status": "ok",
+     "error": null,
+     "steps": [
+      {
+       "step": 1,
+       "name": "fetch_pages",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:26:34+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:26:44+00:00",
+       "result": {
+        "target": "https://www.handworks.com.au",
+        "requests": 25,
+        "unreachable": 0,
+        "platform": "shopify",
+        "product_page": "https://www.handworks.com.au/products/gf60gatahaaaffaircandle"
+       },
+       "description": "Fetched 25 pages and files from https://www.handworks.com.au.",
+       "description_id": "Mengambil 25 halaman dan berkas dari https://www.handworks.com.au."
+      },
+      {
+       "step": 2,
+       "name": "run_checks",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:26:44+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:26:44+00:00",
+       "result": {
+        "checks": 24,
+        "passed": 13,
+        "partial": 3,
+        "failed": 8,
+        "not_applicable": 4,
+        "planned": 9,
+        "errors": []
+       },
+       "description": "Ran 24 checks: 13 passed, 3 partial, 8 failed, 4 not applicable; 9 more are planned.",
+       "description_id": "Menjalankan 24 cek: 13 lolos, 3 sebagian, 8 gagal, 4 tidak berlaku; 9 lagi direncanakan."
+      },
+      {
+       "step": 3,
+       "name": "score_audit",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:26:44+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:26:44+00:00",
+       "result": {
+        "score": 89.4,
+        "label": "strong",
+        "groups": {
+         "1": 93,
+         "2": 70,
+         "3": 67
+        }
+       },
+       "description": "Scored the site 89.4 out of 100 (strong).",
+       "description_id": "Menilai situs 89.4 dari 100 (strong)."
+      },
+      {
+       "step": 4,
+       "name": "list_gaps",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:26:44+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:26:44+00:00",
+       "result": {
+        "gaps": 4,
+        "first": [
+         "raw_html_content",
+         "organization_completeness",
+         "jsonld_organization",
+         "content_signals"
+        ]
+       },
+       "description": "Listed 4 gaps the owner can fix, most important first.",
+       "description_id": "Mendaftar 4 celah yang bisa diperbaiki pemilik, dari yang terpenting."
+      },
+      {
+       "step": 5,
+       "name": "save_audit",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:26:44+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:26:44+00:00",
+       "result": {
+        "audit_id": 2,
+        "rows": 37
+       },
+       "description": "Stored the audit with 37 check results and their evidence.",
+       "description_id": "Menyimpan audit dengan 37 hasil cek beserta buktinya."
+      },
+      {
+       "step": 6,
+       "name": "external_scan",
+       "kind": "CODE",
+       "agent": "auditor",
+       "started_at": "2026-11-23T04:26:44+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:26:45+00:00",
+       "result": {
+        "status": "ok",
+        "score": 54,
+        "issues": 17,
+        "mapped": 5,
+        "extra": 3,
+        "api_product": 9,
+        "requests": 1
+       },
+       "description": "Read Is Agentic's report as a second opinion: 17 issues, 3 of them on checks we do not run, 9 for API products.",
+       "description_id": "Membaca laporan Is Agentic sebagai pendapat kedua: 17 temuan, 3 di antaranya pada cek yang belum kita jalankan, 9 untuk produk API."
+      },
+      {
+       "step": "M",
+       "name": "master_audit_complete",
+       "kind": "CODE",
+       "agent": "master",
+       "checks": "auditor",
+       "started_at": "2026-11-23T04:26:45+00:00",
+       "status": "ok",
+       "finished_at": "2026-11-23T04:26:45+00:00",
+       "result": {
+        "checks": 37,
+        "score": 89.4,
+        "problems": []
+       },
+       "description": "Master checked the Auditor's work: 37 checks stored and the score of 89.4 matches them. Passed.",
+       "description_id": "Master mengecek hasil Auditor: 37 cek tersimpan dan skor 89.4 cocok dengan hasilnya. Lolos."
+      }
+     ],
+     "quotes_verified": 0,
+     "questions": []
+    },
+    {
      "id": 32,
      "agent": "asker,analyst",
      "kind": "shift",
@@ -28848,7 +29829,7 @@
      "answers": 1,
      "ours": 0,
      "rate": 0.0,
-     "competitor": "Milligram",
+     "competitor": "The Art Scene",
      "competitor_mentions": 1,
      "question_count": 1,
      "terms": [
@@ -28876,9 +29857,9 @@
     }
    ],
    "audit": {
-    "id": 1,
-    "run_id": 31,
-    "scanned_at": "2026-11-22T08:38:16+00:00",
+    "id": 2,
+    "run_id": 33,
+    "scanned_at": "2026-11-23T04:26:44+00:00",
     "target": "https://www.handworks.com.au",
     "platform": "shopify",
     "engine": "airtime-auditor/1",
@@ -29007,7 +29988,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "ai_crawlers_allowed",
@@ -29034,7 +30018,10 @@
         "Claude-User",
         "PerplexityBot"
        ]
-      }
+      },
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "sitemap",
@@ -29056,6 +30043,13 @@
       "controlled_note_id": "",
       "details": {
        "entries": 9
+      },
+      "prompt": "",
+      "prompt_id": "",
+      "external": {
+       "id": "sitemap",
+       "result": "not_listed",
+       "details": ""
       }
      },
      {
@@ -29077,8 +30071,8 @@
       "controlled_note": "",
       "controlled_note_id": "",
       "details": {
-       "text_chars": 19751,
-       "ratio": 0.0159,
+       "text_chars": 19694,
+       "ratio": 0.0158,
        "headings": [
         4,
         4,
@@ -29093,6 +30087,13 @@
         2,
         3
        ]
+      },
+      "prompt": "Fix one issue on https://www.handworks.com.au (Shopify store).\n\nIssue: Content available without JavaScript (essential, Access and content)\nWhat the scan found: Missing in the raw HTML: headings in order starting at H1 (first is H4); text is at least 5% of the HTML (1.6%).\nWhat to do: Serve at least 500 characters of real homepage text in the HTML itself, with one clear H1, headings in order (H1, H2, H3 without skipping), and little markup around the text.\nOn Shopify: This comes from the theme: change the heading levels in the theme's sections so the first heading is an H1.\nHow to check:\n    curl -sS https://www.handworks.com.au/ | grep -io '<h[1-6][^>]*>' | head -20\nExpect: The first heading is <h1> and levels never skip (h1, h2, h3). The raw HTML has at least 500 characters of text.\n\nRules:\n- Change only what the issue needs. Keep the existing design, text and behaviour.\n- Before you change a file or a setting, note its current value so it can be restored.\n- If you do not have the access you need (for example to the theme), say so and stop. Do not work around it.\n\nWhen you finish, list exactly what you changed and how to undo each change.\n",
+      "prompt_id": "Perbaiki satu masalah di https://www.handworks.com.au (toko Shopify).\n\nMasalah: Konten tersedia tanpa JavaScript (esensial, Akses dan isi)\nYang ditemukan scan: Missing in the raw HTML: headings in order starting at H1 (first is H4); text is at least 5% of the HTML (1.6%).\nYang perlu dilakukan: Sajikan minimal 500 karakter teks beranda langsung di HTML, dengan satu H1 yang jelas, judul berurutan (H1, H2, H3 tanpa melompat), dan sedikit markup di sekitar teks.\nDi Shopify: Ini berasal dari tema: ubah tingkat judul di bagian tema supaya judul pertama adalah H1.\nCara mengecek:\n    curl -sS https://www.handworks.com.au/ | grep -io '<h[1-6][^>]*>' | head -20\nHasil yang diharapkan: Judul pertama adalah <h1> dan tingkatnya tidak melompat (h1, h2, h3). HTML mentah punya minimal 500 karakter teks.\n\nAturan:\n- Ubah hanya yang dibutuhkan masalah itu. Pertahankan desain, teks dan perilaku yang ada.\n- Sebelum mengubah berkas atau pengaturan, catat nilai aslinya supaya bisa dikembalikan.\n- Kalau kamu tidak punya akses yang dibutuhkan (misalnya ke tema), katakan dan berhenti. Jangan mencari jalan pintas.\n\nSetelah selesai, tuliskan persis apa yang kamu ubah dan cara membatalkan tiap perubahan.\n",
+      "external": {
+       "id": "content-no-js",
+       "result": "partial",
+       "details": "Homepage: 13589 chars with H1, but first content heading is H4, not H1; heading hierarchy skips H1 to H4; 2.0% content ratio is below the 5% target. No inner pages checked: the 1 sampled page was skipped (forms, login pages, bot challenges, error pages, non-HTML pages and pages over 1 MB are skipped)."
       }
      },
      {
@@ -29115,7 +30116,10 @@
       "controlled_note_id": "",
       "details": {
        "hops": 1
-      }
+      },
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "public_no_login",
@@ -29135,7 +30139,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "not_noindex",
@@ -29155,7 +30162,14 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": {
+       "id": "noindex-directives",
+       "result": "not_listed",
+       "details": ""
+      }
      },
      {
       "id": "not_found_markdown",
@@ -29175,7 +30189,14 @@
       "controlled_by": "shopify",
       "controlled_note": "Shopify serves 404 pages; a Markdown error body is not something the owner can change.",
       "controlled_note_id": "Shopify yang menyajikan halaman 404; isi error Markdown tidak bisa diubah pemilik.",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": {
+       "id": "agent-friendly-404",
+       "result": "partial",
+       "details": "The nonexistent path https://handworks.com.au/__ora-404-probe-hzdyp6o1 correctly returns HTTP 404. Partial credit: no Markdown error body was detected."
+      }
      },
      {
       "id": "controls_labelled",
@@ -29195,7 +30216,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "page_token_budget",
@@ -29215,7 +30239,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "jsonld_organization",
@@ -29235,7 +30262,14 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "Fix one issue on https://www.handworks.com.au (Shopify store).\n\nIssue: Organization data in JSON-LD (recommended, Trust and identity)\nWhat the scan found: An Organization entity is present but has no description.\nWhat to do: Add Organization (or LocalBusiness) JSON-LD to the homepage, with a name and a description.\nOn Shopify: Shopify's structured_data filter does not output Organization data: add a JSON-LD block to the theme layout (not verified).\nHow to check:\n    curl -sS https://www.handworks.com.au/ | grep -o 'application/ld+json' | head -3\nExpect: An Organization (or LocalBusiness) JSON-LD block with a name and a description. Test it at validator.schema.org.\n\nRules:\n- Change only what the issue needs. Keep the existing design, text and behaviour.\n- Before you change a file or a setting, note its current value so it can be restored.\n- If you do not have the access you need (for example to the theme), say so and stop. Do not work around it.\n\nWhen you finish, list exactly what you changed and how to undo each change.\n",
+      "prompt_id": "Perbaiki satu masalah di https://www.handworks.com.au (toko Shopify).\n\nMasalah: Data Organization di JSON-LD (disarankan, Kepercayaan dan identitas)\nYang ditemukan scan: An Organization entity is present but has no description.\nYang perlu dilakukan: Tambahkan JSON-LD Organization (atau LocalBusiness) di beranda, dengan nama dan deskripsi.\nDi Shopify: Filter structured_data Shopify tidak menghasilkan data Organization: tambahkan blok JSON-LD di layout tema (belum terverifikasi).\nCara mengecek:\n    curl -sS https://www.handworks.com.au/ | grep -o 'application/ld+json' | head -3\nHasil yang diharapkan: Satu blok JSON-LD Organization (atau LocalBusiness) dengan nama dan deskripsi. Uji di validator.schema.org.\n\nAturan:\n- Ubah hanya yang dibutuhkan masalah itu. Pertahankan desain, teks dan perilaku yang ada.\n- Sebelum mengubah berkas atau pengaturan, catat nilai aslinya supaya bisa dikembalikan.\n- Kalau kamu tidak punya akses yang dibutuhkan (misalnya ke tema), katakan dan berhenti. Jangan mencari jalan pintas.\n\nSetelah selesai, tuliskan persis apa yang kamu ubah dan cara membatalkan tiap perubahan.\n",
+      "external": {
+       "id": "json-ld",
+       "result": "partial",
+       "details": "JSON-LD Organization found - missing description on this entity"
+      }
      },
      {
       "id": "organization_completeness",
@@ -29255,7 +30289,14 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "Fix one issue on https://www.handworks.com.au (Shopify store).\n\nIssue: Organization contact details and address (recommended, Trust and identity)\nWhat the scan found: The Organization is missing: contactPoint, address.\nWhat to do: Add contactPoint (phone or email with a contactType) and address (PostalAddress) to the Organization JSON-LD.\nOn Shopify: Add them in the same JSON-LD block in the theme layout (not verified).\nHow to check:\n    curl -sS https://www.handworks.com.au/ | grep -o 'contactPoint\\|PostalAddress' | sort -u\nExpect: Both contactPoint and PostalAddress appear in the Organization JSON-LD.\n\nRules:\n- Change only what the issue needs. Keep the existing design, text and behaviour.\n- Before you change a file or a setting, note its current value so it can be restored.\n- If you do not have the access you need (for example to the theme), say so and stop. Do not work around it.\n\nWhen you finish, list exactly what you changed and how to undo each change.\n",
+      "prompt_id": "Perbaiki satu masalah di https://www.handworks.com.au (toko Shopify).\n\nMasalah: Kontak dan alamat Organization (disarankan, Kepercayaan dan identitas)\nYang ditemukan scan: The Organization is missing: contactPoint, address.\nYang perlu dilakukan: Tambahkan contactPoint (telepon atau email dengan contactType) dan address (PostalAddress) ke JSON-LD Organization.\nDi Shopify: Tambahkan di blok JSON-LD yang sama di layout tema (belum terverifikasi).\nCara mengecek:\n    curl -sS https://www.handworks.com.au/ | grep -o 'contactPoint\\|PostalAddress' | sort -u\nHasil yang diharapkan: contactPoint dan PostalAddress sama-sama ada di JSON-LD Organization.\n\nAturan:\n- Ubah hanya yang dibutuhkan masalah itu. Pertahankan desain, teks dan perilaku yang ada.\n- Sebelum mengubah berkas atau pengaturan, catat nilai aslinya supaya bisa dikembalikan.\n- Kalau kamu tidak punya akses yang dibutuhkan (misalnya ke tema), katakan dan berhenti. Jangan mencari jalan pintas.\n\nSetelah selesai, tuliskan persis apa yang kamu ubah dan cara membatalkan tiap perubahan.\n",
+      "external": {
+       "id": "org-schema-completeness",
+       "result": "partial",
+       "details": "Organization schema found but missing: contactPoint, address"
+      }
      },
      {
       "id": "metadata_complete",
@@ -29275,7 +30316,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "pricing_structured",
@@ -29298,7 +30342,10 @@
       "details": {
        "price": "22.95",
        "currency": "AUD"
-      }
+      },
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "trust_pages",
@@ -29318,7 +30365,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "schema_breadth",
@@ -29338,7 +30388,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "markdown_negotiation",
@@ -29358,7 +30411,14 @@
       "controlled_by": "shopify",
       "controlled_note": "Shopify controls this and its Markdown route is not reliable yet.",
       "controlled_note_id": "Shopify yang mengaturnya dan rute Markdown-nya belum andal.",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": {
+       "id": "markdown-negotiation-vary",
+       "result": "failed",
+       "details": "Homepage https://handworks.com.au does not meet the Markdown negotiation requirements: Accept: text/markdown returned text/html; charset=utf-8"
+      }
      },
      {
       "id": "llms_txt",
@@ -29378,7 +30438,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "agents_md",
@@ -29398,7 +30461,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "content_signals",
@@ -29420,7 +30486,10 @@
       "controlled_note_id": "",
       "details": {
        "signals": {}
-      }
+      },
+      "prompt": "Fix one issue on https://www.handworks.com.au (Shopify store).\n\nIssue: Content Signals in robots.txt (recommended, Agent discovery)\nWhat the scan found: robots.txt has no Content-Signal directive.\nWhat to do: Add a Content-Signal line to robots.txt stating your preferences, for example: Content-Signal: ai-train=no, search=yes, ai-input=no.\nOn Shopify: Add it through the robots.txt.liquid template.\nHow to check:\n    curl -sS https://www.handworks.com.au/robots.txt | grep -i content-signal\nExpect: A Content-Signal line with ai-train, search and ai-input each set to yes or no.\n\nRules:\n- Change only what the issue needs. Keep the existing design, text and behaviour.\n- Before you change a file or a setting, note its current value so it can be restored.\n- If you do not have the access you need (for example to the theme), say so and stop. Do not work around it.\n\nWhen you finish, list exactly what you changed and how to undo each change.\n",
+      "prompt_id": "Perbaiki satu masalah di https://www.handworks.com.au (toko Shopify).\n\nMasalah: Content Signals di robots.txt (disarankan, Penemuan agent)\nYang ditemukan scan: robots.txt has no Content-Signal directive.\nYang perlu dilakukan: Tambahkan baris Content-Signal di robots.txt yang menyatakan preferensi Anda, misalnya: Content-Signal: ai-train=no, search=yes, ai-input=no.\nDi Shopify: Tambahkan lewat template robots.txt.liquid.\nCara mengecek:\n    curl -sS https://www.handworks.com.au/robots.txt | grep -i content-signal\nHasil yang diharapkan: Satu baris Content-Signal dengan ai-train, search dan ai-input, masing-masing yes atau no.\n\nAturan:\n- Ubah hanya yang dibutuhkan masalah itu. Pertahankan desain, teks dan perilaku yang ada.\n- Sebelum mengubah berkas atau pengaturan, catat nilai aslinya supaya bisa dikembalikan.\n- Kalau kamu tidak punya akses yang dibutuhkan (misalnya ke tema), katakan dan berhenti. Jangan mencari jalan pintas.\n\nSetelah selesai, tuliskan persis apa yang kamu ubah dan cara membatalkan tiap perubahan.\n",
+      "external": null
      },
      {
       "id": "link_headers",
@@ -29440,7 +30509,10 @@
       "controlled_by": "shopify",
       "controlled_note": "Shopify sets Link headers itself; whether an owner can add their own is not documented.",
       "controlled_note_id": "Shopify mengatur header Link sendiri; belum jelas apakah pemilik bisa menambah sendiri.",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "mcp_server_card",
@@ -29460,7 +30532,10 @@
       "controlled_by": "shopify",
       "controlled_note": "Shopify controls this and the owner cannot change it.",
       "controlled_note_id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya.",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "agent_skills_index",
@@ -29480,7 +30555,10 @@
       "controlled_by": "shopify",
       "controlled_note": "Shopify controls this and the owner cannot change it.",
       "controlled_note_id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya.",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "ard_manifest",
@@ -29500,7 +30578,10 @@
       "controlled_by": "shopify",
       "controlled_note": "Shopify controls this and the owner cannot change it.",
       "controlled_note_id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya.",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "auth_md",
@@ -29520,7 +30601,10 @@
       "controlled_by": "shopify",
       "controlled_note": "Shopify controls this and the owner cannot change it.",
       "controlled_note_id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya.",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "oauth_discovery",
@@ -29540,7 +30624,10 @@
       "controlled_by": "shopify",
       "controlled_note": "Shopify controls this and the owner cannot change it.",
       "controlled_note_id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya.",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "oauth_protected_resource",
@@ -29560,7 +30647,10 @@
       "controlled_by": "shopify",
       "controlled_note": "Shopify controls this and the owner cannot change it.",
       "controlled_note_id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya.",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "mcp_live",
@@ -29580,7 +30670,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "mcp_quality",
@@ -29600,7 +30693,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "web_search_discovery",
@@ -29620,7 +30716,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "webmcp",
@@ -29640,7 +30739,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "dns_aid",
@@ -29660,7 +30762,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "web_bot_auth",
@@ -29680,7 +30785,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "api_discovery",
@@ -29700,7 +30808,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "api_surface",
@@ -29720,7 +30831,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "agent_payments",
@@ -29740,7 +30854,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      },
      {
       "id": "agent_checkout",
@@ -29760,7 +30877,10 @@
       "controlled_by": "",
       "controlled_note": "",
       "controlled_note_id": "",
-      "details": {}
+      "details": {},
+      "prompt": "",
+      "prompt_id": "",
+      "external": null
      }
     ],
     "gaps": [
@@ -29774,8 +30894,220 @@
       "scanned_at": "2026-11-22T08:38:16+00:00",
       "score": 89.4,
       "engine": "airtime-auditor/1"
+     },
+     {
+      "scanned_at": "2026-11-23T04:26:44+00:00",
+      "score": 89.4,
+      "engine": "airtime-auditor/1"
      }
-    ]
+    ],
+    "prompt_all": "Fix 4 issues on https://www.handworks.com.au (Shopify store), found by an Airtime scan on 2026-11-23. Work in the order listed, most important first.\n\nRules:\n- Change only what the issue needs. Keep the existing design, text and behaviour.\n- Before you change a file or a setting, note its current value so it can be restored.\n- If you do not have the access you need (for example to the theme), say so and stop. Do not work around it.\n\nIssue 1 of 4: Content available without JavaScript (essential, Access and content)\nWhat the scan found: Missing in the raw HTML: headings in order starting at H1 (first is H4); text is at least 5% of the HTML (1.6%).\nWhat to do: Serve at least 500 characters of real homepage text in the HTML itself, with one clear H1, headings in order (H1, H2, H3 without skipping), and little markup around the text.\nOn Shopify: This comes from the theme: change the heading levels in the theme's sections so the first heading is an H1.\nHow to check:\n    curl -sS https://www.handworks.com.au/ | grep -io '<h[1-6][^>]*>' | head -20\nExpect: The first heading is <h1> and levels never skip (h1, h2, h3). The raw HTML has at least 500 characters of text.\n\nIssue 2 of 4: Organization contact details and address (recommended, Trust and identity)\nWhat the scan found: The Organization is missing: contactPoint, address.\nWhat to do: Add contactPoint (phone or email with a contactType) and address (PostalAddress) to the Organization JSON-LD.\nOn Shopify: Add them in the same JSON-LD block in the theme layout (not verified).\nHow to check:\n    curl -sS https://www.handworks.com.au/ | grep -o 'contactPoint\\|PostalAddress' | sort -u\nExpect: Both contactPoint and PostalAddress appear in the Organization JSON-LD.\n\nIssue 3 of 4: Organization data in JSON-LD (recommended, Trust and identity)\nWhat the scan found: An Organization entity is present but has no description.\nWhat to do: Add Organization (or LocalBusiness) JSON-LD to the homepage, with a name and a description.\nOn Shopify: Shopify's structured_data filter does not output Organization data: add a JSON-LD block to the theme layout (not verified).\nHow to check:\n    curl -sS https://www.handworks.com.au/ | grep -o 'application/ld+json' | head -3\nExpect: An Organization (or LocalBusiness) JSON-LD block with a name and a description. Test it at validator.schema.org.\n\nIssue 4 of 4: Content Signals in robots.txt (recommended, Agent discovery)\nWhat the scan found: robots.txt has no Content-Signal directive.\nWhat to do: Add a Content-Signal line to robots.txt stating your preferences, for example: Content-Signal: ai-train=no, search=yes, ai-input=no.\nOn Shopify: Add it through the robots.txt.liquid template.\nHow to check:\n    curl -sS https://www.handworks.com.au/robots.txt | grep -i content-signal\nExpect: A Content-Signal line with ai-train, search and ai-input each set to yes or no.\n\nWhen you finish, list exactly what you changed and how to undo each change, and say which issues are done and which are not.\n",
+    "prompt_all_id": "Perbaiki 4 masalah di https://www.handworks.com.au (toko Shopify), yang ditemukan scan Airtime pada 2026-11-23. Kerjakan berurutan, dari yang terpenting.\n\nAturan:\n- Ubah hanya yang dibutuhkan masalah itu. Pertahankan desain, teks dan perilaku yang ada.\n- Sebelum mengubah berkas atau pengaturan, catat nilai aslinya supaya bisa dikembalikan.\n- Kalau kamu tidak punya akses yang dibutuhkan (misalnya ke tema), katakan dan berhenti. Jangan mencari jalan pintas.\n\nMasalah 1 dari 4: Konten tersedia tanpa JavaScript (esensial, Akses dan isi)\nYang ditemukan scan: Missing in the raw HTML: headings in order starting at H1 (first is H4); text is at least 5% of the HTML (1.6%).\nYang perlu dilakukan: Sajikan minimal 500 karakter teks beranda langsung di HTML, dengan satu H1 yang jelas, judul berurutan (H1, H2, H3 tanpa melompat), dan sedikit markup di sekitar teks.\nDi Shopify: Ini berasal dari tema: ubah tingkat judul di bagian tema supaya judul pertama adalah H1.\nCara mengecek:\n    curl -sS https://www.handworks.com.au/ | grep -io '<h[1-6][^>]*>' | head -20\nHasil yang diharapkan: Judul pertama adalah <h1> dan tingkatnya tidak melompat (h1, h2, h3). HTML mentah punya minimal 500 karakter teks.\n\nMasalah 2 dari 4: Kontak dan alamat Organization (disarankan, Kepercayaan dan identitas)\nYang ditemukan scan: The Organization is missing: contactPoint, address.\nYang perlu dilakukan: Tambahkan contactPoint (telepon atau email dengan contactType) dan address (PostalAddress) ke JSON-LD Organization.\nDi Shopify: Tambahkan di blok JSON-LD yang sama di layout tema (belum terverifikasi).\nCara mengecek:\n    curl -sS https://www.handworks.com.au/ | grep -o 'contactPoint\\|PostalAddress' | sort -u\nHasil yang diharapkan: contactPoint dan PostalAddress sama-sama ada di JSON-LD Organization.\n\nMasalah 3 dari 4: Data Organization di JSON-LD (disarankan, Kepercayaan dan identitas)\nYang ditemukan scan: An Organization entity is present but has no description.\nYang perlu dilakukan: Tambahkan JSON-LD Organization (atau LocalBusiness) di beranda, dengan nama dan deskripsi.\nDi Shopify: Filter structured_data Shopify tidak menghasilkan data Organization: tambahkan blok JSON-LD di layout tema (belum terverifikasi).\nCara mengecek:\n    curl -sS https://www.handworks.com.au/ | grep -o 'application/ld+json' | head -3\nHasil yang diharapkan: Satu blok JSON-LD Organization (atau LocalBusiness) dengan nama dan deskripsi. Uji di validator.schema.org.\n\nMasalah 4 dari 4: Content Signals di robots.txt (disarankan, Penemuan agent)\nYang ditemukan scan: robots.txt has no Content-Signal directive.\nYang perlu dilakukan: Tambahkan baris Content-Signal di robots.txt yang menyatakan preferensi Anda, misalnya: Content-Signal: ai-train=no, search=yes, ai-input=no.\nDi Shopify: Tambahkan lewat template robots.txt.liquid.\nCara mengecek:\n    curl -sS https://www.handworks.com.au/robots.txt | grep -i content-signal\nHasil yang diharapkan: Satu baris Content-Signal dengan ai-train, search dan ai-input, masing-masing yes atau no.\n\nSetelah selesai, tuliskan persis apa yang kamu ubah dan cara membatalkan tiap perubahan, dan sebutkan masalah mana yang selesai dan mana yang belum.\n",
+    "external": {
+     "source": "is-agentic",
+     "status": "ok",
+     "error": "",
+     "fetched_at": "2026-11-23T04:26:45+00:00",
+     "report_url": "https://is-agentic.com/scan/www.handworks.com.au",
+     "score": 54.0,
+     "label": "Important blockers remain",
+     "scanned_at": "2026-11-23T02:56:11.433Z",
+     "eligible_checks": 29,
+     "breakdown": {
+      "essential": {
+       "earned": 37.6,
+       "available": 80,
+       "passing": 4,
+       "total": 11
+      },
+      "recommended": {
+       "earned": 11.8,
+       "available": 20,
+       "passing": 8,
+       "total": 18
+      },
+      "bonus": {
+       "points": 5,
+       "positive_signals": 23
+      }
+     },
+     "issues": [
+      {
+       "id": "agent-friendly-404",
+       "name": "Agent-friendly 404s",
+       "tier": "essential",
+       "result": "partial",
+       "details": "The nonexistent path https://handworks.com.au/__ora-404-probe-hzdyp6o1 correctly returns HTTP 404. Partial credit: no Markdown error body was detected.",
+       "recommendation": "Keep the correct HTTP 404 status. The remaining requirement is a Markdown error body when agents request Accept: text/markdown. Include at least 20 characters explaining the error and a link to your docs, sitemap, or llms.txt. Verify with `curl -sS -L -i -H 'Accept: text/markdown' https://yourdomain.com/some-path-that-does-not-exist`. Check both the final 404 status and the Markdown body with Content-Type: text/markdown. Checking the status alone does not verify the missing requirement.",
+       "kind": "mapped",
+       "maps_to": "not_found_markdown"
+      },
+      {
+       "id": "content-no-js",
+       "name": "Content without JavaScript",
+       "tier": "essential",
+       "result": "partial",
+       "details": "Homepage: 13589 chars with H1, but first content heading is H4, not H1; heading hierarchy skips H1 to H4; 2.0% content ratio is below the 5% target. No inner pages checked: the 1 sampled page was skipped (forms, login pages, bot challenges, error pages, non-HTML pages and pages over 1 MB are skipped).",
+       "recommendation": "Serve at least 500 characters of meaningful homepage content in raw HTML. Add a clear H1, keep deeper heading levels sequential, and remove excessive non-content markup. Inner pages need their main text in the raw HTML too, not only after JavaScript runs.",
+       "kind": "mapped",
+       "maps_to": "raw_html_content"
+      },
+      {
+       "id": "openapi-spec",
+       "name": "OpenAPI spec published",
+       "tier": "essential",
+       "result": "failed",
+       "details": "No OpenAPI/Swagger specification found",
+       "recommendation": "Publish an OpenAPI (Swagger) specification at /openapi.json or /api/openapi.yaml. This is how agents understand your API surface automatically.",
+       "kind": "api_product",
+       "maps_to": ""
+      },
+      {
+       "id": "scoped-permissions",
+       "name": "Scoped permissions",
+       "tier": "essential",
+       "result": "failed",
+       "details": "No declared OAuth scopes, security schemes, or scoped-permission documentation found",
+       "recommendation": "Declare scoped API permissions where machines can read them: named OAuth scopes in your OpenAPI security schemes, or scopes_supported in RFC 9728 protected-resource metadata. Prose descriptions of roles help humans, but agents need the machine-readable declaration to request least-privilege access.",
+       "kind": "api_product",
+       "maps_to": ""
+      },
+      {
+       "id": "json-error-responses",
+       "name": "JSON error responses",
+       "tier": "essential",
+       "result": "failed",
+       "details": "API does not return JSON error responses (or no API detected)",
+       "recommendation": "Return structured JSON error responses with error codes, messages, and resolution hints. Agents can't parse HTML error pages.",
+       "kind": "api_product",
+       "maps_to": ""
+      },
+      {
+       "id": "mcp-resource-listing",
+       "name": "MCP resources exposed",
+       "tier": "essential",
+       "result": "failed",
+       "details": "MCP server advertises resources capability but resources/list returned none",
+       "recommendation": "If your MCP server advertises the resources capability, make sure resources/list returns at least one resource. If you don't intend to expose resources, omit the capability - the check returns na with no penalty for tool-only servers. Quality of the resources you do return is scored separately by mcp-resource-quality.",
+       "kind": "api_product",
+       "maps_to": ""
+      },
+      {
+       "id": "markdown-negotiation-vary",
+       "name": "Markdown content negotiation (acceptmarkdown.com)",
+       "tier": "essential",
+       "result": "failed",
+       "details": "Homepage https://handworks.com.au does not meet the Markdown negotiation requirements: Accept: text/markdown returned text/html; charset=utf-8",
+       "recommendation": "Enable Markdown negotiation on the scanned homepage. Supporting it only on /docs or a separate .md URL does not satisfy this check. Requests with Accept: text/markdown must receive a nonempty Markdown body with Content-Type: text/markdown and Vary: Accept. Keep serving HTML for Accept: text/html. Adding Vary alone does not create a Markdown response. Verify both with `curl -sS -L -i -H 'Accept: text/markdown' https://yourdomain.com/` and `curl -sS -L -i -H 'Accept: text/html' https://yourdomain.com/`. Check the final response headers and body: Markdown with Vary: Accept for the first request, HTML for the second.",
+       "kind": "mapped",
+       "maps_to": "markdown_negotiation"
+      },
+      {
+       "id": "agentic-search-specific",
+       "name": "Developer resource discoverability",
+       "tier": "recommended",
+       "result": "failed",
+       "details": "In a search for your API docs, none of the 10 results is your official docs. In a search for your MCP server, SDK or CLI, none of the 10 results is your own, although the scan found one on your site",
+       "recommendation": "Make sure a web search for your product's API docs returns your own docs page, and a search for your MCP server, SDK or CLI returns your own pages for those tools. Keep docs on your own domain or a subdomain, or link your docs site from your homepage or llms.txt, give each tool its own page (for example /mcp) with the tool name in the title, put your product name and \"API\" in the docs title and main heading, and link your GitHub org from your homepage.",
+       "kind": "extra",
+       "maps_to": ""
+      },
+      {
+       "id": "brand-search-accuracy",
+       "name": "Brand name discoverability",
+       "tier": "recommended",
+       "result": "failed",
+       "details": "handworks.com.au was not in the top 10 for \"undefined\" (searched your brand name alone: no main product term from your homepage qualified)",
+       "recommendation": "Make sure your own domain ranks in the top results when people search your brand together with your main product (for example \"Acme payments API\"). Ora first reads product terms from your homepage's JSON-LD keywords or knowsAbout, or its meta keywords tag. If none qualifies, it checks the main service's serviceType in JSON-LD, then a short product phrase in the page title. If those do not qualify, it checks product names in the homepage business's JSON-LD offers. Use clear product terms that also appear on the page. If no term qualifies, Ora searches your brand name alone. If your domain does not rank, your brand may be too generic, conflict with a more established term, or not yet indexed. Strengthen it by describing your main product clearly in your homepage title and headings, earning press mentions that link to your domain, and avoiding redirect chains that mask your main domain in search results.",
+       "kind": "extra",
+       "maps_to": ""
+      },
+      {
+       "id": "public-api-docs",
+       "name": "Public API/docs linked from homepage",
+       "tier": "recommended",
+       "result": "failed",
+       "details": "No public API or documentation page linked from homepage",
+       "recommendation": "Publish API documentation at a discoverable URL (/docs, /api, /developers). Include authentication, endpoints, and example requests.",
+       "kind": "api_product",
+       "maps_to": ""
+      },
+      {
+       "id": "api-schema-analysis",
+       "name": "API schema complexity analysis",
+       "tier": "recommended",
+       "result": "failed",
+       "details": "No API schema detected",
+       "recommendation": "Make your API spec self-describing: a unique operationId and a description on every operation, typed parameters, and response schemas. For GraphQL, a fully typed schema with a documented cost or rate limit reads best.",
+       "kind": "api_product",
+       "maps_to": ""
+      },
+      {
+       "id": "function-calling-compat",
+       "name": "Function calling compatibility",
+       "tier": "recommended",
+       "result": "failed",
+       "details": "No API spec found - function calling requires discoverable endpoints",
+       "recommendation": "Ensure API endpoints have unique operation IDs, typed schemas, and descriptions compatible with LLM function-calling formats.",
+       "kind": "api_product",
+       "maps_to": ""
+      },
+      {
+       "id": "public-api",
+       "name": "Public API with reachable endpoints",
+       "tier": "recommended",
+       "result": "partial",
+       "details": "API described in documentation at https://handworks.com.au/agents.md but no machine-verifiable API surface confirmed. Best-of-protocols score: 3/7.",
+       "recommendation": "Expose a public REST or GraphQL API. AI agents need programmatic access  - not just a web UI  - to integrate with your product.",
+       "kind": "api_product",
+       "maps_to": ""
+      },
+      {
+       "id": "json-ld",
+       "name": "JSON-LD structured data",
+       "tier": "recommended",
+       "result": "partial",
+       "details": "JSON-LD Organization found - missing description on this entity",
+       "recommendation": "Add description to the Organization JSON-LD entity for full score.",
+       "kind": "mapped",
+       "maps_to": "jsonld_organization"
+      },
+      {
+       "id": "org-schema-completeness",
+       "name": "Organization schema completeness",
+       "tier": "recommended",
+       "result": "partial",
+       "details": "Organization schema found but missing: contactPoint, address",
+       "recommendation": "Add Organization JSON-LD that includes both contactPoint (with email/phone and contactType) and address (PostalAddress). This lets AI verify your business legitimacy and answer contact queries.",
+       "kind": "mapped",
+       "maps_to": "organization_completeness"
+      },
+      {
+       "id": "onboarding-friction",
+       "name": "Agent onboarding friction",
+       "tier": "recommended",
+       "result": "partial",
+       "details": "Onboarding signals described but not verified live: self-serve key generation",
+       "recommendation": "Offer a free tier or trial, self-serve API key generation, and a sandbox environment. Agents can't fill out 'contact sales' forms.",
+       "kind": "api_product",
+       "maps_to": ""
+      },
+      {
+       "id": "agent-instruction",
+       "name": "Agent instruction / when-to-use",
+       "tier": "recommended",
+       "result": "partial",
+       "details": "Agent instruction file at /agents.md but no explicit when-to-use guidance",
+       "recommendation": "Tell agents when to reach for you: add a 'when to use this' section to your llms.txt (or a dedicated agent-instructions file) that names your best-fit use cases and how an agent should call you. Be specific about the jobs you are right for - generic marketing copy does not read as guidance.",
+       "kind": "extra",
+       "maps_to": ""
+      }
+     ],
+     "agreement": {
+      "compared": 7,
+      "agree": 7
+     }
+    }
    },
    "totals": {
     "days_on_duty": 28,
