@@ -1,7 +1,7 @@
 name: Is Agentic probe
 
-# One-off, read-only: fetch Is Agentic's public OpenAPI spec and one report for the store's site, and print
-# them to the log, so the Auditor can be written against the real response shape. Nothing is committed.
+# One-off, read-only: look at Is Agentic's public API (paths, deprecation, and what a scan streams per check),
+# so the Auditor can be written against the real shape. Prints compact summaries to the log. Nothing is committed.
 on:
   workflow_dispatch: {}
   push:
@@ -16,21 +16,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: OpenAPI spec
+      - name: OpenAPI paths
         run: |
-          curl -sS -m 30 -H "User-Agent: airtime-probe" https://is-agentic.com/openapi.json -o openapi.json -w "openapi http=%{http_code} bytes=%{size_download}\n"
-          echo "=== openapi.json ==="; head -c 60000 openapi.json; echo
-      - name: Report for the store
+          curl -sS -m 30 -H "User-Agent: airtime-probe" https://is-agentic.com/openapi.json -o openapi.json
+          jq '{info, servers, paths: (.paths | to_entries | map({path: .key, methods: (.value | to_entries | map({method: .key, deprecated: .value.deprecated, summary: .value.summary, description: .value.description, params: [.value.parameters[]?.name]}))})), lifecycle: ."x-api-lifecycle"}' openapi.json
+      - name: Scan stream summary
         run: |
           U="https://www.handworks.com.au"
-          code=$(curl -sS -m 30 -H "Accept: application/json" -H "User-Agent: airtime-probe" -G --data-urlencode "url=$U" https://is-agentic.com/api/v1/report -o report.json -w "%{http_code}")
-          echo "report http=$code"
-          if [ "$code" != "200" ]; then
-            echo "=== no stored report, body: ==="; head -c 3000 report.json; echo
-            echo "=== starting a scan (stream, first 120 s) ==="
-            curl -sS -N -m 120 -H "Accept: text/event-stream" -H "User-Agent: airtime-probe" -G --data-urlencode "target=$U" https://is-agentic.com/api/scan/stream -o stream.txt -w "stream http=%{http_code}\n" || true
-            echo "stream bytes: $(wc -c < stream.txt)"; head -c 4000 stream.txt; echo
-            code=$(curl -sS -m 30 -H "Accept: application/json" -H "User-Agent: airtime-probe" -G --data-urlencode "url=$U" https://is-agentic.com/api/v1/report -o report.json -w "%{http_code}")
-            echo "report after scan http=$code"
-          fi
-          echo "=== report.json ==="; head -c 90000 report.json; echo
+          curl -sS -N -m 120 -H "Accept: text/event-stream" -H "User-Agent: airtime-probe" -G --data-urlencode "target=$U" https://is-agentic.com/api/scan/stream -o stream.txt -w "stream http=%{http_code}\n" || true
+          grep '^data: ' stream.txt | sed 's/^data: //' > events.ndjson
+          echo "events: $(wc -l < events.ndjson)"
+          echo "=== event types ==="; jq -r .type events.ndjson | sort | uniq -c
+          echo "=== scan_init (without roster) ==="; jq -c 'select(.type=="scan_init") | del(.checkRoster) | . + {rosterSize: (.checkRoster|length)}' events.ndjson
+          echo "=== roster ids ==="; jq -r 'select(.type=="scan_init") | .checkRoster[] | "\(.layerId)\t\(.id)\t\(.maxScore)\tbonus=\(.bonus)"' events.ndjson
+          echo "=== first check_complete, full ==="; jq -c 'select(.type=="check_complete")' events.ndjson | head -2 | cut -c1-2500
+          echo "=== all check_complete keys and compact result ==="; jq -c 'select(.type=="check_complete") | {id: (.checkId // .id), keys: (keys)}' events.ndjson | head -3
+          echo "=== scan_complete, full (cut) ==="; jq -c 'select(.type=="scan_complete")' events.ndjson | cut -c1-6000
