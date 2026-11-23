@@ -172,7 +172,7 @@ def record(routes, base_url: str, platform: str, product_url: str) -> dict:
     expected_rows = [{"check_id": r["check_id"], "result": r["result"], "percent": r["percent"], "scored": r["scored"],
                       "controlled_by": r["controlled_by"], "evidence": r["evidence"],
                       "details": {k: v for k, v in r["details"].items()}} for r in rows]
-    gap_rows = [{"check_id": g["check_id"], "tier": g["tier"], "evidence": g["evidence"]} for g in gaps(rows)]
+    gap_rows = [{"check_id": g["check_id"], "tier": g["tier"], "evidence": g["evidence"], "details": g["details"]} for g in gaps(rows)]
     return {
         "base_url": base_url, "platform": platform, "product_url": product_url,
         "calls": sorted(calls.values(), key=lambda c: (c["url"], c["accept"], c["ua"])),

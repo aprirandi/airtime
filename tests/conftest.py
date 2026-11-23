@@ -65,3 +65,16 @@ def make_ctx(conn, cfg, date="2026-10-20", ask=None, work=None):
 @pytest.fixture
 def fake_work():
     return FakeProvider(complete_responder=fake_extractor, sleep=lambda s: None)
+
+
+@pytest.fixture(autouse=True)
+def no_real_network_to_is_agentic(monkeypatch):
+    """A test must never reach Is Agentic: every scan there creates a public report for the address scanned.
+    Tests that need the second opinion pass their own client with a fake transport."""
+    from airtime.agents.auditor import isagentic
+
+    def refuse(url, accept, timeout):
+        raise isagentic.ExternalError("the network is switched off in tests")
+
+    monkeypatch.setattr(isagentic, "http_transport", refuse)
+    monkeypatch.setattr(isagentic.IsAgenticClient.__init__, "__defaults__", (refuse,))

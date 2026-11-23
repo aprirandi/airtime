@@ -4617,8 +4617,8 @@ var require_util2 = __commonJS({
       }
       return values;
     }
-    function getDecodeSplit(name, list) {
-      const value = list.get(name, true);
+    function getDecodeSplit(name, list2) {
+      const value = list2.get(name, true);
       if (value === null) {
         return null;
       }
@@ -12030,9 +12030,9 @@ var require_headers = __commonJS({
       // https://fetch.spec.whatwg.org/#dom-headers-getsetcookie
       getSetCookie() {
         webidl.brandCheck(this, _Headers);
-        const list = this.#headersList.cookies;
-        if (list) {
-          return [...list];
+        const list2 = this.#headersList.cookies;
+        if (list2) {
+          return [...list2];
         }
         return [];
       }
@@ -12072,8 +12072,8 @@ var require_headers = __commonJS({
       static getHeadersList(o) {
         return o.#headersList;
       }
-      static setHeadersList(o, list) {
-        o.#headersList = list;
+      static setHeadersList(o, list2) {
+        o.#headersList = list2;
       }
     };
     var { getHeadersGuard, setHeadersGuard, getHeadersList, setHeadersList } = Headers;
@@ -13041,13 +13041,13 @@ var require_request2 = __commonJS({
         if (this.signal.aborted) {
           ac.abort(this.signal.reason);
         } else {
-          let list = dependentControllerMap.get(this.signal);
-          if (list === void 0) {
-            list = /* @__PURE__ */ new Set();
-            dependentControllerMap.set(this.signal, list);
+          let list2 = dependentControllerMap.get(this.signal);
+          if (list2 === void 0) {
+            list2 = /* @__PURE__ */ new Set();
+            dependentControllerMap.set(this.signal, list2);
           }
           const acRef = new WeakRef(ac);
-          list.add(acRef);
+          list2.add(acRef);
           util.addAbortListener(
             ac.signal,
             buildAbort(acRef)
@@ -21145,6 +21145,7 @@ function pyIter(v) {
   if (isDict(v)) return Object.keys(v);
   throw new TypeError(`'${v === null ? "NoneType" : typeof v}' object is not iterable`);
 }
+var clip = (text, n) => [...text].slice(0, n).join("");
 
 // src/html.ts
 var SKIP_TAGS = /* @__PURE__ */ new Set(["script", "style", "noscript", "template"]);
@@ -21671,6 +21672,15 @@ function orgOf(snap) {
   }
   return null;
 }
+function orgFacts(org) {
+  const name = org["name"];
+  const types = typesOf(org);
+  return {
+    org_name: typeof name === "string" ? clip(name, 80) : "",
+    org_type: types[0] ?? "",
+    present: Object.entries(org).filter(([k, v]) => !k.startsWith("@") && filled(v)).map(([k]) => k)
+  };
+}
 var filled = (v) => typeof v === "string" ? pyStrip(v) !== "" : truthy(v);
 var rel = (r) => {
   try {
@@ -21724,7 +21734,8 @@ function raw_html_content(snap) {
   return graded(percent, "Missing in the raw HTML: " + missing.join("; ") + ".", {
     text_chars: chars,
     ratio: pyRound(ratio, 4),
-    headings: levels.slice(0, 12)
+    headings: levels.slice(0, 12),
+    outline: page.headings.slice(0, 12).map(([lvl, text]) => [lvl, clip(text, 60)])
   });
 }
 function redirects_clean(snap) {
@@ -21753,7 +21764,10 @@ function public_no_login(snap) {
 function not_noindex(snap) {
   const robotsMeta = ["robots", "googlebot", "bingbot"].map((n) => metaContent(snap.homePage, n)).join(" ").toLowerCase();
   const header = snap.home.header("x-robots-tag").toLowerCase();
-  if (robotsMeta.includes("noindex") || header.includes("noindex")) return failed("The homepage tells search engines not to index it (noindex).");
+  if (robotsMeta.includes("noindex") || header.includes("noindex")) {
+    const sources = [...robotsMeta.includes("noindex") ? ["meta tag"] : [], ...header.includes("noindex") ? ["X-Robots-Tag header"] : []];
+    return failed("The homepage tells search engines not to index it (noindex).", { sources });
+  }
   return passed("No noindex in the homepage's meta tags or headers.");
 }
 function not_found_markdown(snap) {
@@ -21767,21 +21781,28 @@ function not_found_markdown(snap) {
   return partial(50, "A missing page correctly returns 404, but there is no Markdown error body when the request asks for text/markdown.");
 }
 function jsonld_organization(snap) {
-  const [, invalid] = jsonldItems(snap.homePage);
+  const [items, invalid] = jsonldItems(snap.homePage);
   const org = orgOf(snap);
   if (!org) {
-    return failed("No Organization or store entity in the homepage JSON-LD" + (invalid ? ` (${invalid} block(s) were not valid JSON).` : "."));
+    const found = [];
+    for (const item of items) for (const t of typesOf(item)) if (!found.includes(t)) found.push(t);
+    return failed("No Organization or store entity in the homepage JSON-LD" + (invalid ? ` (${invalid} block(s) were not valid JSON).` : "."), {
+      jsonld_types: found.slice(0, 8),
+      invalid_blocks: invalid
+    });
   }
-  if (!filled(org["description"])) return partial(50, "An Organization entity is present but has no description.");
-  return passed("An Organization entity with a description is present in the JSON-LD.");
+  const facts = orgFacts(org);
+  if (!filled(org["description"])) return partial(50, "An Organization entity is present but has no description.", facts);
+  return passed("An Organization entity with a description is present in the JSON-LD.", facts);
 }
 function organization_completeness(snap) {
   const org = orgOf(snap);
   if (!org) return failed("No Organization entity to check for contact details and address.");
   const have = [["contactPoint", filled(org["contactPoint"])], ["address", filled(org["address"])]];
   const missing = have.filter(([, ok]) => !ok).map(([k]) => k);
-  if (!missing.length) return passed("The Organization has a contactPoint and an address.");
-  return graded(50 * have.filter(([, ok]) => ok).length, "The Organization is missing: " + missing.join(", ") + ".");
+  const facts = { ...orgFacts(org), missing };
+  if (!missing.length) return passed("The Organization has a contactPoint and an address.", facts);
+  return graded(50 * have.filter(([, ok]) => ok).length, "The Organization is missing: " + missing.join(", ") + ".", facts);
 }
 function metadata_complete(snap) {
   const page = snap.homePage;
@@ -21833,17 +21854,23 @@ function pricing_structured(snap) {
 }
 function trust_pages(snap) {
   const parts = [];
+  const pages = {};
   let ok = 0;
   for (const kind of ["about", "contact", "privacy"]) {
     const found = snap.trust[kind];
-    if (!found) parts.push(`${kind}: not found`);
-    else if (cpLen(found[1].text) < MIN_TEXT) parts.push(`${kind}: only ${cpLen(found[1].text)} characters`);
-    else {
+    if (!found) {
+      parts.push(`${kind}: not found`);
+      pages[kind] = { status: "missing", url: "", chars: 0 };
+    } else if (cpLen(found[1].text) < MIN_TEXT) {
+      parts.push(`${kind}: only ${cpLen(found[1].text)} characters`);
+      pages[kind] = { status: "thin", url: found[0].url, chars: cpLen(found[1].text) };
+    } else {
       ok += 1;
       parts.push(`${kind}: ok`);
+      pages[kind] = { status: "ok", url: found[0].url, chars: cpLen(found[1].text) };
     }
   }
-  return graded(pyRound(100 * ok / 3), parts.join("; ") + ".");
+  return graded(pyRound(100 * ok / 3), parts.join("; ") + ".", { pages });
 }
 function markdown_negotiation(snap) {
   const md = snap.homeMarkdown;
@@ -21896,12 +21923,16 @@ function content_signals(snap) {
       if (CONTENT_SIGNAL_KEYS.includes(key) && (value === "yes" || value === "no")) found[key] = value;
     }
   }
+  const lines = splitLines(snap.robots.text);
+  const head = lines.slice(0, 25).map((line) => clip(line, 120));
   const names = Object.keys(found);
-  if (names.length === CONTENT_SIGNAL_KEYS.length) return passed("robots.txt declares ai-train, search and ai-input preferences.", { signals: found });
+  if (names.length === CONTENT_SIGNAL_KEYS.length) {
+    return passed("robots.txt declares ai-train, search and ai-input preferences.", { signals: found, robots_head: head, robots_lines: lines.length });
+  }
   return graded(
     pyRound(100 * names.length / CONTENT_SIGNAL_KEYS.length),
     !names.length ? "robots.txt has no Content-Signal directive." : "robots.txt declares only: " + names.join(", ") + ".",
-    { signals: found }
+    { signals: found, robots_head: head, robots_lines: lines.length }
   );
 }
 function parseLinkHeader(value) {
@@ -22044,7 +22075,8 @@ var registry_generated_default = {
         en: "HTTP 200, at least one User-agent line, and a Sitemap line.",
         id: "HTTP 200, minimal satu baris User-agent, dan satu baris Sitemap."
       },
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "ai_crawlers_allowed",
@@ -22065,7 +22097,11 @@ var registry_generated_default = {
         en: "200 for ChatGPT-User, OAI-SearchBot, Claude-User and PerplexityBot (change the name after -A), and no Disallow for them in robots.txt.",
         id: "200 untuk ChatGPT-User, OAI-SearchBot, Claude-User dan PerplexityBot (ganti nama setelah -A), dan tidak ada Disallow untuk mereka di robots.txt."
       },
-      external_id: ""
+      external_id: "",
+      ask: {
+        en: "A block may be deliberate. Ask the owner whether it is meant before you remove it, and name the crawlers you would unblock.",
+        id: "Pemblokiran bisa disengaja. Tanyakan ke pemilik apakah itu memang dimaksudkan sebelum kamu menghapusnya, dan sebutkan crawler yang akan dibuka."
+      }
     },
     {
       id: "sitemap",
@@ -22086,7 +22122,8 @@ var registry_generated_default = {
         en: "A <urlset> or <sitemapindex> with <loc> entries, and a Sitemap line in robots.txt.",
         id: "<urlset> atau <sitemapindex> dengan entri <loc>, dan baris Sitemap di robots.txt."
       },
-      external_id: "sitemap"
+      external_id: "sitemap",
+      ask: null
     },
     {
       id: "raw_html_content",
@@ -22112,7 +22149,8 @@ var registry_generated_default = {
         en: "The first heading is <h1> and levels never skip (h1, h2, h3). The raw HTML has at least 500 characters of text.",
         id: "Judul pertama adalah <h1> dan tingkatnya tidak melompat (h1, h2, h3). HTML mentah punya minimal 500 karakter teks."
       },
-      external_id: "content-no-js"
+      external_id: "content-no-js",
+      ask: null
     },
     {
       id: "redirects_clean",
@@ -22133,7 +22171,8 @@ var registry_generated_default = {
         en: "At most three redirects (301), ending in HTTP 200, and no meta-refresh in the HTML.",
         id: "Paling banyak tiga redirect (301), berakhir di HTTP 200, dan tidak ada meta-refresh di HTML."
       },
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "public_no_login",
@@ -22154,7 +22193,11 @@ var registry_generated_default = {
         en: "200, and the final URL is not a login or password page.",
         id: "200, dan URL akhirnya bukan halaman login atau kata sandi."
       },
-      external_id: ""
+      external_id: "",
+      ask: {
+        en: "A store password or login may be intentional. Ask the owner before you remove it.",
+        id: "Kata sandi toko atau login bisa disengaja. Tanyakan ke pemilik sebelum kamu menghapusnya."
+      }
     },
     {
       id: "not_noindex",
@@ -22175,7 +22218,11 @@ var registry_generated_default = {
         en: "No noindex in either result.",
         id: "Tidak ada noindex di kedua hasil."
       },
-      external_id: "noindex-directives"
+      external_id: "noindex-directives",
+      ask: {
+        en: "Ask the owner whether hiding the homepage from search is intended (for example a site still being built) before you change it.",
+        id: "Tanyakan ke pemilik apakah menyembunyikan beranda dari pencarian memang disengaja (misalnya situs yang masih dibangun) sebelum kamu mengubahnya."
+      }
     },
     {
       id: "not_found_markdown",
@@ -22201,7 +22248,8 @@ var registry_generated_default = {
         en: "HTTP 404 with Content-Type: text/markdown and a short message that links to the sitemap.",
         id: "HTTP 404 dengan Content-Type: text/markdown dan pesan singkat yang menautkan ke sitemap."
       },
-      external_id: "agent-friendly-404"
+      external_id: "agent-friendly-404",
+      ask: null
     },
     {
       id: "controls_labelled",
@@ -22218,7 +22266,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "page_token_budget",
@@ -22235,7 +22284,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "jsonld_organization",
@@ -22261,7 +22311,11 @@ var registry_generated_default = {
         en: "An Organization (or LocalBusiness) JSON-LD block with a name and a description. Test it at validator.schema.org.",
         id: "Satu blok JSON-LD Organization (atau LocalBusiness) dengan nama dan deskripsi. Uji di validator.schema.org."
       },
-      external_id: "json-ld"
+      external_id: "json-ld",
+      ask: {
+        en: "Ask the store owner for a one or two sentence description of the business, or reuse the wording of the About page. Do not add claims the owner has not approved.",
+        id: "Tanyakan ke pemilik toko deskripsi bisnis satu atau dua kalimat, atau pakai kata-kata dari halaman About. Jangan menambah klaim yang belum disetujui pemilik."
+      }
     },
     {
       id: "organization_completeness",
@@ -22287,7 +22341,11 @@ var registry_generated_default = {
         en: "Both contactPoint and PostalAddress appear in the Organization JSON-LD.",
         id: "contactPoint dan PostalAddress sama-sama ada di JSON-LD Organization."
       },
-      external_id: "org-schema-completeness"
+      external_id: "org-schema-completeness",
+      ask: {
+        en: "Do not invent these. Ask the store owner for a contact phone number or email (and what it is for, such as customer service) and for the street address (street, suburb, postcode, country). If the website already shows them, for example in the footer or on the Contact page, use exactly those values.",
+        id: "Jangan mengarang. Tanyakan ke pemilik toko nomor telepon atau email kontak (dan untuk apa, misalnya layanan pelanggan) serta alamat lengkap (jalan, kecamatan atau kota, kode pos, negara). Kalau website sudah menampilkannya, misalnya di footer atau halaman Kontak, pakai persis nilai itu."
+      }
     },
     {
       id: "metadata_complete",
@@ -22308,7 +22366,8 @@ var registry_generated_default = {
         en: "A canonical link, lang on <html>, og:image and og:type.",
         id: "Link canonical, lang di <html>, og:image dan og:type."
       },
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "pricing_structured",
@@ -22334,7 +22393,8 @@ var registry_generated_default = {
         en: "offers.price and offers.priceCurrency in the product's JSON-LD.",
         id: "offers.price dan offers.priceCurrency di JSON-LD produk."
       },
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "trust_pages",
@@ -22360,7 +22420,11 @@ var registry_generated_default = {
         en: "HTTP 200 for each of the About, Contact and Privacy pages (use their real URLs), each with at least 500 characters of text and linked from the footer.",
         id: "HTTP 200 untuk halaman About, Contact dan Privacy (pakai URL aslinya), masing-masing minimal 500 karakter teks dan ditautkan dari footer."
       },
-      external_id: ""
+      external_id: "",
+      ask: {
+        en: "Write no legal text yourself. Ask the owner for the content of the missing pages, and for the privacy policy the text from their lawyer or policy generator, then publish it as written.",
+        id: "Jangan menulis teks hukum sendiri. Minta ke pemilik isi halaman yang belum ada, dan untuk kebijakan privasi minta teks dari pengacara atau pembuat kebijakan mereka, lalu terbitkan apa adanya."
+      }
     },
     {
       id: "schema_breadth",
@@ -22377,7 +22441,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "markdown_negotiation",
@@ -22403,7 +22468,8 @@ var registry_generated_default = {
         en: "Content-Type: text/markdown, Vary: Accept and a Markdown body. The same URL with Accept: text/html still returns HTML.",
         id: "Content-Type: text/markdown, Vary: Accept dan isi Markdown. URL yang sama dengan Accept: text/html tetap menghasilkan HTML."
       },
-      external_id: "markdown-negotiation-vary"
+      external_id: "markdown-negotiation-vary",
+      ask: null
     },
     {
       id: "llms_txt",
@@ -22429,7 +22495,11 @@ var registry_generated_default = {
         en: "HTTP 200 text with Markdown links that all open.",
         id: "HTTP 200 berupa teks dengan tautan Markdown yang semuanya terbuka."
       },
-      external_id: "llms-txt-exists"
+      external_id: "llms-txt-exists",
+      ask: {
+        en: "Ask the owner which pages matter most (about, products, policies). List only pages that exist.",
+        id: "Tanyakan ke pemilik halaman mana yang paling penting (tentang, produk, kebijakan). Cantumkan hanya halaman yang ada."
+      }
     },
     {
       id: "agents_md",
@@ -22455,7 +22525,11 @@ var registry_generated_default = {
         en: "HTTP 200 and Content-Type text/markdown or text/plain.",
         id: "HTTP 200 dan Content-Type text/markdown atau text/plain."
       },
-      external_id: "agent-discovery-file"
+      external_id: "agent-discovery-file",
+      ask: {
+        en: "Ask the owner for a short description of the business and which pages matter most. Do not describe services the business does not offer.",
+        id: "Tanyakan ke pemilik deskripsi singkat bisnis dan halaman mana yang paling penting. Jangan menjelaskan layanan yang tidak ditawarkan bisnis."
+      }
     },
     {
       id: "content_signals",
@@ -22481,7 +22555,11 @@ var registry_generated_default = {
         en: "A Content-Signal line with ai-train, search and ai-input each set to yes or no.",
         id: "Satu baris Content-Signal dengan ai-train, search dan ai-input, masing-masing yes atau no."
       },
-      external_id: ""
+      external_id: "",
+      ask: {
+        en: "This is a decision for the owner, not for you. Ask the owner three yes or no questions: may AI companies train models on the site's content (ai-train), may the content appear in AI search results (search), and may it be used to answer a user's question (ai-input). Write the line from the answers. Do not use the example values unless the owner confirms them.",
+        id: "Ini keputusan pemilik, bukan kamu. Ajukan tiga pertanyaan ya atau tidak ke pemilik: bolehkah perusahaan AI melatih model dengan konten situs (ai-train), bolehkah konten muncul di hasil pencarian AI (search), dan bolehkah dipakai untuk menjawab pertanyaan pengguna (ai-input). Tulis barisnya dari jawaban itu. Jangan pakai nilai contoh kecuali pemilik menyetujuinya."
+      }
     },
     {
       id: "link_headers",
@@ -22507,7 +22585,8 @@ var registry_generated_default = {
         en: 'A Link header with rel="api-catalog", "service-doc" or a similar useful relation.',
         id: 'Header Link dengan rel="api-catalog", "service-doc" atau relasi berguna lainnya.'
       },
-      external_id: "link-headers-discovery"
+      external_id: "link-headers-discovery",
+      ask: null
     },
     {
       id: "mcp_server_card",
@@ -22533,7 +22612,8 @@ var registry_generated_default = {
         en: "HTTP 200 JSON with serverInfo.name and serverInfo.version.",
         id: "HTTP 200 JSON dengan serverInfo.name dan serverInfo.version."
       },
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "agent_skills_index",
@@ -22559,7 +22639,8 @@ var registry_generated_default = {
         en: "HTTP 200 JSON with $schema and a skills array; each entry has name, type, description, url and sha256.",
         id: "HTTP 200 JSON dengan $schema dan array skills; tiap entri punya name, type, description, url dan sha256."
       },
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "ard_manifest",
@@ -22585,7 +22666,8 @@ var registry_generated_default = {
         en: "HTTP 200 JSON with specVersion, host and entries.",
         id: "HTTP 200 JSON dengan specVersion, host dan entries."
       },
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "auth_md",
@@ -22611,7 +22693,8 @@ var registry_generated_default = {
         en: "HTTP 200 text with agent registration instructions.",
         id: "HTTP 200 berupa teks dengan petunjuk registrasi agent."
       },
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "oauth_discovery",
@@ -22637,7 +22720,8 @@ var registry_generated_default = {
         en: "HTTP 200 JSON with an issuer.",
         id: "HTTP 200 JSON dengan issuer."
       },
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "oauth_protected_resource",
@@ -22663,7 +22747,8 @@ var registry_generated_default = {
         en: "HTTP 200 JSON with a resource.",
         id: "HTTP 200 JSON dengan resource."
       },
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "mcp_live",
@@ -22680,7 +22765,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "mcp_quality",
@@ -22697,7 +22783,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "web_search_discovery",
@@ -22714,7 +22801,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "webmcp",
@@ -22731,7 +22819,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "dns_aid",
@@ -22748,7 +22837,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "web_bot_auth",
@@ -22765,7 +22855,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "api_discovery",
@@ -22782,7 +22873,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "api_surface",
@@ -22799,7 +22891,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "agent_payments",
@@ -22816,7 +22909,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     },
     {
       id: "agent_checkout",
@@ -22833,7 +22927,8 @@ var registry_generated_default = {
       controlled: {},
       platform_fix: {},
       verify: null,
-      external_id: ""
+      external_id: "",
+      ask: null
     }
   ]
 };
@@ -22852,7 +22947,9 @@ var TEXT = {
     issue: "Issue",
     issue_n: "Issue {i} of {n}",
     found: "What the scan found",
+    here: "On this site",
     todo: "What to do",
+    ask: "Ask the owner first",
     on_platform: "On {platform}",
     check: "How to check",
     expect: "Expect",
@@ -22862,6 +22959,7 @@ var TEXT = {
       "Before you change a file or a setting, note its current value so it can be restored.",
       "If you do not have the access you need (for example to the theme), say so and stop. Do not work around it."
     ],
+    ask_rule: "Where an issue says to ask the owner first, ask and wait for the answer. Never invent contact details, legal text or policy choices.",
     done_one: "When you finish, list exactly what you changed and how to undo each change.",
     done_many: "When you finish, list exactly what you changed and how to undo each change, and say which issues are done and which are not.",
     none: "The scan found nothing the owner can fix."
@@ -22873,7 +22971,9 @@ var TEXT = {
     issue: "Masalah",
     issue_n: "Masalah {i} dari {n}",
     found: "Yang ditemukan scan",
+    here: "Di situs ini",
     todo: "Yang perlu dilakukan",
+    ask: "Tanyakan dulu ke pemilik",
     on_platform: "Di {platform}",
     check: "Cara mengecek",
     expect: "Hasil yang diharapkan",
@@ -22883,11 +22983,92 @@ var TEXT = {
       "Sebelum mengubah berkas atau pengaturan, catat nilai aslinya supaya bisa dikembalikan.",
       "Kalau kamu tidak punya akses yang dibutuhkan (misalnya ke tema), katakan dan berhenti. Jangan mencari jalan pintas."
     ],
+    ask_rule: "Kalau sebuah masalah menyuruh bertanya dulu ke pemilik, tanyakan dan tunggu jawabannya. Jangan pernah mengarang data kontak, teks hukum, atau pilihan kebijakan.",
     done_one: "Setelah selesai, tuliskan persis apa yang kamu ubah dan cara membatalkan tiap perubahan.",
     done_many: "Setelah selesai, tuliskan persis apa yang kamu ubah dan cara membatalkan tiap perubahan, dan sebutkan masalah mana yang selesai dan mana yang belum.",
     none: "Scan tidak menemukan apa pun yang bisa diperbaiki pemilik."
   }
 };
+var CONTEXT = {
+  en: {
+    outline: "Headings, in order: {outline}.",
+    no_headings: "The page has no headings.",
+    text: "Visible text: {chars} characters, {pct}% of the HTML.",
+    org: "The Organization entity {name}(type {type}). It has: {present}.",
+    org_lacks: " It lacks: {missing}.",
+    org_none_types: "The homepage has JSON-LD of these types, but no Organization: {types}.",
+    org_no_jsonld: "The homepage has no JSON-LD.",
+    robots: "robots.txt today ({shown} of {total} lines):",
+    blocked: "Blocked: {blocked}.",
+    pages: "About, Contact and Privacy: {pages}.",
+    page: "{kind}: {status}",
+    page_ok: "ok",
+    page_thin: "only {chars} characters at {url}",
+    page_missing: "not found",
+    noindex: "noindex was found in: {sources}.",
+    named: '"{name}" ',
+    none: "none"
+  },
+  id: {
+    outline: "Heading, berurutan: {outline}.",
+    no_headings: "Halaman tidak punya heading.",
+    text: "Teks yang terlihat: {chars} karakter, {pct}% dari HTML.",
+    org: "Entitas Organization {name}(tipe {type}). Isinya: {present}.",
+    org_lacks: " Yang belum ada: {missing}.",
+    org_none_types: "Beranda punya JSON-LD bertipe ini, tapi tidak ada Organization: {types}.",
+    org_no_jsonld: "Beranda tidak punya JSON-LD.",
+    robots: "robots.txt saat ini ({shown} dari {total} baris):",
+    blocked: "Diblokir: {blocked}.",
+    pages: "About, Contact dan Privacy: {pages}.",
+    page: "{kind}: {status}",
+    page_ok: "ada",
+    page_thin: "hanya {chars} karakter di {url}",
+    page_missing: "tidak ditemukan",
+    noindex: "noindex ditemukan di: {sources}.",
+    named: '"{name}" ',
+    none: "tidak ada"
+  }
+};
+var list = (v) => Array.isArray(v) ? v.map(String) : [];
+function factsOrg(c, d, lacks) {
+  const name = d["org_name"] ? fmt(c.named, { name: String(d["org_name"]) }) : "";
+  const present = list(d["present"]).join(", ");
+  let line = fmt(c.org, { name, type: String(d["org_type"] || "?"), present: present || c.none });
+  const missing = list(d["missing"]);
+  if (lacks && missing.length) line += fmt(c.org_lacks, { missing: missing.join(", ") });
+  return line;
+}
+function contextLines(checkId, details, lang) {
+  const c = CONTEXT[lang];
+  const d = details ?? {};
+  if (checkId === "raw_html_content" && "outline" in d) {
+    const outline = d["outline"].map(([lvl, text]) => `H${lvl} "${text}"`).join(", ");
+    const ratio = typeof d["ratio"] === "number" ? d["ratio"] : 0;
+    return [outline ? fmt(c.outline, { outline }) : c.no_headings, fmt(c.text, { chars: String(d["text_chars"] ?? 0), pct: fixed(ratio * 100, 1) })];
+  }
+  if (checkId === "jsonld_organization") {
+    if ("org_type" in d) return [factsOrg(c, d, false)];
+    if (list(d["jsonld_types"]).length) return [fmt(c.org_none_types, { types: list(d["jsonld_types"]).join(", ") })];
+    return "jsonld_types" in d ? [c.org_no_jsonld] : [];
+  }
+  if (checkId === "organization_completeness" && "org_type" in d) return [factsOrg(c, d, true)];
+  if (checkId === "content_signals" && list(d["robots_head"]).length) {
+    const shown = list(d["robots_head"]);
+    return [fmt(c.robots, { shown: shown.length, total: String(d["robots_lines"] ?? shown.length) }), ...shown.map((line) => "    " + line)];
+  }
+  if (checkId === "ai_crawlers_allowed" && list(d["blocked"]).length) return [fmt(c.blocked, { blocked: list(d["blocked"]).join(", ") })];
+  if (checkId === "not_noindex" && list(d["sources"]).length) return [fmt(c.noindex, { sources: list(d["sources"]).join(", ") })];
+  if (checkId === "trust_pages" && d["pages"] && typeof d["pages"] === "object") {
+    const pages = d["pages"];
+    const parts = ["about", "contact", "privacy"].map((kind) => {
+      const p = pages[kind] ?? {};
+      const status2 = p.status === "ok" ? c.page_ok : p.status === "thin" ? fmt(c.page_thin, { chars: String(p.chars ?? 0), url: p.url ?? "" }) : c.page_missing;
+      return fmt(c.page, { kind, status: status2 });
+    });
+    return [fmt(c.pages, { pages: parts.join("; ") })];
+  }
+  return [];
+}
 var TIER_ID = { essential: "esensial", recommended: "disarankan", bonus: "bonus" };
 var fmt = (template, values) => template.replace(/\{(\w+)\}/g, (_, k) => String(values[k]));
 var platformName = (p) => p ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : "";
@@ -22898,23 +23079,27 @@ function issueBlock(d, row, site, platform, lang, heading) {
   const hint = d.platform_fix[platform];
   const group = REGISTRY.groups[String(d.group)]?.[lang] ?? "";
   const tier = en ? row.tier : TIER_ID[row.tier] ?? row.tier;
-  const lines = [
-    `${heading}: ${en ? d.name : d.name_id} (${tier}, ${group})`,
-    `${t.found}: ${row.evidence}`,
-    `${t.todo}: ${en ? d.fix : d.fix_id}`
-  ];
+  const lines = [`${heading}: ${en ? d.name : d.name_id} (${tier}, ${group})`, `${t.found}: ${row.evidence}`];
+  const here = contextLines(d.id, row.details, lang);
+  if (here.length) lines.push(`${t.here}: ${here[0]}`, ...here.slice(1));
+  lines.push(`${t.todo}: ${en ? d.fix : d.fix_id}`);
   if (hint) lines.push(`${fmt(t.on_platform, { platform: platformName(platform) })}: ${hint[lang]}`);
+  if (d.ask) lines.push(`${t.ask}: ${d.ask[lang]}`);
   if (d.verify) {
     lines.push(`${t.check}:`, `    ${d.verify.command.split("{site}").join(site)}`, `${t.expect}: ${en ? d.verify.en : d.verify.id}`);
   }
   return lines;
 }
-var rules = (lang) => [`${TEXT[lang].rules_head}:`, ...TEXT[lang].rules.map((r) => `- ${r}`)];
+var rules = (lang, asks = false) => [
+  `${TEXT[lang].rules_head}:`,
+  ...TEXT[lang].rules.map((r) => `- ${r}`),
+  ...asks ? [`- ${TEXT[lang].ask_rule}`] : []
+];
 function fixPrompt(checkId, row, site, platform = "", lang = "en") {
   const t = TEXT[lang];
   const d = BY_ID[checkId];
   const head = fmt(t.one_head, { site, platform: platformLabel(platform, lang) });
-  return [head, "", ...issueBlock(d, row, site, platform, lang, t.issue), "", ...rules(lang), "", t.done_one].join("\n") + "\n";
+  return [head, "", ...issueBlock(d, row, site, platform, lang, t.issue), "", ...rules(lang, Boolean(d.ask)), "", t.done_one].join("\n") + "\n";
 }
 function allPrompt(gaps2, site, platform = "", lang = "en", scanned = "") {
   const t = TEXT[lang];
@@ -22927,7 +23112,7 @@ function allPrompt(gaps2, site, platform = "", lang = "en", scanned = "") {
     date: scanned,
     platform: platformLabel(platform, lang)
   });
-  const out = [head, "", ...rules(lang), ""];
+  const out = [head, "", ...rules(lang, gaps2.some((g) => Boolean(BY_ID[g.check_id].ask))), ""];
   gaps2.forEach((row, i) => {
     out.push(...issueBlock(BY_ID[row.check_id], row, site, platform, lang, fmt(t.issue_n, { i: i + 1, n })), "");
   });
@@ -23053,7 +23238,7 @@ async function runAudit(fetch, options) {
   const scannedAt = options.scannedAt ?? (/* @__PURE__ */ new Date()).toISOString();
   const fixable = gaps(rows);
   const limited = limitedGaps(rows);
-  const gapRows = fixable.map((g) => ({ check_id: g.check_id, tier: g.tier, evidence: g.evidence }));
+  const gapRows = fixable.map((g) => ({ check_id: g.check_id, tier: g.tier, evidence: g.evidence, details: g.details }));
   const byId = Object.fromEntries(REGISTRY.checks.map((c) => [c.id, c]));
   const gapIds = new Set(fixable.map((g) => g.check_id));
   const checks = rows.map((r) => {
@@ -23181,9 +23366,9 @@ var publicLookup = ((hostname, options, callback) => {
   const opts = typeof options === "function" ? {} : options;
   import_node_dns.default.lookup(hostname, { ...opts, all: true }, (err, addresses) => {
     if (err) return cb(err);
-    const list = addresses;
-    const allowed = list.filter((a) => !isPrivateAddress(a.address));
-    if (!allowed.length || allowed.length !== list.length) {
+    const list2 = addresses;
+    const allowed = list2.filter((a) => !isPrivateAddress(a.address));
+    if (!allowed.length || allowed.length !== list2.length) {
       return cb(Object.assign(new Error(`refused: ${hostname} is not a public address`), { code: "EPRIVATE" }));
     }
     if (opts.all) return cb(null, allowed);

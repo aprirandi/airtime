@@ -120,6 +120,22 @@ config. No other code changes.
 | `agents_md` | Shopify generates it; override it with the agents.md.liquid template. |
 | `content_signals` | Add it through the robots.txt.liquid template. |
 
+## Fixes that need the owner
+
+The fix prompt for these tells the assistant to ask the owner first, and never to invent the answer.
+
+| Check | Ask the owner first |
+|---|---|
+| `ai_crawlers_allowed` | A block may be deliberate. Ask the owner whether it is meant before you remove it, and name the crawlers you would unblock. |
+| `public_no_login` | A store password or login may be intentional. Ask the owner before you remove it. |
+| `not_noindex` | Ask the owner whether hiding the homepage from search is intended (for example a site still being built) before you change it. |
+| `jsonld_organization` | Ask the store owner for a one or two sentence description of the business, or reuse the wording of the About page. Do not add claims the owner has not approved. |
+| `organization_completeness` | Do not invent these. Ask the store owner for a contact phone number or email (and what it is for, such as customer service) and for the street address (street, suburb, postcode, country). If the website already shows them, for example in the footer or on the Contact page, use exactly those values. |
+| `trust_pages` | Write no legal text yourself. Ask the owner for the content of the missing pages, and for the privacy policy the text from their lawyer or policy generator, then publish it as written. |
+| `llms_txt` | Ask the owner which pages matter most (about, products, policies). List only pages that exist. |
+| `agents_md` | Ask the owner for a short description of the business and which pages matter most. Do not describe services the business does not offer. |
+| `content_signals` | This is a decision for the owner, not for you. Ask the owner three yes or no questions: may AI companies train models on the site's content (ai-train), may the content appear in AI search results (search), and may it be used to answer a user's question (ai-input). Write the line from the answers. Do not use the example values unless the owner confirms them. |
+
 ## How to verify a built check by hand
 
 | Check | Command | Expect |

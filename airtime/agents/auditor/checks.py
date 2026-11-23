@@ -87,6 +87,19 @@ def _org(snap: Snapshot) -> dict | None:
     return None
 
 
+def _clip(text: str, n: int) -> str:
+    """The first n characters (code points), so the same text is kept whichever engine reads it."""
+    return text[:n]
+
+
+def _org_facts(org: dict) -> dict:
+    """What the Organization entity on this site says about itself, for the fix prompt."""
+    name = org.get("name")
+    types = types_of(org)
+    return {"org_name": _clip(name, 80) if isinstance(name, str) else "", "org_type": types[0] if types else "",
+            "present": [k for k, v in org.items() if not k.startswith("@") and _filled(v)]}
+
+
 def _filled(value) -> bool:
     if isinstance(value, str):
         return bool(value.strip())
@@ -152,7 +165,8 @@ def raw_html_content(snap: Snapshot) -> Outcome:
     if not missing:
         return passed(f"The raw HTML has {len(page.text)} characters of text, an H1 and ordered headings.")
     return graded(percent, "Missing in the raw HTML: " + "; ".join(missing) + ".",
-                  text_chars=len(page.text), ratio=round(page.content_ratio, 4), headings=levels[:12])
+                  text_chars=len(page.text), ratio=round(page.content_ratio, 4), headings=levels[:12],
+                  outline=[[lvl, _clip(text, 60)] for lvl, text in page.headings[:12]])
 
 
 def redirects_clean(snap: Snapshot) -> Outcome:
@@ -184,7 +198,8 @@ def not_noindex(snap: Snapshot) -> Outcome:
     robots_meta = " ".join(snap.home_page.meta_content(n) for n in ("robots", "googlebot", "bingbot")).lower()
     header = snap.home.header("x-robots-tag").lower()
     if "noindex" in robots_meta or "noindex" in header:
-        return failed("The homepage tells search engines not to index it (noindex).")
+        return failed("The homepage tells search engines not to index it (noindex).",
+                      sources=[s for s, found in (("meta tag", "noindex" in robots_meta), ("X-Robots-Tag header", "noindex" in header)) if found])
     return passed("No noindex in the homepage's meta tags or headers.")
 
 
@@ -202,14 +217,21 @@ def not_found_markdown(snap: Snapshot) -> Outcome:
 # ---- Group 2: trust and identity ---------------------------------------------------------------
 
 def jsonld_organization(snap: Snapshot) -> Outcome:
-    _, invalid = jsonld_items(snap.home_page)
+    items, invalid = jsonld_items(snap.home_page)
     org = _org(snap)
     if org is None:
+        found: list[str] = []
+        for item in items:
+            for t in types_of(item):
+                if t not in found:
+                    found.append(t)
         return failed("No Organization or store entity in the homepage JSON-LD"
-                      + (f" ({invalid} block(s) were not valid JSON)." if invalid else "."))
+                      + (f" ({invalid} block(s) were not valid JSON)." if invalid else "."),
+                      jsonld_types=found[:8], invalid_blocks=invalid)
+    facts = _org_facts(org)
     if not _filled(org.get("description")):
-        return partial(50, "An Organization entity is present but has no description.")
-    return passed("An Organization entity with a description is present in the JSON-LD.")
+        return partial(50, "An Organization entity is present but has no description.", **facts)
+    return passed("An Organization entity with a description is present in the JSON-LD.", **facts)
 
 
 def organization_completeness(snap: Snapshot) -> Outcome:
@@ -218,9 +240,10 @@ def organization_completeness(snap: Snapshot) -> Outcome:
         return failed("No Organization entity to check for contact details and address.")
     have = {"contactPoint": _filled(org.get("contactPoint")), "address": _filled(org.get("address"))}
     missing = [k for k, ok in have.items() if not ok]
+    facts = {**_org_facts(org), "missing": missing}
     if not missing:
-        return passed("The Organization has a contactPoint and an address.")
-    return graded(50 * sum(have.values()), "The Organization is missing: " + ", ".join(missing) + ".")
+        return passed("The Organization has a contactPoint and an address.", **facts)
+    return graded(50 * sum(have.values()), "The Organization is missing: " + ", ".join(missing) + ".", **facts)
 
 
 def metadata_complete(snap: Snapshot) -> Outcome:
@@ -262,17 +285,20 @@ def pricing_structured(snap: Snapshot) -> Outcome:
 
 
 def trust_pages(snap: Snapshot) -> Outcome:
-    parts, ok_count = [], 0
+    parts, ok_count, pages = [], 0, {}
     for kind in ("about", "contact", "privacy"):
         found = snap.trust.get(kind)
         if found is None:
             parts.append(f"{kind}: not found")
+            pages[kind] = {"status": "missing", "url": "", "chars": 0}
         elif len(found[1].text) < MIN_TEXT:
             parts.append(f"{kind}: only {len(found[1].text)} characters")
+            pages[kind] = {"status": "thin", "url": found[0].url, "chars": len(found[1].text)}
         else:
             ok_count += 1
             parts.append(f"{kind}: ok")
-    return graded(round(100 * ok_count / 3), "; ".join(parts) + ".")
+            pages[kind] = {"status": "ok", "url": found[0].url, "chars": len(found[1].text)}
+    return graded(round(100 * ok_count / 3), "; ".join(parts) + ".", pages=pages)
 
 
 # ---- Group 3: agent discovery ------------------------------------------------------------------
@@ -328,11 +354,15 @@ def content_signals(snap: Snapshot) -> Outcome:
             key, _, value = pair.partition("=")
             if key.strip().lower() in CONTENT_SIGNAL_KEYS and value.strip().lower() in ("yes", "no"):
                 found[key.strip().lower()] = value.strip().lower()
+    lines = snap.robots.text.splitlines()
+    head = [_clip(line, 120) for line in lines[:25]]
     if len(found) == len(CONTENT_SIGNAL_KEYS):
-        return passed("robots.txt declares ai-train, search and ai-input preferences.", signals=found)
+        return passed("robots.txt declares ai-train, search and ai-input preferences.", signals=found,
+                      robots_head=head, robots_lines=len(lines))
     return graded(round(100 * len(found) / len(CONTENT_SIGNAL_KEYS)),
                   "robots.txt has no Content-Signal directive." if not found else
-                  "robots.txt declares only: " + ", ".join(found) + ".", signals=found)
+                  "robots.txt declares only: " + ", ".join(found) + ".", signals=found,
+                  robots_head=head, robots_lines=len(lines))
 
 
 def parse_link_header(value: str) -> list[dict]:

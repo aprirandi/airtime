@@ -19,6 +19,10 @@ const server = http.createServer(handler).listen(0, async () => {
   else {
     console.log({ engine: data.engine, target: data.target, platform: data.platform, score: data.score, label: data.label, cached: data.cached, checks: data.checks.length })
     console.log("gaps:", data.gaps.join(", ") || "none", "| held back:", data.limited_gaps.join(", ") || "none")
+    if (process.env.PRINT_PROMPT) {
+      console.log("=====PROMPT_EN_START\n" + data.prompt_all + "=====PROMPT_EN_END")
+      console.log("=====PROMPT_ID_START\n" + data.prompt_all_id + "=====PROMPT_ID_END")
+    }
     const again = await (await post({ url, platform })).json()
     console.log("second request cached:", again.cached)
   }
