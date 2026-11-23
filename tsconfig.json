@@ -1,0 +1,16 @@
+{
+  "//": "Used by Vercel to compile the api/ function and the engine it imports. The engine and the web app have their own tsconfig.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "typeRoots": ["./engine/node_modules/@types"],
+    "types": ["node"]
+  },
+  "include": ["api", "engine/src"]
+}

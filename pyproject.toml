@@ -2,7 +2,7 @@
 name = "airtime"
 version = "0.1.0"
 description = "Airtime agents: measure how often AI assistants name a store."
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = []  # stdlib only at runtime
 
 [project.optional-dependencies]

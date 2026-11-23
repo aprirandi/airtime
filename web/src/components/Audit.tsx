@@ -203,9 +203,12 @@ function GapItem({ c, t, pick, audit }: { c: AuditCheck; t: T; pick: <V>(o: obje
 }
 
 export function AuditCard({ store }: { store: Store }) {
+  return store.audit ? <AuditView audit={store.audit} name={store.name} /> : null
+}
+
+/** The readiness result. `variant="public"` is the page anyone can reach: no mention of the daily shift or Asker. */
+export function AuditView({ audit, name, variant = "dashboard" }: { audit: Audit; name: string; variant?: "dashboard" | "public" }) {
   const { t, pick, lang } = useI18n()
-  const audit = store.audit
-  if (!audit) return null
   const byId = new Map(audit.checks.map((c) => [c.id, c]))
   const gaps = audit.gaps.map((id) => byId.get(id)).filter((c): c is AuditCheck => Boolean(c))
   const controlled = (audit.limited_gaps ?? []).map((id) => byId.get(id)).filter((c): c is AuditCheck => Boolean(c))
@@ -220,7 +223,9 @@ export function AuditCard({ store }: { store: Store }) {
         <CardTitle className="flex items-center gap-2">
           <ShieldAlert className="size-4" /> {t("audit.title")}
         </CardTitle>
-        <CardDescription>{t("audit.sub", { store: store.name, d: fmtDate(audit.scanned_at.slice(0, 10)) })}</CardDescription>
+        <CardDescription>
+          {t(variant === "public" ? "audit.subPublic" : "audit.sub", { store: name, d: fmtDate(audit.scanned_at.slice(0, 10)) })}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-6 md:grid-cols-[200px_1fr]">
@@ -312,7 +317,7 @@ export function AuditCard({ store }: { store: Store }) {
         )}
 
         <p className="text-muted-foreground text-xs leading-relaxed">
-          {t("audit.foot", {
+          {t(variant === "public" ? "audit.footPublic" : "audit.foot", {
             done: built,
             planned: audit.coverage.planned.length,
             d: fmtDate(audit.scanned_at.slice(0, 10)),

@@ -73,7 +73,7 @@ answer and every verified quote; every `audit_checks` row keeps the evidence for
 
 ## Running it
 
-Needs Python 3.11+, no runtime dependencies.
+Needs Python 3.13+ (its robots.txt reader follows RFC 9309, which the Auditor relies on), no runtime dependencies. The TypeScript engine in `engine/` needs Node 22.
 
 ```bash
 export GEMINI_API_KEY=...                       # from Google AI Studio; never commit it
@@ -112,6 +112,14 @@ The daily run only rewrites `docs/data/`, so it needs no Node. After changing an
 ```bash
 cd web && npm ci && npm run build   # builds into docs/, then re-exports docs/data/
 ```
+
+### Website check page and service (Vercel)
+
+`web/` is also the public page where anyone types a website address and gets a score, what to fix and a prompt
+per fix; `api/audit.ts` and `engine/` (TypeScript) are the service behind it. The daily-shift pages are hidden for
+now (still at `#/dashboard`). See [plans/vercel.md](plans/vercel.md) for the deploy steps, limits and how the
+TypeScript engine is kept identical to the Python one. Try it without internet:
+`cd engine && npm ci && npm run test`, or `npx tsx scripts/serve.mts` after `npm run build:site --prefix web`.
 
 ### Website audit
 

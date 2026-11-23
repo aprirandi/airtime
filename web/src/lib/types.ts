@@ -88,8 +88,8 @@ export interface AuditGroup {
 }
 
 export interface Audit {
-  id: number
-  run_id: number | null
+  id?: number
+  run_id?: number | null
   scanned_at: string
   target: string
   platform: string
@@ -106,7 +106,7 @@ export interface Audit {
   prompt_all: string
   prompt_all_id: string
   external?: ExternalReport | null
-  history: { scanned_at: string; score: number | null; engine: string }[]
+  history?: { scanned_at: string; score: number | null; engine: string }[]
 }
 
 export interface RegistryCheck {

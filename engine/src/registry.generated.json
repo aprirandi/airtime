@@ -1,0 +1,837 @@
+{
+ "groups": {
+  "1": {
+   "en": "Access and content",
+   "id": "Akses dan isi"
+  },
+  "2": {
+   "en": "Trust and identity",
+   "id": "Kepercayaan dan identitas"
+  },
+  "3": {
+   "en": "Agent discovery",
+   "id": "Penemuan agent"
+  },
+  "4": {
+   "en": "Not for stores",
+   "id": "Bukan untuk toko"
+  }
+ },
+ "checks": [
+  {
+   "id": "robots_txt",
+   "group": 1,
+   "tier": "recommended",
+   "source": "cloudflare",
+   "status": "built",
+   "name": "robots.txt exists",
+   "name_id": "robots.txt ada",
+   "fix": "Publish /robots.txt with clear crawl rules and a Sitemap line.",
+   "fix_id": "Terbitkan /robots.txt dengan aturan crawl yang jelas dan baris Sitemap.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {
+    "shopify": {
+     "en": "Shopify generates robots.txt. Change it through the robots.txt.liquid template.",
+     "id": "Shopify membuat robots.txt. Ubah lewat template robots.txt.liquid."
+    }
+   },
+   "verify": {
+    "command": "curl -sS -i {site}/robots.txt",
+    "en": "HTTP 200, at least one User-agent line, and a Sitemap line.",
+    "id": "HTTP 200, minimal satu baris User-agent, dan satu baris Sitemap."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "ai_crawlers_allowed",
+   "group": 1,
+   "tier": "essential",
+   "source": "both",
+   "status": "built",
+   "name": "AI crawlers can reach the site",
+   "name_id": "Crawler AI bisa mengakses situs",
+   "fix": "Do not block ChatGPT-User, OAI-SearchBot, Claude-User or PerplexityBot in robots.txt, and check that firewall or bot protection lets them in.",
+   "fix_id": "Jangan blokir ChatGPT-User, OAI-SearchBot, Claude-User atau PerplexityBot di robots.txt, dan pastikan firewall atau perlindungan bot mengizinkan mereka masuk.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS -o /dev/null -w '%{http_code}\\n' -A 'Mozilla/5.0 (compatible; ChatGPT-User/1.0)' {site}/",
+    "en": "200 for ChatGPT-User, OAI-SearchBot, Claude-User and PerplexityBot (change the name after -A), and no Disallow for them in robots.txt.",
+    "id": "200 untuk ChatGPT-User, OAI-SearchBot, Claude-User dan PerplexityBot (ganti nama setelah -A), dan tidak ada Disallow untuk mereka di robots.txt."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "sitemap",
+   "group": 1,
+   "tier": "recommended",
+   "source": "both",
+   "status": "built",
+   "name": "Sitemap exists",
+   "name_id": "Sitemap ada",
+   "fix": "Publish a sitemap.xml and list it in robots.txt with a Sitemap line.",
+   "fix_id": "Terbitkan sitemap.xml dan cantumkan di robots.txt dengan baris Sitemap.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS {site}/sitemap.xml | head -20",
+    "en": "A <urlset> or <sitemapindex> with <loc> entries, and a Sitemap line in robots.txt.",
+    "id": "<urlset> atau <sitemapindex> dengan entri <loc>, dan baris Sitemap di robots.txt."
+   },
+   "external_id": "sitemap"
+  },
+  {
+   "id": "raw_html_content",
+   "group": 1,
+   "tier": "essential",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "Content available without JavaScript",
+   "name_id": "Konten tersedia tanpa JavaScript",
+   "fix": "Serve at least 500 characters of real homepage text in the HTML itself, with one clear H1, headings in order (H1, H2, H3 without skipping), and little markup around the text.",
+   "fix_id": "Sajikan minimal 500 karakter teks beranda langsung di HTML, dengan satu H1 yang jelas, judul berurutan (H1, H2, H3 tanpa melompat), dan sedikit markup di sekitar teks.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {
+    "shopify": {
+     "en": "This comes from the theme: change the heading levels in the theme's sections so the first heading is an H1.",
+     "id": "Ini berasal dari tema: ubah tingkat judul di bagian tema supaya judul pertama adalah H1."
+    }
+   },
+   "verify": {
+    "command": "curl -sS {site}/ | grep -io '<h[1-6][^>]*>' | head -20",
+    "en": "The first heading is <h1> and levels never skip (h1, h2, h3). The raw HTML has at least 500 characters of text.",
+    "id": "Judul pertama adalah <h1> dan tingkatnya tidak melompat (h1, h2, h3). HTML mentah punya minimal 500 karakter teks."
+   },
+   "external_id": "content-no-js"
+  },
+  {
+   "id": "redirects_clean",
+   "group": 1,
+   "tier": "essential",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "Redirects resolve cleanly",
+   "name_id": "Redirect berjalan bersih",
+   "fix": "Use plain HTTP redirects (301), not meta-refresh or JavaScript, and keep the chain to three hops or fewer.",
+   "fix_id": "Pakai redirect HTTP biasa (301), bukan meta-refresh atau JavaScript, dan jaga rantainya maksimal tiga lompatan.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sSIL {site}/ | grep -iE '^(HTTP|location)'",
+    "en": "At most three redirects (301), ending in HTTP 200, and no meta-refresh in the HTML.",
+    "id": "Paling banyak tiga redirect (301), berakhir di HTTP 200, dan tidak ada meta-refresh di HTML."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "public_no_login",
+   "group": 1,
+   "tier": "essential",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "Content available without signing in",
+   "name_id": "Konten tersedia tanpa login",
+   "fix": "Make sure the homepage and product pages can be read without logging in or entering a store password.",
+   "fix_id": "Pastikan beranda dan halaman produk bisa dibaca tanpa login atau kata sandi toko.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS -o /dev/null -w '%{http_code} %{url_effective}\\n' -L {site}/",
+    "en": "200, and the final URL is not a login or password page.",
+    "id": "200, dan URL akhirnya bukan halaman login atau kata sandi."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "not_noindex",
+   "group": 1,
+   "tier": "recommended",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "Homepage not hidden from search",
+   "name_id": "Beranda tidak disembunyikan dari pencarian",
+   "fix": "Remove noindex from the homepage's robots meta tag and from any X-Robots-Tag header.",
+   "fix_id": "Hapus noindex dari meta tag robots beranda dan dari header X-Robots-Tag.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sSI {site}/ | grep -i x-robots-tag; curl -sS {site}/ | grep -i 'name=\"robots\"'",
+    "en": "No noindex in either result.",
+    "id": "Tidak ada noindex di kedua hasil."
+   },
+   "external_id": "noindex-directives"
+  },
+  {
+   "id": "not_found_markdown",
+   "group": 1,
+   "tier": "essential",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "Agent-friendly 404 pages",
+   "name_id": "Halaman 404 ramah agent",
+   "fix": "Return a real HTTP 404 for missing pages, and a Markdown error message with a link to your sitemap or docs when the request asks for text/markdown.",
+   "fix_id": "Kembalikan HTTP 404 yang benar untuk halaman yang tidak ada, dan pesan error Markdown dengan tautan ke sitemap atau dokumentasi saat permintaan meminta text/markdown.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {
+    "shopify": {
+     "en": "Shopify serves 404 pages; a Markdown error body is not something the owner can change.",
+     "id": "Shopify yang menyajikan halaman 404; isi error Markdown tidak bisa diubah pemilik."
+    }
+   },
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS -i -H 'Accept: text/markdown' {site}/a-page-that-does-not-exist",
+    "en": "HTTP 404 with Content-Type: text/markdown and a short message that links to the sitemap.",
+    "id": "HTTP 404 dengan Content-Type: text/markdown dan pesan singkat yang menautkan ke sitemap."
+   },
+   "external_id": "agent-friendly-404"
+  },
+  {
+   "id": "controls_labelled",
+   "group": 1,
+   "tier": "essential",
+   "source": "is_agentic",
+   "status": "planned",
+   "name": "Controls and forms are understandable",
+   "name_id": "Kontrol dan form bisa dipahami",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "page_token_budget",
+   "group": 1,
+   "tier": "recommended",
+   "source": "is_agentic",
+   "status": "planned",
+   "name": "Pages fit an agent's context budget",
+   "name_id": "Halaman muat di anggaran konteks agent",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "jsonld_organization",
+   "group": 2,
+   "tier": "recommended",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "Organization data in JSON-LD",
+   "name_id": "Data Organization di JSON-LD",
+   "fix": "Add Organization (or LocalBusiness) JSON-LD to the homepage, with a name and a description.",
+   "fix_id": "Tambahkan JSON-LD Organization (atau LocalBusiness) di beranda, dengan nama dan deskripsi.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {
+    "shopify": {
+     "en": "Shopify's structured_data filter does not output Organization data: add a JSON-LD block to the theme layout (not verified).",
+     "id": "Filter structured_data Shopify tidak menghasilkan data Organization: tambahkan blok JSON-LD di layout tema (belum terverifikasi)."
+    }
+   },
+   "verify": {
+    "command": "curl -sS {site}/ | grep -o 'application/ld+json' | head -3",
+    "en": "An Organization (or LocalBusiness) JSON-LD block with a name and a description. Test it at validator.schema.org.",
+    "id": "Satu blok JSON-LD Organization (atau LocalBusiness) dengan nama dan deskripsi. Uji di validator.schema.org."
+   },
+   "external_id": "json-ld"
+  },
+  {
+   "id": "organization_completeness",
+   "group": 2,
+   "tier": "recommended",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "Organization contact details and address",
+   "name_id": "Kontak dan alamat Organization",
+   "fix": "Add contactPoint (phone or email with a contactType) and address (PostalAddress) to the Organization JSON-LD.",
+   "fix_id": "Tambahkan contactPoint (telepon atau email dengan contactType) dan address (PostalAddress) ke JSON-LD Organization.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {
+    "shopify": {
+     "en": "Add them in the same JSON-LD block in the theme layout (not verified).",
+     "id": "Tambahkan di blok JSON-LD yang sama di layout tema (belum terverifikasi)."
+    }
+   },
+   "verify": {
+    "command": "curl -sS {site}/ | grep -o 'contactPoint\\|PostalAddress' | sort -u",
+    "en": "Both contactPoint and PostalAddress appear in the Organization JSON-LD.",
+    "id": "contactPoint dan PostalAddress sama-sama ada di JSON-LD Organization."
+   },
+   "external_id": "org-schema-completeness"
+  },
+  {
+   "id": "metadata_complete",
+   "group": 2,
+   "tier": "recommended",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "Page metadata is complete",
+   "name_id": "Metadata halaman lengkap",
+   "fix": "Add a canonical link, the html lang attribute, og:image and og:type to the homepage head.",
+   "fix_id": "Tambahkan link canonical, atribut lang pada html, og:image dan og:type di head beranda.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS {site}/ | grep -iE 'rel=\"canonical\"|og:image|og:type|<html[^>]*lang'",
+    "en": "A canonical link, lang on <html>, og:image and og:type.",
+    "id": "Link canonical, lang di <html>, og:image dan og:type."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "pricing_structured",
+   "group": 2,
+   "tier": "recommended",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "Prices readable in structured data",
+   "name_id": "Harga terbaca di data terstruktur",
+   "fix": "Show price and currency in Product JSON-LD (offers.price and offers.priceCurrency) on product pages.",
+   "fix_id": "Tampilkan harga dan mata uang di JSON-LD Product (offers.price dan offers.priceCurrency) di halaman produk.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {
+    "shopify": {
+     "en": "Shopify's structured_data filter outputs Product data: check that the theme uses it.",
+     "id": "Filter structured_data Shopify menghasilkan data Product: pastikan tema memakainya."
+    }
+   },
+   "verify": {
+    "command": "curl -sS <product-page-url> | grep -o '\"price\"[^,]*\\|priceCurrency[^,]*'",
+    "en": "offers.price and offers.priceCurrency in the product's JSON-LD.",
+    "id": "offers.price dan offers.priceCurrency di JSON-LD produk."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "trust_pages",
+   "group": 2,
+   "tier": "recommended",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "About, Contact and Privacy pages",
+   "name_id": "Halaman About, Contact dan Privacy",
+   "fix": "Publish real About, Contact and Privacy pages with at least 500 characters each, and link them from the footer.",
+   "fix_id": "Terbitkan halaman About, Contact dan Privacy yang nyata dengan minimal 500 karakter masing-masing, dan tautkan dari footer.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {
+    "shopify": {
+     "en": "Privacy: Settings > Customer privacy > Privacy policy, published at /policies/privacy-policy.",
+     "id": "Privacy: Settings > Customer privacy > Privacy policy, terbit di /policies/privacy-policy."
+    }
+   },
+   "verify": {
+    "command": "curl -sS -o /dev/null -w '%{http_code}\\n' {site}/policies/privacy-policy",
+    "en": "HTTP 200 for each of the About, Contact and Privacy pages (use their real URLs), each with at least 500 characters of text and linked from the footer.",
+    "id": "HTTP 200 untuk halaman About, Contact dan Privacy (pakai URL aslinya), masing-masing minimal 500 karakter teks dan ditautkan dari footer."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "schema_breadth",
+   "group": 2,
+   "tier": "bonus",
+   "source": "is_agentic",
+   "status": "planned",
+   "name": "Breadth of schema types",
+   "name_id": "Keragaman tipe schema",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "markdown_negotiation",
+   "group": 3,
+   "tier": "essential",
+   "source": "both",
+   "status": "built",
+   "name": "Markdown content negotiation",
+   "name_id": "Negosiasi konten Markdown",
+   "fix": "Return Markdown when a request sends Accept: text/markdown (Content-Type: text/markdown, Vary: Accept) and keep serving HTML to browsers.",
+   "fix_id": "Kembalikan Markdown saat permintaan mengirim Accept: text/markdown (Content-Type: text/markdown, Vary: Accept) dan tetap sajikan HTML untuk browser.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {
+    "shopify": {
+     "en": "Shopify controls this and its Markdown route is not reliable yet.",
+     "id": "Shopify yang mengaturnya dan rute Markdown-nya belum andal."
+    }
+   },
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS -i -H 'Accept: text/markdown' {site}/",
+    "en": "Content-Type: text/markdown, Vary: Accept and a Markdown body. The same URL with Accept: text/html still returns HTML.",
+    "id": "Content-Type: text/markdown, Vary: Accept dan isi Markdown. URL yang sama dengan Accept: text/html tetap menghasilkan HTML."
+   },
+   "external_id": "markdown-negotiation-vary"
+  },
+  {
+   "id": "llms_txt",
+   "group": 3,
+   "tier": "bonus",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "llms.txt exists and its links work",
+   "name_id": "llms.txt ada dan tautannya berfungsi",
+   "fix": "Publish /llms.txt with Markdown links that all resolve.",
+   "fix_id": "Terbitkan /llms.txt dengan tautan Markdown yang semuanya berfungsi.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {
+    "shopify": {
+     "en": "Shopify generates it from agents.md; override it with the llms.txt.liquid template.",
+     "id": "Shopify membuatnya dari agents.md; timpa dengan template llms.txt.liquid."
+    }
+   },
+   "verify": {
+    "command": "curl -sS -i {site}/llms.txt",
+    "en": "HTTP 200 text with Markdown links that all open.",
+    "id": "HTTP 200 berupa teks dengan tautan Markdown yang semuanya terbuka."
+   },
+   "external_id": "llms-txt-exists"
+  },
+  {
+   "id": "agents_md",
+   "group": 3,
+   "tier": "bonus",
+   "source": "is_agentic",
+   "status": "built",
+   "name": "agents.md exists",
+   "name_id": "agents.md ada",
+   "fix": "Publish /agents.md, a Markdown guide that tells agents how to use the site.",
+   "fix_id": "Terbitkan /agents.md, panduan Markdown yang memberi tahu agent cara memakai situs.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {
+    "shopify": {
+     "en": "Shopify generates it; override it with the agents.md.liquid template.",
+     "id": "Shopify membuatnya; timpa dengan template agents.md.liquid."
+    }
+   },
+   "verify": {
+    "command": "curl -sS -i {site}/agents.md",
+    "en": "HTTP 200 and Content-Type text/markdown or text/plain.",
+    "id": "HTTP 200 dan Content-Type text/markdown atau text/plain."
+   },
+   "external_id": "agent-discovery-file"
+  },
+  {
+   "id": "content_signals",
+   "group": 3,
+   "tier": "recommended",
+   "source": "cloudflare",
+   "status": "built",
+   "name": "Content Signals in robots.txt",
+   "name_id": "Content Signals di robots.txt",
+   "fix": "Add a Content-Signal line to robots.txt stating your preferences, for example: Content-Signal: ai-train=no, search=yes, ai-input=no.",
+   "fix_id": "Tambahkan baris Content-Signal di robots.txt yang menyatakan preferensi Anda, misalnya: Content-Signal: ai-train=no, search=yes, ai-input=no.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {
+    "shopify": {
+     "en": "Add it through the robots.txt.liquid template.",
+     "id": "Tambahkan lewat template robots.txt.liquid."
+    }
+   },
+   "verify": {
+    "command": "curl -sS {site}/robots.txt | grep -i content-signal",
+    "en": "A Content-Signal line with ai-train, search and ai-input each set to yes or no.",
+    "id": "Satu baris Content-Signal dengan ai-train, search dan ai-input, masing-masing yes atau no."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "link_headers",
+   "group": 3,
+   "tier": "bonus",
+   "source": "cloudflare",
+   "status": "built",
+   "name": "Link headers for agent discovery",
+   "name_id": "Header Link untuk penemuan agent",
+   "fix": "Send Link response headers that point agents to useful resources, for example rel=\"api-catalog\" or rel=\"service-doc\".",
+   "fix_id": "Kirim header Link yang mengarahkan agent ke sumber berguna, misalnya rel=\"api-catalog\" atau rel=\"service-doc\".",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {
+    "shopify": {
+     "en": "Shopify sets Link headers itself; whether an owner can add their own is not documented.",
+     "id": "Shopify mengatur header Link sendiri; belum jelas apakah pemilik bisa menambah sendiri."
+    }
+   },
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sSI {site}/ | grep -i '^link'",
+    "en": "A Link header with rel=\"api-catalog\", \"service-doc\" or a similar useful relation.",
+    "id": "Header Link dengan rel=\"api-catalog\", \"service-doc\" atau relasi berguna lainnya."
+   },
+   "external_id": "link-headers-discovery"
+  },
+  {
+   "id": "mcp_server_card",
+   "group": 3,
+   "tier": "bonus",
+   "source": "both",
+   "status": "built",
+   "name": "MCP server card",
+   "name_id": "MCP server card",
+   "fix": "Serve an MCP server card at /.well-known/mcp/server-card.json with serverInfo (name, version).",
+   "fix_id": "Sajikan MCP server card di /.well-known/mcp/server-card.json dengan serverInfo (name, version).",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {
+    "shopify": {
+     "en": "Shopify controls this and the owner cannot change it.",
+     "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+    }
+   },
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS -i {site}/.well-known/mcp/server-card.json",
+    "en": "HTTP 200 JSON with serverInfo.name and serverInfo.version.",
+    "id": "HTTP 200 JSON dengan serverInfo.name dan serverInfo.version."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "agent_skills_index",
+   "group": 3,
+   "tier": "bonus",
+   "source": "cloudflare",
+   "status": "built",
+   "name": "Agent skills index",
+   "name_id": "Indeks agent skills",
+   "fix": "Publish /.well-known/agent-skills/index.json with a $schema and a skills array.",
+   "fix_id": "Terbitkan /.well-known/agent-skills/index.json dengan $schema dan array skills.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {
+    "shopify": {
+     "en": "Shopify controls this and the owner cannot change it.",
+     "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+    }
+   },
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS -i {site}/.well-known/agent-skills/index.json",
+    "en": "HTTP 200 JSON with $schema and a skills array; each entry has name, type, description, url and sha256.",
+    "id": "HTTP 200 JSON dengan $schema dan array skills; tiap entri punya name, type, description, url dan sha256."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "ard_manifest",
+   "group": 3,
+   "tier": "bonus",
+   "source": "cloudflare",
+   "status": "built",
+   "name": "ARD manifest",
+   "name_id": "Manifest ARD",
+   "fix": "Serve /.well-known/ai-catalog.json with specVersion, host and entries.",
+   "fix_id": "Sajikan /.well-known/ai-catalog.json dengan specVersion, host dan entries.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {
+    "shopify": {
+     "en": "Shopify controls this and the owner cannot change it.",
+     "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+    }
+   },
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS -i {site}/.well-known/ai-catalog.json",
+    "en": "HTTP 200 JSON with specVersion, host and entries.",
+    "id": "HTTP 200 JSON dengan specVersion, host dan entries."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "auth_md",
+   "group": 3,
+   "tier": "bonus",
+   "source": "both",
+   "status": "built",
+   "name": "Agent registration (auth.md)",
+   "name_id": "Registrasi agent (auth.md)",
+   "fix": "Serve /auth.md with agent registration instructions.",
+   "fix_id": "Sajikan /auth.md dengan petunjuk registrasi agent.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {
+    "shopify": {
+     "en": "Shopify controls this and the owner cannot change it.",
+     "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+    }
+   },
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS -i {site}/auth.md",
+    "en": "HTTP 200 text with agent registration instructions.",
+    "id": "HTTP 200 berupa teks dengan petunjuk registrasi agent."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "oauth_discovery",
+   "group": 3,
+   "tier": "bonus",
+   "source": "both",
+   "status": "built",
+   "name": "OAuth / OpenID Connect discovery",
+   "name_id": "Penemuan OAuth / OpenID Connect",
+   "fix": "Publish OAuth or OpenID Connect discovery metadata so agents can authenticate.",
+   "fix_id": "Terbitkan metadata penemuan OAuth atau OpenID Connect agar agent bisa mengautentikasi.",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {
+    "shopify": {
+     "en": "Shopify controls this and the owner cannot change it.",
+     "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+    }
+   },
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS -i {site}/.well-known/openid-configuration",
+    "en": "HTTP 200 JSON with an issuer.",
+    "id": "HTTP 200 JSON dengan issuer."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "oauth_protected_resource",
+   "group": 3,
+   "tier": "bonus",
+   "source": "both",
+   "status": "built",
+   "name": "OAuth protected-resource metadata",
+   "name_id": "Metadata protected-resource OAuth",
+   "fix": "Publish /.well-known/oauth-protected-resource (RFC 9728).",
+   "fix_id": "Terbitkan /.well-known/oauth-protected-resource (RFC 9728).",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {
+    "shopify": {
+     "en": "Shopify controls this and the owner cannot change it.",
+     "id": "Shopify yang mengaturnya dan pemilik tidak bisa mengubahnya."
+    }
+   },
+   "platform_fix": {},
+   "verify": {
+    "command": "curl -sS -i {site}/.well-known/oauth-protected-resource",
+    "en": "HTTP 200 JSON with a resource.",
+    "id": "HTTP 200 JSON dengan resource."
+   },
+   "external_id": ""
+  },
+  {
+   "id": "mcp_live",
+   "group": 3,
+   "tier": "bonus",
+   "source": "both",
+   "status": "planned",
+   "name": "MCP server answers a live connection",
+   "name_id": "Server MCP menjawab koneksi langsung",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "mcp_quality",
+   "group": 3,
+   "tier": "bonus",
+   "source": "is_agentic",
+   "status": "planned",
+   "name": "MCP tool quality",
+   "name_id": "Kualitas alat MCP",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "web_search_discovery",
+   "group": 3,
+   "tier": "bonus",
+   "source": "is_agentic",
+   "status": "planned",
+   "name": "Found through web search",
+   "name_id": "Ditemukan lewat pencarian web",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "webmcp",
+   "group": 3,
+   "tier": "bonus",
+   "source": "cloudflare",
+   "status": "planned",
+   "name": "WebMCP tools in the browser",
+   "name_id": "Alat WebMCP di browser",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "dns_aid",
+   "group": 3,
+   "tier": "bonus",
+   "source": "cloudflare",
+   "status": "planned",
+   "name": "DNS for AI Discovery (DNS-AID)",
+   "name_id": "DNS untuk AI Discovery (DNS-AID)",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "web_bot_auth",
+   "group": 3,
+   "tier": "bonus",
+   "source": "cloudflare",
+   "status": "planned",
+   "name": "Web Bot Auth",
+   "name_id": "Web Bot Auth",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "",
+   "na_reason_id": "",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "api_discovery",
+   "group": 4,
+   "tier": "bonus",
+   "source": "both",
+   "status": "na",
+   "name": "API discovery (OpenAPI, API catalog)",
+   "name_id": "Penemuan API (OpenAPI, katalog API)",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "Applies to API products or agent payments, not to a store.",
+   "na_reason_id": "Untuk produk API atau pembayaran antar-agent, bukan untuk toko.",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "api_surface",
+   "group": 4,
+   "tier": "bonus",
+   "source": "is_agentic",
+   "status": "na",
+   "name": "API surface (scopes, JSON errors, onboarding)",
+   "name_id": "Permukaan API (scope, error JSON, onboarding)",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "Applies to API products or agent payments, not to a store.",
+   "na_reason_id": "Untuk produk API atau pembayaran antar-agent, bukan untuk toko.",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "agent_payments",
+   "group": 4,
+   "tier": "bonus",
+   "source": "cloudflare",
+   "status": "na",
+   "name": "Agent payments (x402, MPP)",
+   "name_id": "Pembayaran antar-agent (x402, MPP)",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "Applies to API products or agent payments, not to a store.",
+   "na_reason_id": "Untuk produk API atau pembayaran antar-agent, bukan untuk toko.",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  },
+  {
+   "id": "agent_checkout",
+   "group": 4,
+   "tier": "bonus",
+   "source": "cloudflare",
+   "status": "na",
+   "name": "Agent checkout (ACP)",
+   "name_id": "Checkout antar-agent (ACP)",
+   "fix": "",
+   "fix_id": "",
+   "na_reason": "Applies to API products or agent payments, not to a store.",
+   "na_reason_id": "Untuk produk API atau pembayaran antar-agent, bukan untuk toko.",
+   "controlled": {},
+   "platform_fix": {},
+   "verify": null,
+   "external_id": ""
+  }
+ ]
+}
