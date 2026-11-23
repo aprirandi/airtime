@@ -113,6 +113,14 @@ The daily run only rewrites `docs/data/`, so it needs no Node. After changing an
 cd web && npm ci && npm run build   # builds into docs/, then re-exports docs/data/
 ```
 
+### Website check page and service (Vercel)
+
+`web/` is also the public page where anyone types a website address and gets a score, what to fix and a prompt
+per fix; `api/audit.ts` and `engine/` (TypeScript) are the service behind it. The daily-shift pages are hidden for
+now (still at `#/dashboard`). See [plans/vercel.md](plans/vercel.md) for the deploy steps, limits and how the
+TypeScript engine is kept identical to the Python one. Try it without internet:
+`cd engine && npm ci && npm run test`, or `npx tsx scripts/serve.mts` after `npm run build:site --prefix web`.
+
 ### Website audit
 
 `python -m airtime audit --store handworks` runs the Auditor: about 25 plain HTTP requests to the store's

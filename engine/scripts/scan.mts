@@ -1,4 +1,4 @@
-// Run one audit from the command line: npx tsx scripts/scan.ts <url> [platform]. Prints the result as JSON.
+// Run one audit from the command line: npx tsx scripts/scan.mts <url> [platform]. Prints the result as JSON.
 import { runAudit } from "../src/audit"
 import { httpFetcher } from "../src/http"
 

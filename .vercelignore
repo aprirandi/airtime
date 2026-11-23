@@ -1,0 +1,10 @@
+# Not needed to build or run the website and the audit service
+data
+docs
+airtime
+tests
+plans
+config
+.github
+pyproject.toml
+README.md

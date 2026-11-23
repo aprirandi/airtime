@@ -37,7 +37,7 @@ def python_engine(url: str, platform: str) -> dict:
 
 
 def ts_engine(url: str, platform: str) -> dict:
-    proc = subprocess.run(["npx", "tsx", "scripts/scan.ts", url, platform], cwd=ENGINE_DIR, capture_output=True, text=True, timeout=180)
+    proc = subprocess.run(["npx", "tsx", "scripts/scan.mts", url, platform], cwd=ENGINE_DIR, capture_output=True, text=True, timeout=180)
     data = json.loads(proc.stdout.strip().splitlines()[-1])
     if "error" in data:
         return data
