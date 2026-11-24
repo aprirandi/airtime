@@ -1,3 +1,4 @@
+import { FixList, FixMetaBadges, type FixMeta } from "@/components/FixList"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { fmtDate } from "@/lib/format"
@@ -16,7 +17,7 @@ const STATUS_VARIANT: Record<FixStatus, "success" | "warning" | "outline" | "sec
   done: "success",
 }
 
-export function FixCard({ fix, badge, hideSummary, children }: { fix: Fix; hideSummary?: boolean; badge?: { label: string; variant: "success" | "warning" | "outline" | "secondary" }; children?: React.ReactNode }) {
+export function FixCard({ fix, meta, badge, hideSummary, children }: { fix: Fix; meta?: FixMeta; hideSummary?: boolean; badge?: { label: string; variant: "success" | "warning" | "outline" | "secondary" }; children?: React.ReactNode }) {
   const { t, pick, lang } = useI18n()
   return (
     <Card>
@@ -27,6 +28,7 @@ export function FixCard({ fix, badge, hideSummary, children }: { fix: Fix; hideS
             {badge?.label ?? t(`ov.status.${fix.status}`)}
           </Badge>
         </div>
+        {meta && <FixMetaBadges meta={meta} />}
         <CardDescription>{pick<string>(fix, "why")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
@@ -184,11 +186,7 @@ export function Overview({ site, store }: { site: Site; store: Store }) {
         {fixes.length === 0 ? (
           <p className="text-muted-foreground text-sm">{t("ov.noFixes")}</p>
         ) : (
-          <div className="grid gap-3 lg:grid-cols-2">
-            {fixes.map((f) => (
-              <FixCard key={f.check_id} fix={f} />
-            ))}
-          </div>
+          <FixList fixes={fixes} checks={audit?.checks ?? []} card={(f, meta) => <FixCard fix={f} meta={meta} />} />
         )}
       </section>
 

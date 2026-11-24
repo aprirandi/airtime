@@ -6,7 +6,7 @@ import json
 
 from airtime.agents.auditor.prompts import all_prompt, fix_prompt
 from airtime.agents.auditor.isagentic import MAPPED
-from airtime.agents.auditor.registry import BY_ID, GROUPS, REGISTRY
+from airtime.agents.auditor.registry import BY_ID, GROUPS, REGISTRY, effort_of
 from airtime.agents.auditor.score import gaps, limited_gaps
 
 
@@ -82,7 +82,7 @@ def audit_json(conn, store_id: int) -> dict | None:
         controlled = d.platform_controlled.get(r["controlled_by"]) if r["controlled_by"] else None
         hint = d.platform_fix.get(platform)
         checks.append({
-            "id": r["check_id"], "group": r["grp"], "tier": r["tier"], "source": r["source"],
+            "id": r["check_id"], "group": r["grp"], "tier": r["tier"], "source": r["source"], "effort": effort_of(r["check_id"]),
             "result": r["result"], "percent": r["percent"], "scored": bool(r["scored"]),
             "name": d.name, "name_id": d.name_id, "evidence": r["evidence"],
             "fix": d.fix, "fix_id": d.fix_id,
@@ -125,7 +125,7 @@ def registry_json() -> dict:
     checks = []
     for d in REGISTRY:
         checks.append({
-            "id": d.id, "group": d.group, "tier": d.tier, "source": d.source,
+            "id": d.id, "group": d.group, "tier": d.tier, "source": d.source, "effort": effort_of(d.id),
             "status": "built" if d.run else ("na" if d.group == 4 else "planned"),
             "name": d.name, "name_id": d.name_id, "fix": d.fix, "fix_id": d.fix_id,
             "na_reason": d.na_reason[0] if d.na_reason else "", "na_reason_id": d.na_reason[1] if d.na_reason else "",

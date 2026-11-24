@@ -19,6 +19,7 @@ export interface RegistryCheck {
   group: number
   tier: Tier
   source: "is_agentic" | "cloudflare" | "both"
+  effort: "easy" | "medium" | "hard"
   status: "built" | "planned" | "na"
   name: string
   name_id: string
