@@ -70,3 +70,5 @@ jobs:
           curl -sS -m 30 -D - -o /dev/null "$FOUND/api/audit?url=example.com" | grep -iE "^HTTP|access-control|content-type|cache-control"
           echo "--- API: unreachable site"
           curl -sS -m 60 -X POST "$FOUND/api/audit" -H 'content-type: application/json' -d '{"url":"this-site-does-not-exist-12345.com"}' -w "  [HTTP %{http_code}]\n"
+          echo "--- API: the page-per-website service (503 storage_off = Supabase not set up yet; 404 not_found = working)"
+          curl -sS -m 30 -X POST "$FOUND/api/site" -H 'content-type: application/json' -d '{"action":"get","token":"0000000000000000000000000000000000000000"}' -w "\nHTTP %{http_code}\n"
