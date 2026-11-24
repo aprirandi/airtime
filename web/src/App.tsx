@@ -29,7 +29,7 @@ function parse(hash: string): Route {
   const run = hash.match(/^#\/run\/(\d+)/)
   if (run) return { page: "run", id: Number(run[1]) }
   if (hash.startsWith("#/checks")) return { page: "checks" }
-  if (hash.startsWith("#/agents")) return { page: "agents", view: hash.endsWith("/flow") ? "flow" : "team" }
+  if (hash.startsWith("#/agents")) return { page: "agents", view: hash.split("?")[0]?.endsWith("/flow") ? "flow" : "team" }
   if (hash.startsWith("#/overview")) return { page: "overview" }
   if (hash.startsWith("#/dashboard")) return { page: "dashboard" }
   const check = hash.match(/^#\/check\/([^?]*)(?:\?(.*))?$/)
@@ -43,6 +43,15 @@ function parse(hash: string): Route {
     return { page: "scan", url, platform: new URLSearchParams(check[2] ?? "").get("platform") ?? "" }
   }
   return { page: "scan", url: "", platform: "" }
+}
+
+/** Which store the analysis pages show: #/overview?store=renosites. Without it, the first store. */
+function storeSlug(hash = location.hash): string {
+  return new URLSearchParams(hash.split("?")[1] ?? "").get("store") ?? ""
+}
+
+function withStore(href: string, slug: string): string {
+  return slug ? `${href}?store=${encodeURIComponent(slug)}` : href
 }
 
 function useRoute() {
@@ -96,7 +105,9 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
   )
 }
 
-function Header({ route, store, working }: { route: Route; store?: string; working?: boolean }) {
+function Header({ route, store, working, stores, slug, go }: {
+  route: Route; store?: string; working?: boolean; stores?: { slug: string; name: string }[]; slug?: string; go?: (h: string) => void
+}) {
   const { t } = useI18n()
   const analysis = route.page !== "scan"
   return (
@@ -106,20 +117,36 @@ function Header({ route, store, working }: { route: Route; store?: string; worki
           <span className="bg-chart-1 grid size-7 place-items-center rounded-lg text-xs text-white">A</span>
           <span className="hidden sm:inline">Airtime</span>
         </a>
-        {analysis && store && <span className="text-muted-foreground hidden truncate text-sm md:inline">{store}</span>}
+        {analysis && store && (stores?.length ?? 0) < 2 && (
+          <span className="text-muted-foreground hidden truncate text-sm md:inline">{store}</span>
+        )}
+        {analysis && stores && stores.length > 1 && (
+          <select
+            aria-label="Store"
+            className="bg-background h-8 rounded-md border px-2 text-sm"
+            value={slug}
+            onChange={(e) => go?.(`${location.hash.split("?")[0] || "#/overview"}?store=${encodeURIComponent(e.target.value)}`)}
+          >
+            {stores.map((s) => (
+              <option key={s.slug} value={s.slug}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        )}
         {(analysis || SHOW_ANALYSIS) && (
           <nav className="flex items-center gap-1">
-            <NavLink href="#/overview" active={route.page === "overview"}>
+            <NavLink href={withStore("#/overview", slug ?? "")} active={route.page === "overview"}>
               <Home /> <span className="hidden sm:inline">{t("nav.overview")}</span>
             </NavLink>
-            <NavLink href="#/dashboard" active={route.page === "dashboard" || route.page === "run"}>
+            <NavLink href={withStore("#/dashboard", slug ?? "")} active={route.page === "dashboard" || route.page === "run"}>
               <LayoutDashboard /> <span className="hidden sm:inline">{t("nav.dashboard")}</span>
             </NavLink>
-            <NavLink href="#/agents/team" active={route.page === "agents"}>
+            <NavLink href={withStore("#/agents/team", slug ?? "")} active={route.page === "agents"}>
               <Bot /> <span className="hidden sm:inline">{t("nav.agents")}</span>
               {working && <span className="bg-success size-1.5 animate-pulse rounded-full" />}
             </NavLink>
-            <NavLink href="#/checks" active={route.page === "checks"}>
+            <NavLink href={withStore("#/checks", slug ?? "")} active={route.page === "checks"}>
               <ListChecks /> <span className="hidden sm:inline">{t("nav.checks")}</span>
             </NavLink>
           </nav>
@@ -138,10 +165,12 @@ function Analysis({ route, go }: { route: Exclude<Route, { page: "scan" }>; go: 
   const liveState = useLive()
   const live = liveState.data
   const { data: site, error } = useSite(live)
-  const store = site?.stores[0]
+  const wanted = storeSlug()
+  const store = site?.stores.find((x) => x.slug === wanted) ?? site?.stores[0]
   return (
     <>
-      <Header route={route} store={store?.name} working={live?.status === "running"} />
+      <Header route={route} store={store?.name} working={live?.status === "running"} go={go}
+        stores={site?.stores.map((x) => ({ slug: x.slug, name: x.name }))} slug={store?.slug} />
       <main className="mx-auto max-w-6xl px-4 py-6">
         {error && (
           <Card>

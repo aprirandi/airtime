@@ -1,0 +1,250 @@
+{
+ "client": {
+  "robots_txt": [
+   "A clear rulebook for AI crawlers",
+   "Aturan jelas untuk robot AI",
+   "AI assistants read it first to learn what they may look at.",
+   "Asisten AI membacanya lebih dulu untuk tahu apa yang boleh dilihat."
+  ],
+  "ai_crawlers_allowed": [
+   "AI assistants can visit your website",
+   "Asisten AI bisa mengunjungi website Anda",
+   "If they are blocked, they cannot recommend your shop.",
+   "Kalau diblokir, mereka tidak bisa merekomendasikan toko Anda."
+  ],
+  "sitemap": [
+   "A map of your pages",
+   "Peta halaman website",
+   "It helps assistants find every product and page.",
+   "Membantu asisten menemukan semua produk dan halaman."
+  ],
+  "raw_html_content": [
+   "Your homepage is easy for assistants to read",
+   "Beranda mudah dibaca asisten AI",
+   "Assistants read the page as it is sent, without running its scripts, so the words and headings must be there.",
+   "Asisten membaca halaman apa adanya tanpa menjalankan skrip, jadi teks dan judulnya harus sudah ada."
+  ],
+  "redirects_clean": [
+   "Your address opens the page directly",
+   "Alamat website langsung membuka halamannya",
+   "A long chain of redirects makes assistants give up.",
+   "Rantai pengalihan yang panjang membuat asisten menyerah."
+  ],
+  "public_no_login": [
+   "Nothing blocks the way in",
+   "Tidak ada yang menghalangi masuk",
+   "A login or store password keeps assistants out.",
+   "Login atau kata sandi toko membuat asisten tidak bisa masuk."
+  ],
+  "not_noindex": [
+   "Your homepage may appear in search",
+   "Beranda boleh muncul di pencarian",
+   "A hidden homepage cannot be found or recommended.",
+   "Beranda yang disembunyikan tidak bisa ditemukan atau direkomendasikan."
+  ],
+  "not_found_markdown": [
+   "A helpful message on pages that do not exist",
+   "Pesan yang membantu di halaman yang tidak ada",
+   "It points assistants to the right place instead of a dead end.",
+   "Mengarahkan asisten ke tempat yang benar, bukan jalan buntu."
+  ],
+  "jsonld_organization": [
+   "Your business introduces itself",
+   "Bisnis Anda memperkenalkan diri",
+   "Assistants use it to know who you are and what you sell.",
+   "Asisten memakainya untuk tahu siapa Anda dan apa yang Anda jual."
+  ],
+  "organization_completeness": [
+   "Contact details and address for assistants",
+   "Kontak dan alamat toko untuk asisten AI",
+   "So assistants can tell people where to find you and how to reach you.",
+   "Supaya asisten bisa memberi tahu orang di mana menemukan dan bagaimana menghubungi Anda."
+  ],
+  "metadata_complete": [
+   "Complete page details",
+   "Keterangan halaman yang lengkap",
+   "Assistants and search engines use them to describe your pages.",
+   "Asisten dan mesin pencari memakainya untuk menjelaskan halaman Anda."
+  ],
+  "pricing_structured": [
+   "Prices assistants can read",
+   "Harga yang bisa dibaca asisten",
+   "Assistants can only quote a price they can read.",
+   "Asisten hanya bisa menyebut harga yang bisa mereka baca."
+  ],
+  "trust_pages": [
+   "About, Contact and Privacy pages",
+   "Halaman Tentang, Kontak, dan Privasi",
+   "They show assistants that your shop is real and trustworthy.",
+   "Menunjukkan ke asisten bahwa toko Anda nyata dan layak dipercaya."
+  ],
+  "markdown_negotiation": [
+   "A plain-text version for assistants",
+   "Versi teks polos untuk asisten",
+   "It is quicker and cheaper for an assistant to read.",
+   "Lebih cepat dan murah dibaca oleh asisten."
+  ],
+  "llms_txt": [
+   "A short guide to your website for assistants",
+   "Panduan singkat website untuk asisten AI",
+   "It tells assistants which pages matter most.",
+   "Memberi tahu asisten halaman mana yang paling penting."
+  ],
+  "agents_md": [
+   "Instructions for shopping assistants",
+   "Petunjuk untuk asisten belanja",
+   "It tells assistants how to find and buy from your shop.",
+   "Memberi tahu asisten cara menemukan dan membeli dari toko Anda."
+  ],
+  "content_signals": [
+   "Your rules on AI using your content",
+   "Aturan Anda soal AI memakai konten toko",
+   "You decide whether AI may learn from your content, show it in search, or use it in answers.",
+   "Anda yang memutuskan apakah AI boleh belajar dari konten Anda, menampilkannya di pencarian, atau memakainya dalam jawaban."
+  ],
+  "link_headers": [
+   "Pointers to your guides",
+   "Penunjuk ke panduan website",
+   "They help assistants find your guides straight away.",
+   "Membantu asisten langsung menemukan panduan Anda."
+  ],
+  "mcp_server_card": [
+   "An identity card for AI tools",
+   "Kartu identitas untuk alat AI",
+   "AI tools use it to connect to your shop.",
+   "Alat AI memakainya untuk terhubung ke toko Anda."
+  ],
+  "agent_skills_index": [
+   "A list of what assistants can do on your site",
+   "Daftar hal yang bisa dilakukan asisten di website",
+   "It shows assistants what they can do for a customer.",
+   "Menunjukkan apa yang bisa dilakukan asisten untuk pelanggan."
+  ],
+  "ard_manifest": [
+   "A catalogue so AI can find your services",
+   "Katalog agar AI menemukan layanan Anda",
+   "It makes your shop easier to discover.",
+   "Membuat toko Anda lebih mudah ditemukan."
+  ],
+  "auth_md": [
+   "How assistants sign in",
+   "Cara asisten AI masuk",
+   "It explains how an assistant can act for a customer.",
+   "Menjelaskan bagaimana asisten bisa bertindak untuk pelanggan."
+  ],
+  "oauth_discovery": [
+   "Sign-in details for AI tools",
+   "Keterangan masuk untuk alat AI",
+   "AI tools need it to log in safely.",
+   "Alat AI membutuhkannya untuk masuk dengan aman."
+  ],
+  "oauth_protected_resource": [
+   "Access rules for AI tools",
+   "Aturan akses untuk alat AI",
+   "They say what an AI tool may do and how to ask.",
+   "Menjelaskan apa yang boleh dilakukan alat AI dan cara memintanya."
+  ]
+ },
+ "questions": {
+  "organization_completeness": [
+   [
+    "Which phone number or email should customers use?",
+    "Nomor telepon atau email mana yang dipakai pelanggan?"
+   ],
+   [
+    "What is the shop's street address (street, suburb, postcode)?",
+    "Apa alamat lengkap toko (jalan, kota, kode pos)?"
+   ]
+  ],
+  "jsonld_organization": [
+   [
+    "In one or two sentences, how would you describe your business?",
+    "Dalam satu atau dua kalimat, bagaimana Anda menjelaskan bisnis ini?"
+   ]
+  ],
+  "content_signals": [
+   [
+    "May AI companies train their models on your content?",
+    "Bolehkah perusahaan AI melatih modelnya dengan konten Anda?"
+   ],
+   [
+    "May your content appear in AI search results?",
+    "Bolehkah konten Anda muncul di hasil pencarian AI?"
+   ],
+   [
+    "May AI use your content to answer a customer's question?",
+    "Bolehkah AI memakai konten Anda untuk menjawab pertanyaan pelanggan?"
+   ]
+  ],
+  "ai_crawlers_allowed": [
+   [
+    "Is blocking these AI assistants on purpose?",
+    "Apakah pemblokiran asisten AI ini disengaja?"
+   ]
+  ],
+  "not_noindex": [
+   [
+    "Is hiding the homepage from search on purpose?",
+    "Apakah beranda sengaja disembunyikan dari pencarian?"
+   ]
+  ],
+  "public_no_login": [
+   [
+    "Is the store password on purpose?",
+    "Apakah kata sandi toko ini disengaja?"
+   ]
+  ],
+  "trust_pages": [
+   [
+    "Can you send the text for the missing pages, including your privacy policy?",
+    "Bisakah Anda mengirim teks untuk halaman yang belum ada, termasuk kebijakan privasi?"
+   ]
+  ],
+  "llms_txt": [
+   [
+    "Which pages matter most for assistants to know (about, products, policies)?",
+    "Halaman mana yang paling penting diketahui asisten (tentang, produk, kebijakan)?"
+   ]
+  ],
+  "agents_md": [
+   [
+    "How would you describe your business in a few sentences, and which pages matter most?",
+    "Bagaimana Anda menjelaskan bisnis ini dalam beberapa kalimat, dan halaman mana yang paling penting?"
+   ]
+  ]
+ },
+ "status_text": {
+  "not_started": [
+   "The Fixer will prepare this. Nothing is needed from you.",
+   "Fixer akan menyiapkan ini. Tidak ada yang perlu Anda lakukan."
+  ],
+  "needs_owner": [
+   "The Fixer needs your answer before it can prepare this.",
+   "Fixer membutuhkan jawaban Anda sebelum bisa menyiapkan ini."
+  ],
+  "draft_ready": [
+   "A draft is ready. Nothing changes on your website until you approve it.",
+   "Draf sudah siap. Tidak ada yang berubah di website Anda sampai Anda menyetujuinya."
+  ],
+  "platform_held": [
+   "{platform} controls this, so you cannot change it directly. We will check again after {platform} updates.",
+   "{platform} yang mengatur ini, jadi Anda tidak bisa mengubahnya langsung. Kami akan mengecek lagi setelah {platform} diperbarui."
+  ],
+  "in_progress": [
+   "The Fixer is working on this.",
+   "Fixer sedang mengerjakan ini."
+  ],
+  "done": [
+   "Done.",
+   "Selesai."
+  ]
+ },
+ "statuses": [
+  "not_started",
+  "needs_owner",
+  "draft_ready",
+  "platform_held",
+  "in_progress",
+  "done"
+ ]
+}

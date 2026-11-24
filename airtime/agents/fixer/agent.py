@@ -63,6 +63,21 @@ def plan_all(rows: list[dict], platform: str, drafts: dict[str, dict | None] | N
     return [plan_fix(r, platform, i, drafts.get(r["check_id"])) for i, r in enumerate(ordered, 1)]
 
 
+CONFIRM_KEYS = ("kind", "value", "source", "label", "label_id")
+
+
+def build_fixes(rows: list[dict], platform: str, snap, name: str) -> list[dict]:
+    """The owner's view of every fix for one scan: statuses, questions and the facts to confirm, without the prepared
+    change itself. This is what the website check returns; the TypeScript engine reproduces it exactly."""
+    drafts = {r["check_id"]: draft_for(r["check_id"], snap, name) for r in rows if not r.get("controlled_by")}
+    out = []
+    for fix in plan_all(rows, platform, drafts):
+        draft = fix.pop("draft")
+        fix["confirm"] = [{k: f[k] for k in CONFIRM_KEYS} for f in (draft or {}).get("confirm", [])]
+        out.append(fix)
+    return out
+
+
 class FixerAgent(Agent):
     name = "fixer"
     title = "Fixer"

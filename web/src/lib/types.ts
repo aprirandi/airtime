@@ -106,6 +106,31 @@ export interface Fix {
   confirm?: { kind: string; value: string; source: "contact" | "about" | "home"; label: string; label_id: string }[]
 }
 
+export interface ChangeTally {
+  shifts: number
+  mentions: number
+  answers: number
+  pct: number | null
+  from: string | null
+  to: string | null
+}
+
+/** A fix that went live and what the Asker saw before and after. Never a claim about cause. */
+export interface Change {
+  check_id: string
+  title: string
+  title_id: string
+  applied_on: string
+  note: string
+  before: ChangeTally
+  after: ChangeTally
+  score_before: number | null
+  score_after: number | null
+  needed: number
+  enough: boolean
+  result: "up" | "down" | "same" | null
+}
+
 export interface Audit {
   id?: number
   run_id?: number | null
@@ -267,6 +292,7 @@ export interface Store {
   runs: Run[]
   topics?: TopicRow[]
   audit?: Audit | null
+  changes?: Change[]
   totals: {
     days_on_duty: number
     first_day: string | null

@@ -52,7 +52,7 @@ function robotsOf(snap: Snapshot): Robots | null {
 
 type Dict = Record<string, unknown>
 
-function orgOf(snap: Snapshot): Dict | null {
+export function orgOf(snap: Snapshot): Dict | null {
   const [items] = jsonldItems(snap.homePage)
   for (const item of items) {
     for (const t of typesOf(item)) {

@@ -1,0 +1,40 @@
+name: Scan a site
+
+# Informational: scans any public address with the same engine the website check uses and prints the result.
+# Nothing is stored or committed.
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: "Address to scan, e.g. https://handworks-staging.myshopify.com"
+        required: true
+      platform:
+        description: "shopify, wordpress, wix, squarespace, woocommerce or leave empty"
+        required: false
+        default: ""
+  push:
+    branches: [claude/zen-ptolemy-884w50]
+    paths: [.github/workflows/scan-site.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: How the front door answers
+        env:
+          SITE: ${{ github.event.inputs.site || 'https://handworks-staging.myshopify.com' }}
+        run: |
+          curl -sS -m 20 -I -L "$SITE" | grep -iE "^(HTTP|location|x-robots-tag|server)" | head -12
+      - name: Scan
+        env:
+          SITE: ${{ github.event.inputs.site || 'https://handworks-staging.myshopify.com' }}
+          PLATFORM: ${{ github.event.inputs.platform || 'shopify' }}
+        run: node engine/scripts/try-bundle.mjs "$SITE" "$PLATFORM"

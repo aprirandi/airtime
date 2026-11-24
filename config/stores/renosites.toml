@@ -1,0 +1,26 @@
+# Renosites' own website, scanned by the Auditor only. There is no Asker shift for it: the AI-answer
+# questions and provider settings are left empty on purpose, so nothing here uses an AI quota.
+# It is the test site for before-and-after on the website score, because the team can change it.
+
+[store]
+name = "Renosites"
+domain = "renosites.com.au"
+city = "Melbourne"
+country = "Australia"
+areas = []
+categories = []
+# Built on WordPress; the team can edit the theme and the plugins, so no check is held back by the platform.
+platform = "wordpress"
+
+[audit]
+url = "https://renosites.com.au"
+product_url = ""
+external = false
+
+[questions]
+mode = "fixed"
+list = []
+daily_count = 0
+
+[run]
+timezone = "Australia/Melbourne"

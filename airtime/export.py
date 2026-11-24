@@ -13,6 +13,7 @@ from pathlib import Path
 from airtime.agents.auditor.report import audit_json, registry_json
 from airtime.agents.visibility.compare import compare_days, mention_range, scope_label
 from airtime.agents.visibility.topics import topic_stats, topics_for
+from airtime.changes import changes_json
 from airtime.config import REPO_ROOT, load_store_config
 from airtime.live import write_json
 from airtime.providers.base import utc_now
@@ -428,6 +429,7 @@ def export_site(conn, out_dir: Path = DOCS_DIR) -> list[Path]:
             "areas": _loads(store["areas"], []), "categories": _loads(store["categories"], []),
             "series": series, "ranges": ranges, "runs": run_items, "topics": topic_rows,
             "audit": audit_json(conn, store["id"]),
+            "changes": changes_json(conn, store["id"]),
             "totals": {
                 "days_on_duty": len({r["run_date"] for r in api_runs}),
                 "first_day": min((r["run_date"] for r in api_runs), default=None),

@@ -155,8 +155,8 @@ def test_the_export_carries_the_whole_registry_for_the_checks_page(conn, acfg, t
 def test_the_files_the_typescript_engine_is_checked_against_are_up_to_date():
     from airtime.agents.auditor import golden
     registry, golden_json = golden.build()
-    assert _same(golden.REGISTRY_FILE.read_text(), registry) and _same(golden.GOLDEN_FILE.read_text(), golden_json), \
-        "run: python -m airtime.agents.auditor.golden"
+    assert _same(golden.REGISTRY_FILE.read_text(), registry) and _same(golden.GOLDEN_FILE.read_text(), golden_json) \
+        and _same(golden.FIXER_FILE.read_text(), golden.fixer_texts()), "run: python -m airtime.agents.auditor.golden"
 
 
 def test_the_recorded_visits_the_typescript_engine_replays_are_up_to_date():

@@ -1,0 +1,50 @@
+name: Record a change
+
+# Version 0 has no write access to the store: the owner or a developer applies a fix, then records here the day it went
+# live. That keeps the Asker's "before" for that day. Nothing is changed on the website by this workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      check:
+        description: "The check the fix was for, e.g. organization_completeness"
+        required: true
+      date:
+        description: "The day it went live, YYYY-MM-DD"
+        required: true
+      note:
+        description: "What was changed, in a few words"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: airtime-daily   # the database is committed by the daily shift and the audit too
+  cancel-in-progress: false
+
+jobs:
+  change:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Record the change
+        env:
+          CHECK: ${{ github.event.inputs.check }}
+          DATE: ${{ github.event.inputs.date }}
+          NOTE: ${{ github.event.inputs.note }}
+        run: |
+          python -m airtime seed --store handworks
+          python -m airtime change --store handworks --check "$CHECK" --date "$DATE" --note "$NOTE"
+      - name: Commit
+        run: |
+          git config user.name "airtime-bot"
+          git config user.email "airtime-bot@users.noreply.github.com"
+          git add data/airtime.sqlite docs
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "Record change $(TZ=Australia/Melbourne date +%F)"
+          git push
