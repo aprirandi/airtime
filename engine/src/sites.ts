@@ -88,14 +88,22 @@ export function memoryStore(): SiteStore {
 
 // ---- Supabase over its REST interface -------------------------------------------------------------
 
-export class StoreError extends Error {}
+/** The storage said no. `detail` is safe to show: the status and PostgREST's error code, never the key. */
+export class StoreError extends Error {
+  constructor(message: string, readonly detail: string = "") {
+    super(message)
+  }
+}
 
 type FetchLike = (url: string, init?: { method?: string; headers?: Record<string, string>; body?: string }) => Promise<{ ok: boolean; status: number; text(): Promise<string> }>
 
 /** The tables are in supabase/schema.sql. `key` is the service role key: it stays on the server. */
 export function supabaseStore(baseUrl: string, key: string, doFetch: FetchLike = fetch as unknown as FetchLike): SiteStore {
   const root = `${baseUrl.replace(/\/+$/, "")}/rest/v1`
-  const headers = { apikey: key, authorization: `Bearer ${key}`, "content-type": "application/json" }
+  // The older service_role key is a JWT and is also sent as the bearer. The newer sb_secret_ keys are not JWTs: they
+  // go in the apikey header alone, and the gateway turns them into the service role itself.
+  const headers: Record<string, string> = { apikey: key, "content-type": "application/json" }
+  if (!key.startsWith("sb_")) headers["authorization"] = `Bearer ${key}`
   const call = async (path: string, init: { method?: string; body?: unknown; prefer?: string } = {}) => {
     const res = await doFetch(`${root}/${path}`, {
       method: init.method ?? "GET",
@@ -103,7 +111,15 @@ export function supabaseStore(baseUrl: string, key: string, doFetch: FetchLike =
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
     })
     const text = await res.text()
-    if (!res.ok) throw new StoreError(`storage answered ${res.status}`)
+    if (!res.ok) {
+      let code = ""
+      try {
+        code = String((JSON.parse(text) as { code?: unknown }).code ?? "")
+      } catch {
+        /* not JSON */
+      }
+      throw new StoreError(`storage answered ${res.status}`, `supabase ${res.status}${code ? ` ${code.replace(/[^A-Za-z0-9_.-]/g, "").slice(0, 20)}` : ""}`)
+    }
     return text ? JSON.parse(text) : null
   }
   const eq = (v: string) => encodeURIComponent(v)
@@ -246,7 +262,10 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
     }
     return fail(400, "bad_action", "Unknown request.")
   } catch (err) {
-    if (err instanceof StoreError) return fail(502, "storage", "We could not reach the place where pages are kept. Try again in a moment.")
+    if (err instanceof StoreError) {
+      const res = fail(502, "storage", "We could not reach the place where pages are kept. Try again in a moment.")
+      return { ...res, body: { ...res.body, detail: err.detail } }
+    }
     return fail(500, "failed", "Something went wrong.")
   }
 }

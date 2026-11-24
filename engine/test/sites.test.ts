@@ -208,6 +208,24 @@ describe("Supabase over its REST interface", () => {
     await expect(store.findSite("h")).rejects.toThrow("storage answered 500")
   })
 
+  it("sends a new sb_secret_ key in the apikey header alone, and the older JWT key as the bearer too", async () => {
+    const a = fake(() => [])
+    await supabaseStore("https://p.supabase.co", "sb_secret_abc", a.doFetch).findSite("h")
+    expect(a.seen[0]!.headers["apikey"]).toBe("sb_secret_abc")
+    expect(a.seen[0]!.headers["authorization"]).toBeUndefined()
+    const b = fake(() => [])
+    await supabaseStore("https://p.supabase.co", "eyJhbGciOi.payload.sig", b.doFetch).findSite("h")
+    expect(b.seen[0]!.headers["authorization"]).toBe("Bearer eyJhbGciOi.payload.sig")
+  })
+
+  it("says which status and error code came back, never the key", async () => {
+    const doFetch = async () => ({ ok: false, status: 404, text: async () => JSON.stringify({ code: "PGRST205", message: "Could not find the table 'public.sites'" }) })
+    const store = supabaseStore("https://p.supabase.co", "SECRETKEY", doFetch)
+    const r = await handleSite({ action: "get", token: "t".repeat(32), client: "c" } as never, { store })
+    expect([r.status, r.body["error"], r.body["detail"]]).toEqual([502, "storage", "supabase 404 PGRST205"])
+    expect(JSON.stringify(r.body)).not.toContain("SECRETKEY")
+  })
+
   it("is used only when both settings exist", () => {
     expect(storeFromEnv({})).toBeNull()
     expect(storeFromEnv({ SUPABASE_URL: "https://p.supabase.co" })).toBeNull()
