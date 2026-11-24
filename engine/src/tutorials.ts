@@ -163,14 +163,15 @@ export const TUTORIALS: Record<string, Tutorial> = {
     steps: [
       b("AI assistants look for a short, structured 'business card' on your website: who you are, your logo and your address. Yours is missing.", "Asisten AI mencari 'kartu nama' singkat dan terstruktur di website Anda: siapa Anda, logo, dan alamat. Milik Anda belum ada."),
       b("Fill in your business name and logo in your SEO tool, if it has the place for it.", "Isi nama bisnis dan logo Anda di alat SEO, kalau ada tempatnya."),
+      b("The check also looks for a short description of your business. If your plugin has no field for it, use the prepared code below, which includes one. Read it and correct it first.", "Pemeriksaan ini juga mencari deskripsi singkat bisnis Anda. Kalau plugin Anda tidak punya kolom untuknya, pakai kode yang sudah disiapkan di bawah, yang sudah memuatnya. Baca dulu dan perbaiki yang salah."),
     ],
     platforms: {
       wordpress: [
         b("In Yoast SEO go to Settings, then Site basics, and fill in your organization name and logo. In Rank Math go to Titles and Meta, then Local SEO, and fill in your business details.", "Di Yoast SEO buka Settings, lalu Site basics, dan isi nama organisasi serta logo. Di Rank Math buka Titles and Meta, lalu Local SEO, dan isi detail bisnis."),
-        b("Prefer to be exact about the details? Use the prepared code below instead.", "Ingin detailnya persis? Pakai kode yang sudah disiapkan di bawah."),
+        b("The check also looks for a short description of your business. If your plugin has no field for it, use the prepared code below, which includes one. Read it and correct it first.", "Pemeriksaan ini juga mencari deskripsi singkat bisnis Anda. Kalau plugin Anda tidak punya kolom untuknya, pakai kode yang sudah disiapkan di bawah, yang sudah memuatnya. Baca dulu dan perbaiki yang salah."),
       ],
       shopify: [
-        b("Shopify themes often include a basic business card already. If yours does not, use the prepared code below.", "Tema Shopify sering sudah punya kartu nama dasar. Kalau milik Anda belum, pakai kode yang sudah disiapkan di bawah."),
+        b("Shopify themes often include a basic business card already. If yours does not, or it has no description of your business, use the prepared code below.", "Tema Shopify sering sudah punya kartu nama dasar. Kalau milik Anda belum, atau belum ada deskripsi bisnis Anda, pakai kode yang sudah disiapkan di bawah."),
       ],
     },
   },

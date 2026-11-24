@@ -183,8 +183,10 @@ function findAddresses(pages: Source[]): [Address[], string] | null {
 function findDescription(snap: FactsSource): [string, string] | null {
   for (const meta of snap.homePage.meta) {
     const key = (meta["name"] || meta["property"] || "").toLowerCase()
-    if ((key === "description" || key === "og:description") && cpLen(collapse(meta["content"] ?? "")) >= 40) {
-      return [clip(collapse(meta["content"] as string), 300), "home"]
+    const text = collapse(meta["content"] ?? "")
+    // a site that builds its meta description from the page text brings the menu and the code samples with it
+    if ((key === "description" || key === "og:description") && cpLen(text) >= 40 && !NOISE.test(text)) {
+      return [clip(text, 300), "home"]
     }
   }
   const about = snap.trust["about"]

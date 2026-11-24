@@ -23656,8 +23656,9 @@ function findAddresses(pages) {
 function findDescription(snap) {
   for (const meta of snap.homePage.meta) {
     const key = (meta["name"] || meta["property"] || "").toLowerCase();
-    if ((key === "description" || key === "og:description") && cpLen(collapse(meta["content"] ?? "")) >= 40) {
-      return [clip(collapse(meta["content"]), 300), "home"];
+    const text = collapse(meta["content"] ?? "");
+    if ((key === "description" || key === "og:description") && cpLen(text) >= 40 && !NOISE.test(text)) {
+      return [clip(text, 300), "home"];
     }
   }
   const about = snap.trust["about"];

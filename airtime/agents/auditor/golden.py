@@ -145,6 +145,9 @@ FIXER_SITES = [
      _doc("<h1>About</h1><div>02 AI and automation Agents and automation do the heavy lifting under the hood.</div><div>03 Product design, engineering and growth under one roof, built by a team that has shipped websites and software for years.</div>"), None),
     ("unclosed paragraphs and links inside one", "https://open.example", _doc("<h1>Open</h1>"),
      _doc("<h1>About</h1><p>Menu<p>We are a <a href='/x'>small studio</a> in <b>Melbourne</b> that builds calm, fast websites for local businesses.<p>Second paragraph that is long enough to be used as well, but only if the first was not.</p>"), None),
+    ("a meta description made of page text is skipped for the About paragraph", "https://meta.example",
+     _doc("<h1>Meta</h1>", '<meta name="description" content="[ 01 ] Technology company \u00b7 Melbourne Small software. Big advantage. We design and run our own software $ node ./mark/bu">'),
+     _doc("<h1>About</h1><p>We design, build and run our own software, right now all of it for small online businesses.</p>"), None),
     ("site name from og:site_name, other state", "https://og.example", _doc("<h1>X</h1>", '<meta property="og:site_name" content="  Og   Shop ">'), None,
      _doc("<h1>Contact</h1><p>Unit 5, 10 Beach Parade QLD 4217 Phone 0755 551 234</p>")),
 ]
