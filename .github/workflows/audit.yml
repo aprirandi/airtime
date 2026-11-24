@@ -24,6 +24,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main   # a run that waited in the queue starts from the latest main, not the one it was started on
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
@@ -47,10 +49,19 @@ jobs:
         run: |
           git config user.name "airtime-bot"
           git config user.email "airtime-bot@users.noreply.github.com"
+          push_with_retry() {
+            # main can move while a run is going (a merged change, a Pages rebuild): take it in and push again
+            for attempt in 1 2 3 4; do
+              if git push -q; then return 0; fi
+              echo "push rejected (attempt $attempt): main moved during this run, rebasing onto it"
+              git pull --rebase -q origin main || { git rebase --abort 2>/dev/null; echo "could not rebase onto main"; return 1; }
+            done
+            return 1
+          }
           git add data/airtime.sqlite docs
           if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
           git commit -m "Website audit $(TZ=Australia/Melbourne date +%F)${STORE:+ ($STORE)}"
-          git push
+          push_with_retry
       - name: Fail loudly if the audit failed
         if: steps.run.outputs.code != '0'
         run: |
