@@ -18,6 +18,7 @@ describe("the Fixer reads the owner's own pages as the Python Fixer does", () =>
         homePage: parsePage(c.home),
         trust: { about: trust(c.about), contact: trust(c.contact), privacy: null },
       }
+      expect(c.about === null ? [] : parsePage(c.about).paragraphs).toEqual(c.about_paragraphs)
       const name = siteName(snap)
       expect(name).toBe(c.site_name)
       expect(plain(draftFor("organization_completeness", snap, name))).toEqual(c.organization_completeness)

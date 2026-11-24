@@ -11,6 +11,7 @@ export interface Page {
   meta: Record<string, string>[]
   linkTags: Record<string, string>[]
   anchors: [string, string][]
+  paragraphs: string[]
   jsonldRaw: string[]
   text: string
   htmlBytes: number
@@ -19,7 +20,7 @@ export interface Page {
 }
 
 export const emptyPage = (): Page => ({
-  lang: "", headings: [], meta: [], linkTags: [], anchors: [], jsonldRaw: [], text: "", htmlBytes: 0,
+  lang: "", headings: [], meta: [], linkTags: [], anchors: [], paragraphs: [], jsonldRaw: [], text: "", htmlBytes: 0,
   hasPasswordInput: false, scriptRedirect: false,
 })
 
@@ -56,6 +57,14 @@ export function parsePage(html: string): Page {
   let headingBuf: string[] = []
   let href: string | null = null
   let anchorBuf: string[] = []
+  let para: string[] | null = null
+  const closeParagraph = () => {
+    if (para !== null) {
+      const text = collapse(para.join(""))
+      if (text) page.paragraphs.push(text)
+    }
+    para = null
+  }
 
   const flush = () => {
     if (!chunk) return
@@ -68,6 +77,7 @@ export function parsePage(html: string): Page {
     parts.push(data)
     if (heading) headingBuf.push(data)
     if (href !== null) anchorBuf.push(data)
+    if (para !== null) para.push(data)
   }
 
   const parser = new Parser(
@@ -86,6 +96,10 @@ export function parsePage(html: string): Page {
         } else if (/^h[1-6]$/.test(name)) {
           heading = Number(name[1])
           headingBuf = []
+        }
+        if (name === "p") {
+          closeParagraph()
+          para = []
         }
         if (SKIP_TAGS.has(name)) {
           skip += 1
@@ -112,6 +126,8 @@ export function parsePage(html: string): Page {
         } else if (heading && name === `h${heading}`) {
           page.headings.push([heading, collapse(headingBuf.join(""))])
           heading = null
+        } else if (name === "p") {
+          closeParagraph()
         }
       },
       ontext(data) {

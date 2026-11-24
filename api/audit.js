@@ -21156,6 +21156,7 @@ var emptyPage = () => ({
   meta: [],
   linkTags: [],
   anchors: [],
+  paragraphs: [],
   jsonldRaw: [],
   text: "",
   htmlBytes: 0,
@@ -21188,6 +21189,14 @@ function parsePage(html) {
   let headingBuf = [];
   let href = null;
   let anchorBuf = [];
+  let para = null;
+  const closeParagraph = () => {
+    if (para !== null) {
+      const text = collapse(para.join(""));
+      if (text) page.paragraphs.push(text);
+    }
+    para = null;
+  };
   const flush = () => {
     if (!chunk) return;
     const data = chunk;
@@ -21199,6 +21208,7 @@ function parsePage(html) {
     parts.push(data);
     if (heading) headingBuf.push(data);
     if (href !== null) anchorBuf.push(data);
+    if (para !== null) para.push(data);
   };
   const parser = new Parser(
     {
@@ -21216,6 +21226,10 @@ function parsePage(html) {
         } else if (/^h[1-6]$/.test(name)) {
           heading = Number(name[1]);
           headingBuf = [];
+        }
+        if (name === "p") {
+          closeParagraph();
+          para = [];
         }
         if (SKIP_TAGS.has(name)) {
           skip += 1;
@@ -21242,6 +21256,8 @@ function parsePage(html) {
         } else if (heading && name === `h${heading}`) {
           page.headings.push([heading, collapse(headingBuf.join(""))]);
           heading = null;
+        } else if (name === "p") {
+          closeParagraph();
         }
       },
       ontext(data) {
@@ -23609,15 +23625,15 @@ function findDescription(snap) {
   }
   const about = snap.trust["about"];
   if (about) {
-    const taken = [];
-    let body = about[1].text;
-    for (const [, heading] of about[1].headings) if (heading) body = body.replace(heading, () => " ");
-    for (const sentence of body.split(/(?<=[.!?])\s+/)) {
-      const s = collapse(sentence);
-      if (cpLen(s) >= 60 && cpLen(s) <= 300 && !NOISE.test(s)) taken.push(s);
-      if (cpLen(taken.join(" ")) >= 120 || taken.length === 2) break;
+    for (const paragraph of about[1].paragraphs) {
+      const taken = [];
+      for (const sentence of paragraph.split(/(?<=[.!?])\s+/)) {
+        const s = collapse(sentence);
+        if (cpLen(s) >= 60 && cpLen(s) <= 300 && !NOISE.test(s)) taken.push(s);
+        if (cpLen(taken.join(" ")) >= 120 || taken.length === 2) break;
+      }
+      if (taken.length) return [clip(taken.join(" "), 300), "about"];
     }
-    if (taken.length) return [clip(taken.join(" "), 300), "about"];
   }
   return null;
 }

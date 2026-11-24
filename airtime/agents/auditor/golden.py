@@ -141,6 +141,10 @@ FIXER_SITES = [
      _doc("<h1>About</h1><p>Renosites Skip to content Renosites Labs: 3 apps in development Melbourne, AU \u00b7 37.81\u00b0 S \u00b7 --:--:-- -- /what-we-do /approach /about Get in touch [ 01 ] Technology company \u00b7 Melbourne Renosites is a technology company.</p>"), None),
     ("a clean sentence after a noisy one is used", "https://mix.example", _doc("<h1>Mix</h1>"),
      _doc("<h1>About</h1><p>Home | Shop | Contact \u00a9 2026 Mix Pty Ltd and all of its friends and neighbours. We design and build calm, fast websites for small businesses across Melbourne and beyond.</p>"), None),
+    ("text in divs, not paragraphs, gives no description", "https://divs.example", _doc("<h1>Divs</h1>"),
+     _doc("<h1>About</h1><div>02 AI and automation Agents and automation do the heavy lifting under the hood.</div><div>03 Product design, engineering and growth under one roof, built by a team that has shipped websites and software for years.</div>"), None),
+    ("unclosed paragraphs and links inside one", "https://open.example", _doc("<h1>Open</h1>"),
+     _doc("<h1>About</h1><p>Menu<p>We are a <a href='/x'>small studio</a> in <b>Melbourne</b> that builds calm, fast websites for local businesses.<p>Second paragraph that is long enough to be used as well, but only if the first was not.</p>"), None),
     ("site name from og:site_name, other state", "https://og.example", _doc("<h1>X</h1>", '<meta property="og:site_name" content="  Og   Shop ">'), None,
      _doc("<h1>Contact</h1><p>Unit 5, 10 Beach Parade QLD 4217 Phone 0755 551 234</p>")),
 ]
@@ -153,9 +157,11 @@ def fixer_cases() -> list[dict]:
         snap = SimpleNamespace(base=base, home_page=parse_page(home),
                                trust={"about": _page(about), "contact": _page(contact), "privacy": None})
         nm = site_name(snap)
+        about_paragraphs = parse_page(about).paragraphs if about is not None else []
         out.append({"name": name, "base": base, "home": home, "about": about, "contact": contact, "site_name": nm,
                     "organization_completeness": draft_for("organization_completeness", snap, nm),
-                    "jsonld_organization": draft_for("jsonld_organization", snap, nm)})
+                    "jsonld_organization": draft_for("jsonld_organization", snap, nm),
+                    "about_paragraphs": about_paragraphs})
     return out
 
 

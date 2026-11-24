@@ -139,19 +139,18 @@ def find_description(snap: Snapshot) -> tuple[str, str] | None:
             return _clean(meta["content"])[:300], "home"
     about = snap.trust.get("about")
     if about:
-        taken: list[str] = []
-        body = about[1].text
-        for _, heading in about[1].headings:     # headings run into the first sentence in the visible text
-            if heading:
-                body = body.replace(heading, " ", 1)
-        for sentence in re.split(r"(?<=[.!?])\s+", body):
-            s = _clean(sentence)
-            if 60 <= len(s) <= 300 and not NOISE.search(s):
-                taken.append(s)
-            if len(" ".join(taken)) >= 120 or len(taken) == 2:
-                break
-        if taken:
-            return " ".join(taken)[:300], "about"
+        # Only the text of a real paragraph: in the visible text of a whole page a menu, a heading or a footer runs
+        # into the first sentence. A site that writes its text without <p> tags gets a question instead of a draft.
+        for paragraph in about[1].paragraphs:
+            taken: list[str] = []
+            for sentence in re.split(r"(?<=[.!?])\s+", paragraph):
+                s = _clean(sentence)
+                if 60 <= len(s) <= 300 and not NOISE.search(s):
+                    taken.append(s)
+                if len(" ".join(taken)) >= 120 or len(taken) == 2:
+                    break
+            if taken:
+                return " ".join(taken)[:300], "about"
     return None
 
 

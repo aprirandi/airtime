@@ -189,15 +189,17 @@ function findDescription(snap: FactsSource): [string, string] | null {
   }
   const about = snap.trust["about"]
   if (about) {
-    const taken: string[] = []
-    let body = about[1].text
-    for (const [, heading] of about[1].headings) if (heading) body = body.replace(heading, () => " ")
-    for (const sentence of body.split(/(?<=[.!?])\s+/)) {
-      const s = collapse(sentence)
-      if (cpLen(s) >= 60 && cpLen(s) <= 300 && !NOISE.test(s)) taken.push(s)
-      if (cpLen(taken.join(" ")) >= 120 || taken.length === 2) break
+    // Only the text of a real paragraph: in the visible text of a whole page a menu, a heading or a footer runs
+    // into the first sentence. A site that writes its text without <p> tags gets a question instead of a draft.
+    for (const paragraph of about[1].paragraphs) {
+      const taken: string[] = []
+      for (const sentence of paragraph.split(/(?<=[.!?])\s+/)) {
+        const s = collapse(sentence)
+        if (cpLen(s) >= 60 && cpLen(s) <= 300 && !NOISE.test(s)) taken.push(s)
+        if (cpLen(taken.join(" ")) >= 120 || taken.length === 2) break
+      }
+      if (taken.length) return [clip(taken.join(" "), 300), "about"]
     }
-    if (taken.length) return [clip(taken.join(" "), 300), "about"]
   }
   return null
 }

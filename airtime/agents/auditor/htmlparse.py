@@ -22,6 +22,7 @@ class Page:
     meta: list[dict[str, str]] = field(default_factory=list)        # attributes of every <meta>
     link_tags: list[dict[str, str]] = field(default_factory=list)   # attributes of every <link>
     anchors: list[tuple[str, str]] = field(default_factory=list)    # (href, text)
+    paragraphs: list[str] = field(default_factory=list)             # text of each closed <p>, so menus never run into it
     jsonld_raw: list[str] = field(default_factory=list)
     text: str = ""                                                   # visible text, whitespace collapsed
     html_bytes: int = 0
@@ -60,6 +61,7 @@ class _Parser(HTMLParser):
         self._heading_buf: list[str] = []
         self._href: str | None = None
         self._anchor_buf: list[str] = []
+        self._para: list[str] | None = None
 
     def handle_starttag(self, tag: str, attrs: list) -> None:
         a = {k.lower(): (v or "") for k, v in attrs}
@@ -75,6 +77,9 @@ class _Parser(HTMLParser):
             self._href, self._anchor_buf = a["href"], []
         elif tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
             self._heading, self._heading_buf = int(tag[1]), []
+        if tag == "p":
+            self._close_paragraph()
+            self._para = []
         if tag in SKIP_TAGS:
             self._skip += 1
             if tag == "script":
@@ -97,6 +102,15 @@ class _Parser(HTMLParser):
         elif self._heading and tag == f"h{self._heading}":
             self.page.headings.append((self._heading, collapse("".join(self._heading_buf))))
             self._heading = None
+        elif tag == "p":
+            self._close_paragraph()
+
+    def _close_paragraph(self) -> None:
+        if self._para is not None:
+            text = collapse("".join(self._para))
+            if text:
+                self.page.paragraphs.append(text)
+        self._para = None
 
     def handle_data(self, data: str) -> None:
         if self._skip:
@@ -107,6 +121,8 @@ class _Parser(HTMLParser):
             self._heading_buf.append(data)
         if self._href is not None:
             self._anchor_buf.append(data)
+        if self._para is not None:
+            self._para.append(data)
 
 
 def parse_page(html: str) -> Page:
