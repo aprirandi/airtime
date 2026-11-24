@@ -1,5 +1,5 @@
 import { API_BASE, ScanFailure } from "@/lib/scan"
-import type { FixChoice, SiteView } from "@/lib/types"
+import type { BusinessProfile, FixChoice, SiteView } from "@/lib/types"
 
 async function call(body: Record<string, unknown>, signal?: AbortSignal): Promise<SiteView> {
   let res: Response
@@ -27,3 +27,6 @@ export const createSite = (url: string, platform: string, signal?: AbortSignal) 
 export const getSite = (token: string, signal?: AbortSignal) => call({ action: "get", token }, signal)
 export const rescanSite = (token: string) => call({ action: "rescan", token })
 export const setFix = (token: string, check_id: string, state: FixChoice) => call({ action: "fix", token, check_id, state })
+export const saveProfile = (token: string, profile: Record<string, string>) => call({ action: "profile", token, profile })
+export const askNow = (token: string) => call({ action: "ask", token })
+export type { BusinessProfile }

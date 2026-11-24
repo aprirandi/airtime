@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 import { Check, Copy, Loader2, RefreshCw } from "lucide-react"
 
 import { AuditView, CopyButton } from "@/components/Audit"
+import { AskerSection } from "@/components/AskerSection"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -254,6 +255,8 @@ export function SitePage({ token, go }: { token: string; go: (hash: string) => v
           </div>
         )}
       </section>
+
+      <AskerSection token={token} view={view} onView={(v) => setState({ kind: "ready", view: v })} />
 
       <details className="rounded-lg border">
         <summary className="cursor-pointer px-4 py-3 font-medium">

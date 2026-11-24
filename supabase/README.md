@@ -19,3 +19,21 @@ so the public `anon` key can read nothing.
 
 What is stored: the address, the platform, a **hash** of the private link (the link itself is not kept), every scan
 (score, checks, evidence, prepared drafts) and what the client chose per item.
+
+## Asking AI assistants about a client's business
+
+The "Do AI assistants name you?" part of the page needs two more things; without them it simply does not appear.
+
+1. **New tables.** Run the whole of `supabase/schema.sql` again in the SQL Editor. It is safe to run twice. It adds
+   `profiles` (what the client told us about their business) and `asker_runs` (every time we asked).
+2. **A Gemini key.** In Google AI Studio create an API key, then in Vercel add `GEMINI_API_KEY` (Environment Variables,
+   Production) and redeploy. Like the Supabase key, it lives only in Vercel's settings.
+
+Optional settings, all with defaults: `GEMINI_ASK_MODEL` (default `gemini-3.8-flash`), `GEMINI_WORK_MODEL`
+(default `gemini-3.5-flash-lite`) and `ASKER_DAILY_RUNS` (default 3: how many runs all pages together may start in 24
+hours).
+
+**Cost and limits.** One run is six questions and one reading of the answers: seven calls. The free tier of the ask
+model allows only about twenty calls a day for the whole key, so with the default of 3 runs a day it holds for a
+trial and not for many clients. A page can ask again after 12 hours. Real use needs a paid key; raise
+`ASKER_DAILY_RUNS` when you move to one.

@@ -33,9 +33,36 @@ create table if not exists fix_states (
   primary key (site_id, check_id)
 );
 
+-- The Asker: what the client told us about their business, and every time we asked AI assistants about it.
+create table if not exists profiles (
+  site_id     uuid primary key references sites(id) on delete cascade,
+  name        text not null,
+  aliases     text[] not null default '{}',
+  city        text not null default '',
+  country     text not null default '',
+  areas       text[] not null default '{}',
+  categories  text[] not null default '{}',
+  updated_at  timestamptz not null default now()
+);
+
+create table if not exists asker_runs (
+  id          uuid primary key default gen_random_uuid(),
+  site_id     uuid not null references sites(id) on delete cascade,
+  ran_at      timestamptz not null default now(),
+  model       text not null default '',
+  asked       int not null,
+  answered    int not null,
+  named       int not null,                   -- answers that named the business
+  result      jsonb not null                  -- the questions, the answers, the other shops named
+);
+create index if not exists asker_runs_site_time on asker_runs (site_id, ran_at);
+create index if not exists asker_runs_time on asker_runs (ran_at);
+
 alter table sites enable row level security;
 alter table scans enable row level security;
 alter table fix_states enable row level security;
+alter table profiles enable row level security;
+alter table asker_runs enable row level security;
 
 -- Newer Supabase projects do not give the API roles access to new tables by themselves. The server uses the service
 -- role, so that is the only role given access; the public anon and authenticated roles still see nothing.
