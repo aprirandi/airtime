@@ -8,6 +8,19 @@ type Dict = Record<string, string>
 
 // UI text. Data text written by the agent comes from the JSON in both languages (field + "_id").
 const EN: Dict = {
+  "site.delta.first": "{d} since the first check ({b})",
+  "site.delta.firstSame": "No change since the first check ({b})",
+  "site.delta.prev": "{d} since the last check ({b})",
+  "site.delta.prevSame": "No change since the last check ({b})",
+  "site.delta.none": "First check. Re-check after you fix something to see whether it goes up or down.",
+  "site.chip.strong": "Ready",
+  "site.chip.needs_work": "Almost ready",
+  "site.chip.blockers": "Not ready",
+  "site.chip.none": "Not scored",
+  "site.sum": "{pass} of {total} checks pass · {partial} partly · {failed} not yet",
+  "site.doneSince": "{n} fixed since the first check",
+  "site.passed": "pass",
+  "site.tierRest": "{partial} partly · {failed} not yet",
   "site.copyCode": "Copy code",
   "site.state.partial": "Partly done · {p}%",
   "site.lastCheck": "What the last check found: {e}",
@@ -547,6 +560,19 @@ const EN: Dict = {
 }
 
 const ID: Dict = {
+  "site.delta.first": "{d} sejak pemeriksaan pertama ({b})",
+  "site.delta.firstSame": "Tidak berubah sejak pemeriksaan pertama ({b})",
+  "site.delta.prev": "{d} sejak pemeriksaan terakhir ({b})",
+  "site.delta.prevSame": "Tidak berubah sejak pemeriksaan terakhir ({b})",
+  "site.delta.none": "Pemeriksaan pertama. Periksa ulang setelah memperbaiki sesuatu untuk melihat naik atau turun.",
+  "site.chip.strong": "Siap",
+  "site.chip.needs_work": "Hampir siap",
+  "site.chip.blockers": "Belum siap",
+  "site.chip.none": "Belum dinilai",
+  "site.sum": "{pass} dari {total} pemeriksaan lulus · {partial} sebagian · {failed} belum",
+  "site.doneSince": "{n} selesai sejak pemeriksaan pertama",
+  "site.passed": "lulus",
+  "site.tierRest": "{partial} sebagian · {failed} belum",
   "site.copyCode": "Salin kode",
   "site.state.partial": "Sebagian selesai · {p}%",
   "site.lastCheck": "Temuan pemeriksaan terakhir: {e}",

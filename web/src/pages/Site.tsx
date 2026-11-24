@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Check, Copy, Loader2, RefreshCw } from "lucide-react"
+import { ArrowDown, ArrowUp, Check, Copy, Loader2, Minus, RefreshCw } from "lucide-react"
 
 import { AuditView, CopyButton } from "@/components/Audit"
 import { AskerSection } from "@/components/AskerSection"
@@ -41,6 +41,19 @@ function Steps({ guide, lang, t }: { guide: Guide; lang: "en" | "id"; t: T }) {
         </div>
       )}
     </div>
+  )
+}
+
+/** Up, down or the same, with the number and what it is measured from. */
+function Delta({ now, before, text, same, small }: { now: number; before: number; text: (d: string, b: number) => string; same: string; small?: boolean }) {
+  const diff = Math.round((now - before) * 10) / 10
+  const tone = diff > 0 ? "text-success" : diff < 0 ? "text-destructive" : "text-muted-foreground"
+  const Icon = diff > 0 ? ArrowUp : diff < 0 ? ArrowDown : Minus
+  return (
+    <p className={cn("flex items-center gap-1 font-medium", tone, small ? "text-xs" : "text-sm")}>
+      <Icon className="size-3.5" aria-hidden="true" />
+      {diff === 0 ? same : text(`${diff > 0 ? "+" : "−"}${Math.abs(diff).toFixed(1)}`, before)}
+    </p>
   )
 }
 
@@ -182,7 +195,6 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
   const first = view.baseline
   const rechecked = view.history.length > 1
   const doneCount = open.filter((f) => view.done.includes(f.check_id)).length
-  const baselineTotal = first ? first.gaps.length : 0
 
   const asker = view.asker
   const askerOn = asker.enabled
@@ -190,6 +202,14 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
   const topNames = ranked.slice(0, 3).map((r) => pick<string>(r.fix, "title")).join(", ")
   const easyLeft = ranked.filter((r) => r.meta.effort === "easy").length
   const score = Math.max(0, Math.min(100, audit.score ?? 0))
+  const previous = view.history.length > 1 ? view.history[view.history.length - 2] : undefined
+  const bd = audit.breakdown
+  const tiers: [string, string, typeof bd.essential][] = [
+    ["essential", t("fix.badge.high"), bd.essential],
+    ["recommended", t("fix.badge.medium"), bd.recommended],
+    ["bonus", t("fix.badge.low"), bd.bonus],
+  ]
+  const sum = tiers.reduce((a, [, , x]) => ({ total: a.total + x.total, passing: a.passing + x.passing, partial: a.partial + x.partial, failed: a.failed + x.failed }), { total: 0, passing: 0, partial: 0, failed: 0 })
   const current = tab === "ask" && askerOn ? "ask" : "audit"
   const openLeft = open.length - doneCount
 
@@ -254,24 +274,47 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
       ) : (
         <>
           <Card>
-            <CardContent className="flex flex-wrap items-center gap-6">
-              <div className={`text-5xl font-semibold tabular-nums ${SCORE_TONE[audit.label]}`}>
-                {audit.score ?? "–"}
-                <span className="text-muted-foreground text-xl">/100</span>
+            <CardContent className="space-y-5">
+              <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
+                <div>
+                  <div className={`text-5xl font-semibold tabular-nums ${SCORE_TONE[audit.label]}`}>
+                    {audit.score ?? "–"}
+                    <span className="text-muted-foreground text-xl">/100</span>
+                  </div>
+                  <div className="mt-1 space-y-0.5">
+                    {first && first.score !== null && audit.score !== null && rechecked ? (
+                      <Delta now={audit.score} before={first.score} text={(d, b) => t("site.delta.first", { d, b })} same={t("site.delta.firstSame", { b: first.score })} />
+                    ) : (
+                      <p className="text-muted-foreground text-xs">{t("site.delta.none")}</p>
+                    )}
+                    {previous && previous.score !== null && audit.score !== null && view.history.length > 2 && (
+                      <Delta now={audit.score} before={previous.score} small text={(d, b) => t("site.delta.prev", { d, b })} same={t("site.delta.prevSame", { b: previous.score })} />
+                    )}
+                  </div>
+                </div>
+                <div className="min-w-56 flex-1 space-y-2">
+                  <Badge variant={audit.label === "strong" ? "success" : audit.label === "needs_work" ? "warning" : "destructive"}>{t(`site.chip.${audit.label}`)}</Badge>
+                  <p className="text-sm">{t("site.sum", { pass: sum.passing, total: sum.total, partial: sum.partial, failed: sum.failed })}</p>
+                  {ranked.length > 0 && <p className="text-muted-foreground text-sm">{t("site.verdict.easy", { e: easyLeft, n: ranked.length })}</p>}
+                  {rechecked && view.done.length > 0 && <p className="text-success text-sm">{t("site.doneSince", { n: view.done.length })}</p>}
+                </div>
               </div>
-              <div className="min-w-48 flex-1 space-y-1">
-                <div className="font-medium">{t(`site.verdict.${audit.label}`)}</div>
-                {audit.label !== "strong" && ranked.length > 0 && <p className="text-sm">{t("site.verdict.top", { names: topNames })}</p>}
-                {ranked.length > 0 && <p className="text-muted-foreground text-sm">{t("site.verdict.easy", { e: easyLeft, n: ranked.length })}</p>}
-                {rechecked && first?.score !== null && first?.score !== undefined && (
-                  <p className="text-muted-foreground text-sm">{t("site.before", { a: first.score, b: audit.score ?? "–" })}</p>
-                )}
-                {rechecked && baselineTotal > 0 && (
-                  <p className="text-muted-foreground text-sm">{t("site.progress", { done: doneCount, total: baselineTotal })}</p>
-                )}
+
+              <div className="grid gap-2 sm:grid-cols-3">
+                {tiers.map(([key, label, tier]) => (
+                  <div key={key} className="rounded-lg border p-3">
+                    <div className="text-muted-foreground text-xs">{label}</div>
+                    <div className="mt-0.5 text-lg font-semibold tabular-nums">
+                      {tier.passing}
+                      <span className="text-muted-foreground text-sm font-normal"> / {tier.total} {t("site.passed")}</span>
+                    </div>
+                    <div className="text-muted-foreground mt-0.5 text-xs">{t("site.tierRest", { partial: tier.partial, failed: tier.failed })}</div>
+                  </div>
+                ))}
               </div>
+
               {audit.score !== null && (
-                <div className="w-full space-y-1" aria-hidden="true">
+                <div className="space-y-1" aria-hidden="true">
                   <div className="relative h-2 overflow-hidden rounded-full">
                     <div className="absolute inset-y-0 left-0 w-[60%] bg-red-500/70" />
                     <div className="absolute inset-y-0 left-[60%] w-[20%] bg-amber-400/80" />
@@ -285,6 +328,7 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
                   </div>
                 </div>
               )}
+              {audit.label !== "strong" && ranked.length > 0 && <p className="text-sm">{t("site.verdict.top", { names: topNames })}</p>}
             </CardContent>
           </Card>
 
