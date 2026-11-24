@@ -135,8 +135,10 @@ def find_addresses(pages: list[tuple[str, Page]]) -> tuple[list[dict], str] | No
 def find_description(snap: Snapshot) -> tuple[str, str] | None:
     for meta in snap.home_page.meta:
         key = (meta.get("name") or meta.get("property") or "").lower()
-        if key in ("description", "og:description") and len(_clean(meta.get("content", ""))) >= 40:
-            return _clean(meta["content"])[:300], "home"
+        text = _clean(meta.get("content", ""))
+        # a site that builds its meta description from the page text brings the menu and the code samples with it
+        if key in ("description", "og:description") and len(text) >= 40 and not NOISE.search(text):
+            return text[:300], "home"
     about = snap.trust.get("about")
     if about:
         # Only the text of a real paragraph: in the visible text of a whole page a menu, a heading or a footer runs

@@ -23656,8 +23656,9 @@ function findAddresses(pages) {
 function findDescription(snap) {
   for (const meta of snap.homePage.meta) {
     const key = (meta["name"] || meta["property"] || "").toLowerCase();
-    if ((key === "description" || key === "og:description") && cpLen(collapse(meta["content"] ?? "")) >= 40) {
-      return [clip(collapse(meta["content"]), 300), "home"];
+    const text = collapse(meta["content"] ?? "");
+    if ((key === "description" || key === "og:description") && cpLen(text) >= 40 && !NOISE.test(text)) {
+      return [clip(text, 300), "home"];
     }
   }
   const about = snap.trust["about"];
@@ -24530,15 +24531,16 @@ var TUTORIALS = {
     owner: true,
     steps: [
       b("AI assistants look for a short, structured 'business card' on your website: who you are, your logo and your address. Yours is missing.", "Asisten AI mencari 'kartu nama' singkat dan terstruktur di website Anda: siapa Anda, logo, dan alamat. Milik Anda belum ada."),
-      b("Fill in your business name and logo in your SEO tool, if it has the place for it.", "Isi nama bisnis dan logo Anda di alat SEO, kalau ada tempatnya.")
+      b("Fill in your business name and logo in your SEO tool, if it has the place for it.", "Isi nama bisnis dan logo Anda di alat SEO, kalau ada tempatnya."),
+      b("The check also looks for a short description of your business. If your plugin has no field for it, use the prepared code below, which includes one. Read it and correct it first.", "Pemeriksaan ini juga mencari deskripsi singkat bisnis Anda. Kalau plugin Anda tidak punya kolom untuknya, pakai kode yang sudah disiapkan di bawah, yang sudah memuatnya. Baca dulu dan perbaiki yang salah.")
     ],
     platforms: {
       wordpress: [
         b("In Yoast SEO go to Settings, then Site basics, and fill in your organization name and logo. In Rank Math go to Titles and Meta, then Local SEO, and fill in your business details.", "Di Yoast SEO buka Settings, lalu Site basics, dan isi nama organisasi serta logo. Di Rank Math buka Titles and Meta, lalu Local SEO, dan isi detail bisnis."),
-        b("Prefer to be exact about the details? Use the prepared code below instead.", "Ingin detailnya persis? Pakai kode yang sudah disiapkan di bawah.")
+        b("The check also looks for a short description of your business. If your plugin has no field for it, use the prepared code below, which includes one. Read it and correct it first.", "Pemeriksaan ini juga mencari deskripsi singkat bisnis Anda. Kalau plugin Anda tidak punya kolom untuknya, pakai kode yang sudah disiapkan di bawah, yang sudah memuatnya. Baca dulu dan perbaiki yang salah.")
       ],
       shopify: [
-        b("Shopify themes often include a basic business card already. If yours does not, use the prepared code below.", "Tema Shopify sering sudah punya kartu nama dasar. Kalau milik Anda belum, pakai kode yang sudah disiapkan di bawah.")
+        b("Shopify themes often include a basic business card already. If yours does not, or it has no description of your business, use the prepared code below.", "Tema Shopify sering sudah punya kartu nama dasar. Kalau milik Anda belum, atau belum ada deskripsi bisnis Anda, pakai kode yang sudah disiapkan di bawah.")
       ]
     }
   },
@@ -24681,8 +24683,8 @@ var TUTORIALS = {
 // src/guide.ts
 var WHERE_TO_PASTE = {
   wordpress: {
-    en: "In WordPress, open your SEO plugin (for example Yoast or Rank Math), find its organization or schema settings and enter these details. If your plugin has no such place, paste the code below into the header of your theme, before the closing head tag.",
-    id: "Di WordPress, buka plugin SEO Anda (misalnya Yoast atau Rank Math), cari pengaturan organisasi atau skema, lalu isi detail ini. Kalau plugin Anda tidak punya tempatnya, tempel kode di bawah ke header tema Anda, sebelum tag head ditutup."
+    en: "If your plugin has no place for this, paste the code below into the header of your theme, before the closing head tag.",
+    id: "Kalau plugin Anda tidak punya tempatnya, tempel kode di bawah ke header tema Anda, sebelum tag head ditutup."
   },
   shopify: {
     en: "In Shopify, open Online Store, Themes, Edit code, and open theme.liquid. Paste the code below just before the closing head tag, then save.",

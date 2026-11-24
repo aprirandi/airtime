@@ -11,7 +11,7 @@ import { useI18n, type T } from "@/lib/i18n"
 import { ScanFailure } from "@/lib/scan"
 import { getSite, rescanSite, setFix } from "@/lib/site"
 import type { Fix, FixChoice, Guide, SiteView } from "@/lib/types"
-import { FixList, type FixMeta } from "@/components/FixList"
+import { FixList, mostImportant, type FixMeta } from "@/components/FixList"
 import { cn } from "@/lib/utils"
 import { FixCard } from "@/pages/Overview"
 
@@ -35,7 +35,7 @@ function Steps({ guide, lang, t }: { guide: Guide; lang: "en" | "id"; t: T }) {
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-muted-foreground text-xs font-medium">{say(guide.code.label)}</span>
-            <CopyButton text={guide.code.text} label={t("audit.copy")} t={t} />
+            <CopyButton text={guide.code.text} label={t("site.copyCode")} t={t} />
           </div>
           <pre className="bg-muted max-h-64 overflow-auto rounded-lg p-3 text-xs whitespace-pre-wrap break-all">{guide.code.text}</pre>
         </div>
@@ -51,8 +51,12 @@ function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta;
   const held = fix.status === "platform_held"
   const guide = view.guides[fix.check_id]
   const prompt = view.latest.checks.find((c) => c.id === fix.check_id)?.[lang === "id" ? "prompt_id" : "prompt"]
+  const check = view.latest.checks.find((c) => c.id === fix.check_id)
+  const partial = !done && check?.result === "partial" ? check : undefined
   const badge = done
     ? { label: t("site.state.done"), variant: "success" as const }
+    : partial
+      ? { label: t("site.state.partial", { p: partial.percent }), variant: "warning" as const }
     : choice === "self"
       ? { label: t("site.state.self"), variant: "secondary" as const }
       : choice === "asked_fixer"
@@ -79,6 +83,7 @@ function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta;
           )}
         </div>
       )}
+      {partial && <p className="text-muted-foreground text-xs">{t("site.lastCheck", { e: partial.evidence })}</p>}
       {choice === "asked_fixer" && !done && <p className="text-muted-foreground text-xs">{t("site.fixerNote")}</p>}
       {guide && !done && (
         <details className="group rounded-lg border">
@@ -114,7 +119,7 @@ function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta;
 }
 
 export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "ask"; go: (hash: string) => void }) {
-  const { t } = useI18n()
+  const { t, pick } = useI18n()
   const [state, setState] = useState<State>({ kind: "loading" })
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -181,6 +186,10 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
 
   const asker = view.asker
   const askerOn = asker.enabled
+  const ranked = mostImportant(fixes, audit.checks, (f) => view.done.includes(f.check_id))
+  const topNames = ranked.slice(0, 3).map((r) => pick<string>(r.fix, "title")).join(", ")
+  const easyLeft = ranked.filter((r) => r.meta.effort === "easy").length
+  const score = Math.max(0, Math.min(100, audit.score ?? 0))
   const current = tab === "ask" && askerOn ? "ask" : "audit"
   const openLeft = open.length - doneCount
 
@@ -252,6 +261,8 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
               </div>
               <div className="min-w-48 flex-1 space-y-1">
                 <div className="font-medium">{t(`site.verdict.${audit.label}`)}</div>
+                {audit.label !== "strong" && ranked.length > 0 && <p className="text-sm">{t("site.verdict.top", { names: topNames })}</p>}
+                {ranked.length > 0 && <p className="text-muted-foreground text-sm">{t("site.verdict.easy", { e: easyLeft, n: ranked.length })}</p>}
                 {rechecked && first?.score !== null && first?.score !== undefined && (
                   <p className="text-muted-foreground text-sm">{t("site.before", { a: first.score, b: audit.score ?? "–" })}</p>
                 )}
@@ -259,6 +270,21 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
                   <p className="text-muted-foreground text-sm">{t("site.progress", { done: doneCount, total: baselineTotal })}</p>
                 )}
               </div>
+              {audit.score !== null && (
+                <div className="w-full space-y-1" aria-hidden="true">
+                  <div className="relative h-2 overflow-hidden rounded-full">
+                    <div className="absolute inset-y-0 left-0 w-[60%] bg-red-500/70" />
+                    <div className="absolute inset-y-0 left-[60%] w-[20%] bg-amber-400/80" />
+                    <div className="absolute inset-y-0 left-[80%] w-[20%] bg-emerald-500/70" />
+                    <div className="bg-foreground absolute top-[-2px] h-3 w-1 rounded-full" style={{ left: `calc(${score}% - 2px)` }} />
+                  </div>
+                  <div className="text-muted-foreground relative flex text-[11px]">
+                    <span className="w-[60%]">{t("site.scale.low")}</span>
+                    <span className="w-[20%]">{t("site.scale.mid")}</span>
+                    <span className="w-[20%]">{t("site.scale.high")}</span>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

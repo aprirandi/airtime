@@ -25,8 +25,8 @@ export interface Guide {
 
 const WHERE_TO_PASTE: Record<string, Bilingual> = {
   wordpress: {
-    en: "In WordPress, open your SEO plugin (for example Yoast or Rank Math), find its organization or schema settings and enter these details. If your plugin has no such place, paste the code below into the header of your theme, before the closing head tag.",
-    id: "Di WordPress, buka plugin SEO Anda (misalnya Yoast atau Rank Math), cari pengaturan organisasi atau skema, lalu isi detail ini. Kalau plugin Anda tidak punya tempatnya, tempel kode di bawah ke header tema Anda, sebelum tag head ditutup.",
+    en: "If your plugin has no place for this, paste the code below into the header of your theme, before the closing head tag.",
+    id: "Kalau plugin Anda tidak punya tempatnya, tempel kode di bawah ke header tema Anda, sebelum tag head ditutup.",
   },
   shopify: {
     en: "In Shopify, open Online Store, Themes, Edit code, and open theme.liquid. Paste the code below just before the closing head tag, then save.",

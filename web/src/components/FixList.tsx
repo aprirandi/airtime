@@ -80,6 +80,14 @@ function Chips<T extends string>({ label, options, value, counts, text, onChange
 
 const rank = (list: readonly string[], v: string) => list.indexOf(v)
 
+/** The things to do that matter most, most important first and the easiest among equals. */
+export function mostImportant(fixes: Fix[], checks: AuditCheck[], skip: (fix: Fix) => boolean = () => false) {
+  return fixes
+    .filter((f) => f.status !== "platform_held" && !skip(f))
+    .map((fix) => ({ fix, meta: metaOf(fix, checks) }))
+    .sort((a, b) => rank(PRIORITIES, a.meta.priority) - rank(PRIORITIES, b.meta.priority) || rank(EFFORTS, a.meta.effort) - rank(EFFORTS, b.meta.effort) || a.fix.position - b.fix.position)
+}
+
 /**
  * The things to do, in one column, grouped by category, with filters for priority, how hard and category.
  * Within a category the most important comes first, and among equals the easiest.

@@ -8,6 +8,14 @@ type Dict = Record<string, string>
 
 // UI text. Data text written by the agent comes from the JSON in both languages (field + "_id").
 const EN: Dict = {
+  "site.copyCode": "Copy code",
+  "site.state.partial": "Partly done · {p}%",
+  "site.lastCheck": "What the last check found: {e}",
+  "site.verdict.top": "What holds it back most: {names}.",
+  "site.verdict.easy": "{e} of the {n} things to do are easy.",
+  "site.scale.low": "Not ready",
+  "site.scale.mid": "Almost ready · 60",
+  "site.scale.high": "Ready · 80",
   "fix.filter.priority": "Priority",
   "fix.filter.effort": "How hard",
   "fix.filter.category": "Category",
@@ -539,6 +547,14 @@ const EN: Dict = {
 }
 
 const ID: Dict = {
+  "site.copyCode": "Salin kode",
+  "site.state.partial": "Sebagian selesai · {p}%",
+  "site.lastCheck": "Temuan pemeriksaan terakhir: {e}",
+  "site.verdict.top": "Yang paling menghambat: {names}.",
+  "site.verdict.easy": "{e} dari {n} hal yang perlu dikerjakan itu mudah.",
+  "site.scale.low": "Belum siap",
+  "site.scale.mid": "Hampir siap · 60",
+  "site.scale.high": "Siap · 80",
   "fix.filter.priority": "Prioritas",
   "fix.filter.effort": "Tingkat kesulitan",
   "fix.filter.category": "Kategori",
