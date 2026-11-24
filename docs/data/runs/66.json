@@ -1,0 +1,35 @@
+{
+ "store": {
+  "slug": "renosites",
+  "name": "Renosites"
+ },
+ "run": {
+  "id": 66,
+  "agent": "auditor,fixer",
+  "kind": "audit",
+  "run_date": "2026-11-24",
+  "started_at": "2026-11-24T09:16:32+00:00",
+  "finished_at": "2026-11-24T09:17:02+00:00",
+  "status": "failed",
+  "error": "airtime.core.agent.RunFailed: could not reach https://renosites.com.au/: URLError: <urlopen error [Errno 101] Network is unreachable>",
+  "steps": [
+   {
+    "step": 1,
+    "name": "fetch_pages",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T09:16:32+00:00",
+    "status": "failed",
+    "error": "RunFailed: could not reach https://renosites.com.au/: URLError: <urlopen error [Errno 101] Network is unreachable>",
+    "description": "Stopped here: RunFailed: could not reach https://renosites.com.au/: URLError: <urlopen error [Errno 101] Network is unreachable>",
+    "description_id": "Berhenti di sini: RunFailed: could not reach https://renosites.com.au/: URLError: <urlopen error [Errno 101] Network is unreachable>"
+   }
+  ],
+  "quotes_verified": 0,
+  "questions": []
+ },
+ "summary": null,
+ "comparison": [],
+ "comparison_id": [],
+ "answers": []
+}
