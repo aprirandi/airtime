@@ -81,20 +81,26 @@ function SiteFix({ fix, view, busy, onChoose }: { fix: Fix; view: SiteView; busy
         <details className="group rounded-lg border">
           <summary className="cursor-pointer px-3 py-2 text-sm font-medium">{t("site.how")}</summary>
           <div className="space-y-4 border-t p-3">
+            <Badge variant={guide.owner ? "success" : "secondary"}>{guide.owner ? t("site.owner.yes") : t("site.owner.no")}</Badge>
             <Steps guide={guide} lang={lang} t={t} />
+            {guide.owner && <p className="text-muted-foreground text-xs">{t("site.menuNote")}</p>}
             {prompt && (
               <div className="space-y-2">
                 <div className="text-muted-foreground text-xs font-medium">{t("site.promptTitle")}</div>
                 <CopyButton text={prompt} label={t("audit.copy")} t={t} />
               </div>
             )}
-            {guide.verify && (
+            {(guide.developer || guide.verify) && (
               <details>
-                <summary className="text-muted-foreground cursor-pointer text-xs">{t("site.verify")}</summary>
-                <p className="mt-1 text-xs">{lang === "id" ? guide.verify.id : guide.verify.en}</p>
-                <pre className="bg-muted mt-1 overflow-auto rounded p-2 text-xs whitespace-pre-wrap break-all">
-                  {guide.verify.command.split("{site}").join(view.site.url)}
-                </pre>
+                <summary className="text-muted-foreground cursor-pointer text-xs">{t("site.devTitle")}</summary>
+                {guide.developer && <p className="mt-1 text-xs">{lang === "id" ? guide.developer.id : guide.developer.en}</p>}
+                {guide.verify && <p className="mt-2 text-xs font-medium">{t("site.verify")}</p>}
+                {guide.verify && <p className="mt-1 text-xs">{lang === "id" ? guide.verify.id : guide.verify.en}</p>}
+                {guide.verify && (
+                  <pre className="bg-muted mt-1 overflow-auto rounded p-2 text-xs whitespace-pre-wrap break-all">
+                    {guide.verify.command.split("{site}").join(view.site.url)}
+                  </pre>
+                )}
               </details>
             )}
           </div>

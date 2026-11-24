@@ -36,3 +36,11 @@ create table if not exists fix_states (
 alter table sites enable row level security;
 alter table scans enable row level security;
 alter table fix_states enable row level security;
+
+-- Newer Supabase projects do not give the API roles access to new tables by themselves. The server uses the service
+-- role, so that is the only role given access; the public anon and authenticated roles still see nothing.
+grant usage on schema public to service_role;
+grant all on all tables in schema public to service_role;
+alter default privileges in schema public grant all on tables to service_role;
+
+notify pgrst, 'reload schema';

@@ -4,6 +4,7 @@
  * check has a guide. Until the Fixer can change a website itself, this is how a fix gets done.
  */
 import { BY_ID } from "./registry"
+import { TUTORIALS } from "./tutorials"
 
 export interface Bilingual {
   en: string
@@ -11,7 +12,11 @@ export interface Bilingual {
 }
 
 export interface Guide {
+  /** true when an owner with no technical skills can do it; false when it needs a developer or an AI assistant */
+  owner: boolean
   steps: Bilingual[]
+  /** What the check asks for, in technical words, for whoever does the work */
+  developer?: Bilingual
   /** Text to paste, when the Fixer prepared one */
   code?: { label: Bilingual; text: string }
   /** For a developer: a command that shows the result */
@@ -53,15 +58,18 @@ export function scriptTag(jsonld: Record<string, unknown>): string {
 export function buildGuide(checkId: string, platform: string, draft?: Record<string, unknown>): Guide | null {
   const check = BY_ID[checkId]
   if (!check) return null
-  const steps: Bilingual[] = [{ en: check.fix, id: check.fix_id }]
+  const tutorial = TUTORIALS[checkId]
+  const key = platform === "woocommerce" ? "wordpress" : platform
+  const own = (tutorial?.platforms as Record<string, Bilingual[] | undefined> | undefined)?.[key]
+  const steps: Bilingual[] = [...(own ?? tutorial?.steps ?? [{ en: check.fix, id: check.fix_id }])]
+  const guide: Guide = { owner: tutorial?.owner ?? false, steps, developer: { en: check.fix, id: check.fix_id } }
   const hint = check.platform_fix[platform]
-  if (hint) steps.push({ en: hint.en, id: hint.id })
-  const guide: Guide = { steps }
+  if (hint) guide.developer = { en: `${check.fix} ${hint.en}`, id: `${check.fix_id} ${hint.id}` }
   if (draft) {
     steps.push(CHECK_FIRST, WHERE_TO_PASTE[platform] ?? (WHERE_TO_PASTE["other"] as Bilingual))
     guide.code = { label: CODE_LABEL, text: scriptTag(draft) }
   }
-  steps.push(THEN_RECHECK)
+  if (tutorial?.owner !== false) steps.push(THEN_RECHECK)
   if (check.verify) guide.verify = check.verify
   return guide
 }
