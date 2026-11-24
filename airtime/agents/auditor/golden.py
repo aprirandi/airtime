@@ -137,6 +137,10 @@ FIXER_SITES = [
      _doc("<h1>Contact</h1><p>Come and say hello.</p>")),
     ("description from the About page, headings dropped", "https://about.example", _doc("<h1>About</h1>"),
      _doc("<h1>About us</h1><h2>Our story</h2><p>Short one. We are a family run paper shop, selling handmade cards and journals. Everything is chosen by people who love paper. Third.</p>"), None),
+    ("a menu that runs into the sentence is not a description", "https://menu.example", _doc("<h1>Menu</h1>"),
+     _doc("<h1>About</h1><p>Renosites Skip to content Renosites Labs: 3 apps in development Melbourne, AU \u00b7 37.81\u00b0 S \u00b7 --:--:-- -- /what-we-do /approach /about Get in touch [ 01 ] Technology company \u00b7 Melbourne Renosites is a technology company.</p>"), None),
+    ("a clean sentence after a noisy one is used", "https://mix.example", _doc("<h1>Mix</h1>"),
+     _doc("<h1>About</h1><p>Home | Shop | Contact \u00a9 2026 Mix Pty Ltd and all of its friends and neighbours. We design and build calm, fast websites for small businesses across Melbourne and beyond.</p>"), None),
     ("site name from og:site_name, other state", "https://og.example", _doc("<h1>X</h1>", '<meta property="og:site_name" content="  Og   Shop ">'), None,
      _doc("<h1>Contact</h1><p>Unit 5, 10 Beach Parade QLD 4217 Phone 0755 551 234</p>")),
 ]

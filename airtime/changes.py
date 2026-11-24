@@ -70,8 +70,9 @@ def compare_change(conn, change) -> dict:
     """The change with its stored "before", the "after" so far, and whether there is enough to call it a result."""
     before = json.loads(change["before"])
     after = _tally(_shifts(conn, change["store_id"], after=change["applied_on"]))
+    # the latest scan after the day it went live: the score now, which moves as more is fixed
     audit_after = conn.execute("SELECT scanned_at, score FROM audits WHERE store_id = ? AND substr(scanned_at, 1, 10) > ? "
-                               "ORDER BY scanned_at, id LIMIT 1", (change["store_id"], change["applied_on"])).fetchone()
+                               "ORDER BY scanned_at DESC, id DESC LIMIT 1", (change["store_id"], change["applied_on"])).fetchone()
     enough = after["shifts"] >= MIN_AFTER
     result = None
     if enough and before["asker"]["pct"] is not None and after["pct"] is not None:

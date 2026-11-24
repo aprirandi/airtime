@@ -5,6 +5,10 @@ name: Record a change
 on:
   workflow_dispatch:
     inputs:
+      store:
+        description: "Store config (config/stores/<name>.toml)"
+        required: false
+        default: "handworks"
       check:
         description: "The check the fix was for, e.g. organization_completeness"
         required: true
@@ -34,17 +38,21 @@ jobs:
           python-version: "3.13"
       - name: Record the change
         env:
+          STORE: ${{ github.event.inputs.store }}
           CHECK: ${{ github.event.inputs.check }}
           DATE: ${{ github.event.inputs.date }}
           NOTE: ${{ github.event.inputs.note }}
         run: |
-          python -m airtime seed --store handworks
-          python -m airtime change --store handworks --check "$CHECK" --date "$DATE" --note "$NOTE"
+          STORE="${STORE:-handworks}"
+          if [ "$STORE" = "handworks" ]; then python -m airtime seed --store handworks; fi
+          python -m airtime change --store "$STORE" --check "$CHECK" --date "$DATE" --note "$NOTE"
       - name: Commit
+        env:
+          STORE: ${{ github.event.inputs.store }}
         run: |
           git config user.name "airtime-bot"
           git config user.email "airtime-bot@users.noreply.github.com"
           git add data/airtime.sqlite docs
           if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
-          git commit -m "Record change $(TZ=Australia/Melbourne date +%F)"
+          git commit -m "Record change $(TZ=Australia/Melbourne date +%F) (${STORE:-handworks})"
           git push

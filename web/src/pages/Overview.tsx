@@ -71,7 +71,7 @@ function Tally({ label, tally }: { label: "before" | "after"; tally: ChangeTally
   )
 }
 
-function ChangeCard({ change }: { change: Change }) {
+function ChangeCard({ change, asked }: { change: Change; asked: boolean }) {
   const { t, pick } = useI18n()
   return (
     <Card>
@@ -83,16 +83,23 @@ function ChangeCard({ change }: { change: Change }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-1.5 text-sm">
-        <Tally label="before" tally={change.before} />
-        {change.enough ? (
-          <Tally label="after" tally={change.after} />
-        ) : (
-          <p>{t("ov.changes.waiting", { n: change.after.shifts, needed: change.needed })}</p>
+        {change.score_before !== null &&
+          (change.score_after !== null ? (
+            <p>{t("ov.changes.score", { a: change.score_before, b: change.score_after })}</p>
+          ) : (
+            <p>{t("ov.changes.scoreWaiting", { a: change.score_before })}</p>
+          ))}
+        {asked && (
+          <>
+            <Tally label="before" tally={change.before} />
+            {change.enough ? (
+              <Tally label="after" tally={change.after} />
+            ) : (
+              <p>{t("ov.changes.waiting", { n: change.after.shifts, needed: change.needed })}</p>
+            )}
+            {change.enough && <p className="text-muted-foreground text-xs">{t("ov.changes.caveat")}</p>}
+          </>
         )}
-        {change.score_before !== null && change.score_after !== null && (
-          <p>{t("ov.changes.score", { a: change.score_before, b: change.score_after })}</p>
-        )}
-        {change.enough && <p className="text-muted-foreground text-xs">{t("ov.changes.caveat")}</p>}
       </CardContent>
     </Card>
   )
@@ -189,7 +196,7 @@ export function Overview({ site, store }: { site: Site; store: Store }) {
           <h2 className="text-lg font-semibold">{t("ov.changes")}</h2>
           <div className="grid gap-3 lg:grid-cols-2">
             {store.changes?.map((c) => (
-              <ChangeCard key={`${c.check_id}-${c.applied_on}`} change={c} />
+              <ChangeCard key={`${c.check_id}-${c.applied_on}`} change={c} asked={asked} />
             ))}
           </div>
         </section>

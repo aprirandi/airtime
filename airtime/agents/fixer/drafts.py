@@ -27,6 +27,8 @@ EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-
 STATE_POSTCODE = re.compile(r"\b(VIC|NSW|QLD|SA|WA|TAS|ACT|NT)\s+(\d{4})\b", A)
 STREET_START = re.compile(r"\b\d{1,5}[A-Za-z]?(?:[/-]\d{1,5})?\s+[A-Za-z]", A)
 STREET_WORD = re.compile(r"\b(St|Street|Rd|Road|Ave|Avenue|Lane|Ln|Dr|Drive|Hwy|Highway|Pde|Parade|Way|Court|Ct|Place|Pl|Blvd|Boulevard|Terrace|Tce|Crescent|Cres)\b\.?", re.I | A)
+# Marks of a menu or footer that ran into the sentence, not of a sentence a person wrote.
+NOISE = re.compile(r"[\u00b7|\u00a9\[\]\u00bb]|\s/[A-Za-z]|\d:\d|--|skip to content", re.I | A)
 UPPER = re.compile(r"[A-Z]", A)
 LETTERS = re.compile(r"[A-Za-z]+", A)
 NOT_EMAIL = ("sentry", "example.", "@2x", ".png", ".jpg", ".webp", "wixpress", "shopify.com", "yourdomain")
@@ -144,7 +146,7 @@ def find_description(snap: Snapshot) -> tuple[str, str] | None:
                 body = body.replace(heading, " ", 1)
         for sentence in re.split(r"(?<=[.!?])\s+", body):
             s = _clean(sentence)
-            if len(s) >= 60 and "|" not in s and "©" not in s:
+            if 60 <= len(s) <= 300 and not NOISE.search(s):
                 taken.append(s)
             if len(" ".join(taken)) >= 120 or len(taken) == 2:
                 break
