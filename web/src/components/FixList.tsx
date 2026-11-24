@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Flag, Wrench } from "lucide-react"
+import { Flag, SlidersHorizontal, Wrench, X } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -50,31 +50,61 @@ export function FixMetaBadges({ meta }: { meta: FixMeta }) {
   )
 }
 
-function Chips<T extends string>({ label, options, value, counts, text, onChange }: {
-  label: string; options: T[]; value: T | "all"; counts: Record<string, number>; text: (o: T) => string; onChange: (v: T | "all") => void
+/** A row of choices joined into one control: "All" and one choice for each value, with how many each would leave. */
+function Segmented<T extends string>({ label, options, value, counts, text, mark, onChange }: {
+  label: string
+  options: T[]
+  value: T | "all"
+  counts: Record<string, number>
+  text: (o: T) => string
+  mark?: (o: T) => React.ReactNode
+  onChange: (v: T | "all") => void
 }) {
   const { t } = useI18n()
   const all = Object.values(counts).reduce((a, b) => a + b, 0)
-  const chip = (key: T | "all", name: string, n: number) => (
-    <Button
-      key={key}
-      type="button"
-      size="sm"
-      variant={value === key ? "default" : "outline"}
-      aria-pressed={value === key}
-      disabled={n === 0 && value !== key}
-      onClick={() => onChange(key)}
-      className="h-7 gap-1 px-2.5 text-xs"
-    >
-      {name} <span className={cn("tabular-nums", value === key ? "opacity-80" : "text-muted-foreground")}>{n}</span>
-    </Button>
-  )
+  const entries: [T | "all", string, number][] = [["all", t("fix.filter.all"), all], ...options.map((o): [T, string, number] => [o, text(o), counts[o] ?? 0])]
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-muted-foreground w-24 shrink-0 text-xs font-medium">{label}</span>
-      {chip("all", t("fix.filter.all"), all)}
-      {options.map((o) => chip(o, text(o), counts[o] ?? 0))}
+    <div className="space-y-1.5">
+      <div className="text-muted-foreground text-xs font-medium">{label}</div>
+      <div role="group" aria-label={label} className="bg-muted inline-flex max-w-full flex-wrap gap-0.5 rounded-lg p-0.5">
+        {entries.map(([key, name, n]) => {
+          const on = value === key
+          return (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={on}
+              disabled={n === 0 && !on}
+              onClick={() => onChange(key)}
+              className={cn(
+                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+                on ? "bg-background text-foreground font-medium shadow-sm" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {key !== "all" && mark?.(key as T)}
+              {name}
+              <span className={cn("text-xs tabular-nums", on ? "text-muted-foreground" : "opacity-70")}>{n}</span>
+            </button>
+          )
+        })}
+      </div>
     </div>
+  )
+}
+
+const PRIORITY_DOT: Record<Priority, string> = { high: "bg-red-500", medium: "bg-amber-400", low: "bg-slate-300 dark:bg-slate-500" }
+
+const PriorityMark = ({ p }: { p: Priority }) => <span className={cn("size-2 rounded-full", PRIORITY_DOT[p])} aria-hidden="true" />
+
+/** Easy is one filled dot, medium two, hard three: how much work it is. */
+const EffortMark = ({ e }: { e: Effort }) => {
+  const filled = e === "easy" ? 1 : e === "medium" ? 2 : 3
+  return (
+    <span className="flex gap-0.5" aria-hidden="true">
+      {[0, 1, 2].map((i) => (
+        <span key={i} className={cn("size-1.5 rounded-full", i < filled ? "bg-foreground/70" : "bg-foreground/20")} />
+      ))}
+    </span>
   )
 }
 
@@ -128,10 +158,23 @@ export function FixList({ fixes, checks, card }: { fixes: Fix[]; checks: AuditCh
   return (
     <div className="space-y-5">
       {actionable.length > 0 && (
-        <div className="bg-muted/40 space-y-2 rounded-lg border p-3">
-          <Chips label={t("fix.filter.priority")} options={PRIORITIES} value={priority} counts={count("priority", (r) => r.meta.priority)} text={(o) => t(`fix.p.${o}`)} onChange={setPriority} />
-          <Chips label={t("fix.filter.effort")} options={EFFORTS} value={effort} counts={count("effort", (r) => r.meta.effort)} text={(o) => t(`fix.e.${o}`)} onChange={setEffort} />
-          <Chips label={t("fix.filter.category")} options={[...CATEGORIES]} value={category} counts={count("category", (r) => r.meta.category)} text={(o) => t(`fix.cat.${o}`)} onChange={setCategory} />
+        <div className="bg-card space-y-4 rounded-xl border p-4 shadow-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <SlidersHorizontal className="size-4" aria-hidden="true" /> {t("fix.filter.title")}
+              <span className="text-muted-foreground font-normal">· {t("fix.showing", { n: shown.length, total: actionable.length })}</span>
+            </div>
+            {filtered && (
+              <Button type="button" variant="ghost" size="sm" onClick={reset} className="h-7 gap-1 px-2 text-xs">
+                <X className="size-3.5" /> {t("fix.filter.reset")}
+              </Button>
+            )}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Segmented label={t("fix.filter.priority")} options={PRIORITIES} value={priority} counts={count("priority", (r) => r.meta.priority)} text={(o) => t(`fix.p.${o}`)} mark={(o) => <PriorityMark p={o} />} onChange={setPriority} />
+            <Segmented label={t("fix.filter.effort")} options={EFFORTS} value={effort} counts={count("effort", (r) => r.meta.effort)} text={(o) => t(`fix.e.${o}`)} mark={(o) => <EffortMark e={o} />} onChange={setEffort} />
+          </div>
+          <Segmented label={t("fix.filter.category")} options={[...CATEGORIES]} value={category} counts={count("category", (r) => r.meta.category)} text={(o) => t(`fix.cat.${o}`)} onChange={setCategory} />
         </div>
       )}
       {sections.length === 0 && (
