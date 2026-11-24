@@ -49,20 +49,35 @@ create table if not exists asker_runs (
   id          uuid primary key default gen_random_uuid(),
   site_id     uuid not null references sites(id) on delete cascade,
   ran_at      timestamptz not null default now(),
+  status      text not null default 'done',   -- running while the questions are being asked, then done or failed
   model       text not null default '',
   asked       int not null,
   answered    int not null,
   named       int not null,                   -- answers that named the business
   result      jsonb not null                  -- the questions, the answers, the other shops named
 );
+-- for a table made by an earlier version of this file
+alter table asker_runs add column if not exists status text not null default 'done';
 create index if not exists asker_runs_site_time on asker_runs (site_id, ran_at);
 create index if not exists asker_runs_time on asker_runs (ran_at);
+
+-- A run is asked a question at a time, each in its own request, so each answer is kept as it arrives.
+create table if not exists asker_answers (
+  run_id      uuid not null references asker_runs(id) on delete cascade,
+  idx         int not null,
+  answer      text not null default '',
+  named       boolean not null default false,
+  failed      boolean not null default false,
+  error       text not null default '',
+  primary key (run_id, idx)
+);
 
 alter table sites enable row level security;
 alter table scans enable row level security;
 alter table fix_states enable row level security;
 alter table profiles enable row level security;
 alter table asker_runs enable row level security;
+alter table asker_answers enable row level security;
 
 -- Newer Supabase projects do not give the API roles access to new tables by themselves. The server uses the service
 -- role, so that is the only role given access; the public anon and authenticated roles still see nothing.

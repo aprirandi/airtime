@@ -24304,28 +24304,21 @@ function readOthers(raw, items, names) {
   }
   return true;
 }
-async function runAsker(profile, provider, concurrency = 2) {
-  const questions = buildQuestions(profile);
+async function askQuestion(provider, question, profile) {
+  try {
+    const answer = (await provider.ask(question)).slice(0, 6e3);
+    if (!answer) return { answer: "", named: false, failed: true, error: "other" };
+    return { answer, named: [profile.name, ...profile.aliases].some((n) => containsTerm(answer, n)), failed: false, error: "" };
+  } catch (err) {
+    return { answer: "", named: false, failed: true, error: err instanceof ProviderError ? err.kind : "other" };
+  }
+}
+async function finishRun(profile, questions, answers, provider) {
   const names = [profile.name, ...profile.aliases];
-  const items = questions.map((question) => ({ question, answer: "", named: false, others: [], failed: false }));
-  let quota = false;
-  let next = 0;
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-      while (next < items.length && !quota) {
-        const item = items[next++];
-        try {
-          item.answer = (await provider.ask(item.question)).slice(0, 6e3);
-          item.failed = !item.answer;
-          item.named = names.some((n) => containsTerm(item.answer, n));
-        } catch (err) {
-          item.failed = true;
-          if (err instanceof ProviderError && err.kind === "quota") quota = true;
-        }
-      }
-    })
-  );
-  items.forEach((i) => i.answer === "" && (i.failed = true));
+  const items = questions.map((question, i) => {
+    const a = answers[i] ?? { answer: "", named: false, failed: true, error: "other" };
+    return { question, answer: a.answer, named: a.named, others: [], failed: a.failed };
+  });
   const answered = items.filter((i) => !i.failed);
   let others = false;
   if (answered.length) {
@@ -24351,7 +24344,7 @@ async function runAsker(profile, provider, concurrency = 2) {
     items,
     rivals: [...counts.values()].sort((a, b2) => b2.count - a.count).slice(0, 8),
     readOthers: others,
-    quota
+    quota: answers.some((a) => a.error === "quota")
   };
 }
 
@@ -24769,19 +24762,44 @@ function supabaseStore(baseUrl, key, doFetch = fetch) {
         prefer: "resolution=merge-duplicates,return=minimal"
       });
     },
-    async addAskerRun(siteId, run) {
-      const { asked, answered, named } = run.result;
-      await call("asker_runs", { method: "POST", body: { site_id: siteId, ran_at: run.ran_at, model: run.result.model, asked, answered, named, result: run.result }, prefer: "return=minimal" });
+    async startAskerRun(siteId, run) {
+      const rows = await call("asker_runs", {
+        method: "POST",
+        prefer: "return=representation",
+        body: { site_id: siteId, ran_at: run.ran_at, status: "running", asked: run.questions.length, answered: 0, named: 0, result: { questions: run.questions } }
+      });
+      return rows[0].id;
+    },
+    async saveAskerAnswer(runId, idx, a) {
+      await call("asker_answers?on_conflict=run_id,idx", { method: "POST", body: { run_id: runId, idx, ...a }, prefer: "resolution=merge-duplicates,return=minimal" });
+    },
+    async askerRunState(siteId, runId) {
+      const runs = await call(`asker_runs?id=eq.${eq(runId)}&site_id=eq.${eq(siteId)}&select=id,status,ran_at,result&limit=1`);
+      const r = runs[0];
+      if (!r) return null;
+      const rows = await call(`asker_answers?run_id=eq.${eq(runId)}&select=idx,answer,named,failed,error`);
+      return { id: r.id, status: r.status, ran_at: r.ran_at, questions: r.result?.questions ?? [], answers: Object.fromEntries(rows.map(({ idx, ...a }) => [idx, a])) };
+    },
+    async finishAskerRun(runId, status2, result) {
+      await call(`asker_runs?id=eq.${eq(runId)}`, {
+        method: "PATCH",
+        prefer: "return=minimal",
+        body: result ? { status: status2, asked: result.asked, answered: result.answered, named: result.named, model: result.model, result } : { status: status2 }
+      });
+    },
+    async askerRunningSince(siteId, isoTime) {
+      const rows = await call(`asker_runs?site_id=eq.${eq(siteId)}&status=eq.running&ran_at=gte.${eq(isoTime)}&select=id&limit=1`);
+      return rows.length > 0;
     },
     async latestAskerRun(siteId) {
-      const rows = await call(`asker_runs?site_id=eq.${eq(siteId)}&select=ran_at,result&order=ran_at.desc&limit=1`);
+      const rows = await call(`asker_runs?site_id=eq.${eq(siteId)}&status=eq.done&select=ran_at,result&order=ran_at.desc&limit=1`);
       return rows[0] ?? null;
     },
     async askerHistory(siteId) {
-      return await call(`asker_runs?site_id=eq.${eq(siteId)}&select=ran_at,asked,answered,named&order=ran_at.asc&limit=60`);
+      return await call(`asker_runs?site_id=eq.${eq(siteId)}&status=eq.done&select=ran_at,asked,answered,named&order=ran_at.asc&limit=60`);
     },
     async askerRunsSince(isoTime) {
-      const rows = await call(`asker_runs?ran_at=gte.${eq(isoTime)}&select=id&limit=100`);
+      const rows = await call(`asker_runs?status=in.(running,done)&ran_at=gte.${eq(isoTime)}&select=id&limit=100`);
       return rows.length;
     }
   };
@@ -24880,7 +24898,7 @@ async function handleSite(req, deps = {}) {
       if (!scan) return fail(404, "not_found", "This page does not exist.");
       return { status: 200, body: await viewOf(store, site, scan, Boolean(deps.asker)) };
     }
-    if (req.action === "ask") {
+    if (req.action === "ask_start") {
       if (!deps.asker) return fail(503, "asker_off", "Asking AI assistants is not switched on yet.");
       const profile = await store.getProfile(site.id);
       if (!profile) return fail(400, "no_profile", "Tell us about your business first.");
@@ -24891,27 +24909,55 @@ async function handleSite(req, deps = {}) {
         const wait = new Date(last.ran_at).getTime() + limits.perSiteHours * 36e5 - at;
         if (wait > 0) return fail(429, "asked_recently", "You asked a little while ago. Come back later to ask again.", { "retry-after": String(Math.ceil(wait / 1e3)) });
       }
+      if (await store.askerRunningSince(site.id, new Date(at - 4 * 6e4).toISOString())) return fail(429, "asking_now", "We are already asking. Wait a minute.");
       if (await store.askerRunsSince(new Date(at - 24 * 36e5).toISOString()) >= limits.dailyRuns) {
         return fail(429, "busy_today", "A lot of people asked today. Try again tomorrow.");
       }
-      let timer;
-      const result = await Promise.race([
-        runAsker(profile, deps.asker, deps.askConcurrency ?? 3),
-        new Promise((_, reject) => {
-          timer = setTimeout(() => reject(new Error("deadline")), deps.deadlineMs ?? 52e3);
-        })
-      ]).finally(() => clearTimeout(timer));
-      if (result.answered === 0) {
-        return fail(503, "asker_unavailable", result.quota ? "The AI assistants are not answering more questions today. Try again tomorrow." : "The AI assistants did not answer. Try again in a moment.");
+      const questions = buildQuestions(profile);
+      const run = await store.startAskerRun(site.id, { ran_at: new Date(at).toISOString(), questions });
+      return { status: 200, body: { run, total: questions.length } };
+    }
+    if (req.action === "ask_step" || req.action === "ask_finish") {
+      if (!deps.asker) return fail(503, "asker_off", "Asking AI assistants is not switched on yet.");
+      const state = typeof req.run === "string" && req.run.length <= 80 ? await store.askerRunState(site.id, req.run) : null;
+      if (!state) return fail(404, "not_found", "This run does not exist.");
+      const profile = await store.getProfile(site.id);
+      if (!profile) return fail(400, "no_profile", "Tell us about your business first.");
+      const stepMs = deps.askerStepMs ?? 52e3;
+      const within = (job, onTimeout) => {
+        let timer;
+        return Promise.race([job, new Promise((resolve) => timer = setTimeout(() => resolve(onTimeout), stepMs))]).finally(() => clearTimeout(timer));
+      };
+      if (req.action === "ask_step") {
+        if (state.status !== "running") return fail(409, "run_over", "This run is over.");
+        const i = req.i;
+        if (typeof i !== "number" || !Number.isInteger(i) || i < 0 || i >= state.questions.length) return fail(400, "bad_step", "Unknown question.");
+        if (!state.answers[i]) {
+          const timedOut = { answer: "", named: false, failed: true, error: "rate" };
+          const answer = await within(askQuestion(deps.asker, state.questions[i], profile), timedOut);
+          await store.saveAskerAnswer(state.id, i, answer);
+          state.answers[i] = answer;
+        }
+        return { status: 200, body: { done: Object.keys(state.answers).length, total: state.questions.length, quota: Object.values(state.answers).some((a) => a.error === "quota") } };
       }
-      await store.addAskerRun(site.id, { ran_at: new Date(at).toISOString(), result });
       const scan = await store.latestScan(site.id);
       if (!scan) return fail(404, "not_found", "This page does not exist.");
+      if (state.status === "done") return { status: 200, body: await viewOf(store, site, scan, true) };
+      if (state.status === "failed") return fail(409, "run_over", "This run is over.");
+      const answers = state.questions.map((_, i) => state.answers[i] ?? { answer: "", named: false, failed: true, error: "other" });
+      const noReading = { model: deps.asker.model, ask: deps.asker.ask, complete: async () => {
+        throw new Error("no time");
+      } };
+      const result = await within(finishRun(profile, state.questions, answers, deps.asker), await finishRun(profile, state.questions, answers, noReading));
+      if (result.answered === 0) {
+        await store.finishAskerRun(state.id, "failed", null);
+        return fail(503, "asker_unavailable", result.quota ? "The AI assistants are not answering more questions today. Try again tomorrow." : "The AI assistants did not answer. Try again in a moment.");
+      }
+      await store.finishAskerRun(state.id, "done", result);
       return { status: 200, body: await viewOf(store, site, scan, true) };
     }
     return fail(400, "bad_action", "Unknown request.");
   } catch (err) {
-    if (err.message === "deadline") return fail(504, "timeout", "The AI assistants took too long to answer. Try again in a moment.");
     if (err instanceof StoreError) {
       const res = fail(502, "storage", "We could not reach the place where pages are kept. Try again in a moment.");
       return { ...res, body: { ...res.body, detail: err.detail } };

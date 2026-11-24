@@ -8,7 +8,7 @@
 import { createHash, randomBytes } from "node:crypto"
 import { fail, MemoryLimiter, parseAddress, PLATFORMS, scanAddress, type ApiResponse, type Deps, type Limiter } from "./api"
 import type { AuditResult } from "./audit"
-import { ProfileError, runAsker, validateProfile, type AskProvider, type AskerResult, type Profile } from "./asker"
+import { askQuestion, buildQuestions, finishRun, ProfileError, validateProfile, type Answered, type AskProvider, type AskerResult, type Profile } from "./asker"
 import { buildGuide, type Guide } from "./guide"
 import { BY_ID } from "./registry"
 
@@ -38,6 +38,14 @@ export interface AskerSummary {
   named: number
 }
 
+export interface AskerRunState {
+  id: string
+  status: "running" | "done" | "failed"
+  ran_at: string
+  questions: string[]
+  answers: Record<number, Answered>
+}
+
 export interface SiteStore {
   createSite(site: Omit<SiteRow, "id" | "created_at">): Promise<SiteRow>
   findSite(tokenHash: string): Promise<SiteRow | null>
@@ -51,11 +59,18 @@ export interface SiteStore {
   fixStates(siteId: string): Promise<Record<string, FixState>>
   getProfile(siteId: string): Promise<Profile | null>
   setProfile(siteId: string, profile: Profile): Promise<void>
-  addAskerRun(siteId: string, run: { ran_at: string; result: AskerResult }): Promise<void>
+  /** A run is asked a question at a time, each in its own request: it starts, collects answers, then finishes. */
+  startAskerRun(siteId: string, run: { ran_at: string; questions: string[] }): Promise<string>
+  saveAskerAnswer(runId: string, idx: number, answer: Answered): Promise<void>
+  askerRunState(siteId: string, runId: string): Promise<AskerRunState | null>
+  finishAskerRun(runId: string, status: "done" | "failed", result: AskerResult | null): Promise<void>
+  /** is a run of this site still going that started at or after this time */
+  askerRunningSince(siteId: string, isoTime: string): Promise<boolean>
+  /** the newest finished run */
   latestAskerRun(siteId: string): Promise<{ ran_at: string; result: AskerResult } | null>
-  /** every run, oldest first, without the answers */
+  /** every finished run, oldest first, without the answers */
   askerHistory(siteId: string): Promise<AskerSummary[]>
-  /** how many runs, for all sites, started at or after this time */
+  /** how many runs, finished or still going, for all sites, started at or after this time */
   askerRunsSince(isoTime: string): Promise<number>
 }
 
@@ -69,7 +84,8 @@ export function memoryStore(): SiteStore {
   const scans = new Map<string, { scanned_at: string; score: number | null; label: string; result: AuditResult }[]>()
   const states = new Map<string, Record<string, FixState>>()
   const profiles = new Map<string, Profile>()
-  const runs: { site: string; ran_at: string; result: AskerResult }[] = []
+  const runs: { id: string; site: string; ran_at: string; status: "running" | "done" | "failed"; questions: string[]; result: AskerResult | null }[] = []
+  const answers = new Map<string, Record<number, Answered>>()
   return {
     async createSite(site) {
       const row = { ...site, id: `site-${sites.length + 1}`, created_at: new Date().toISOString() }
@@ -107,18 +123,34 @@ export function memoryStore(): SiteStore {
     async setProfile(siteId, profile) {
       profiles.set(siteId, profile)
     },
-    async addAskerRun(siteId, run) {
-      runs.push({ site: siteId, ...run })
+    async startAskerRun(siteId, run) {
+      const id = `run-${runs.length + 1}`
+      runs.push({ id, site: siteId, ran_at: run.ran_at, status: "running", questions: run.questions, result: null })
+      return id
+    },
+    async saveAskerAnswer(runId, idx, answer) {
+      answers.set(runId, { ...(answers.get(runId) ?? {}), [idx]: answer })
+    },
+    async askerRunState(siteId, runId) {
+      const r = runs.find((x) => x.id === runId && x.site === siteId)
+      return r ? { id: r.id, status: r.status, ran_at: r.ran_at, questions: r.questions, answers: { ...(answers.get(runId) ?? {}) } } : null
+    },
+    async finishAskerRun(runId, status, result) {
+      const r = runs.find((x) => x.id === runId)
+      if (r) Object.assign(r, { status, result })
+    },
+    async askerRunningSince(siteId, isoTime) {
+      return runs.some((r) => r.site === siteId && r.status === "running" && r.ran_at >= isoTime)
     },
     async latestAskerRun(siteId) {
-      const last = runs.filter((r) => r.site === siteId).at(-1)
-      return last ? { ran_at: last.ran_at, result: last.result } : null
+      const last = runs.filter((r) => r.site === siteId && r.status === "done").at(-1)
+      return last?.result ? { ran_at: last.ran_at, result: last.result } : null
     },
     async askerHistory(siteId) {
-      return runs.filter((r) => r.site === siteId).map(({ ran_at, result }) => ({ ran_at, asked: result.asked, answered: result.answered, named: result.named }))
+      return runs.filter((r) => r.site === siteId && r.status === "done" && r.result).map((r) => ({ ran_at: r.ran_at, asked: r.result!.asked, answered: r.result!.answered, named: r.result!.named }))
     },
     async askerRunsSince(isoTime) {
-      return runs.filter((r) => r.ran_at >= isoTime).length
+      return runs.filter((r) => r.status !== "failed" && r.ran_at >= isoTime).length
     },
   }
 }
@@ -203,19 +235,42 @@ export function supabaseStore(baseUrl: string, key: string, doFetch: FetchLike =
         prefer: "resolution=merge-duplicates,return=minimal",
       })
     },
-    async addAskerRun(siteId, run) {
-      const { asked, answered, named } = run.result
-      await call("asker_runs", { method: "POST", body: { site_id: siteId, ran_at: run.ran_at, model: run.result.model, asked, answered, named, result: run.result }, prefer: "return=minimal" })
+    async startAskerRun(siteId, run) {
+      const rows = (await call("asker_runs", {
+        method: "POST", prefer: "return=representation",
+        body: { site_id: siteId, ran_at: run.ran_at, status: "running", asked: run.questions.length, answered: 0, named: 0, result: { questions: run.questions } },
+      })) as { id: string }[]
+      return (rows[0] as { id: string }).id
+    },
+    async saveAskerAnswer(runId, idx, a) {
+      await call("asker_answers?on_conflict=run_id,idx", { method: "POST", body: { run_id: runId, idx, ...a }, prefer: "resolution=merge-duplicates,return=minimal" })
+    },
+    async askerRunState(siteId, runId) {
+      const runs = (await call(`asker_runs?id=eq.${eq(runId)}&site_id=eq.${eq(siteId)}&select=id,status,ran_at,result&limit=1`)) as { id: string; status: AskerRunState["status"]; ran_at: string; result: { questions?: string[] } }[]
+      const r = runs[0]
+      if (!r) return null
+      const rows = (await call(`asker_answers?run_id=eq.${eq(runId)}&select=idx,answer,named,failed,error`)) as (Answered & { idx: number })[]
+      return { id: r.id, status: r.status, ran_at: r.ran_at, questions: r.result?.questions ?? [], answers: Object.fromEntries(rows.map(({ idx, ...a }) => [idx, a])) }
+    },
+    async finishAskerRun(runId, status, result) {
+      await call(`asker_runs?id=eq.${eq(runId)}`, {
+        method: "PATCH", prefer: "return=minimal",
+        body: result ? { status, asked: result.asked, answered: result.answered, named: result.named, model: result.model, result } : { status },
+      })
+    },
+    async askerRunningSince(siteId, isoTime) {
+      const rows = (await call(`asker_runs?site_id=eq.${eq(siteId)}&status=eq.running&ran_at=gte.${eq(isoTime)}&select=id&limit=1`)) as unknown[]
+      return rows.length > 0
     },
     async latestAskerRun(siteId) {
-      const rows = (await call(`asker_runs?site_id=eq.${eq(siteId)}&select=ran_at,result&order=ran_at.desc&limit=1`)) as { ran_at: string; result: AskerResult }[]
+      const rows = (await call(`asker_runs?site_id=eq.${eq(siteId)}&status=eq.done&select=ran_at,result&order=ran_at.desc&limit=1`)) as { ran_at: string; result: AskerResult }[]
       return rows[0] ?? null
     },
     async askerHistory(siteId) {
-      return (await call(`asker_runs?site_id=eq.${eq(siteId)}&select=ran_at,asked,answered,named&order=ran_at.asc&limit=60`)) as AskerSummary[]
+      return (await call(`asker_runs?site_id=eq.${eq(siteId)}&status=eq.done&select=ran_at,asked,answered,named&order=ran_at.asc&limit=60`)) as AskerSummary[]
     },
     async askerRunsSince(isoTime) {
-      const rows = (await call(`asker_runs?ran_at=gte.${eq(isoTime)}&select=id&limit=100`)) as unknown[]
+      const rows = (await call(`asker_runs?status=in.(running,done)&ran_at=gte.${eq(isoTime)}&select=id&limit=100`)) as unknown[]
       return rows.length
     },
   }
@@ -238,6 +293,8 @@ export interface SiteRequest {
   check_id?: unknown
   state?: unknown
   profile?: unknown
+  run?: unknown
+  i?: unknown
   client: string
 }
 
@@ -250,7 +307,8 @@ export interface SiteDeps extends Deps {
   asker?: AskProvider | null
   /** hours a page must wait between two runs, and how many runs all pages together may start in 24 hours */
   askerLimits?: { perSiteHours: number; dailyRuns: number }
-  askConcurrency?: number
+  /** how long one question, or the reading of the answers, may take before it counts as failed */
+  askerStepMs?: number
 }
 
 const defaultCreate = new MemoryLimiter(5, 60 * 60_000)
@@ -345,7 +403,9 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
       if (!scan) return fail(404, "not_found", "This page does not exist.")
       return { status: 200, body: await viewOf(store, site, scan, Boolean(deps.asker)) }
     }
-    if (req.action === "ask") {
+    // Asking is done a question at a time, each in its own request, because one answer from an assistant can take
+    // many seconds and a whole run in one request would not fit in the time a function is allowed to run.
+    if (req.action === "ask_start") {
       if (!deps.asker) return fail(503, "asker_off", "Asking AI assistants is not switched on yet.")
       const profile = await store.getProfile(site.id)
       if (!profile) return fail(400, "no_profile", "Tell us about your business first.")
@@ -356,27 +416,56 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
         const wait = new Date(last.ran_at).getTime() + limits.perSiteHours * 3_600_000 - at
         if (wait > 0) return fail(429, "asked_recently", "You asked a little while ago. Come back later to ask again.", { "retry-after": String(Math.ceil(wait / 1000)) })
       }
+      if (await store.askerRunningSince(site.id, new Date(at - 4 * 60_000).toISOString())) return fail(429, "asking_now", "We are already asking. Wait a minute.")
       if ((await store.askerRunsSince(new Date(at - 24 * 3_600_000).toISOString())) >= limits.dailyRuns) {
         return fail(429, "busy_today", "A lot of people asked today. Try again tomorrow.")
       }
-      let timer: ReturnType<typeof setTimeout> | undefined
-      const result = await Promise.race([
-        runAsker(profile, deps.asker, deps.askConcurrency ?? 3),
-        new Promise<never>((_, reject) => {
-          timer = setTimeout(() => reject(new Error("deadline")), deps.deadlineMs ?? 52_000)
-        }),
-      ]).finally(() => clearTimeout(timer))
-      if (result.answered === 0) {
-        return fail(503, "asker_unavailable", result.quota ? "The AI assistants are not answering more questions today. Try again tomorrow." : "The AI assistants did not answer. Try again in a moment.")
+      const questions = buildQuestions(profile)
+      const run = await store.startAskerRun(site.id, { ran_at: new Date(at).toISOString(), questions })
+      return { status: 200, body: { run, total: questions.length } }
+    }
+    if (req.action === "ask_step" || req.action === "ask_finish") {
+      if (!deps.asker) return fail(503, "asker_off", "Asking AI assistants is not switched on yet.")
+      const state = typeof req.run === "string" && req.run.length <= 80 ? await store.askerRunState(site.id, req.run) : null
+      if (!state) return fail(404, "not_found", "This run does not exist.")
+      const profile = await store.getProfile(site.id)
+      if (!profile) return fail(400, "no_profile", "Tell us about your business first.")
+      const stepMs = deps.askerStepMs ?? 52_000
+      const within = <T>(job: Promise<T>, onTimeout: T): Promise<T> => {
+        let timer: ReturnType<typeof setTimeout> | undefined
+        return Promise.race([job, new Promise<T>((resolve) => (timer = setTimeout(() => resolve(onTimeout), stepMs)))]).finally(() => clearTimeout(timer))
       }
-      await store.addAskerRun(site.id, { ran_at: new Date(at).toISOString(), result })
+
+      if (req.action === "ask_step") {
+        if (state.status !== "running") return fail(409, "run_over", "This run is over.")
+        const i = req.i
+        if (typeof i !== "number" || !Number.isInteger(i) || i < 0 || i >= state.questions.length) return fail(400, "bad_step", "Unknown question.")
+        if (!state.answers[i]) {
+          const timedOut: Answered = { answer: "", named: false, failed: true, error: "rate" }
+          const answer = await within(askQuestion(deps.asker, state.questions[i] as string, profile), timedOut)
+          await store.saveAskerAnswer(state.id, i, answer)
+          state.answers[i] = answer
+        }
+        return { status: 200, body: { done: Object.keys(state.answers).length, total: state.questions.length, quota: Object.values(state.answers).some((a) => a.error === "quota") } }
+      }
+
+      // ask_finish
       const scan = await store.latestScan(site.id)
       if (!scan) return fail(404, "not_found", "This page does not exist.")
+      if (state.status === "done") return { status: 200, body: await viewOf(store, site, scan, true) }
+      if (state.status === "failed") return fail(409, "run_over", "This run is over.")
+      const answers = state.questions.map((_, i) => state.answers[i] ?? { answer: "", named: false, failed: true, error: "other" as const })
+      const noReading: AskProvider = { model: deps.asker.model, ask: deps.asker.ask, complete: async () => { throw new Error("no time") } }
+      const result = await within(finishRun(profile, state.questions, answers, deps.asker), await finishRun(profile, state.questions, answers, noReading))
+      if (result.answered === 0) {
+        await store.finishAskerRun(state.id, "failed", null)
+        return fail(503, "asker_unavailable", result.quota ? "The AI assistants are not answering more questions today. Try again tomorrow." : "The AI assistants did not answer. Try again in a moment.")
+      }
+      await store.finishAskerRun(state.id, "done", result)
       return { status: 200, body: await viewOf(store, site, scan, true) }
     }
     return fail(400, "bad_action", "Unknown request.")
   } catch (err) {
-    if ((err as Error).message === "deadline") return fail(504, "timeout", "The AI assistants took too long to answer. Try again in a moment.")
     if (err instanceof StoreError) {
       const res = fail(502, "storage", "We could not reach the place where pages are kept. Try again in a moment.")
       return { ...res, body: { ...res.body, detail: err.detail } }
