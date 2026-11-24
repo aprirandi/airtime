@@ -104,7 +104,11 @@ export function Overview({ site, store }: { site: Site; store: Store }) {
   const fixes = audit?.fixes ?? []
   const waiting = fixes.filter((f) => f.status === "needs_owner").length
   const lastShift = store.runs.find((r) => r.kind === "shift")
-  const team = site.team.filter((m) => m.status === "active" && m.id !== "master")
+  // a store scanned only by the Auditor has no Asker or Analyst shifts, so those two are not shown for it
+  const asked = store.runs.some((r) => r.kind === "shift")
+  const team = site.team.filter(
+    (m) => m.status === "active" && m.id !== "master" && (asked || (m.id !== "asker" && m.id !== "analyst"))
+  )
   // one line per day and kind: an audit run five times in a day is still one "re-checked" line
   const seen = new Set<string>()
   const recent = store.runs
