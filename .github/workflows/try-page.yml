@@ -15,6 +15,10 @@ on:
         required: false
         default: "https://airtime-ai.vercel.app"
 
+  push:
+    branches: [claude/zen-ptolemy-884w50]
+    paths: [.github/workflows/try-page.yml]
+
 permissions:
   contents: read
 
