@@ -12,6 +12,7 @@ import { ScanFailure } from "@/lib/scan"
 import { getSite, rescanSite, setFix } from "@/lib/site"
 import type { Fix, FixChoice, Guide, SiteView } from "@/lib/types"
 import { FixList, type FixMeta } from "@/components/FixList"
+import { cn } from "@/lib/utils"
 import { FixCard } from "@/pages/Overview"
 
 type State = { kind: "loading" } | { kind: "ready"; view: SiteView } | { kind: "error"; code: string; message: string }
@@ -112,7 +113,7 @@ function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta;
   )
 }
 
-export function SitePage({ token, go }: { token: string; go: (hash: string) => void }) {
+export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "ask"; go: (hash: string) => void }) {
   const { t } = useI18n()
   const [state, setState] = useState<State>({ kind: "loading" })
   const [busy, setBusy] = useState(false)
@@ -178,95 +179,124 @@ export function SitePage({ token, go }: { token: string; go: (hash: string) => v
   const doneCount = open.filter((f) => view.done.includes(f.check_id)).length
   const baselineTotal = first ? first.gaps.length : 0
 
+  const asker = view.asker
+  const askerOn = asker.enabled
+  const current = tab === "ask" && askerOn ? "ask" : "audit"
+  const openLeft = open.length - doneCount
+
+  const tabLink = (id: "audit" | "ask", label: string, sub: string) => (
+    <a
+      key={id}
+      href={`#/s/${token}${id === "ask" ? "/ask" : ""}`}
+      aria-current={current === id ? "page" : undefined}
+      className={cn(
+        "-mb-px flex flex-col border-b-2 px-4 py-2 text-sm transition-colors sm:flex-row sm:items-baseline sm:gap-2",
+        current === id ? "border-chart-1 text-foreground font-semibold" : "text-muted-foreground hover:text-foreground border-transparent"
+      )}
+    >
+      <span>{label}</span>
+      <span className="text-muted-foreground text-xs font-normal">{sub}</span>
+    </a>
+  )
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{view.site.host}</h1>
-          <p className="text-muted-foreground text-sm">{t("site.checked", { d: fmtDate(audit.scanned_at.slice(0, 10)) })}</p>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">{view.site.host}</h1>
+            <p className="text-muted-foreground text-sm">{t("site.checked", { d: fmtDate(audit.scanned_at.slice(0, 10)) })}</p>
+            <p className="text-muted-foreground mt-1 text-xs">{t("site.linkShort")}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              title={t("site.linkSub")}
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(link)
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2500)
+                } catch {
+                  /* the link is in the address bar anyway */
+                }
+              }}
+            >
+              {copied ? <Check /> : <Copy />} {copied ? t("audit.copied") : t("site.copyLink")}
+            </Button>
+            {current === "audit" && (
+              <Button onClick={() => act(() => rescanSite(token))} disabled={busy} className="gap-2">
+                {busy ? <Loader2 className="animate-spin" /> : <RefreshCw />} {busy ? t("site.rechecking") : t("site.recheck")}
+              </Button>
+            )}
+          </div>
         </div>
-        <Button onClick={() => act(() => rescanSite(token))} disabled={busy} className="gap-2">
-          {busy ? <Loader2 className="animate-spin" /> : <RefreshCw />} {busy ? t("site.rechecking") : t("site.recheck")}
-        </Button>
+        {askerOn && (
+          <nav className="flex flex-wrap border-b" aria-label={view.site.host}>
+            {tabLink("audit", t("site.tab.audit"), openLeft > 0 ? t("site.tab.todo", { n: openLeft }) : "")}
+            {tabLink("ask", t("site.tab.ask"), asker.latest ? t("site.tab.named", { named: asker.latest.named, answered: asker.latest.answered }) : t("site.tab.notAsked"))}
+          </nav>
+        )}
       </div>
 
-      <Card>
-        <CardContent className="flex flex-wrap items-center gap-6">
-          <div className={`text-5xl font-semibold tabular-nums ${SCORE_TONE[audit.label]}`}>
-            {audit.score ?? "–"}
-            <span className="text-muted-foreground text-xl">/100</span>
-          </div>
-          <div className="min-w-48 flex-1 space-y-1">
-            <div className="font-medium">{t(`site.verdict.${audit.label}`)}</div>
-            {rechecked && first?.score !== null && first?.score !== undefined && (
-              <p className="text-muted-foreground text-sm">{t("site.before", { a: first.score, b: audit.score ?? "–" })}</p>
+      {current === "ask" ? (
+        <AskerSection token={token} view={view} onView={(v) => setState({ kind: "ready", view: v })} />
+      ) : (
+        <>
+          <Card>
+            <CardContent className="flex flex-wrap items-center gap-6">
+              <div className={`text-5xl font-semibold tabular-nums ${SCORE_TONE[audit.label]}`}>
+                {audit.score ?? "–"}
+                <span className="text-muted-foreground text-xl">/100</span>
+              </div>
+              <div className="min-w-48 flex-1 space-y-1">
+                <div className="font-medium">{t(`site.verdict.${audit.label}`)}</div>
+                {rechecked && first?.score !== null && first?.score !== undefined && (
+                  <p className="text-muted-foreground text-sm">{t("site.before", { a: first.score, b: audit.score ?? "–" })}</p>
+                )}
+                {rechecked && baselineTotal > 0 && (
+                  <p className="text-muted-foreground text-sm">{t("site.progress", { done: doneCount, total: baselineTotal })}</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-lg font-semibold">{t("ov.fixes")}</h2>
+              <p className="text-muted-foreground text-sm">{t("site.fixesSub")}</p>
+            </div>
+            {fixes.length === 0 ? (
+              <p className="text-muted-foreground text-sm">{t("site.nothing")}</p>
+            ) : (
+              <FixList
+                fixes={fixes}
+                checks={audit.checks}
+                card={(f, meta) => <SiteFix fix={f} meta={meta} view={view} busy={busy} onChoose={(c) => act(() => setFix(token, f.check_id, c))} />}
+              />
             )}
-            {rechecked && baselineTotal > 0 && (
-              <p className="text-muted-foreground text-sm">{t("site.progress", { done: doneCount, total: baselineTotal })}</p>
+            {view.done.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {view.done.map((id) => (
+                  <Badge key={id} variant="success">
+                    <Check className="size-3" /> {audit.checks.find((c) => c.id === id)?.name ?? id}
+                  </Badge>
+                ))}
+              </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
+          </section>
 
-      <Card>
-        <CardContent className="flex flex-wrap items-center gap-3 text-sm">
-          <div className="min-w-60 flex-1">
-            <div className="font-medium">{t("site.linkTitle")}</div>
-            <p className="text-muted-foreground text-xs">{t("site.linkSub")}</p>
-          </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(link)
-                setCopied(true)
-                setTimeout(() => setCopied(false), 2500)
-              } catch {
-                /* the link is in the address bar anyway */
-              }
-            }}
-          >
-            {copied ? <Check /> : <Copy />} {copied ? t("audit.copied") : t("site.copyLink")}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <section className="space-y-3">
-        <div>
-          <h2 className="text-lg font-semibold">{t("ov.fixes")}</h2>
-          <p className="text-muted-foreground text-sm">{t("site.fixesSub")}</p>
-        </div>
-        {fixes.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("site.nothing")}</p>
-        ) : (
-          <FixList
-            fixes={fixes}
-            checks={audit.checks}
-            card={(f, meta) => <SiteFix fix={f} meta={meta} view={view} busy={busy} onChoose={(c) => act(() => setFix(token, f.check_id, c))} />}
-          />
-        )}
-        {view.done.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {view.done.map((id) => (
-              <Badge key={id} variant="success">
-                <Check className="size-3" /> {audit.checks.find((c) => c.id === id)?.name ?? id}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <AskerSection token={token} view={view} onView={(v) => setState({ kind: "ready", view: v })} />
-
-      <details className="rounded-lg border">
-        <summary className="cursor-pointer px-4 py-3 font-medium">
-          {t("site.technical")} <span className="text-muted-foreground text-sm font-normal">· {t("site.technicalSub")}</span>
-        </summary>
-        <div className="border-t p-3">
-          <AuditView audit={audit} name={view.site.host} variant="public" />
-        </div>
-      </details>
+          <details className="rounded-lg border">
+            <summary className="cursor-pointer px-4 py-3 font-medium">
+              {t("site.technical")} <span className="text-muted-foreground text-sm font-normal">· {t("site.technicalSub")}</span>
+            </summary>
+            <div className="border-t p-3">
+              <AuditView audit={audit} name={view.site.host} variant="public" />
+            </div>
+          </details>
+        </>
+      )}
 
       <div className="text-center">
         <Button variant="outline" onClick={() => go("#/")}>

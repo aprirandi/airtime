@@ -15,7 +15,7 @@ import { Scan } from "@/pages/Scan"
 import { SitePage } from "@/pages/Site"
 
 type Route =
-  | { page: "site"; token: string }
+  | { page: "site"; token: string; tab: "audit" | "ask" }
   | { page: "scan"; url: string; platform: string }
   | { page: "overview" }
   | { page: "dashboard" }
@@ -28,8 +28,8 @@ type Route =
 const SHOW_ANALYSIS = import.meta.env.VITE_SHOW_ANALYSIS === "1"
 
 function parse(hash: string): Route {
-  const site = hash.match(/^#\/s\/([A-Za-z0-9_-]{20,200})/)
-  if (site) return { page: "site", token: site[1] as string }
+  const site = hash.match(/^#\/s\/([A-Za-z0-9_-]{20,200})(?:\/(ask))?\/?$/)
+  if (site) return { page: "site", token: site[1] as string, tab: site[2] === "ask" ? "ask" : "audit" }
   const run = hash.match(/^#\/run\/(\d+)/)
   if (run) return { page: "run", id: Number(run[1]) }
   if (hash.startsWith("#/checks")) return { page: "checks" }
@@ -202,7 +202,7 @@ export default function App() {
         <>
           <Header route={route} />
           <main className="mx-auto max-w-6xl px-4 py-6">
-            {route.page === "scan" ? <Scan url={route.url} platform={route.platform} go={go} /> : <SitePage token={route.token} go={go} />}
+            {route.page === "scan" ? <Scan url={route.url} platform={route.platform} go={go} /> : <SitePage token={route.token} tab={route.tab} go={go} />}
           </main>
         </>
       ) : (
