@@ -1,0 +1,60 @@
+name: Try a client page
+
+# Walks the page-per-website service once, end to end, on the deployed site: creates a page for an address, opens it,
+# makes a choice, re-checks it. It writes a real page to the database (use your own site), and it never prints the
+# private link. Informational.
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: "Address to make a page for (use your own website)"
+        required: false
+        default: "renosites.com.au"
+      deployed:
+        description: "Deployed address"
+        required: false
+        default: "https://airtime-ai.vercel.app"
+
+permissions:
+  contents: read
+
+jobs:
+  try:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Create, open, choose, re-check
+        env:
+          SITE: ${{ github.event.inputs.site || 'renosites.com.au' }}
+          DEPLOYED: ${{ github.event.inputs.deployed || 'https://airtime-ai.vercel.app' }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+
+          base = os.environ["DEPLOYED"].rstrip("/") + "/api/site"
+
+          def call(body):
+              req = urllib.request.Request(base, data=json.dumps(body).encode(), headers={"content-type": "application/json"})
+              try:
+                  with urllib.request.urlopen(req, timeout=70) as r:
+                      return r.status, json.load(r)
+              except urllib.error.HTTPError as e:
+                  return e.code, json.load(e)
+
+          status, made = call({"action": "create", "url": os.environ["SITE"], "platform": "wordpress"})
+          print("create:", status, made.get("error", "ok"), made.get("detail", ""))
+          if status != 200:
+              raise SystemExit(0)
+          token = made["token"]  # never printed
+          latest = made["latest"]
+          print("  host:", made["site"]["host"], "| score:", latest["score"], "| fixes:", len(latest["fixes"]), "| guides:", len(made["guides"]))
+          status, got = call({"action": "get", "token": token})
+          print("get:", status, "| same score:", got.get("latest", {}).get("score") == latest["score"])
+          first = latest["gaps"][0]
+          status, chosen = call({"action": "fix", "token": token, "check_id": first, "state": "self"})
+          print("fix:", status, "| saved:", chosen.get("states", {}).get(first))
+          status, again = call({"action": "rescan", "token": token})
+          print("rescan:", status, "| scans kept:", len(again.get("history", [])), "| baseline score:", (again.get("baseline") or {}).get("score"))
+          status, bad = call({"action": "get", "token": "x" * 32})
+          print("wrong link:", status, bad.get("error"))
+          PY
