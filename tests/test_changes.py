@@ -95,3 +95,19 @@ def test_the_export_carries_the_change_in_plain_words(conn, store, tmp_path):
     changes = json.loads((tmp_path / "data" / "site.json").read_text())["stores"][0]["changes"]
     assert changes[0]["title"] == "Contact details and address for assistants" and changes[0]["note"] == "added contact details"
     assert changes_json(conn, store)[0]["enough"] is False
+
+
+def test_the_score_after_is_the_latest_scan_after_the_day_and_never_a_scan_before_it(conn, store):
+    def audit(day, score):
+        conn.execute("INSERT INTO audits (store_id, scanned_at, target, platform, engine, score, score_label) "
+                     "VALUES (?, ?, 'https://x', '', 'e', ?, 'x')", (store, f"{day}T10:00:00+00:00", score))
+        conn.commit()
+    audit("2026-11-09", 60)
+    record_change(conn, store, "organization_completeness", "2026-11-10")
+    assert compare_change(conn, row(conn, store))["score_before"] == 60
+    assert compare_change(conn, row(conn, store))["score_after"] is None
+    audit("2026-11-10", 99)                                     # the day itself: it may have run before the fix
+    audit("2026-11-12", 70)
+    audit("2026-11-15", 75)
+    got = compare_change(conn, row(conn, store))
+    assert got["score_before"] == 60 and got["score_after"] == 75

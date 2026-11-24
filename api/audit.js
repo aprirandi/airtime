@@ -23481,6 +23481,7 @@ var EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g
 var STATE_POSTCODE = /\b(VIC|NSW|QLD|SA|WA|TAS|ACT|NT)\s+(\d{4})\b/g;
 var STREET_START = /\b\d{1,5}[A-Za-z]?(?:[/-]\d{1,5})?\s+[A-Za-z]/g;
 var STREET_WORD = /\b(St|Street|Rd|Road|Ave|Avenue|Lane|Ln|Dr|Drive|Hwy|Highway|Pde|Parade|Way|Court|Ct|Place|Pl|Blvd|Boulevard|Terrace|Tce|Crescent|Cres)\b\.?/i;
+var NOISE = /[\u00b7|\u00a9[\]\u00bb]|\s\/[A-Za-z]|\d:\d|--|skip to content/i;
 var NOT_EMAIL = ["sentry", "example.", "@2x", ".png", ".jpg", ".webp", "wixpress", "shopify.com", "yourdomain"];
 var PLACE_STOP = /* @__PURE__ */ new Set([
   "store",
@@ -23613,7 +23614,7 @@ function findDescription(snap) {
     for (const [, heading] of about[1].headings) if (heading) body = body.replace(heading, () => " ");
     for (const sentence of body.split(/(?<=[.!?])\s+/)) {
       const s = collapse(sentence);
-      if (cpLen(s) >= 60 && !s.includes("|") && !s.includes("\xA9")) taken.push(s);
+      if (cpLen(s) >= 60 && cpLen(s) <= 300 && !NOISE.test(s)) taken.push(s);
       if (cpLen(taken.join(" ")) >= 120 || taken.length === 2) break;
     }
     if (taken.length) return [clip(taken.join(" "), 300), "about"];
