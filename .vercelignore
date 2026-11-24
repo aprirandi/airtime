@@ -1,10 +1,6 @@
 # Not needed to build or run the website and the audit service
 data
-# docs is the old GitHub Pages build. Only its data folder is needed: the Vercel build copies it into the website.
-docs/assets
-docs/id
-docs/index.html
-docs/.nojekyll
+docs
 airtime
 tests
 plans
