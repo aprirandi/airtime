@@ -59,6 +59,33 @@ jobs:
           print("fix:", status, "| saved:", chosen.get("states", {}).get(first))
           status, again = call({"action": "rescan", "token": token})
           print("rescan:", status, "| scans kept:", len(again.get("history", [])), "| baseline score:", (again.get("baseline") or {}).get("score"))
+          # the Asker: only when the service has an assistant (the key is set); it spends seven calls of the AI key
+          asker = again.get("asker", {})
+          print("asker on:", asker.get("enabled"))
+          if asker.get("enabled"):
+              status, saved = call({"action": "profile", "token": token, "profile": {
+                  "name": "Renosites", "city": "Melbourne", "categories": "website design, web development"}})
+              print("profile:", status, saved.get("error", "ok"))
+              status, start = call({"action": "ask_start", "token": token})
+              print("ask start:", status, start.get("error", "ok"), "|", start.get("message", "") if status != 200 else "")
+              if status == 200:
+                  import time
+                  total = start["total"]
+                  for i in range(total):
+                      t0 = time.time()
+                      st, step = call({"action": "ask_step", "token": token, "run": start["run"], "i": i})
+                      print(f"  question {i + 1}: {st} {step.get('error', 'ok')} in {time.time() - t0:.1f}s | quota: {step.get('quota')}")
+                  status, ran = call({"action": "ask_finish", "token": token, "run": start["run"]})
+                  print("ask finish:", status, ran.get("error", "ok"), "|", ran.get("message", "") if status != 200 else "")
+                  if status == 200:
+                      latest = ran["asker"]["latest"]
+                      print("  model:", latest["model"], "| asked:", latest["asked"], "| answered:", latest["answered"],
+                            "| named:", latest["named"], "| other shops read:", latest["readOthers"],
+                            "| rivals:", [r["name"] for r in latest["rivals"]][:5])
+                      print("  first question:", latest["items"][0]["question"])
+                      print("  first answer starts:", latest["items"][0]["answer"][:160].replace("\n", " "))
+                      status, again2 = call({"action": "ask_start", "token": token})
+                      print("ask again at once:", status, again2.get("error", "ok"))
           status, bad = call({"action": "get", "token": "x" * 32})
           print("wrong link:", status, bad.get("error"))
           PY

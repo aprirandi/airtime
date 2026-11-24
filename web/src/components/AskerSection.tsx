@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { fmtDate } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import { ScanFailure } from "@/lib/scan"
-import { askNow, saveProfile } from "@/lib/site"
+import { askFinish, askStart, askStep, saveProfile } from "@/lib/site"
 import type { BusinessProfile, SiteView } from "@/lib/types"
 
 const field = "border-input bg-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 text-sm outline-none focus-visible:ring-2"
@@ -69,11 +69,12 @@ export function AskerSection({ token, view, onView }: { token: string; view: Sit
   const [editing, setEditing] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
   if (!enabled) return null
 
   const failure = (err: unknown) => {
     const code = err instanceof ScanFailure ? err.code : "failed"
-    const known = ["asked_recently", "busy_today", "asker_unavailable", "timeout", "bad_profile"].includes(code)
+    const known = ["asked_recently", "busy_today", "asking_now", "asker_unavailable", "timeout", "bad_profile"].includes(code)
     setError(code === "bad_profile" && err instanceof ScanFailure ? err.message : t(known ? `ask.error.${code}` : "ask.error.failed"))
   }
   const run = async (job: () => Promise<SiteView>, after?: () => void) => {
@@ -86,6 +87,38 @@ export function AskerSection({ token, view, onView }: { token: string; view: Sit
       failure(err)
     } finally {
       setBusy(false)
+    }
+  }
+  // The questions are asked one at a time, a few at once, each in its own request, then the answers are put together.
+  const ask = async () => {
+    setBusy(true)
+    setError("")
+    try {
+      const { run, total } = await askStart(token)
+      setProgress({ done: 0, total })
+      let next = 0
+      let answered = 0
+      let quota = false
+      await Promise.all(
+        Array.from({ length: 3 }, async () => {
+          while (next < total && !quota) {
+            const i = next++
+            try {
+              const r = await askStep(token, run, i)
+              quota = r.quota
+            } catch {
+              /* an unanswered question counts as not answered; the others go on */
+            }
+            setProgress({ done: ++answered, total })
+          }
+        })
+      )
+      onView(await askFinish(token, run))
+    } catch (err) {
+      failure(err)
+    } finally {
+      setBusy(false)
+      setProgress(null)
     }
   }
   const first = history[0]
@@ -114,8 +147,8 @@ export function AskerSection({ token, view, onView }: { token: string; view: Sit
                     {t("ask.edit")}
                   </button>
                 </p>
-                <Button onClick={() => run(() => askNow(token))} disabled={busy} className="gap-2">
-                  {busy && <Loader2 className="animate-spin" />} {busy ? t("ask.going") : t("ask.go")}
+                <Button onClick={ask} disabled={busy} className="gap-2">
+                  {busy && <Loader2 className="animate-spin" />} {busy ? t("ask.going", { done: progress?.done ?? 0, total: progress?.total ?? 6 }) : t("ask.go")}
                 </Button>
               </div>
               {error && <p className="text-destructive" role="alert">{error}</p>}

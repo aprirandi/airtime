@@ -1,7 +1,7 @@
 import { API_BASE, ScanFailure } from "@/lib/scan"
 import type { BusinessProfile, FixChoice, SiteView } from "@/lib/types"
 
-async function call(body: Record<string, unknown>, signal?: AbortSignal): Promise<SiteView> {
+async function call<T = SiteView>(body: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
   let res: Response
   try {
     res = await fetch(`${API_BASE}/api/site`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal })
@@ -19,7 +19,7 @@ async function call(body: Record<string, unknown>, signal?: AbortSignal): Promis
     const e = data as { error?: string; message?: string }
     throw new ScanFailure(e.error ?? "failed", e.message ?? "failed")
   }
-  return data as SiteView
+  return data as T
 }
 
 /** Scan an address and open a page for it. Fails with code "storage_off" when pages are not switched on. */
@@ -28,5 +28,7 @@ export const getSite = (token: string, signal?: AbortSignal) => call({ action: "
 export const rescanSite = (token: string) => call({ action: "rescan", token })
 export const setFix = (token: string, check_id: string, state: FixChoice) => call({ action: "fix", token, check_id, state })
 export const saveProfile = (token: string, profile: Record<string, string>) => call({ action: "profile", token, profile })
-export const askNow = (token: string) => call({ action: "ask", token })
+export const askStart = (token: string) => call<{ run: string; total: number }>({ action: "ask_start", token })
+export const askStep = (token: string, run: string, i: number) => call<{ done: number; total: number; quota: boolean }>({ action: "ask_step", token, run, i })
+export const askFinish = (token: string, run: string) => call({ action: "ask_finish", token, run })
 export type { BusinessProfile }

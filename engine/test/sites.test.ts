@@ -244,6 +244,7 @@ describe("Supabase over its REST interface", () => {
 import { ProviderError, type AskProvider } from "../src/asker"
 
 const PROFILE = { name: "Example Shop", aliases: "Ex Shop", city: "Melbourne", areas: "Prahran", categories: "stationery, gifts" }
+const TOKEN = "t".repeat(32)
 
 function assistant(answer = "Try Example Shop or Kikki K."): AskProvider & { asked: number } {
   const p = {
@@ -260,100 +261,169 @@ async function pageWith(deps: Partial<SiteDeps> = {}) {
   return s
 }
 
+/** What the page does: start a run, ask each question in its own request, then finish. */
+async function askAll(deps: SiteDeps) {
+  const started = await call(deps, { action: "ask_start", token: TOKEN })
+  if (started.status !== 200) return { started }
+  const run = started.body["run"]
+  const total = Number(started.body["total"])
+  const steps = []
+  for (let i = 0; i < total; i++) steps.push(await call(deps, { action: "ask_step", token: TOKEN, run, i }))
+  const finished = await call(deps, { action: "ask_finish", token: TOKEN, run })
+  return { started, steps, finished, run }
+}
+
 describe("asking AI assistants", () => {
   it("is off without an assistant, and says so", async () => {
     const { deps } = await pageWith()
-    const view = await call(deps, { action: "get", token: "t".repeat(32) })
+    const view = await call(deps, { action: "get", token: TOKEN })
     expect((view.body["asker"] as { enabled: boolean }).enabled).toBe(false)
-    const r = await call(deps, { action: "ask", token: "t".repeat(32) })
-    expect([r.status, r.body["error"]]).toEqual([503, "asker_off"])
+    for (const action of ["ask_start", "ask_step", "ask_finish"]) {
+      const r = await call(deps, { action, token: TOKEN, run: "x", i: 0 })
+      expect([r.status, r.body["error"]]).toEqual([503, "asker_off"])
+    }
   })
 
   it("keeps the profile the client typed, cleaned, and refuses an incomplete one", async () => {
     const { deps } = await pageWith({ asker: assistant() })
-    const bad = await call(deps, { action: "profile", token: "t".repeat(32), profile: { name: "X" } })
+    const bad = await call(deps, { action: "profile", token: TOKEN, profile: { name: "X" } })
     expect([bad.status, bad.body["error"]]).toEqual([400, "bad_profile"])
-    const ok = await call(deps, { action: "profile", token: "t".repeat(32), profile: PROFILE })
+    const ok = await call(deps, { action: "profile", token: TOKEN, profile: PROFILE })
     expect(ok.status).toBe(200)
     expect((ok.body["asker"] as { profile: { aliases: string[]; categories: string[] } }).profile).toMatchObject({ aliases: ["Ex Shop"], categories: ["stationery", "gifts"] })
   })
 
   it("needs the profile first", async () => {
     const { deps } = await pageWith({ asker: assistant() })
-    const r = await call(deps, { action: "ask", token: "t".repeat(32) })
+    const r = await call(deps, { action: "ask_start", token: TOKEN })
     expect([r.status, r.body["error"]]).toEqual([400, "no_profile"])
   })
 
-  it("asks, keeps the run, and shows how often the business was named", async () => {
+  it("asks a question at a time, keeps the run, and shows how often the business was named", async () => {
     const a = assistant()
     const { deps } = await pageWith({ asker: a })
-    await call(deps, { action: "profile", token: "t".repeat(32), profile: PROFILE })
-    const r = await call(deps, { action: "ask", token: "t".repeat(32) })
-    expect(r.status).toBe(200)
-    const asker = r.body["asker"] as { latest: { asked: number; answered: number; named: number; ran_at: string }; history: unknown[]; enabled: boolean }
-    expect(asker.enabled).toBe(true)
+    await call(deps, { action: "profile", token: TOKEN, profile: PROFILE })
+    const r = await askAll(deps)
+    expect(r.started.body["total"]).toBe(6)
+    expect(r.steps!.map((s) => s.body["done"])).toEqual([1, 2, 3, 4, 5, 6])
+    expect(r.finished!.status).toBe(200)
+    const asker = r.finished!.body["asker"] as { latest: { asked: number; answered: number; named: number }; history: unknown[]; enabled: boolean }
     expect([asker.latest.asked, asker.latest.answered, asker.latest.named]).toEqual([6, 6, 6])
     expect(asker.history).toHaveLength(1)
     expect(a.asked).toBe(6)
   })
 
+  it("does not ask the same question twice, and finishing twice gives the same page", async () => {
+    const a = assistant()
+    const { deps } = await pageWith({ asker: a })
+    await call(deps, { action: "profile", token: TOKEN, profile: PROFILE })
+    const r = await askAll(deps)
+    await call(deps, { action: "ask_step", token: TOKEN, run: r.run, i: 0 })
+    expect([a.asked]).toEqual([6])
+    const again = await call(deps, { action: "ask_finish", token: TOKEN, run: r.run })
+    expect(again.status).toBe(200)
+    expect((again.body["asker"] as { history: unknown[] }).history).toHaveLength(1)
+    expect((await call(deps, { action: "ask_step", token: TOKEN, run: r.run, i: 1 })).body["error"]).toBe("run_over")
+  })
+
+  it("refuses a step for a run that is not this page's, or a question that does not exist", async () => {
+    const { deps } = await pageWith({ asker: assistant() })
+    await call(deps, { action: "profile", token: TOKEN, profile: PROFILE })
+    const started = await call(deps, { action: "ask_start", token: TOKEN })
+    const run = started.body["run"]
+    for (const i of [-1, 6, 1.5, "1", null]) expect((await call(deps, { action: "ask_step", token: TOKEN, run, i })).body["error"]).toBe("bad_step")
+    expect((await call(deps, { action: "ask_step", token: TOKEN, run: "nope", i: 0 })).body["error"]).toBe("not_found")
+    expect((await call(deps, { action: "ask_step", token: TOKEN, run: 5, i: 0 })).body["error"]).toBe("not_found")
+  })
+
   it("waits between two runs on one page, and across all pages in a day", async () => {
     let t = Date.parse("2026-11-24T00:00:00Z")
     const { deps, store } = await pageWith({ asker: assistant(), now: () => t, askerLimits: { perSiteHours: 12, dailyRuns: 2 } })
-    await call(deps, { action: "profile", token: "t".repeat(32), profile: PROFILE })
-    expect((await call(deps, { action: "ask", token: "t".repeat(32) })).status).toBe(200)
+    await call(deps, { action: "profile", token: TOKEN, profile: PROFILE })
+    expect((await askAll(deps)).finished!.status).toBe(200)
     t += 3_600_000
-    const early = await call(deps, { action: "ask", token: "t".repeat(32) })
+    const early = await call(deps, { action: "ask_start", token: TOKEN })
     expect([early.status, early.body["error"], Number(early.headers?.["retry-after"])]).toEqual([429, "asked_recently", 11 * 3600])
     // another page asked too, so the day's allowance (2) is used up
     const other = await store.createSite({ token_hash: "other", url: "https://b.com", host: "b.com", platform: "", name: "b.com" })
-    await store.addAskerRun(other.id, { ran_at: new Date(t).toISOString(), result: { model: "m", asked: 1, answered: 1, named: 0, items: [], rivals: [], readOthers: false, quota: false } })
+    await store.startAskerRun(other.id, { ran_at: new Date(t).toISOString(), questions: ["q"] })
     t += 12 * 3_600_000
-    const busy = await call(deps, { action: "ask", token: "t".repeat(32) })
+    const busy = await call(deps, { action: "ask_start", token: TOKEN })
     expect([busy.status, busy.body["error"]]).toEqual([429, "busy_today"])
     t += 24 * 3_600_000
-    expect((await call(deps, { action: "ask", token: "t".repeat(32) })).status).toBe(200)
+    expect((await askAll(deps)).finished!.status).toBe(200)
   })
 
-  it("keeps nothing and says why when no assistant answers", async () => {
+  it("does not start a second run while one is going", async () => {
+    const { deps } = await pageWith({ asker: assistant() })
+    await call(deps, { action: "profile", token: TOKEN, profile: PROFILE })
+    expect((await call(deps, { action: "ask_start", token: TOKEN })).status).toBe(200)
+    const second = await call(deps, { action: "ask_start", token: TOKEN })
+    expect([second.status, second.body["error"]]).toEqual([429, "asking_now"])
+  })
+
+  it("keeps nothing and says why when no assistant answers, and lets the client try again at once", async () => {
     const quota: AskProvider = { model: "m", ask: async () => { throw new ProviderError("q", "quota") }, complete: async () => "{}" }
     const { deps } = await pageWith({ asker: quota })
-    await call(deps, { action: "profile", token: "t".repeat(32), profile: PROFILE })
-    const r = await call(deps, { action: "ask", token: "t".repeat(32) })
-    expect([r.status, r.body["error"]]).toEqual([503, "asker_unavailable"])
-    expect(String(r.body["message"])).toContain("tomorrow")
-    const view = await call(deps, { action: "get", token: "t".repeat(32) })
+    await call(deps, { action: "profile", token: TOKEN, profile: PROFILE })
+    const r = await askAll(deps)
+    expect(r.steps!.every((s) => s.body["quota"] === true)).toBe(true)
+    expect([r.finished!.status, r.finished!.body["error"]]).toEqual([503, "asker_unavailable"])
+    expect(String(r.finished!.body["message"])).toContain("tomorrow")
+    const view = await call(deps, { action: "get", token: TOKEN })
     expect((view.body["asker"] as { history: unknown[] }).history).toHaveLength(0)
+    // a failed run does not count against the page or the day
+    expect((await call(deps, { action: "ask_start", token: TOKEN })).status).toBe(200)
   })
 
-  it("gives up after the deadline instead of hanging", async () => {
-    const slow: AskProvider = { model: "m", ask: () => new Promise(() => {}), complete: async () => "{}" }
-    const { deps } = await pageWith({ asker: slow, deadlineMs: 30 })
-    await call(deps, { action: "profile", token: "t".repeat(32), profile: PROFILE })
-    const r = await call(deps, { action: "ask", token: "t".repeat(32) })
-    expect([r.status, r.body["error"]]).toEqual([504, "timeout"])
+  it("counts a question that takes too long as unanswered and still finishes with the others", async () => {
+    let n = 0
+    const slowFirst: AskProvider = { model: "m", ask: () => (n++ === 0 ? new Promise(() => {}) : Promise.resolve("Example Shop.")), complete: async () => "{}" }
+    const { deps } = await pageWith({ asker: slowFirst, askerStepMs: 30 })
+    await call(deps, { action: "profile", token: TOKEN, profile: PROFILE })
+    const r = await askAll(deps)
+    const asker = r.finished!.body["asker"] as { latest: { asked: number; answered: number; items: { failed: boolean }[] } }
+    expect([asker.latest.asked, asker.latest.answered, asker.latest.items[0]!.failed]).toEqual([6, 5, true])
   })
 })
 
 describe("the Asker's rows in Supabase", () => {
-  it("saves the profile and the run, and reads them back with the queries the tables need", async () => {
+  it("starts a run, saves answers, finishes it, and reads the finished ones back", async () => {
     const seen: { url: string; method: string; body?: string; prefer?: string }[] = []
     const doFetch = async (url: string, init: { method?: string; headers?: Record<string, string>; body?: string } = {}) => {
       seen.push({ url, method: init.method ?? "GET", body: init.body, prefer: init.headers?.["prefer"] })
-      const out = url.endsWith("limit=1") ? [{ ran_at: "t", result: { asked: 6 } }] : []
+      const out = url.includes("/asker_runs") && init.method === "POST" ? [{ id: "run-1" }] : url.includes("status=eq.running") ? [] : url.endsWith("limit=1") ? [{ ran_at: "t", result: { asked: 6 } }] : []
       return { ok: true, status: 200, text: async () => JSON.stringify(out) }
     }
     const store = supabaseStore("https://p.supabase.co", "K", doFetch)
     await store.setProfile("s1", { name: "N", aliases: [], city: "C", country: "", areas: [], categories: ["x"] })
-    await store.addAskerRun("s1", { ran_at: "2026-11-24T00:00:00.000Z", result: { model: "m", asked: 6, answered: 5, named: 2, items: [], rivals: [], readOthers: true, quota: false } })
+    expect(await store.startAskerRun("s1", { ran_at: "2026-11-24T00:00:00.000Z", questions: ["q1", "q2"] })).toBe("run-1")
+    await store.saveAskerAnswer("run-1", 0, { answer: "a", named: true, failed: false, error: "" })
+    await store.finishAskerRun("run-1", "done", { model: "m", asked: 2, answered: 2, named: 1, items: [], rivals: [], readOthers: true, quota: false })
+    await store.finishAskerRun("run-2", "failed", null)
     expect((await store.latestAskerRun("s1"))?.result).toEqual({ asked: 6 })
     await store.askerHistory("s1")
     expect(await store.askerRunsSince("2026-11-23T00:00:00.000Z")).toBe(0)
-    expect(seen[0]).toMatchObject({ method: "POST", url: "https://p.supabase.co/rest/v1/profiles?on_conflict=site_id" })
-    expect(seen[0]!.prefer).toContain("merge-duplicates")
-    expect(JSON.parse(seen[1]!.body!)).toMatchObject({ site_id: "s1", asked: 6, answered: 5, named: 2, model: "m" })
-    expect(seen[2]!.url).toContain("asker_runs?site_id=eq.s1&select=ran_at,result&order=ran_at.desc&limit=1")
-    expect(seen[3]!.url).toContain("select=ran_at,asked,answered,named&order=ran_at.asc")
-    expect(seen[4]!.url).toContain("ran_at=gte.2026-11-23T00%3A00%3A00.000Z")
+    expect(await store.askerRunningSince("s1", "2026-11-23T00:00:00.000Z")).toBe(false)
+    const [prof, start, answer, done, failed, latest, history, since, running] = seen
+    expect(prof).toMatchObject({ method: "POST", url: "https://p.supabase.co/rest/v1/profiles?on_conflict=site_id" })
+    expect(JSON.parse(start!.body!)).toMatchObject({ site_id: "s1", status: "running", asked: 2, answered: 0, result: { questions: ["q1", "q2"] } })
+    expect(answer).toMatchObject({ method: "POST", url: "https://p.supabase.co/rest/v1/asker_answers?on_conflict=run_id,idx" })
+    expect(done).toMatchObject({ method: "PATCH", url: "https://p.supabase.co/rest/v1/asker_runs?id=eq.run-1" })
+    expect(JSON.parse(done!.body!)).toMatchObject({ status: "done", asked: 2, answered: 2, named: 1, model: "m" })
+    expect(JSON.parse(failed!.body!)).toEqual({ status: "failed" })
+    expect(latest!.url).toContain("asker_runs?site_id=eq.s1&status=eq.done&select=ran_at,result&order=ran_at.desc&limit=1")
+    expect(history!.url).toContain("status=eq.done&select=ran_at,asked,answered,named&order=ran_at.asc")
+    expect(since!.url).toContain("status=in.(running,done)&ran_at=gte.2026-11-23T00%3A00%3A00.000Z")
+    expect(running!.url).toContain("status=eq.running&ran_at=gte.")
+  })
+
+  it("rebuilds a run from its row and its answers", async () => {
+    const doFetch = async (url: string) => ({
+      ok: true, status: 200,
+      text: async () => JSON.stringify(url.includes("/asker_runs") ? [{ id: "r", status: "running", ran_at: "t", result: { questions: ["a", "b"] } }] : [{ idx: 1, answer: "x", named: false, failed: false, error: "" }]),
+    })
+    const state = await supabaseStore("https://p.supabase.co", "K", doFetch).askerRunState("s1", "r")
+    expect(state).toEqual({ id: "r", status: "running", ran_at: "t", questions: ["a", "b"], answers: { 1: { answer: "x", named: false, failed: false, error: "" } } })
   })
 })

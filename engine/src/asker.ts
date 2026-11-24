@@ -221,28 +221,32 @@ function readOthers(raw: string, items: AskedItem[], names: string[]): boolean {
   return true
 }
 
-export async function runAsker(profile: Profile, provider: AskProvider, concurrency = 2): Promise<AskerResult> {
-  const questions = buildQuestions(profile)
+export interface Answered {
+  answer: string
+  named: boolean
+  failed: boolean
+  /** why it failed, when it did */
+  error: "" | "quota" | "rate" | "other"
+}
+
+/** One question to the assistant. Never throws: a failure is part of the answer. */
+export async function askQuestion(provider: AskProvider, question: string, profile: Profile): Promise<Answered> {
+  try {
+    const answer = (await provider.ask(question)).slice(0, 6000)
+    if (!answer) return { answer: "", named: false, failed: true, error: "other" }
+    return { answer, named: [profile.name, ...profile.aliases].some((n) => containsTerm(answer, n)), failed: false, error: "" }
+  } catch (err) {
+    return { answer: "", named: false, failed: true, error: err instanceof ProviderError ? err.kind : "other" }
+  }
+}
+
+/** Put the answers together: the counts, and the other shops read from the answers with one call. */
+export async function finishRun(profile: Profile, questions: string[], answers: Answered[], provider: AskProvider): Promise<AskerResult> {
   const names = [profile.name, ...profile.aliases]
-  const items: AskedItem[] = questions.map((question) => ({ question, answer: "", named: false, others: [], failed: false }))
-  let quota = false
-  let next = 0
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-      while (next < items.length && !quota) {
-        const item = items[next++] as AskedItem
-        try {
-          item.answer = (await provider.ask(item.question)).slice(0, 6000)
-          item.failed = !item.answer
-          item.named = names.some((n) => containsTerm(item.answer, n))
-        } catch (err) {
-          item.failed = true
-          if (err instanceof ProviderError && err.kind === "quota") quota = true
-        }
-      }
-    })
-  )
-  items.forEach((i) => i.answer === "" && (i.failed = true))
+  const items: AskedItem[] = questions.map((question, i) => {
+    const a = answers[i] ?? { answer: "", named: false, failed: true, error: "other" as const }
+    return { question, answer: a.answer, named: a.named, others: [], failed: a.failed }
+  })
   const answered = items.filter((i) => !i.failed)
   let others = false
   if (answered.length) {
@@ -262,6 +266,25 @@ export async function runAsker(profile: Profile, provider: AskProvider, concurre
   }
   return {
     model: provider.model, asked: items.length, answered: answered.length, named: answered.filter((i) => i.named).length,
-    items, rivals: [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 8), readOthers: others, quota,
+    items, rivals: [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 8), readOthers: others,
+    quota: answers.some((a) => a.error === "quota"),
   }
+}
+
+/** The whole run in one go (tests, and trying it locally). The service runs it a question at a time instead. */
+export async function runAsker(profile: Profile, provider: AskProvider, concurrency = 2): Promise<AskerResult> {
+  const questions = buildQuestions(profile)
+  const answers: Answered[] = questions.map(() => ({ answer: "", named: false, failed: true, error: "other" as const }))
+  let quota = false
+  let next = 0
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, questions.length) }, async () => {
+      while (next < questions.length && !quota) {
+        const i = next++
+        answers[i] = await askQuestion(provider, questions[i] as string, profile)
+        if (answers[i]!.error === "quota") quota = true
+      }
+    })
+  )
+  return finishRun(profile, questions, answers, provider)
 }
