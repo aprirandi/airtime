@@ -1,0 +1,220 @@
+{
+ "store": {
+  "slug": "handworks",
+  "name": "Handworks"
+ },
+ "run": {
+  "id": 48,
+  "agent": "auditor,fixer",
+  "kind": "audit",
+  "run_date": "2026-11-24",
+  "started_at": "2026-11-24T03:51:48+00:00",
+  "finished_at": "2026-11-24T03:51:59+00:00",
+  "status": "ok",
+  "error": null,
+  "steps": [
+   {
+    "step": 1,
+    "name": "fetch_pages",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T03:51:48+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "target": "https://www.handworks.com.au",
+     "requests": 25,
+     "unreachable": 0,
+     "platform": "shopify",
+     "product_page": "https://www.handworks.com.au/products/gf60gatahaaaffaircandle"
+    },
+    "description": "Fetched 25 pages and files from https://www.handworks.com.au.",
+    "description_id": "Mengambil 25 halaman dan berkas dari https://www.handworks.com.au."
+   },
+   {
+    "step": 2,
+    "name": "run_checks",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T03:51:59+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "checks": 24,
+     "passed": 13,
+     "partial": 3,
+     "failed": 8,
+     "not_applicable": 4,
+     "planned": 9,
+     "errors": []
+    },
+    "description": "Ran 24 checks: 13 passed, 3 partial, 8 failed, 4 not applicable; 9 more are planned.",
+    "description_id": "Menjalankan 24 cek: 13 lolos, 3 sebagian, 8 gagal, 4 tidak berlaku; 9 lagi direncanakan."
+   },
+   {
+    "step": 3,
+    "name": "score_audit",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T03:51:59+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "score": 70.0,
+     "label": "needs_work",
+     "groups": {
+      "1": 88,
+      "2": 70,
+      "3": 36
+     }
+    },
+    "description": "Scored the site 70.0 out of 100 (needs work).",
+    "description_id": "Menilai situs 70.0 dari 100 (needs work)."
+   },
+   {
+    "step": 4,
+    "name": "list_gaps",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T03:51:59+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "gaps": 4,
+     "limited": 7,
+     "first": [
+      "raw_html_content",
+      "organization_completeness",
+      "jsonld_organization",
+      "content_signals"
+     ]
+    },
+    "description": "Listed 4 gaps the owner can fix, most important first. 7 more count against the score but the platform controls them.",
+    "description_id": "Mendaftar 4 celah yang bisa diperbaiki pemilik, dari yang terpenting. 7 lagi dihitung dalam skor tetapi dikendalikan platform."
+   },
+   {
+    "step": 5,
+    "name": "save_audit",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T03:51:59+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "audit_id": 17,
+     "rows": 37
+    },
+    "description": "Stored the audit with 37 check results and their evidence.",
+    "description_id": "Menyimpan audit dengan 37 hasil cek beserta buktinya."
+   },
+   {
+    "step": 6,
+    "name": "external_scan",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T03:51:59+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "status": "ok",
+     "score": 54,
+     "issues": 17,
+     "mapped": 5,
+     "extra": 3,
+     "api_product": 9,
+     "requests": 1
+    },
+    "description": "Read Is Agentic's report as a second opinion: 17 issues, 3 of them on checks we do not run, 9 for API products.",
+    "description_id": "Membaca laporan Is Agentic sebagai pendapat kedua: 17 temuan, 3 di antaranya pada cek yang belum kita jalankan, 9 untuk produk API."
+   },
+   {
+    "step": "M",
+    "name": "master_audit_complete",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "auditor",
+    "started_at": "2026-11-24T03:51:59+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "checks": 37,
+     "score": 70.0,
+     "problems": []
+    },
+    "description": "Master checked the Auditor's work: 37 checks stored and the score of 70.0 matches them. Passed.",
+    "description_id": "Master mengecek hasil Auditor: 37 cek tersimpan dan skor 70.0 cocok dengan hasilnya. Lolos."
+   },
+   {
+    "step": 1,
+    "name": "read_audit",
+    "kind": "CODE",
+    "agent": "fixer",
+    "started_at": "2026-11-24T03:51:59+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "gaps": 4,
+     "held_back": 7,
+     "platform": "shopify"
+    },
+    "description": "Fixer looked at what the Auditor found: 4 things to fix, and 7 that Shopify controls.",
+    "description_id": "Fixer membaca temuan Auditor: 4 hal yang perlu diperbaiki, dan 7 yang dikendalikan Shopify."
+   },
+   {
+    "step": 2,
+    "name": "plan_fixes",
+    "kind": "CODE",
+    "agent": "fixer",
+    "started_at": "2026-11-24T03:51:59+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "fixes": 11,
+     "needs_owner": 1,
+     "not_started": 1,
+     "platform_held": 7,
+     "draft_ready": 2
+    },
+    "description": "Fixer sorted the work: 1 waiting for your answers, 1 it will prepare, 7 held back by the platform.",
+    "description_id": "Fixer memilah pekerjaan: 1 menunggu jawaban Anda, 1 akan ia siapkan, 7 tertahan platform."
+   },
+   {
+    "step": 3,
+    "name": "save_fixes",
+    "kind": "CODE",
+    "agent": "fixer",
+    "started_at": "2026-11-24T03:51:59+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "saved": 11,
+     "audit_id": 17
+    },
+    "description": "Fixer saved 11 fixes for you to review.",
+    "description_id": "Fixer menyimpan 11 perbaikan untuk Anda tinjau."
+   },
+   {
+    "step": "M",
+    "name": "master_fixes_complete",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "fixer",
+    "started_at": "2026-11-24T03:51:59+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T03:51:59+00:00",
+    "result": {
+     "fixes": 11,
+     "problems": []
+    },
+    "description": "Master checked the Fixer's work: 11 fixes match what the Auditor found. Passed.",
+    "description_id": "Master mengecek hasil Fixer: 11 perbaikan sesuai dengan temuan Auditor. Lolos."
+   }
+  ],
+  "quotes_verified": 0,
+  "questions": []
+ },
+ "summary": null,
+ "comparison": [],
+ "comparison_id": [],
+ "answers": []
+}
