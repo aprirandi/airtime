@@ -31,5 +31,6 @@
         }
       ]
     }
-  ]
+  ],
+  "ignoreCommand": "git log -1 --pretty=%s | grep -q '^Live: agent progress'"
 }
