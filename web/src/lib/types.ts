@@ -158,7 +158,10 @@ export type FixChoice = "open" | "self" | "asked_fixer"
 
 /** "How to do it" for one fix, written by the service from the check registry and the site's own pages. */
 export interface Guide {
+  /** true when an owner with no technical skills can do it; false when it needs a developer or an AI assistant */
+  owner: boolean
   steps: { en: string; id: string }[]
+  developer?: { en: string; id: string }
   code?: { label: { en: string; id: string }; text: string }
   verify?: { command: string; en: string; id: string }
 }
