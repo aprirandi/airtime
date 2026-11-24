@@ -24994,11 +24994,13 @@ function send2(res, status2, body, headers = {}) {
 }
 function depsFromEnv(env = process.env) {
   const key = env["GEMINI_API_KEY"];
-  const daily = Number(env["ASKER_DAILY_RUNS"]);
+  const raw = env["ASKER_DAILY_RUNS"];
+  const daily = raw === void 0 || raw.trim() === "" ? 1 : Number(raw);
+  const runs = Number.isInteger(daily) && daily >= 0 ? daily : 1;
   return {
     store: storeFromEnv(env),
-    asker: key ? geminiProvider(key, { ask: env["GEMINI_ASK_MODEL"] || "gemini-3.8-flash", work: env["GEMINI_WORK_MODEL"] || "gemini-3.5-flash-lite" }) : null,
-    askerLimits: { perSiteHours: 12, dailyRuns: Number.isFinite(daily) && daily > 0 ? daily : 3 }
+    asker: key && runs > 0 ? geminiProvider(key, { ask: env["GEMINI_ASK_MODEL"] || "gemini-3.8-flash", work: env["GEMINI_WORK_MODEL"] || "gemini-3.5-flash-lite" }) : null,
+    askerLimits: { perSiteHours: 12, dailyRuns: runs }
   };
 }
 function makeSiteHandler(deps = () => depsFromEnv()) {

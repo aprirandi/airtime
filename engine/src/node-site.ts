@@ -35,11 +35,15 @@ function send(res: ServerResponse, status: number, body: unknown, headers: Recor
 /** The settings the service reads from its environment: Supabase for storing pages, Gemini for asking the questions. */
 export function depsFromEnv(env: Record<string, string | undefined> = process.env): SiteDeps {
   const key = env["GEMINI_API_KEY"]
-  const daily = Number(env["ASKER_DAILY_RUNS"])
+  // One run is six questions and one reading. The default of one run a day is small on purpose: the free allowance of a
+  // key is shared with everything else that uses it, and 0 switches asking off even with a key set.
+  const raw = env["ASKER_DAILY_RUNS"]
+  const daily = raw === undefined || raw.trim() === "" ? 1 : Number(raw)
+  const runs = Number.isInteger(daily) && daily >= 0 ? daily : 1
   return {
     store: storeFromEnv(env),
-    asker: key ? geminiProvider(key, { ask: env["GEMINI_ASK_MODEL"] || "gemini-3.8-flash", work: env["GEMINI_WORK_MODEL"] || "gemini-3.5-flash-lite" }) : null,
-    askerLimits: { perSiteHours: 12, dailyRuns: Number.isFinite(daily) && daily > 0 ? daily : 3 },
+    asker: key && runs > 0 ? geminiProvider(key, { ask: env["GEMINI_ASK_MODEL"] || "gemini-3.8-flash", work: env["GEMINI_WORK_MODEL"] || "gemini-3.5-flash-lite" }) : null,
+    askerLimits: { perSiteHours: 12, dailyRuns: runs },
   }
 }
 
