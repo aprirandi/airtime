@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-24T08:36:43+00:00",
+ "generated_at": "2026-11-24T08:58:53+00:00",
  "schedule": {
   "cron": "17 20 * * *",
   "utc_hour": 20,
@@ -33095,7 +33095,7 @@
      "answers": 1,
      "ours": 0,
      "rate": 0.0,
-     "competitor": "Milligram",
+     "competitor": "Oxlades",
      "competitor_mentions": 1,
      "question_count": 1,
      "terms": [
@@ -38424,7 +38424,36 @@
      }
     ]
    },
-   "changes": [],
+   "changes": [
+    {
+     "check_id": "jsonld_organization",
+     "applied_on": "2026-11-24",
+     "note": "Organization name and logo filled in under Yoast SEO, Site basics",
+     "before": {
+      "shifts": 0,
+      "mentions": 0,
+      "answers": 0,
+      "pct": null,
+      "from": null,
+      "to": null
+     },
+     "score_before": 68.0,
+     "after": {
+      "shifts": 0,
+      "mentions": 0,
+      "answers": 0,
+      "pct": null,
+      "from": null,
+      "to": null
+     },
+     "score_after": null,
+     "needed": 5,
+     "enough": false,
+     "result": null,
+     "title": "Your business introduces itself",
+     "title_id": "Bisnis Anda memperkenalkan diri"
+    }
+   ],
    "totals": {
     "days_on_duty": 0,
     "first_day": null,
