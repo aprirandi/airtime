@@ -1,0 +1,201 @@
+{
+ "store": {
+  "slug": "renosites",
+  "name": "Renosites"
+ },
+ "run": {
+  "id": 41,
+  "agent": "auditor,fixer",
+  "kind": "audit",
+  "run_date": "2026-11-24",
+  "started_at": "2026-11-24T02:24:53+00:00",
+  "finished_at": "2026-11-24T02:25:18+00:00",
+  "status": "ok",
+  "error": null,
+  "steps": [
+   {
+    "step": 1,
+    "name": "fetch_pages",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T02:24:53+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T02:25:18+00:00",
+    "result": {
+     "target": "https://renosites.com.au",
+     "requests": 28,
+     "unreachable": 0,
+     "platform": "wordpress",
+     "product_page": null
+    },
+    "description": "Fetched 28 pages and files from https://renosites.com.au.",
+    "description_id": "Mengambil 28 halaman dan berkas dari https://renosites.com.au."
+   },
+   {
+    "step": 2,
+    "name": "run_checks",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T02:25:18+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T02:25:18+00:00",
+    "result": {
+     "checks": 24,
+     "passed": 7,
+     "partial": 4,
+     "failed": 12,
+     "not_applicable": 5,
+     "planned": 9,
+     "errors": []
+    },
+    "description": "Ran 24 checks: 7 passed, 4 partial, 12 failed, 5 not applicable; 9 more are planned.",
+    "description_id": "Menjalankan 24 cek: 7 lolos, 4 sebagian, 12 gagal, 5 tidak berlaku; 9 lagi direncanakan."
+   },
+   {
+    "step": 3,
+    "name": "score_audit",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T02:25:18+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T02:25:18+00:00",
+    "result": {
+     "score": 68.0,
+     "label": "needs_work",
+     "groups": {
+      "1": 91,
+      "2": 38,
+      "3": 2
+     }
+    },
+    "description": "Scored the site 68.0 out of 100 (needs work).",
+    "description_id": "Menilai situs 68.0 dari 100 (needs work)."
+   },
+   {
+    "step": 4,
+    "name": "list_gaps",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T02:25:18+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T02:25:18+00:00",
+    "result": {
+     "gaps": 16,
+     "limited": 0,
+     "first": [
+      "not_found_markdown",
+      "raw_html_content",
+      "markdown_negotiation",
+      "jsonld_organization",
+      "organization_completeness"
+     ]
+    },
+    "description": "Listed 16 gaps the owner can fix, most important first.",
+    "description_id": "Mendaftar 16 celah yang bisa diperbaiki pemilik, dari yang terpenting."
+   },
+   {
+    "step": 5,
+    "name": "save_audit",
+    "kind": "CODE",
+    "agent": "auditor",
+    "started_at": "2026-11-24T02:25:18+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T02:25:18+00:00",
+    "result": {
+     "audit_id": 10,
+     "rows": 37
+    },
+    "description": "Stored the audit with 37 check results and their evidence.",
+    "description_id": "Menyimpan audit dengan 37 hasil cek beserta buktinya."
+   },
+   {
+    "step": "M",
+    "name": "master_audit_complete",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "auditor",
+    "started_at": "2026-11-24T02:25:18+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T02:25:18+00:00",
+    "result": {
+     "checks": 37,
+     "score": 68.0,
+     "problems": []
+    },
+    "description": "Master checked the Auditor's work: 37 checks stored and the score of 68.0 matches them. Passed.",
+    "description_id": "Master mengecek hasil Auditor: 37 cek tersimpan dan skor 68.0 cocok dengan hasilnya. Lolos."
+   },
+   {
+    "step": 1,
+    "name": "read_audit",
+    "kind": "CODE",
+    "agent": "fixer",
+    "started_at": "2026-11-24T02:25:18+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T02:25:18+00:00",
+    "result": {
+     "gaps": 16,
+     "held_back": 0,
+     "platform": "wordpress"
+    },
+    "description": "Fixer looked at what the Auditor found: 16 things to fix.",
+    "description_id": "Fixer membaca temuan Auditor: 16 hal yang perlu diperbaiki."
+   },
+   {
+    "step": 2,
+    "name": "plan_fixes",
+    "kind": "CODE",
+    "agent": "fixer",
+    "started_at": "2026-11-24T02:25:18+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T02:25:18+00:00",
+    "result": {
+     "fixes": 16,
+     "needs_owner": 3,
+     "not_started": 11,
+     "platform_held": 0,
+     "draft_ready": 2
+    },
+    "description": "Fixer sorted the work: 3 waiting for your answers, 11 it will prepare, 0 held back by the platform.",
+    "description_id": "Fixer memilah pekerjaan: 3 menunggu jawaban Anda, 11 akan ia siapkan, 0 tertahan platform."
+   },
+   {
+    "step": 3,
+    "name": "save_fixes",
+    "kind": "CODE",
+    "agent": "fixer",
+    "started_at": "2026-11-24T02:25:18+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T02:25:18+00:00",
+    "result": {
+     "saved": 16,
+     "audit_id": 10
+    },
+    "description": "Fixer saved 16 fixes for you to review.",
+    "description_id": "Fixer menyimpan 16 perbaikan untuk Anda tinjau."
+   },
+   {
+    "step": "M",
+    "name": "master_fixes_complete",
+    "kind": "CODE",
+    "agent": "master",
+    "checks": "fixer",
+    "started_at": "2026-11-24T02:25:18+00:00",
+    "status": "ok",
+    "finished_at": "2026-11-24T02:25:18+00:00",
+    "result": {
+     "fixes": 16,
+     "problems": []
+    },
+    "description": "Master checked the Fixer's work: 16 fixes match what the Auditor found. Passed.",
+    "description_id": "Master mengecek hasil Fixer: 16 perbaikan sesuai dengan temuan Auditor. Lolos."
+   }
+  ],
+  "quotes_verified": 0,
+  "questions": []
+ },
+ "summary": null,
+ "comparison": [],
+ "comparison_id": [],
+ "answers": []
+}
