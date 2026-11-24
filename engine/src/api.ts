@@ -84,7 +84,7 @@ export function parseAddress(raw: unknown): Parsed {
   return { ok: true, baseUrl: `${u.protocol}//${u.host}`, host }
 }
 
-const fail = (status: number, error: string, message: string, headers?: Record<string, string>): ApiResponse => ({
+export const fail = (status: number, error: string, message: string, headers?: Record<string, string>): ApiResponse => ({
   status, body: { error, message }, headers,
 })
 
@@ -98,13 +98,28 @@ export async function handleAudit(req: ApiRequest, deps: Deps = {}): Promise<Api
 
   const key = `${parsed.baseUrl}|${platform}`
   const hit = cache.get(key)
-  if (hit && now() - hit.at < CACHE_MS) return { status: 200, body: { ...hit.result, cached: true } }
+  if (hit && now() - hit.at < CACHE_MS) {
+    const { fix_drafts: _d, ...cached } = hit.result
+    return { status: 200, body: { ...cached, cached: true } }
+  }
 
   const taken = (deps.limiter ?? defaultLimiter).take(req.client, now())
   if (!taken.ok) {
     return fail(429, "too_many", "Too many checks from your address. Try again in a few minutes.", { "retry-after": String(taken.retryAfterSeconds) })
   }
 
+  const scanned = await scanAddress(parsed, platform, deps)
+  if (!scanned.ok) return scanned.response
+  const { fix_drafts: _drafts, ...result } = scanned.result
+  cache.set(key, { at: now(), result: scanned.result })
+  if (cache.size > 200) cache.delete(cache.keys().next().value as string)
+  return { status: 200, body: { ...result, cached: false } }
+}
+
+/** Run one audit with a deadline, and turn the ways it can fail into the answers the service gives. */
+export async function scanAddress(
+  parsed: { baseUrl: string; host: string }, platform: string, deps: Deps = {}
+): Promise<{ ok: true; result: AuditResult } | { ok: false; response: ApiResponse }> {
   const fetcher = deps.fetcher ?? httpFetcher({ timeoutMs: 10_000 })
   const deadline = deps.deadlineMs ?? 50_000
   let timer: ReturnType<typeof setTimeout> | undefined
@@ -115,13 +130,11 @@ export async function handleAudit(req: ApiRequest, deps: Deps = {}): Promise<Api
         timer = setTimeout(() => reject(new Error("deadline")), deadline)
       }),
     ])
-    cache.set(key, { at: now(), result })
-    if (cache.size > 200) cache.delete(cache.keys().next().value as string)
-    return { status: 200, body: { ...result, cached: false } }
+    return { ok: true, result }
   } catch (err) {
-    if (err instanceof ScanError) return fail(422, "unreachable", `We could not open ${parsed.host}: ${err.message.replace(/^could not reach \S+: ?/, "")}`)
-    if ((err as Error).message === "deadline") return fail(504, "timeout", "The website took too long to answer.")
-    return fail(500, "failed", "Something went wrong while checking the website.")
+    if (err instanceof ScanError) return { ok: false, response: fail(422, "unreachable", `We could not open ${parsed.host}: ${err.message.replace(/^could not reach \S+: ?/, "")}`) }
+    if ((err as Error).message === "deadline") return { ok: false, response: fail(504, "timeout", "The website took too long to answer.") }
+    return { ok: false, response: fail(500, "failed", "Something went wrong while checking the website.") }
   } finally {
     clearTimeout(timer)
   }

@@ -16,21 +16,21 @@ const STATUS_VARIANT: Record<FixStatus, "success" | "warning" | "outline" | "sec
   done: "success",
 }
 
-export function FixCard({ fix }: { fix: Fix }) {
+export function FixCard({ fix, badge, hideSummary, children }: { fix: Fix; hideSummary?: boolean; badge?: { label: string; variant: "success" | "warning" | "outline" | "secondary" }; children?: React.ReactNode }) {
   const { t, pick, lang } = useI18n()
   return (
     <Card>
       <CardHeader className="gap-2">
         <div className="flex items-start justify-between gap-3">
           <CardTitle className="text-base">{pick<string>(fix, "title")}</CardTitle>
-          <Badge variant={STATUS_VARIANT[fix.status]} className="shrink-0">
-            {t(`ov.status.${fix.status}`)}
+          <Badge variant={badge?.variant ?? STATUS_VARIANT[fix.status]} className="shrink-0">
+            {badge?.label ?? t(`ov.status.${fix.status}`)}
           </Badge>
         </div>
         <CardDescription>{pick<string>(fix, "why")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
-        <p>{pick<string>(fix, "summary")}</p>
+        {!hideSummary && <p>{pick<string>(fix, "summary")}</p>}
         {fix.confirm && fix.confirm.length > 0 && (
           <div className="bg-muted/50 space-y-2 rounded-lg p-3">
             <div className="text-xs font-medium">{t("ov.confirm")}</div>
@@ -56,6 +56,7 @@ export function FixCard({ fix }: { fix: Fix }) {
             </ul>
           </div>
         )}
+        {children}
       </CardContent>
     </Card>
   )

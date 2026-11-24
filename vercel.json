@@ -6,6 +6,9 @@
   "functions": {
     "api/audit.js": {
       "maxDuration": 60
+    },
+    "api/site.js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [

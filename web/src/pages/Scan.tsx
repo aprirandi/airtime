@@ -6,6 +6,7 @@ import { FixCard } from "@/pages/Overview"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useI18n } from "@/lib/i18n"
+import { createSite } from "@/lib/site"
 import { hostOf, PLATFORM_OPTIONS, scanSite, ScanFailure, type ScanResult } from "@/lib/scan"
 
 type State =
@@ -48,7 +49,18 @@ export function Scan({ url, platform, go }: { url: string; platform: string; go:
     const text = address.trim()
     if (!text) return
     const query = chosen ? `?platform=${encodeURIComponent(chosen)}` : ""
-    go(`#/check/${encodeURIComponent(text)}${query}`)
+    const plain = () => go(`#/check/${encodeURIComponent(text)}${query}`)
+    // A page of their own for the website; when pages are not switched on, the plain check as before.
+    const id = ++run.current
+    setState({ kind: "loading", host: hostOf(text) })
+    createSite(text, chosen)
+      .then((view) => view.token && go(`#/s/${view.token}`))
+      .catch((err: Error) => {
+        if (id !== run.current) return
+        const f = err instanceof ScanFailure ? err : new ScanFailure("failed", "failed")
+        if (f.code === "storage_off" || f.code === "network") return plain()
+        setState({ kind: "error", code: f.code, message: f.message, host: hostOf(text) })
+      })
   }
 
   const busy = state.kind === "loading"
