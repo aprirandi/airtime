@@ -10,6 +10,8 @@ import replay from "../test/replay.json" with { type: "json" }
 import { MemoryLimiter } from "../src/api"
 import { Response, type Fetcher } from "../src/http"
 import { makeHandler } from "../src/node"
+import { makeSiteHandler } from "../src/node-site"
+import { memoryStore } from "../src/sites"
 
 const bodies = replay.bodies as Record<string, string>
 const maps = replay.scenarios.map((s) => new Map(s.calls.map((c) => [`${c.url}|${c.accept}|${c.ua}`, c])))
@@ -31,12 +33,14 @@ const fake: Fetcher = async (rawUrl, o) => {
 let currentScenario = 0
 
 const api = makeHandler({ fetcher: fake, limiter: new MemoryLimiter(1000) })
+const siteApi = makeSiteHandler({ store: memoryStore(), fetcher: fake, createLimiter: new MemoryLimiter(1000), rescanLimiter: new MemoryLimiter(1000) })
 const root = join(import.meta.dirname, "..", "..", "web", "dist")
 const TYPES: Record<string, string> = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon" }
 
 createServer((req, res) => {
   const path = (req.url ?? "/").split("?")[0] as string
   if (path.startsWith("/api/audit")) return void api(req, res)
+  if (path.startsWith("/api/site")) return void siteApi(req, res)
   let file = normalize(join(root, path === "/id" ? "/id/index.html" : path))
   if (!file.startsWith(root)) return void res.writeHead(403).end()
   if (existsSync(file) && statSync(file).isDirectory()) file = join(file, "index.html")

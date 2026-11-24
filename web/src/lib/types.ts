@@ -154,6 +154,27 @@ export interface Audit {
   history?: { scanned_at: string; score: number | null; engine: string }[]
 }
 
+export type FixChoice = "open" | "self" | "asked_fixer"
+
+/** "How to do it" for one fix, written by the service from the check registry and the site's own pages. */
+export interface Guide {
+  steps: { en: string; id: string }[]
+  code?: { label: { en: string; id: string }; text: string }
+  verify?: { command: string; en: string; id: string }
+}
+
+/** A client's page for one website: the latest scan, the first scan as the before, and what they chose per item. */
+export interface SiteView {
+  token?: string
+  site: { host: string; url: string; platform: string; name: string; created_at: string }
+  latest: Audit
+  baseline: { scanned_at: string; score: number | null; label: string; gaps: string[] } | null
+  history: { scanned_at: string; score: number | null; label: string }[]
+  states: Record<string, FixChoice>
+  done: string[]
+  guides: Record<string, Guide>
+}
+
 export interface RegistryCheck {
   id: string
   group: number

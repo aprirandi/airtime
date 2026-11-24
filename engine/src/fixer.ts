@@ -311,3 +311,13 @@ export function buildFixes(rows: Row[], platform: string, snap: FactsSource, nam
   for (const r of rows) if (!r.controlled_by) drafts[r.check_id] = draftFor(r.check_id, snap, name)
   return planAll(rows, platform, drafts).map(({ draft, ...fix }) => ({ ...fix, confirm: draft ? draft.confirm : [] }))
 }
+
+/** The JSON-LD the Fixer prepared for each gap, for the owner's tutorial. Not part of the public audit answer. */
+export function fixDrafts(rows: Row[], snap: FactsSource, name: string): Record<string, Record<string, unknown>> {
+  const out: Record<string, Record<string, unknown>> = {}
+  for (const r of gaps(rows)) {
+    const draft = draftFor(r.check_id, snap, name)
+    if (draft) out[r.check_id] = draft.jsonld
+  }
+  return out
+}

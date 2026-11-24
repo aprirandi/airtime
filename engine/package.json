@@ -7,7 +7,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "serve": "tsx scripts/serve.mts",
-    "bundle:api": "esbuild src/node.ts --bundle --platform=node --target=node20 --format=cjs --legal-comments=none --footer:js=\"module.exports=module.exports.default||module.exports;\" --outfile=../api/audit.js"
+    "bundle:api": "esbuild src/node.ts --bundle --platform=node --target=node20 --format=cjs --legal-comments=none --footer:js=\"module.exports=module.exports.default||module.exports;\" --outfile=../api/audit.js && esbuild src/node-site.ts --bundle --platform=node --target=node20 --format=cjs --legal-comments=none --footer:js=\"module.exports=module.exports.default||module.exports;\" --outfile=../api/site.js"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

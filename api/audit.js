@@ -23745,6 +23745,14 @@ function buildFixes(rows, platform, snap, name) {
   for (const r of rows) if (!r.controlled_by) drafts[r.check_id] = draftFor(r.check_id, snap, name);
   return planAll(rows, platform, drafts).map(({ draft, ...fix }) => ({ ...fix, confirm: draft ? draft.confirm : [] }));
 }
+function fixDrafts(rows, snap, name) {
+  const out = {};
+  for (const r of gaps(rows)) {
+    const draft = draftFor(r.check_id, snap, name);
+    if (draft) out[r.check_id] = draft.jsonld;
+  }
+  return out;
+}
 
 // src/audit.ts
 var ENGINE = "airtime-auditor/2";
@@ -23822,6 +23830,7 @@ async function runAudit(fetch, options) {
     gaps: fixable.map((g) => g.check_id),
     limited_gaps: limited.map((g) => g.check_id),
     fixes: buildFixes(rows, platform, snapshot, siteName(snapshot)),
+    fix_drafts: fixDrafts(rows, snapshot, siteName(snapshot)),
     prompt_all: allPrompt(gapRows, target, platform, "en", scanned),
     prompt_all_id: allPrompt(gapRows, target, platform, "id", scanned),
     fetches: snapshot.fetches.map((f) => f.summary())
@@ -24056,11 +24065,22 @@ async function handleAudit(req, deps = {}) {
   const platform = platformRaw === "other" ? "" : platformRaw;
   const key = `${parsed.baseUrl}|${platform}`;
   const hit = cache.get(key);
-  if (hit && now() - hit.at < CACHE_MS) return { status: 200, body: { ...hit.result, cached: true } };
+  if (hit && now() - hit.at < CACHE_MS) {
+    const { fix_drafts: _d, ...cached } = hit.result;
+    return { status: 200, body: { ...cached, cached: true } };
+  }
   const taken = (deps.limiter ?? defaultLimiter).take(req.client, now());
   if (!taken.ok) {
     return fail(429, "too_many", "Too many checks from your address. Try again in a few minutes.", { "retry-after": String(taken.retryAfterSeconds) });
   }
+  const scanned = await scanAddress(parsed, platform, deps);
+  if (!scanned.ok) return scanned.response;
+  const { fix_drafts: _drafts, ...result } = scanned.result;
+  cache.set(key, { at: now(), result: scanned.result });
+  if (cache.size > 200) cache.delete(cache.keys().next().value);
+  return { status: 200, body: { ...result, cached: false } };
+}
+async function scanAddress(parsed, platform, deps = {}) {
   const fetcher = deps.fetcher ?? httpFetcher({ timeoutMs: 1e4 });
   const deadline = deps.deadlineMs ?? 5e4;
   let timer;
@@ -24071,13 +24091,11 @@ async function handleAudit(req, deps = {}) {
         timer = setTimeout(() => reject(new Error("deadline")), deadline);
       })
     ]);
-    cache.set(key, { at: now(), result });
-    if (cache.size > 200) cache.delete(cache.keys().next().value);
-    return { status: 200, body: { ...result, cached: false } };
+    return { ok: true, result };
   } catch (err) {
-    if (err instanceof ScanError) return fail(422, "unreachable", `We could not open ${parsed.host}: ${err.message.replace(/^could not reach \S+: ?/, "")}`);
-    if (err.message === "deadline") return fail(504, "timeout", "The website took too long to answer.");
-    return fail(500, "failed", "Something went wrong while checking the website.");
+    if (err instanceof ScanError) return { ok: false, response: fail(422, "unreachable", `We could not open ${parsed.host}: ${err.message.replace(/^could not reach \S+: ?/, "")}`) };
+    if (err.message === "deadline") return { ok: false, response: fail(504, "timeout", "The website took too long to answer.") };
+    return { ok: false, response: fail(500, "failed", "Something went wrong while checking the website.") };
   } finally {
     clearTimeout(timer);
   }

@@ -12,8 +12,10 @@ import { Dashboard } from "@/pages/Dashboard"
 import { Day } from "@/pages/Day"
 import { Overview } from "@/pages/Overview"
 import { Scan } from "@/pages/Scan"
+import { SitePage } from "@/pages/Site"
 
 type Route =
+  | { page: "site"; token: string }
   | { page: "scan"; url: string; platform: string }
   | { page: "overview" }
   | { page: "dashboard" }
@@ -26,6 +28,8 @@ type Route =
 const SHOW_ANALYSIS = import.meta.env.VITE_SHOW_ANALYSIS === "1"
 
 function parse(hash: string): Route {
+  const site = hash.match(/^#\/s\/([A-Za-z0-9_-]{20,200})/)
+  if (site) return { page: "site", token: site[1] as string }
   const run = hash.match(/^#\/run\/(\d+)/)
   if (run) return { page: "run", id: Number(run[1]) }
   if (hash.startsWith("#/checks")) return { page: "checks" }
@@ -109,7 +113,7 @@ function Header({ route, store, working, stores, slug, go }: {
   route: Route; store?: string; working?: boolean; stores?: { slug: string; name: string }[]; slug?: string; go?: (h: string) => void
 }) {
   const { t } = useI18n()
-  const analysis = route.page !== "scan"
+  const analysis = route.page !== "scan" && route.page !== "site"
   return (
     <header className="bg-background/80 sticky top-0 z-20 border-b backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-4">
@@ -160,7 +164,7 @@ function Header({ route, store, working, stores, slug, go }: {
 }
 
 /** The pages that read the daily-shift data. Kept apart so the scan page never loads that data. */
-function Analysis({ route, go }: { route: Exclude<Route, { page: "scan" }>; go: (h: string) => void }) {
+function Analysis({ route, go }: { route: Exclude<Route, { page: "scan" } | { page: "site" }>; go: (h: string) => void }) {
   const { t } = useI18n()
   const liveState = useLive()
   const live = liveState.data
@@ -194,11 +198,11 @@ export default function App() {
   const { route, go } = useRoute()
   return (
     <div className="min-h-screen">
-      {route.page === "scan" ? (
+      {route.page === "scan" || route.page === "site" ? (
         <>
           <Header route={route} />
           <main className="mx-auto max-w-6xl px-4 py-6">
-            <Scan url={route.url} platform={route.platform} go={go} />
+            {route.page === "scan" ? <Scan url={route.url} platform={route.platform} go={go} /> : <SitePage token={route.token} go={go} />}
           </main>
         </>
       ) : (

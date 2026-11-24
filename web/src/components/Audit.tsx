@@ -51,7 +51,7 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-function CopyButton({ text, label, t }: { text: string; label: string; t: T }) {
+export function CopyButton({ text, label, t }: { text: string; label: string; t: T }) {
   const [state, setState] = useState<"idle" | "copied" | "failed">("idle")
   return (
     <Button
