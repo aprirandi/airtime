@@ -11,6 +11,7 @@ import { useI18n, type T } from "@/lib/i18n"
 import { ScanFailure } from "@/lib/scan"
 import { getSite, rescanSite, setFix } from "@/lib/site"
 import type { Fix, FixChoice, Guide, SiteView } from "@/lib/types"
+import { FixList, type FixMeta } from "@/components/FixList"
 import { FixCard } from "@/pages/Overview"
 
 type State = { kind: "loading" } | { kind: "ready"; view: SiteView } | { kind: "error"; code: string; message: string }
@@ -42,7 +43,7 @@ function Steps({ guide, lang, t }: { guide: Guide; lang: "en" | "id"; t: T }) {
   )
 }
 
-function SiteFix({ fix, view, busy, onChoose }: { fix: Fix; view: SiteView; busy: boolean; onChoose: (c: FixChoice) => void }) {
+function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta; view: SiteView; busy: boolean; onChoose: (c: FixChoice) => void }) {
   const { t, lang } = useI18n()
   const done = view.done.includes(fix.check_id)
   const choice = view.states[fix.check_id] ?? "open"
@@ -57,7 +58,7 @@ function SiteFix({ fix, view, busy, onChoose }: { fix: Fix; view: SiteView; busy
         ? { label: t("site.state.asked_fixer"), variant: "secondary" as const }
         : undefined
   return (
-    <FixCard fix={fix} badge={badge} hideSummary={!held}>
+    <FixCard fix={fix} meta={meta} badge={badge} hideSummary={!held}>
       {!held && !done && (
         <div className="flex flex-wrap gap-2">
           {choice !== "self" && (
@@ -239,11 +240,11 @@ export function SitePage({ token, go }: { token: string; go: (hash: string) => v
         {fixes.length === 0 ? (
           <p className="text-muted-foreground text-sm">{t("site.nothing")}</p>
         ) : (
-          <div className="grid gap-3 lg:grid-cols-2">
-            {fixes.map((f) => (
-              <SiteFix key={f.check_id} fix={f} view={view} busy={busy} onChoose={(c) => act(() => setFix(token, f.check_id, c))} />
-            ))}
-          </div>
+          <FixList
+            fixes={fixes}
+            checks={audit.checks}
+            card={(f, meta) => <SiteFix fix={f} meta={meta} view={view} busy={busy} onChoose={(c) => act(() => setFix(token, f.check_id, c))} />}
+          />
         )}
         {view.done.length > 0 && (
           <div className="flex flex-wrap gap-2">

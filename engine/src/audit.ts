@@ -63,7 +63,7 @@ export async function runAudit(fetch: Fetcher, options: AuditOptions) {
     const controlled = r.controlled_by ? d.controlled[r.controlled_by] : undefined
     const gap = gapRows.find((g) => g.check_id === r.check_id)
     return {
-      id: r.check_id, group: r.group, tier: r.tier, source: r.source, result: r.result, percent: r.percent, scored: r.scored,
+      id: r.check_id, group: r.group, tier: r.tier, source: r.source, effort: d.effort, result: r.result, percent: r.percent, scored: r.scored,
       name: d.name, name_id: d.name_id, evidence: r.evidence, fix: d.fix, fix_id: d.fix_id,
       platform_fix: hint?.en ?? "", platform_fix_id: hint?.id ?? "",
       controlled_by: r.controlled_by, controlled_note: controlled?.en ?? "", controlled_note_id: controlled?.id ?? "",

@@ -24,6 +24,24 @@ GROUPS = {
 }
 TIERS = ("essential", "recommended", "bonus")
 
+# How much work a fix is for the owner. easy: a setting or a few minutes. medium: a decision or several steps, or a
+# developer's quick job. hard: needs a developer and careful work. engine/test checks that no fix a developer must do
+# is called easy and no fix an owner can do alone is called hard. A check not listed counts as hard.
+EFFORT = {
+    "robots_txt": "easy", "sitemap": "easy", "public_no_login": "easy", "not_noindex": "easy",
+    "ai_crawlers_allowed": "medium", "jsonld_organization": "medium", "organization_completeness": "medium",
+    "metadata_complete": "medium", "trust_pages": "medium", "content_signals": "medium",
+    "redirects_clean": "medium", "pricing_structured": "medium", "llms_txt": "medium", "agents_md": "medium",
+    "link_headers": "medium",
+    "raw_html_content": "hard", "not_found_markdown": "hard", "markdown_negotiation": "hard", "mcp_server_card": "hard",
+    "agent_skills_index": "hard", "ard_manifest": "hard", "auth_md": "hard", "oauth_discovery": "hard",
+    "oauth_protected_resource": "hard",
+}
+
+
+def effort_of(check_id: str) -> str:
+    return EFFORT.get(check_id, "hard")
+
 
 @dataclass(frozen=True)
 class CheckDef:

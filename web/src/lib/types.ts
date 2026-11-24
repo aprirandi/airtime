@@ -49,6 +49,7 @@ export interface AuditCheck {
   group: number
   tier: "essential" | "recommended" | "bonus"
   source: "is_agentic" | "cloudflare" | "both"
+  effort?: "easy" | "medium" | "hard"
   result: CheckResult
   percent: number
   scored: boolean
@@ -217,6 +218,7 @@ export interface RegistryCheck {
   group: number
   tier: "essential" | "recommended" | "bonus"
   source: "is_agentic" | "cloudflare" | "both"
+  effort?: "easy" | "medium" | "hard"
   status: "built" | "planned" | "na"
   name: string
   name_id: string
