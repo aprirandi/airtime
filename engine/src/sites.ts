@@ -243,7 +243,7 @@ export function supabaseStore(baseUrl: string, key: string, doFetch: FetchLike =
       return (rows[0] as { id: string }).id
     },
     async saveAskerAnswer(runId, idx, a) {
-      await call("asker_answers?on_conflict=run_id,idx", { method: "POST", body: { run_id: runId, idx, ...a }, prefer: "resolution=merge-duplicates,return=minimal" })
+      await call("asker_answers?on_conflict=run_id,idx", { method: "POST", body: { run_id: runId, idx, answer: a.answer, named: a.named, failed: a.failed, error: a.error }, prefer: "resolution=merge-duplicates,return=minimal" })
     },
     async askerRunState(siteId, runId) {
       const runs = (await call(`asker_runs?id=eq.${eq(runId)}&site_id=eq.${eq(siteId)}&select=id,status,ran_at,result&limit=1`)) as { id: string; status: AskerRunState["status"]; ran_at: string; result: { questions?: string[] } }[]
@@ -440,13 +440,22 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
         if (state.status !== "running") return fail(409, "run_over", "This run is over.")
         const i = req.i
         if (typeof i !== "number" || !Number.isInteger(i) || i < 0 || i >= state.questions.length) return fail(400, "bad_step", "Unknown question.")
+        let last: Answered | undefined
         if (!state.answers[i]) {
-          const timedOut: Answered = { answer: "", named: false, failed: true, error: "rate" }
+          const timedOut: Answered = { answer: "", named: false, failed: true, error: "rate", detail: "no answer within the time allowed" }
           const answer = await within(askQuestion(deps.asker, state.questions[i] as string, profile), timedOut)
           await store.saveAskerAnswer(state.id, i, answer)
           state.answers[i] = answer
+          last = answer
         }
-        return { status: 200, body: { done: Object.keys(state.answers).length, total: state.questions.length, quota: Object.values(state.answers).some((a) => a.error === "quota") } }
+        return {
+          status: 200,
+          body: {
+            done: Object.keys(state.answers).length, total: state.questions.length, quota: Object.values(state.answers).some((a) => a.error === "quota"),
+            // how this question went, so a run that gets no answers can be told apart from one that is only slow
+            answered: last ? !last.failed : Boolean(state.answers[i] && !state.answers[i]!.failed), detail: last?.detail ?? "",
+          },
+        }
       }
 
       // ask_finish

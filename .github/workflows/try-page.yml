@@ -74,7 +74,7 @@ jobs:
                   for i in range(total):
                       t0 = time.time()
                       st, step = call({"action": "ask_step", "token": token, "run": start["run"], "i": i})
-                      print(f"  question {i + 1}: {st} {step.get('error', 'ok')} in {time.time() - t0:.1f}s | quota: {step.get('quota')}")
+                      print(f"  question {i + 1}: {st} {step.get('error', 'ok')} in {time.time() - t0:.1f}s | answered: {step.get('answered')} | {step.get('detail', '')} | quota: {step.get('quota')}")
                   status, ran = call({"action": "ask_finish", "token": token, "run": start["run"]})
                   print("ask finish:", status, ran.get("error", "ok"), "|", ran.get("message", "") if status != 200 else "")
                   if status == 200:
