@@ -238,3 +238,122 @@ describe("Supabase over its REST interface", () => {
     expect([...tokens][0]!.length).toBeGreaterThanOrEqual(30)
   })
 })
+
+// ---- the Asker on a client's page -----------------------------------------------------------------
+
+import { ProviderError, type AskProvider } from "../src/asker"
+
+const PROFILE = { name: "Example Shop", aliases: "Ex Shop", city: "Melbourne", areas: "Prahran", categories: "stationery, gifts" }
+
+function assistant(answer = "Try Example Shop or Kikki K."): AskProvider & { asked: number } {
+  const p = {
+    model: "fake", asked: 0,
+    async ask() { p.asked++; return answer },
+    async complete() { return JSON.stringify({ answers: [] }) },
+  }
+  return p
+}
+
+async function pageWith(deps: Partial<SiteDeps> = {}) {
+  const s = setup(deps)
+  await call(s.deps, { action: "create", url: "example-shop.com" })
+  return s
+}
+
+describe("asking AI assistants", () => {
+  it("is off without an assistant, and says so", async () => {
+    const { deps } = await pageWith()
+    const view = await call(deps, { action: "get", token: "t".repeat(32) })
+    expect((view.body["asker"] as { enabled: boolean }).enabled).toBe(false)
+    const r = await call(deps, { action: "ask", token: "t".repeat(32) })
+    expect([r.status, r.body["error"]]).toEqual([503, "asker_off"])
+  })
+
+  it("keeps the profile the client typed, cleaned, and refuses an incomplete one", async () => {
+    const { deps } = await pageWith({ asker: assistant() })
+    const bad = await call(deps, { action: "profile", token: "t".repeat(32), profile: { name: "X" } })
+    expect([bad.status, bad.body["error"]]).toEqual([400, "bad_profile"])
+    const ok = await call(deps, { action: "profile", token: "t".repeat(32), profile: PROFILE })
+    expect(ok.status).toBe(200)
+    expect((ok.body["asker"] as { profile: { aliases: string[]; categories: string[] } }).profile).toMatchObject({ aliases: ["Ex Shop"], categories: ["stationery", "gifts"] })
+  })
+
+  it("needs the profile first", async () => {
+    const { deps } = await pageWith({ asker: assistant() })
+    const r = await call(deps, { action: "ask", token: "t".repeat(32) })
+    expect([r.status, r.body["error"]]).toEqual([400, "no_profile"])
+  })
+
+  it("asks, keeps the run, and shows how often the business was named", async () => {
+    const a = assistant()
+    const { deps } = await pageWith({ asker: a })
+    await call(deps, { action: "profile", token: "t".repeat(32), profile: PROFILE })
+    const r = await call(deps, { action: "ask", token: "t".repeat(32) })
+    expect(r.status).toBe(200)
+    const asker = r.body["asker"] as { latest: { asked: number; answered: number; named: number; ran_at: string }; history: unknown[]; enabled: boolean }
+    expect(asker.enabled).toBe(true)
+    expect([asker.latest.asked, asker.latest.answered, asker.latest.named]).toEqual([6, 6, 6])
+    expect(asker.history).toHaveLength(1)
+    expect(a.asked).toBe(6)
+  })
+
+  it("waits between two runs on one page, and across all pages in a day", async () => {
+    let t = Date.parse("2026-11-24T00:00:00Z")
+    const { deps, store } = await pageWith({ asker: assistant(), now: () => t, askerLimits: { perSiteHours: 12, dailyRuns: 2 } })
+    await call(deps, { action: "profile", token: "t".repeat(32), profile: PROFILE })
+    expect((await call(deps, { action: "ask", token: "t".repeat(32) })).status).toBe(200)
+    t += 3_600_000
+    const early = await call(deps, { action: "ask", token: "t".repeat(32) })
+    expect([early.status, early.body["error"], Number(early.headers?.["retry-after"])]).toEqual([429, "asked_recently", 11 * 3600])
+    // another page asked too, so the day's allowance (2) is used up
+    const other = await store.createSite({ token_hash: "other", url: "https://b.com", host: "b.com", platform: "", name: "b.com" })
+    await store.addAskerRun(other.id, { ran_at: new Date(t).toISOString(), result: { model: "m", asked: 1, answered: 1, named: 0, items: [], rivals: [], readOthers: false, quota: false } })
+    t += 12 * 3_600_000
+    const busy = await call(deps, { action: "ask", token: "t".repeat(32) })
+    expect([busy.status, busy.body["error"]]).toEqual([429, "busy_today"])
+    t += 24 * 3_600_000
+    expect((await call(deps, { action: "ask", token: "t".repeat(32) })).status).toBe(200)
+  })
+
+  it("keeps nothing and says why when no assistant answers", async () => {
+    const quota: AskProvider = { model: "m", ask: async () => { throw new ProviderError("q", "quota") }, complete: async () => "{}" }
+    const { deps } = await pageWith({ asker: quota })
+    await call(deps, { action: "profile", token: "t".repeat(32), profile: PROFILE })
+    const r = await call(deps, { action: "ask", token: "t".repeat(32) })
+    expect([r.status, r.body["error"]]).toEqual([503, "asker_unavailable"])
+    expect(String(r.body["message"])).toContain("tomorrow")
+    const view = await call(deps, { action: "get", token: "t".repeat(32) })
+    expect((view.body["asker"] as { history: unknown[] }).history).toHaveLength(0)
+  })
+
+  it("gives up after the deadline instead of hanging", async () => {
+    const slow: AskProvider = { model: "m", ask: () => new Promise(() => {}), complete: async () => "{}" }
+    const { deps } = await pageWith({ asker: slow, deadlineMs: 30 })
+    await call(deps, { action: "profile", token: "t".repeat(32), profile: PROFILE })
+    const r = await call(deps, { action: "ask", token: "t".repeat(32) })
+    expect([r.status, r.body["error"]]).toEqual([504, "timeout"])
+  })
+})
+
+describe("the Asker's rows in Supabase", () => {
+  it("saves the profile and the run, and reads them back with the queries the tables need", async () => {
+    const seen: { url: string; method: string; body?: string; prefer?: string }[] = []
+    const doFetch = async (url: string, init: { method?: string; headers?: Record<string, string>; body?: string } = {}) => {
+      seen.push({ url, method: init.method ?? "GET", body: init.body, prefer: init.headers?.["prefer"] })
+      const out = url.endsWith("limit=1") ? [{ ran_at: "t", result: { asked: 6 } }] : []
+      return { ok: true, status: 200, text: async () => JSON.stringify(out) }
+    }
+    const store = supabaseStore("https://p.supabase.co", "K", doFetch)
+    await store.setProfile("s1", { name: "N", aliases: [], city: "C", country: "", areas: [], categories: ["x"] })
+    await store.addAskerRun("s1", { ran_at: "2026-11-24T00:00:00.000Z", result: { model: "m", asked: 6, answered: 5, named: 2, items: [], rivals: [], readOthers: true, quota: false } })
+    expect((await store.latestAskerRun("s1"))?.result).toEqual({ asked: 6 })
+    await store.askerHistory("s1")
+    expect(await store.askerRunsSince("2026-11-23T00:00:00.000Z")).toBe(0)
+    expect(seen[0]).toMatchObject({ method: "POST", url: "https://p.supabase.co/rest/v1/profiles?on_conflict=site_id" })
+    expect(seen[0]!.prefer).toContain("merge-duplicates")
+    expect(JSON.parse(seen[1]!.body!)).toMatchObject({ site_id: "s1", asked: 6, answered: 5, named: 2, model: "m" })
+    expect(seen[2]!.url).toContain("asker_runs?site_id=eq.s1&select=ran_at,result&order=ran_at.desc&limit=1")
+    expect(seen[3]!.url).toContain("select=ran_at,asked,answered,named&order=ran_at.asc")
+    expect(seen[4]!.url).toContain("ran_at=gte.2026-11-23T00%3A00%3A00.000Z")
+  })
+})

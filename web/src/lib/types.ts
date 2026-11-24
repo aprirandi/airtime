@@ -166,6 +166,34 @@ export interface Guide {
   verify?: { command: string; en: string; id: string }
 }
 
+export interface BusinessProfile {
+  name: string
+  aliases: string[]
+  city: string
+  country: string
+  areas: string[]
+  categories: string[]
+}
+
+export interface AskedItem {
+  question: string
+  answer: string
+  named: boolean
+  others: { name: string; quote: string }[]
+  failed: boolean
+}
+
+export interface AskerRunView {
+  ran_at: string
+  model: string
+  asked: number
+  answered: number
+  named: number
+  items: AskedItem[]
+  rivals: { name: string; count: number }[]
+  readOthers: boolean
+}
+
 /** A client's page for one website: the latest scan, the first scan as the before, and what they chose per item. */
 export interface SiteView {
   token?: string
@@ -176,6 +204,12 @@ export interface SiteView {
   states: Record<string, FixChoice>
   done: string[]
   guides: Record<string, Guide>
+  asker: {
+    enabled: boolean
+    profile: BusinessProfile | null
+    latest: AskerRunView | null
+    history: { ran_at: string; asked: number; answered: number; named: number }[]
+  }
 }
 
 export interface RegistryCheck {

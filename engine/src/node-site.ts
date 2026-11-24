@@ -1,6 +1,7 @@
 /** The Node.js side of the site pages: reads a JSON request, calls handleSite, writes the JSON. A Vercel function. */
 import type { IncomingMessage, ServerResponse } from "node:http"
 import { clientOf } from "./node"
+import { geminiProvider } from "./asker"
 import { handleSite, storeFromEnv, type SiteDeps } from "./sites"
 
 const MAX_BODY = 8192
@@ -31,7 +32,18 @@ function send(res: ServerResponse, status: number, body: unknown, headers: Recor
   res.end(JSON.stringify(body))
 }
 
-export function makeSiteHandler(deps: SiteDeps | (() => SiteDeps) = () => ({ store: storeFromEnv() })) {
+/** The settings the service reads from its environment: Supabase for storing pages, Gemini for asking the questions. */
+export function depsFromEnv(env: Record<string, string | undefined> = process.env): SiteDeps {
+  const key = env["GEMINI_API_KEY"]
+  const daily = Number(env["ASKER_DAILY_RUNS"])
+  return {
+    store: storeFromEnv(env),
+    asker: key ? geminiProvider(key, { ask: env["GEMINI_ASK_MODEL"] || "gemini-3.8-flash", work: env["GEMINI_WORK_MODEL"] || "gemini-3.5-flash-lite" }) : null,
+    askerLimits: { perSiteHours: 12, dailyRuns: Number.isFinite(daily) && daily > 0 ? daily : 3 },
+  }
+}
+
+export function makeSiteHandler(deps: SiteDeps | (() => SiteDeps) = () => depsFromEnv()) {
   return async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
     if (req.method === "OPTIONS") return send(res, 204, {})
     if (req.method !== "POST") return send(res, 405, { error: "method", message: "Use POST." }, { allow: "POST, OPTIONS" })

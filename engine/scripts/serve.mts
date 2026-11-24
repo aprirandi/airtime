@@ -33,7 +33,17 @@ const fake: Fetcher = async (rawUrl, o) => {
 let currentScenario = 0
 
 const api = makeHandler({ fetcher: fake, limiter: new MemoryLimiter(1000) })
-const siteApi = makeSiteHandler({ store: memoryStore(), fetcher: fake, createLimiter: new MemoryLimiter(1000), rescanLimiter: new MemoryLimiter(1000) })
+// A stand-in for the AI assistants, so the Asker can be tried with no key: every other answer names "Example Shop".
+let asked = 0
+const assistant = {
+  model: "stand-in",
+  async ask(q: string) { return `For "${q}" people often pick Kikki K or Milligram.${asked++ % 2 === 0 ? " Example Shop is a good choice too." : ""}` },
+  async complete(prompt: string) {
+    const n = prompt.split("ANSWER ").length - 1
+    return JSON.stringify({ answers: Array.from({ length: n }, (_, i) => ({ n: i + 1, stores: [{ name: "Kikki K", quote: "pick Kikki K or Milligram" }] })) })
+  },
+}
+const siteApi = makeSiteHandler({ store: memoryStore(), asker: assistant, askerLimits: { perSiteHours: 0, dailyRuns: 1000 }, fetcher: fake, createLimiter: new MemoryLimiter(1000), rescanLimiter: new MemoryLimiter(1000) })
 const root = join(import.meta.dirname, "..", "..", "web", "dist")
 const TYPES: Record<string, string> = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon" }
 
