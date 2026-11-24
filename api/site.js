@@ -24268,16 +24268,22 @@ function geminiProvider(apiKey, models, doFetch = fetch, wait = (ms) => new Prom
         const parts = JSON.parse(text).candidates?.[0]?.content?.parts ?? [];
         return parts.filter((p) => !p.thought).map((p) => p.text ?? "").join("").trim();
       }
+      let what = "";
+      try {
+        what = String(JSON.parse(text).error?.status ?? "").replace(/[^A-Z_]/g, "").slice(0, 30);
+      } catch {
+      }
+      const label = `HTTP ${res.status}${what ? ` ${what}` : ""}`;
       const daily = res.status === 429 && /PerDay|per day/i.test(text);
-      if (daily) throw new ProviderError("daily quota used up", "quota");
+      if (daily) throw new ProviderError(`${label}: daily quota used up`, "quota");
       if ([429, 500, 502, 503, 504].includes(res.status)) {
         if (attempt < 1) {
           await wait(2e3);
           continue;
         }
-        throw new ProviderError(`HTTP ${res.status}`, "rate");
+        throw new ProviderError(label, "rate");
       }
-      throw new ProviderError(`HTTP ${res.status}`);
+      throw new ProviderError(label);
     }
   };
   return {
@@ -24345,10 +24351,10 @@ function readOthers(raw, items, names) {
 async function askQuestion(provider, question, profile) {
   try {
     const answer = (await provider.ask(question)).slice(0, 6e3);
-    if (!answer) return { answer: "", named: false, failed: true, error: "other" };
+    if (!answer) return { answer: "", named: false, failed: true, error: "other", detail: "the assistant sent an empty answer" };
     return { answer, named: [profile.name, ...profile.aliases].some((n) => containsTerm(answer, n)), failed: false, error: "" };
   } catch (err) {
-    return { answer: "", named: false, failed: true, error: err instanceof ProviderError ? err.kind : "other" };
+    return { answer: "", named: false, failed: true, error: err instanceof ProviderError ? err.kind : "other", detail: String(err.message ?? "").slice(0, 80) };
   }
 }
 async function finishRun(profile, questions, answers, provider) {
@@ -24809,7 +24815,7 @@ function supabaseStore(baseUrl, key, doFetch = fetch) {
       return rows[0].id;
     },
     async saveAskerAnswer(runId, idx, a) {
-      await call("asker_answers?on_conflict=run_id,idx", { method: "POST", body: { run_id: runId, idx, ...a }, prefer: "resolution=merge-duplicates,return=minimal" });
+      await call("asker_answers?on_conflict=run_id,idx", { method: "POST", body: { run_id: runId, idx, answer: a.answer, named: a.named, failed: a.failed, error: a.error }, prefer: "resolution=merge-duplicates,return=minimal" });
     },
     async askerRunState(siteId, runId) {
       const runs = await call(`asker_runs?id=eq.${eq(runId)}&site_id=eq.${eq(siteId)}&select=id,status,ran_at,result&limit=1`);
@@ -24970,13 +24976,25 @@ async function handleSite(req, deps = {}) {
         if (state.status !== "running") return fail(409, "run_over", "This run is over.");
         const i = req.i;
         if (typeof i !== "number" || !Number.isInteger(i) || i < 0 || i >= state.questions.length) return fail(400, "bad_step", "Unknown question.");
+        let last;
         if (!state.answers[i]) {
-          const timedOut = { answer: "", named: false, failed: true, error: "rate" };
+          const timedOut = { answer: "", named: false, failed: true, error: "rate", detail: "no answer within the time allowed" };
           const answer = await within(askQuestion(deps.asker, state.questions[i], profile), timedOut);
           await store.saveAskerAnswer(state.id, i, answer);
           state.answers[i] = answer;
+          last = answer;
         }
-        return { status: 200, body: { done: Object.keys(state.answers).length, total: state.questions.length, quota: Object.values(state.answers).some((a) => a.error === "quota") } };
+        return {
+          status: 200,
+          body: {
+            done: Object.keys(state.answers).length,
+            total: state.questions.length,
+            quota: Object.values(state.answers).some((a) => a.error === "quota"),
+            // how this question went, so a run that gets no answers can be told apart from one that is only slow
+            answered: last ? !last.failed : Boolean(state.answers[i] && !state.answers[i].failed),
+            detail: last?.detail ?? ""
+          }
+        };
       }
       const scan = await store.latestScan(site.id);
       if (!scan) return fail(404, "not_found", "This page does not exist.");

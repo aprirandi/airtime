@@ -376,6 +376,17 @@ describe("asking AI assistants", () => {
     expect((await call(deps, { action: "ask_start", token: TOKEN })).status).toBe(200)
   })
 
+  it("tells the page how each question went, with what was wrong when it failed", async () => {
+    const refused: AskProvider = { model: "m", ask: async () => { throw new ProviderError("HTTP 404 NOT_FOUND") }, complete: async () => "{}" }
+    const bad = await pageWith({ asker: refused })
+    await call(bad.deps, { action: "profile", token: TOKEN, profile: PROFILE })
+    const r = await askAll(bad.deps)
+    expect(r.steps![0]!.body).toMatchObject({ answered: false, detail: "HTTP 404 NOT_FOUND" })
+    const good = await pageWith({ asker: assistant() })
+    await call(good.deps, { action: "profile", token: TOKEN, profile: PROFILE })
+    expect((await askAll(good.deps)).steps![0]!.body).toMatchObject({ answered: true, detail: "" })
+  })
+
   it("counts a question that takes too long as unanswered and still finishes with the others", async () => {
     let n = 0
     const slowFirst: AskProvider = { model: "m", ask: () => (n++ === 0 ? new Promise(() => {}) : Promise.resolve("Example Shop.")), complete: async () => "{}" }
@@ -398,7 +409,7 @@ describe("the Asker's rows in Supabase", () => {
     const store = supabaseStore("https://p.supabase.co", "K", doFetch)
     await store.setProfile("s1", { name: "N", aliases: [], city: "C", country: "", areas: [], categories: ["x"] })
     expect(await store.startAskerRun("s1", { ran_at: "2026-11-24T00:00:00.000Z", questions: ["q1", "q2"] })).toBe("run-1")
-    await store.saveAskerAnswer("run-1", 0, { answer: "a", named: true, failed: false, error: "" })
+    await store.saveAskerAnswer("run-1", 0, { answer: "a", named: true, failed: false, error: "rate", detail: "HTTP 503" })
     await store.finishAskerRun("run-1", "done", { model: "m", asked: 2, answered: 2, named: 1, items: [], rivals: [], readOthers: true, quota: false })
     await store.finishAskerRun("run-2", "failed", null)
     expect((await store.latestAskerRun("s1"))?.result).toEqual({ asked: 6 })
@@ -409,6 +420,7 @@ describe("the Asker's rows in Supabase", () => {
     expect(prof).toMatchObject({ method: "POST", url: "https://p.supabase.co/rest/v1/profiles?on_conflict=site_id" })
     expect(JSON.parse(start!.body!)).toMatchObject({ site_id: "s1", status: "running", asked: 2, answered: 0, result: { questions: ["q1", "q2"] } })
     expect(answer).toMatchObject({ method: "POST", url: "https://p.supabase.co/rest/v1/asker_answers?on_conflict=run_id,idx" })
+    expect(JSON.parse(answer!.body!)).toEqual({ run_id: "run-1", idx: 0, answer: "a", named: true, failed: false, error: "rate" }) // the detail is never stored
     expect(done).toMatchObject({ method: "PATCH", url: "https://p.supabase.co/rest/v1/asker_runs?id=eq.run-1" })
     expect(JSON.parse(done!.body!)).toMatchObject({ status: "done", asked: 2, answered: 2, named: 1, model: "m" })
     expect(JSON.parse(failed!.body!)).toEqual({ status: "failed" })

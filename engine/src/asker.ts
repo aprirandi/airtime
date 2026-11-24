@@ -140,16 +140,24 @@ export function geminiProvider(apiKey: string, models: { ask: string; work: stri
         const parts = ((JSON.parse(text) as { candidates?: { content?: { parts?: { text?: string; thought?: boolean }[] } }[] }).candidates?.[0]?.content?.parts) ?? []
         return parts.filter((p) => !p.thought).map((p) => p.text ?? "").join("").trim()
       }
+      // what Gemini calls the problem (for example NOT_FOUND or RESOURCE_EXHAUSTED); safe to show, it holds no key
+      let what = ""
+      try {
+        what = String((JSON.parse(text) as { error?: { status?: unknown } }).error?.status ?? "").replace(/[^A-Z_]/g, "").slice(0, 30)
+      } catch {
+        /* not JSON */
+      }
+      const label = `HTTP ${res.status}${what ? ` ${what}` : ""}`
       const daily = res.status === 429 && /PerDay|per day/i.test(text)
-      if (daily) throw new ProviderError("daily quota used up", "quota")
+      if (daily) throw new ProviderError(`${label}: daily quota used up`, "quota")
       if ([429, 500, 502, 503, 504].includes(res.status)) {
         if (attempt < 1) {
           await wait(2000)
           continue
         }
-        throw new ProviderError(`HTTP ${res.status}`, "rate")
+        throw new ProviderError(label, "rate")
       }
-      throw new ProviderError(`HTTP ${res.status}`)
+      throw new ProviderError(label)
     }
   }
   return {
@@ -227,16 +235,18 @@ export interface Answered {
   failed: boolean
   /** why it failed, when it did */
   error: "" | "quota" | "rate" | "other"
+  /** what went wrong, in a few safe words; shown to whoever is trying it, never stored */
+  detail?: string
 }
 
 /** One question to the assistant. Never throws: a failure is part of the answer. */
 export async function askQuestion(provider: AskProvider, question: string, profile: Profile): Promise<Answered> {
   try {
     const answer = (await provider.ask(question)).slice(0, 6000)
-    if (!answer) return { answer: "", named: false, failed: true, error: "other" }
+    if (!answer) return { answer: "", named: false, failed: true, error: "other", detail: "the assistant sent an empty answer" }
     return { answer, named: [profile.name, ...profile.aliases].some((n) => containsTerm(answer, n)), failed: false, error: "" }
   } catch (err) {
-    return { answer: "", named: false, failed: true, error: err instanceof ProviderError ? err.kind : "other" }
+    return { answer: "", named: false, failed: true, error: err instanceof ProviderError ? err.kind : "other", detail: String((err as Error).message ?? "").slice(0, 80) }
   }
 }
 

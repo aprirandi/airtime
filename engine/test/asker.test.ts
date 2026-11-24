@@ -66,6 +66,18 @@ function fake(answers: Record<string, string | Error>, extraction: (n: number) =
   }
 }
 
+describe("one question", () => {
+  it("keeps what went wrong in a few words when the assistant fails or says nothing", async () => {
+    const { askQuestion } = await import("../src/asker")
+    const refused: AskProvider = { model: "m", ask: async () => { throw new ProviderError("HTTP 404 NOT_FOUND") }, complete: async () => "{}" }
+    expect(await askQuestion(refused, "q", profile)).toMatchObject({ failed: true, error: "other", detail: "HTTP 404 NOT_FOUND" })
+    const silent: AskProvider = { model: "m", ask: async () => "", complete: async () => "{}" }
+    expect(await askQuestion(silent, "q", profile)).toMatchObject({ failed: true, detail: "the assistant sent an empty answer" })
+    const ok: AskProvider = { model: "m", ask: async () => "Try Handworks.", complete: async () => "{}" }
+    expect(await askQuestion(ok, "q", profile)).toEqual({ answer: "Try Handworks.", named: true, failed: false, error: "" })
+  })
+})
+
 describe("a run", () => {
   it("counts the answers that name the business, by looking for its name", async () => {
     const q = buildQuestions(profile)
@@ -154,6 +166,15 @@ describe("Gemini over REST", () => {
     let m = 0
     const flaky = geminiProvider("K", { ask: "a", work: "w" }, async () => (m++ === 0 ? reply(429, "slow down") : reply(200, { candidates: [{ content: { parts: [{ text: "ok" }] } }] })), async () => {})
     expect(await flaky.ask("q")).toBe("ok")
+  })
+
+  it("says what Gemini called a refusal, in safe words", async () => {
+    const g = geminiProvider("SECRETKEY", { ask: "a", work: "w" }, async () => reply(404, { error: { code: 404, status: "NOT_FOUND", message: "models/x is not found for API version v1beta" } }))
+    const err = await g.ask("q").catch((e: Error) => e)
+    expect((err as Error).message).toBe("HTTP 404 NOT_FOUND")
+    expect((err as Error).message).not.toContain("SECRETKEY")
+    const odd = geminiProvider("K", { ask: "a", work: "w" }, async () => reply(400, { error: { status: "<script>bad things</script>" } }))
+    expect(((await odd.ask("q").catch((e: Error) => e)) as Error).message).toBe("HTTP 400")
   })
 
   it("tells the daily quota from a short wait, and a refusal from both", async () => {
