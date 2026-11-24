@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import replay from "./replay.json"
 import { rowsFor } from "../src/audit"
 import { Response, type Fetcher } from "../src/http"
+import { buildFixes, siteName } from "../src/fixer"
 import { allPrompt } from "../src/prompts"
 import { coverage, gaps, limitedGaps, scoreRows } from "../src/score"
 import { collect } from "../src/snapshot"
@@ -49,6 +50,7 @@ describe("the TypeScript engine reaches the Python engine's conclusions", () => 
       expect(gaps(rows).map((r) => r.check_id)).toEqual(sc.expected.gaps)
       expect(limitedGaps(rows).map((r) => r.check_id)).toEqual(sc.expected.limited)
       expect(coverage(rows)).toEqual(sc.expected.coverage)
+      expect(buildFixes(rows, sc.platform, snap, siteName(snap))).toEqual(sc.expected.fixes)
       const gapRows = gaps(rows).map((g) => ({ check_id: g.check_id, tier: g.tier, evidence: g.evidence, details: (g as (typeof rows)[number]).details }))
       expect(allPrompt(gapRows, snap.base, sc.platform, "en", "2026-11-23")).toBe(sc.expected.prompt_all)
     })

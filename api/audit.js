@@ -21766,8 +21766,8 @@ function not_noindex(snap) {
   const robotsMeta = ["robots", "googlebot", "bingbot"].map((n) => metaContent(snap.homePage, n)).join(" ").toLowerCase();
   const header = snap.home.header("x-robots-tag").toLowerCase();
   if (robotsMeta.includes("noindex") || header.includes("noindex")) {
-    const sources = [...robotsMeta.includes("noindex") ? ["meta tag"] : [], ...header.includes("noindex") ? ["X-Robots-Tag header"] : []];
-    return failed("The homepage tells search engines not to index it (noindex).", { sources });
+    const sources2 = [...robotsMeta.includes("noindex") ? ["meta tag"] : [], ...header.includes("noindex") ? ["X-Robots-Tag header"] : []];
+    return failed("The homepage tells search engines not to index it (noindex).", { sources: sources2 });
   }
   return passed("No noindex in the homepage's meta tags or headers.");
 }
@@ -23220,6 +23220,515 @@ function coverage(rows) {
   };
 }
 
+// src/fixer.generated.json
+var fixer_generated_default = {
+  client: {
+    robots_txt: [
+      "A clear rulebook for AI crawlers",
+      "Aturan jelas untuk robot AI",
+      "AI assistants read it first to learn what they may look at.",
+      "Asisten AI membacanya lebih dulu untuk tahu apa yang boleh dilihat."
+    ],
+    ai_crawlers_allowed: [
+      "AI assistants can visit your website",
+      "Asisten AI bisa mengunjungi website Anda",
+      "If they are blocked, they cannot recommend your shop.",
+      "Kalau diblokir, mereka tidak bisa merekomendasikan toko Anda."
+    ],
+    sitemap: [
+      "A map of your pages",
+      "Peta halaman website",
+      "It helps assistants find every product and page.",
+      "Membantu asisten menemukan semua produk dan halaman."
+    ],
+    raw_html_content: [
+      "Your homepage is easy for assistants to read",
+      "Beranda mudah dibaca asisten AI",
+      "Assistants read the page as it is sent, without running its scripts, so the words and headings must be there.",
+      "Asisten membaca halaman apa adanya tanpa menjalankan skrip, jadi teks dan judulnya harus sudah ada."
+    ],
+    redirects_clean: [
+      "Your address opens the page directly",
+      "Alamat website langsung membuka halamannya",
+      "A long chain of redirects makes assistants give up.",
+      "Rantai pengalihan yang panjang membuat asisten menyerah."
+    ],
+    public_no_login: [
+      "Nothing blocks the way in",
+      "Tidak ada yang menghalangi masuk",
+      "A login or store password keeps assistants out.",
+      "Login atau kata sandi toko membuat asisten tidak bisa masuk."
+    ],
+    not_noindex: [
+      "Your homepage may appear in search",
+      "Beranda boleh muncul di pencarian",
+      "A hidden homepage cannot be found or recommended.",
+      "Beranda yang disembunyikan tidak bisa ditemukan atau direkomendasikan."
+    ],
+    not_found_markdown: [
+      "A helpful message on pages that do not exist",
+      "Pesan yang membantu di halaman yang tidak ada",
+      "It points assistants to the right place instead of a dead end.",
+      "Mengarahkan asisten ke tempat yang benar, bukan jalan buntu."
+    ],
+    jsonld_organization: [
+      "Your business introduces itself",
+      "Bisnis Anda memperkenalkan diri",
+      "Assistants use it to know who you are and what you sell.",
+      "Asisten memakainya untuk tahu siapa Anda dan apa yang Anda jual."
+    ],
+    organization_completeness: [
+      "Contact details and address for assistants",
+      "Kontak dan alamat toko untuk asisten AI",
+      "So assistants can tell people where to find you and how to reach you.",
+      "Supaya asisten bisa memberi tahu orang di mana menemukan dan bagaimana menghubungi Anda."
+    ],
+    metadata_complete: [
+      "Complete page details",
+      "Keterangan halaman yang lengkap",
+      "Assistants and search engines use them to describe your pages.",
+      "Asisten dan mesin pencari memakainya untuk menjelaskan halaman Anda."
+    ],
+    pricing_structured: [
+      "Prices assistants can read",
+      "Harga yang bisa dibaca asisten",
+      "Assistants can only quote a price they can read.",
+      "Asisten hanya bisa menyebut harga yang bisa mereka baca."
+    ],
+    trust_pages: [
+      "About, Contact and Privacy pages",
+      "Halaman Tentang, Kontak, dan Privasi",
+      "They show assistants that your shop is real and trustworthy.",
+      "Menunjukkan ke asisten bahwa toko Anda nyata dan layak dipercaya."
+    ],
+    markdown_negotiation: [
+      "A plain-text version for assistants",
+      "Versi teks polos untuk asisten",
+      "It is quicker and cheaper for an assistant to read.",
+      "Lebih cepat dan murah dibaca oleh asisten."
+    ],
+    llms_txt: [
+      "A short guide to your website for assistants",
+      "Panduan singkat website untuk asisten AI",
+      "It tells assistants which pages matter most.",
+      "Memberi tahu asisten halaman mana yang paling penting."
+    ],
+    agents_md: [
+      "Instructions for shopping assistants",
+      "Petunjuk untuk asisten belanja",
+      "It tells assistants how to find and buy from your shop.",
+      "Memberi tahu asisten cara menemukan dan membeli dari toko Anda."
+    ],
+    content_signals: [
+      "Your rules on AI using your content",
+      "Aturan Anda soal AI memakai konten toko",
+      "You decide whether AI may learn from your content, show it in search, or use it in answers.",
+      "Anda yang memutuskan apakah AI boleh belajar dari konten Anda, menampilkannya di pencarian, atau memakainya dalam jawaban."
+    ],
+    link_headers: [
+      "Pointers to your guides",
+      "Penunjuk ke panduan website",
+      "They help assistants find your guides straight away.",
+      "Membantu asisten langsung menemukan panduan Anda."
+    ],
+    mcp_server_card: [
+      "An identity card for AI tools",
+      "Kartu identitas untuk alat AI",
+      "AI tools use it to connect to your shop.",
+      "Alat AI memakainya untuk terhubung ke toko Anda."
+    ],
+    agent_skills_index: [
+      "A list of what assistants can do on your site",
+      "Daftar hal yang bisa dilakukan asisten di website",
+      "It shows assistants what they can do for a customer.",
+      "Menunjukkan apa yang bisa dilakukan asisten untuk pelanggan."
+    ],
+    ard_manifest: [
+      "A catalogue so AI can find your services",
+      "Katalog agar AI menemukan layanan Anda",
+      "It makes your shop easier to discover.",
+      "Membuat toko Anda lebih mudah ditemukan."
+    ],
+    auth_md: [
+      "How assistants sign in",
+      "Cara asisten AI masuk",
+      "It explains how an assistant can act for a customer.",
+      "Menjelaskan bagaimana asisten bisa bertindak untuk pelanggan."
+    ],
+    oauth_discovery: [
+      "Sign-in details for AI tools",
+      "Keterangan masuk untuk alat AI",
+      "AI tools need it to log in safely.",
+      "Alat AI membutuhkannya untuk masuk dengan aman."
+    ],
+    oauth_protected_resource: [
+      "Access rules for AI tools",
+      "Aturan akses untuk alat AI",
+      "They say what an AI tool may do and how to ask.",
+      "Menjelaskan apa yang boleh dilakukan alat AI dan cara memintanya."
+    ]
+  },
+  questions: {
+    organization_completeness: [
+      [
+        "Which phone number or email should customers use?",
+        "Nomor telepon atau email mana yang dipakai pelanggan?"
+      ],
+      [
+        "What is the shop's street address (street, suburb, postcode)?",
+        "Apa alamat lengkap toko (jalan, kota, kode pos)?"
+      ]
+    ],
+    jsonld_organization: [
+      [
+        "In one or two sentences, how would you describe your business?",
+        "Dalam satu atau dua kalimat, bagaimana Anda menjelaskan bisnis ini?"
+      ]
+    ],
+    content_signals: [
+      [
+        "May AI companies train their models on your content?",
+        "Bolehkah perusahaan AI melatih modelnya dengan konten Anda?"
+      ],
+      [
+        "May your content appear in AI search results?",
+        "Bolehkah konten Anda muncul di hasil pencarian AI?"
+      ],
+      [
+        "May AI use your content to answer a customer's question?",
+        "Bolehkah AI memakai konten Anda untuk menjawab pertanyaan pelanggan?"
+      ]
+    ],
+    ai_crawlers_allowed: [
+      [
+        "Is blocking these AI assistants on purpose?",
+        "Apakah pemblokiran asisten AI ini disengaja?"
+      ]
+    ],
+    not_noindex: [
+      [
+        "Is hiding the homepage from search on purpose?",
+        "Apakah beranda sengaja disembunyikan dari pencarian?"
+      ]
+    ],
+    public_no_login: [
+      [
+        "Is the store password on purpose?",
+        "Apakah kata sandi toko ini disengaja?"
+      ]
+    ],
+    trust_pages: [
+      [
+        "Can you send the text for the missing pages, including your privacy policy?",
+        "Bisakah Anda mengirim teks untuk halaman yang belum ada, termasuk kebijakan privasi?"
+      ]
+    ],
+    llms_txt: [
+      [
+        "Which pages matter most for assistants to know (about, products, policies)?",
+        "Halaman mana yang paling penting diketahui asisten (tentang, produk, kebijakan)?"
+      ]
+    ],
+    agents_md: [
+      [
+        "How would you describe your business in a few sentences, and which pages matter most?",
+        "Bagaimana Anda menjelaskan bisnis ini dalam beberapa kalimat, dan halaman mana yang paling penting?"
+      ]
+    ]
+  },
+  status_text: {
+    not_started: [
+      "The Fixer will prepare this. Nothing is needed from you.",
+      "Fixer akan menyiapkan ini. Tidak ada yang perlu Anda lakukan."
+    ],
+    needs_owner: [
+      "The Fixer needs your answer before it can prepare this.",
+      "Fixer membutuhkan jawaban Anda sebelum bisa menyiapkan ini."
+    ],
+    draft_ready: [
+      "A draft is ready. Nothing changes on your website until you approve it.",
+      "Draf sudah siap. Tidak ada yang berubah di website Anda sampai Anda menyetujuinya."
+    ],
+    platform_held: [
+      "{platform} controls this, so you cannot change it directly. We will check again after {platform} updates.",
+      "{platform} yang mengatur ini, jadi Anda tidak bisa mengubahnya langsung. Kami akan mengecek lagi setelah {platform} diperbarui."
+    ],
+    in_progress: [
+      "The Fixer is working on this.",
+      "Fixer sedang mengerjakan ini."
+    ],
+    done: [
+      "Done.",
+      "Selesai."
+    ]
+  },
+  statuses: [
+    "not_started",
+    "needs_owner",
+    "draft_ready",
+    "platform_held",
+    "in_progress",
+    "done"
+  ]
+};
+
+// src/fixer.ts
+var CLIENT = fixer_generated_default.client;
+var QUESTIONS = fixer_generated_default.questions;
+var STATUS_TEXT = fixer_generated_default.status_text;
+var PHONE = /(?<![\d.])(?:\+?61\s?\(?0?\d\)?|\(?0\d\)?)[\s-]?\d{4}[\s-]?\d{4}(?!\d)|(?<![\d.])1[38]00[\s-]?\d{3}[\s-]?\d{3}(?!\d)/g;
+var EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g;
+var STATE_POSTCODE = /\b(VIC|NSW|QLD|SA|WA|TAS|ACT|NT)\s+(\d{4})\b/g;
+var STREET_START = /\b\d{1,5}[A-Za-z]?(?:[/-]\d{1,5})?\s+[A-Za-z]/g;
+var STREET_WORD = /\b(St|Street|Rd|Road|Ave|Avenue|Lane|Ln|Dr|Drive|Hwy|Highway|Pde|Parade|Way|Court|Ct|Place|Pl|Blvd|Boulevard|Terrace|Tce|Crescent|Cres)\b\.?/i;
+var NOT_EMAIL = ["sentry", "example.", "@2x", ".png", ".jpg", ".webp", "wixpress", "shopify.com", "yourdomain"];
+var PLACE_STOP = /* @__PURE__ */ new Set([
+  "store",
+  "shop",
+  "address",
+  "visit",
+  "us",
+  "contact",
+  "location",
+  "find",
+  "phone",
+  "ph",
+  "tel",
+  "call",
+  "our",
+  "the",
+  "open",
+  "at",
+  "email",
+  "stores",
+  "locations",
+  "map"
+]);
+var PLACE_PREFIX = /* @__PURE__ */ new Set(["south", "north", "east", "west", "port", "mount", "mt", "glen", "box", "st", "new", "point"]);
+function sources(snap) {
+  const out = [];
+  for (const kind of ["contact", "about"]) {
+    const t = snap.trust[kind];
+    if (t) out.push([kind, t[1]]);
+  }
+  out.push(["home", snap.homePage]);
+  return out;
+}
+var matches = (re, text) => [...text.matchAll(re)];
+var unique = (items) => [...new Set(items)];
+function findPhones(pages) {
+  for (const [kind, page] of pages) {
+    const found = unique(matches(PHONE, page.text).map((m) => collapse(m[0])));
+    if (found.length) return [found.slice(0, 3), kind];
+  }
+  return null;
+}
+function findEmail(pages) {
+  for (const [kind, page] of pages) {
+    const found = matches(EMAIL, page.text).map((m) => m[0].toLowerCase()).filter((m) => !NOT_EMAIL.some((b) => m.includes(b)));
+    if (found.length) {
+      const counts = /* @__PURE__ */ new Map();
+      for (const f of found) counts.set(f, (counts.get(f) ?? 0) + 1);
+      let best = found[0];
+      for (const [k, v] of counts) if (v > counts.get(best)) best = k;
+      return [best, kind];
+    }
+  }
+  return null;
+}
+var isUpperAscii = (c) => /^[A-Z]$/.test(c);
+var nameWord = (w) => isUpperAscii(w.slice(0, 1)) && /^[A-Za-z]+$/.test(w.replace(/'/g, "").replace(/-/g, ""));
+var stripPunct = (s) => s.replace(/^[,.:]+|[,.:]+$/g, "");
+function locality(before, between) {
+  const after = between.replace(/^[ ,.]+|[ ,.]+$/g, "");
+  const words = after.split(/\s+/).filter(Boolean);
+  if (words.length > 0 && words.length <= 3 && words.every(nameWord)) return after;
+  const tokens = before.split(/\s+/).filter(Boolean);
+  if (tokens.length) {
+    const last = stripPunct(tokens[tokens.length - 1]);
+    if (isUpperAscii(last.slice(0, 1)) && /^[A-Za-z]+$/.test(last) && !PLACE_STOP.has(last.toLowerCase())) {
+      const prev = tokens.length > 1 ? stripPunct(tokens[tokens.length - 2]) : "";
+      if (tokens.length > 1 && PLACE_PREFIX.has(prev.toLowerCase())) return `${prev} ${last}`;
+      return last;
+    }
+  }
+  return "";
+}
+function findAddresses(pages) {
+  for (const [kind, page] of pages) {
+    const order = [];
+    const base = /* @__PURE__ */ new Map();
+    const votes = /* @__PURE__ */ new Map();
+    for (const m of matches(STATE_POSTCODE, page.text)) {
+      const at = m.index;
+      const window = page.text.slice(Math.max(0, at - 90), at);
+      const starts = matches(STREET_START, window).map((x) => x.index).reverse();
+      for (const s of starts) {
+        const chunk = window.slice(s);
+        const w = STREET_WORD.exec(chunk);
+        if (!w) continue;
+        const end = w.index + w[0].length;
+        const street = collapse(chunk.slice(0, end));
+        const key = `${street.toLowerCase()}|${m[2]}`;
+        if (!base.has(key)) {
+          base.set(key, { street, locality: "", region: m[1], postcode: m[2], text: "" });
+          order.push(key);
+        }
+        const loc = locality(window.slice(0, s), chunk.slice(end));
+        if (loc) {
+          const vk = `${key}\0${loc}`;
+          const v = votes.get(vk);
+          if (v) v.n += 1;
+          else votes.set(vk, { key, locality: loc, n: 1 });
+        }
+        break;
+      }
+    }
+    const used = /* @__PURE__ */ new Set();
+    const ranked = [...votes.values()].sort((a, b) => b.n - a.n || order.indexOf(a.key) - order.indexOf(b.key));
+    for (const v of ranked) {
+      const a = base.get(v.key);
+      if (!a.locality && !used.has(v.locality)) {
+        a.locality = v.locality;
+        used.add(v.locality);
+      }
+    }
+    const found = order.map((k) => base.get(k));
+    for (const a of found) a.text = collapse(`${a.street} ${a.locality} ${a.region} ${a.postcode}`);
+    if (found.length) return [found.slice(0, 3), kind];
+  }
+  return null;
+}
+function findDescription(snap) {
+  for (const meta of snap.homePage.meta) {
+    const key = (meta["name"] || meta["property"] || "").toLowerCase();
+    if ((key === "description" || key === "og:description") && cpLen(collapse(meta["content"] ?? "")) >= 40) {
+      return [clip(collapse(meta["content"]), 300), "home"];
+    }
+  }
+  const about = snap.trust["about"];
+  if (about) {
+    const taken = [];
+    let body = about[1].text;
+    for (const [, heading] of about[1].headings) if (heading) body = body.replace(heading, () => " ");
+    for (const sentence of body.split(/(?<=[.!?])\s+/)) {
+      const s = collapse(sentence);
+      if (cpLen(s) >= 60 && !s.includes("|") && !s.includes("\xA9")) taken.push(s);
+      if (cpLen(taken.join(" ")) >= 120 || taken.length === 2) break;
+    }
+    if (taken.length) return [clip(taken.join(" "), 300), "about"];
+  }
+  return null;
+}
+var fact = (kind, value, source, label, label_id) => ({ kind, value, source, label, label_id });
+function draftOrganizationCompleteness(snap, name) {
+  const pages = sources(snap);
+  const phones = findPhones(pages);
+  const email = findEmail(pages);
+  const addresses = findAddresses(pages);
+  if (!phones && !email && !addresses) return null;
+  const org = { "@context": "https://schema.org", "@type": "Organization", name, url: snap.base };
+  const existing = orgOf(snap);
+  if (existing && typeof existing["@type"] === "string") org["@type"] = existing["@type"];
+  const confirm = [];
+  const answered = [];
+  if (phones || email) {
+    const numbers = phones ? phones[0] : [null];
+    const points = numbers.map((n) => {
+      const p = { "@type": "ContactPoint", contactType: "customer service" };
+      if (n) p["telephone"] = n;
+      if (email) p["email"] = email[0];
+      return p;
+    });
+    org["contactPoint"] = points.length === 1 ? points[0] : points;
+    for (const n of phones ? phones[0] : []) confirm.push(fact("phone", n, phones[1], "Phone", "Telepon"));
+    if (email) confirm.push(fact("email", email[0], email[1], "Email", "Email"));
+    answered.push(0);
+  }
+  if (addresses) {
+    const places = addresses[0].map((a) => {
+      const p = { "@type": "PostalAddress", streetAddress: a.street, addressRegion: a.region, postalCode: a.postcode, addressCountry: "AU" };
+      if (a.locality) p["addressLocality"] = a.locality;
+      confirm.push(fact("address", a.text, addresses[1], "Address", "Alamat"));
+      return p;
+    });
+    org["address"] = places.length === 1 ? places[0] : places;
+    answered.push(1);
+  }
+  return { jsonld: org, confirm, answered };
+}
+function draftJsonldOrganization(snap, name) {
+  const found = findDescription(snap);
+  if (!found) return null;
+  const [text, source] = found;
+  const org = { "@context": "https://schema.org", "@type": "Organization", name, url: snap.base, description: text };
+  return { jsonld: org, confirm: [fact("description", text, source, "Description", "Deskripsi")], answered: [0] };
+}
+function draftFor(checkId, snap, name) {
+  if (checkId === "organization_completeness") return draftOrganizationCompleteness(snap, name);
+  if (checkId === "jsonld_organization") return draftJsonldOrganization(snap, name);
+  return null;
+}
+function siteName(snap) {
+  const org = orgOf(snap);
+  const name = org?.["name"];
+  if (typeof name === "string" && collapse(name)) return clip(collapse(name), 80);
+  const og = collapse(metaContent(snap.homePage, "og:site_name"));
+  if (og) return clip(og, 80);
+  let host = "";
+  try {
+    host = new URL(snap.base).host.toLowerCase();
+  } catch {
+    host = "";
+  }
+  return host.startsWith("www.") ? host.slice(4) : host;
+}
+function planFix(row, platform, position, draft = null) {
+  const cid = row.check_id;
+  const [titleEn, titleId, whyEn, whyId] = CLIENT[cid];
+  const limited = Boolean(row.controlled_by);
+  let questions = QUESTIONS[cid] ?? [];
+  let status2;
+  if (limited) status2 = "platform_held";
+  else if (draft && !questions.length) {
+    draft = null;
+    status2 = "not_started";
+  } else if (draft) {
+    status2 = "draft_ready";
+    const answered = new Set(draft.answered);
+    questions = questions.filter((_, i) => !answered.has(i));
+  } else if (questions.length) status2 = "needs_owner";
+  else status2 = "not_started";
+  const keep = status2 === "needs_owner" || status2 === "draft_ready";
+  const name = platform ? platform.charAt(0).toUpperCase() + platform.slice(1).toLowerCase() : "";
+  const [sayEn, sayId] = STATUS_TEXT[status2];
+  const fill = (s) => s.split("{platform}").join(name);
+  return {
+    check_id: cid,
+    position,
+    status: status2,
+    tier: row.tier,
+    draft,
+    title: titleEn,
+    title_id: titleId,
+    why: whyEn,
+    why_id: whyId,
+    summary: fill(sayEn),
+    summary_id: fill(sayId),
+    questions: keep ? questions.map(([en, id]) => ({ en, id })) : [],
+    confirm: []
+  };
+}
+function planAll(rows, platform, drafts = {}) {
+  const ordered2 = [...gaps(rows), ...limitedGaps(rows)];
+  return ordered2.map((r, i) => planFix(r, platform, i + 1, drafts[r.check_id] ?? null));
+}
+function buildFixes(rows, platform, snap, name) {
+  const drafts = {};
+  for (const r of rows) if (!r.controlled_by) drafts[r.check_id] = draftFor(r.check_id, snap, name);
+  return planAll(rows, platform, drafts).map(({ draft, ...fix }) => ({ ...fix, confirm: draft ? draft.confirm : [] }));
+}
+
 // src/audit.ts
 var ENGINE = "airtime-auditor/2";
 function runOne(id, snapshot) {
@@ -23295,6 +23804,7 @@ async function runAudit(fetch, options) {
     checks,
     gaps: fixable.map((g) => g.check_id),
     limited_gaps: limited.map((g) => g.check_id),
+    fixes: buildFixes(rows, platform, snapshot, siteName(snapshot)),
     prompt_all: allPrompt(gapRows, target, platform, "en", scanned),
     prompt_all_id: allPrompt(gapRows, target, platform, "id", scanned),
     fetches: snapshot.fetches.map((f) => f.summary())

@@ -5,22 +5,30 @@ Nothing is published. Pure functions over the Snapshot, so the same pages always
 
 Version 0 reads Australian phone numbers and addresses (state + postcode); other countries give no address draft
 and the owner is asked instead.
+
+The TypeScript engine (engine/src/fixer.ts) does the same for the website check, and engine/test/golden.json holds cases
+it must reproduce exactly. So the patterns read ASCII only (re.ASCII, ASCII letter checks) and positions are counted
+the way JavaScript counts them in text without emoji; keep the two in step when changing either.
 """
 
 from __future__ import annotations
 
 import re
+import urllib.parse
 from collections import Counter
 
 from airtime.agents.auditor.checks import _org
 from airtime.agents.auditor.htmlparse import Page
 from airtime.agents.auditor.snapshot import Snapshot
 
-PHONE = re.compile(r"(?<![\d.])(?:\+?61\s?\(?0?\d\)?|\(?0\d\)?)[\s-]?\d{4}[\s-]?\d{4}(?!\d)|(?<![\d.])1[38]00[\s-]?\d{3}[\s-]?\d{3}(?!\d)")
-EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
-STATE_POSTCODE = re.compile(r"\b(VIC|NSW|QLD|SA|WA|TAS|ACT|NT)\s+(\d{4})\b")
-STREET_START = re.compile(r"\b\d{1,5}[A-Za-z]?(?:[/-]\d{1,5})?\s+[A-Za-z]")
-STREET_WORD = re.compile(r"\b(St|Street|Rd|Road|Ave|Avenue|Lane|Ln|Dr|Drive|Hwy|Highway|Pde|Parade|Way|Court|Ct|Place|Pl|Blvd|Boulevard|Terrace|Tce|Crescent|Cres)\b\.?", re.I)
+A = re.ASCII
+PHONE = re.compile(r"(?<![\d.])(?:\+?61\s?\(?0?\d\)?|\(?0\d\)?)[\s-]?\d{4}[\s-]?\d{4}(?!\d)|(?<![\d.])1[38]00[\s-]?\d{3}[\s-]?\d{3}(?!\d)", A)
+EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}", A)
+STATE_POSTCODE = re.compile(r"\b(VIC|NSW|QLD|SA|WA|TAS|ACT|NT)\s+(\d{4})\b", A)
+STREET_START = re.compile(r"\b\d{1,5}[A-Za-z]?(?:[/-]\d{1,5})?\s+[A-Za-z]", A)
+STREET_WORD = re.compile(r"\b(St|Street|Rd|Road|Ave|Avenue|Lane|Ln|Dr|Drive|Hwy|Highway|Pde|Parade|Way|Court|Ct|Place|Pl|Blvd|Boulevard|Terrace|Tce|Crescent|Cres)\b\.?", re.I | A)
+UPPER = re.compile(r"[A-Z]", A)
+LETTERS = re.compile(r"[A-Za-z]+", A)
 NOT_EMAIL = ("sentry", "example.", "@2x", ".png", ".jpg", ".webp", "wixpress", "shopify.com", "yourdomain")
 
 SOURCE_TEXT = {"contact": ("your Contact page", "halaman Kontak Anda"), "about": ("your About page", "halaman Tentang Anda"),
@@ -64,16 +72,20 @@ PLACE_STOP = {"store", "shop", "address", "visit", "us", "contact", "location", 
 PLACE_PREFIX = {"south", "north", "east", "west", "port", "mount", "mt", "glen", "box", "st", "new", "point"}
 
 
+def _name_word(w: str) -> bool:
+    return bool(UPPER.fullmatch(w[:1])) and bool(LETTERS.fullmatch(w.replace("'", "").replace("-", "")))
+
+
 def _locality(before: str, between: str) -> str:
     """The suburb: written after the street ("123 Smith St Richmond VIC") or just before the number ("Richmond 123 Smith St")."""
     after = between.strip(" ,.")
     words = after.split()
-    if 0 < len(words) <= 3 and all(w[:1].isupper() and w.replace("'", "").replace("-", "").isalpha() for w in words):
+    if 0 < len(words) <= 3 and all(_name_word(w) for w in words):
         return after
     tokens = before.split()
     if tokens:
         last = tokens[-1].strip(",.:")
-        if last[:1].isupper() and last.isalpha() and last.lower() not in PLACE_STOP:
+        if UPPER.fullmatch(last[:1]) and LETTERS.fullmatch(last) and last.lower() not in PLACE_STOP:
             if len(tokens) > 1 and tokens[-2].strip(",.:").lower() in PLACE_PREFIX:
                 return f"{tokens[-2].strip(',.:')} {last}"
             return last
@@ -196,6 +208,19 @@ def draft_jsonld_organization(snap: Snapshot, name: str) -> dict | None:
 
 
 DRAFTERS = {"organization_completeness": draft_organization_completeness, "jsonld_organization": draft_jsonld_organization}
+
+
+def site_name(snap: Snapshot) -> str:
+    """What to call a site that has no configured name: its Organization name, its og:site_name, else its host."""
+    org = _org(snap)
+    name = org.get("name") if org else None
+    if isinstance(name, str) and _clean(name):
+        return _clean(name)[:80]
+    og = _clean(snap.home_page.meta_content("og:site_name"))
+    if og:
+        return og[:80]
+    host = urllib.parse.urlsplit(snap.base).netloc.lower()
+    return host[4:] if host.startswith("www.") else host
 
 
 def draft_for(check_id: str, snap: Snapshot, name: str) -> dict | None:

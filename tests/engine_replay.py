@@ -24,6 +24,8 @@ from auditor_site import HOME, LOREM, ORG, ORIGIN, PRODUCT, FakeSite, good_route
 from airtime.agents.auditor import snapshot as snap_mod  # noqa: E402
 from airtime.agents.auditor.agent import build_row, run_one  # noqa: E402
 from airtime.agents.auditor.prompts import all_prompt  # noqa: E402
+from airtime.agents.fixer.agent import build_fixes  # noqa: E402
+from airtime.agents.fixer.drafts import site_name  # noqa: E402
 from airtime.agents.auditor.registry import REGISTRY  # noqa: E402
 from airtime.agents.auditor.score import coverage, gaps, limited_gaps, score_rows  # noqa: E402
 from airtime.config import load_store_config  # noqa: E402
@@ -181,6 +183,7 @@ def record(routes, base_url: str, platform: str, product_url: str) -> dict:
         "expected": {"base": snap.base, "rows": expected_rows, "score": result,
                      "gaps": [g["check_id"] for g in gaps(rows)], "limited": [g["check_id"] for g in limited_gaps(rows)],
                      "coverage": coverage(rows),
+                     "fixes": build_fixes(rows, platform, snap, site_name(snap)),
                      "prompt_all": all_prompt(gap_rows, snap.base, platform, "en", "2026-11-23")},
     }
 

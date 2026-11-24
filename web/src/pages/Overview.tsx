@@ -16,7 +16,7 @@ const STATUS_VARIANT: Record<FixStatus, "success" | "warning" | "outline" | "sec
   done: "success",
 }
 
-function FixCard({ fix }: { fix: Fix }) {
+export function FixCard({ fix }: { fix: Fix }) {
   const { t, pick, lang } = useI18n()
   return (
     <Card>

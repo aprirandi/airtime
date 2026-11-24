@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { ArrowRight, ClipboardCopy, ListChecks, Loader2, Search, Gauge } from "lucide-react"
 
 import { AuditView } from "@/components/Audit"
+import { FixCard } from "@/pages/Overview"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useI18n } from "@/lib/i18n"
@@ -150,6 +151,19 @@ export function Scan({ url, platform, go }: { url: string; platform: string; go:
         <div className="space-y-3">
           {state.result.cached && <p className="text-muted-foreground text-xs">{t("scan.cached")}</p>}
           <AuditView audit={state.result} name={state.host} variant="public" />
+          {(state.result.fixes?.length ?? 0) > 0 && (
+            <section className="space-y-3 pt-3">
+              <div>
+                <h2 className="text-lg font-semibold">{t("ov.fixes")}</h2>
+                <p className="text-muted-foreground text-sm">{t("scan.fixesSub")}</p>
+              </div>
+              <div className="grid gap-3 lg:grid-cols-2">
+                {state.result.fixes?.map((f) => (
+                  <FixCard key={f.check_id} fix={f} />
+                ))}
+              </div>
+            </section>
+          )}
           <div className="text-center">
             <Button variant="outline" onClick={() => go("#/")}>
               {t("scan.again")}
