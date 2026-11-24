@@ -7,7 +7,7 @@ import type { Fetcher } from "./http"
 import { allPrompt, fixPrompt } from "./prompts"
 import { REGISTRY } from "./registry"
 import { coverage, gaps, limitedGaps, scoreRows } from "./score"
-import { buildFixes, fixDrafts, siteName } from "./fixer"
+import { buildFixes, fixDrafts, profileHint, siteName, siteSummary } from "./fixer"
 import { collect, type ScanConfig, type Snapshot } from "./snapshot"
 import type { RegistryCheck, Row } from "./types"
 
@@ -81,6 +81,8 @@ export async function runAudit(fetch: Fetcher, options: AuditOptions) {
     gaps: fixable.map((g) => g.check_id), limited_gaps: limited.map((g) => g.check_id),
     fixes: buildFixes(rows, platform, snapshot, siteName(snapshot)),
     fix_drafts: fixDrafts(rows, snapshot, siteName(snapshot)),
+    profile_hint: profileHint(snapshot),
+    site_summary: siteSummary(snapshot),
     prompt_all: allPrompt(gapRows, target, platform, "en", scanned),
     prompt_all_id: allPrompt(gapRows, target, platform, "id", scanned),
     fetches: snapshot.fetches.map((f) => f.summary()),

@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { ArrowDown, ArrowUp, Check, Copy, Loader2, Minus, RefreshCw } from "lucide-react"
 
 import { AuditView, CopyButton } from "@/components/Audit"
-import { AskerSection } from "@/components/AskerSection"
+import { AskerSection, type AskState } from "@/components/AskerSection"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { fmtDate } from "@/lib/format"
 import { useI18n, type T } from "@/lib/i18n"
 import { ScanFailure } from "@/lib/scan"
-import { getSite, rescanSite, setFix } from "@/lib/site"
+import { getSite, rescanSite, runAsk, setFix } from "@/lib/site"
 import type { Fix, FixChoice, Guide, SiteView } from "@/lib/types"
 import { FixList, mostImportant, type FixMeta } from "@/components/FixList"
 import { cn } from "@/lib/utils"
@@ -136,6 +136,8 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
   const [state, setState] = useState<State>({ kind: "loading" })
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [ask, setAsk] = useState<AskState>({ kind: "idle" })
+  const triedAsk = useRef(false)
 
   const fail = (err: unknown) => {
     const f = err instanceof ScanFailure ? err : new ScanFailure("failed", "failed")
@@ -152,18 +154,57 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
   }, [token])
 
   const act = useCallback(
-    async (job: () => Promise<SiteView>) => {
+    async (job: () => Promise<SiteView>): Promise<SiteView | undefined> => {
       setBusy(true)
       try {
-        setState({ kind: "ready", view: await job() })
+        const view = await job()
+        setState({ kind: "ready", view })
+        return view
       } catch (err) {
         fail(err)
+        return undefined
       } finally {
         setBusy(false)
       }
     },
     []
   )
+
+  // Asking AI assistants starts by itself: the pages tell who and where the business is, and its homepage what it sells.
+  // `quiet` is for a run nobody asked for (after a re-check): if it is not allowed yet, say nothing.
+  const startAsk = useCallback(
+    async (quiet = false) => {
+      setAsk({ kind: "running", done: 0, total: 6 })
+      try {
+        const view = await runAsk(token, (p) => setAsk({ kind: "running", ...p }))
+        setState({ kind: "ready", view })
+        setAsk({ kind: "idle" })
+      } catch (err) {
+        const f = err instanceof ScanFailure ? err : new ScanFailure("failed", "failed")
+        if (f.code === "need_profile") setAsk({ kind: "need", hint: (f.body as { hint: Extract<AskState, { kind: "need" }>["hint"] }).hint })
+        else if (quiet && ["asked_recently", "busy_today", "asking_now"].includes(f.code)) setAsk({ kind: "idle" })
+        else setAsk({ kind: "error", code: f.code, message: f.message })
+      }
+    },
+    [token]
+  )
+
+  useEffect(() => {
+    if (state.kind !== "ready" || triedAsk.current) return
+    const a = state.view.asker
+    if (a.enabled && a.history.length === 0) {
+      triedAsk.current = true
+      void startAsk()
+    }
+  }, [state, startAsk])
+
+  const recheck = async () => {
+    const view = await act(() => rescanSite(token))
+    const a = view?.asker
+    const last = a?.history.at(-1)
+    // after a re-check, ask again by itself when enough time has passed since the last time
+    if (view && a?.enabled && last && Date.now() - new Date(last.ran_at).getTime() > a.perSiteHours * 3_600_000) void startAsk(true)
+  }
 
   if (state.kind === "loading") {
     return (
@@ -255,7 +296,7 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
               {copied ? <Check /> : <Copy />} {copied ? t("audit.copied") : t("site.copyLink")}
             </Button>
             {current === "audit" && (
-              <Button onClick={() => act(() => rescanSite(token))} disabled={busy} className="gap-2">
+              <Button onClick={recheck} disabled={busy} className="gap-2">
                 {busy ? <Loader2 className="animate-spin" /> : <RefreshCw />} {busy ? t("site.rechecking") : t("site.recheck")}
               </Button>
             )}
@@ -264,13 +305,21 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
         {askerOn && (
           <nav className="flex flex-wrap border-b" aria-label={view.site.host}>
             {tabLink("audit", t("site.tab.audit"), openLeft > 0 ? t("site.tab.todo", { n: openLeft }) : "")}
-            {tabLink("ask", t("site.tab.ask"), asker.latest ? t("site.tab.named", { named: asker.latest.named, answered: asker.latest.answered }) : t("site.tab.notAsked"))}
+            {tabLink(
+              "ask",
+              t("site.tab.ask"),
+              ask.kind === "running"
+                ? t("site.tab.asking", { done: ask.done, total: ask.total })
+                : asker.latest
+                  ? t("site.tab.named", { named: asker.latest.named, answered: asker.latest.answered })
+                  : t("site.tab.notAsked")
+            )}
           </nav>
         )}
       </div>
 
       {current === "ask" ? (
-        <AskerSection token={token} view={view} onView={(v) => setState({ kind: "ready", view: v })} />
+        <AskerSection token={token} view={view} ask={ask} onAsk={() => void startAsk()} onView={(v) => setState({ kind: "ready", view: v })} goAudit={() => go(`#/s/${token}`)} />
       ) : (
         <>
           <Card>
@@ -331,6 +380,23 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
               {audit.label !== "strong" && ranked.length > 0 && <p className="text-sm">{t("site.verdict.top", { names: topNames })}</p>}
             </CardContent>
           </Card>
+
+          {askerOn && (
+            <Card>
+              <CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                <span>
+                  {ask.kind === "running"
+                    ? t("site.askcard.running", { done: ask.done, total: ask.total })
+                    : asker.latest
+                      ? t("site.askcard.named", { named: asker.latest.named, answered: asker.latest.answered })
+                      : t("site.askcard.none")}
+                </span>
+                <a className="text-chart-1 underline" href={`#/s/${token}/ask`}>
+                  {t("site.askcard.open")}
+                </a>
+              </CardContent>
+            </Card>
+          )}
 
           <section className="space-y-3">
             <div>

@@ -205,11 +205,15 @@ export interface SiteView {
   states: Record<string, FixChoice>
   done: string[]
   guides: Record<string, Guide>
+  /** who and where the pages say the business is, for asking about it without a form */
+  hint: { name: string; city: string; country: string; areas: string[] } | null
   asker: {
     enabled: boolean
+    perSiteHours: number
     profile: BusinessProfile | null
     latest: AskerRunView | null
-    history: { ran_at: string; asked: number; answered: number; named: number }[]
+    /** each time we asked, with the audit score at that time */
+    history: { ran_at: string; asked: number; answered: number; named: number; audit_score: number | null }[]
   }
 }
 

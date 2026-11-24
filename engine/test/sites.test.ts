@@ -293,10 +293,77 @@ describe("asking AI assistants", () => {
     expect((ok.body["asker"] as { profile: { aliases: string[]; categories: string[] } }).profile).toMatchObject({ aliases: ["Ex Shop"], categories: ["stationery", "gifts"] })
   })
 
-  it("needs the profile first", async () => {
+  it("asks for the details only when the pages do not tell where the business is", async () => {
     const { deps } = await pageWith({ asker: assistant() })
     const r = await call(deps, { action: "ask_start", token: TOKEN })
-    expect([r.status, r.body["error"]]).toEqual([400, "no_profile"])
+    expect([r.status, r.body["error"]]).toEqual([400, "need_profile"])
+    expect(r.body["hint"]).toMatchObject({ name: "shop.test", city: "" })
+  })
+
+  describe("without a form", () => {
+    const summary = { title: "Example Shop", description: "Cards and gifts in Prahran", headings: ["Greeting cards", "Gifts"], text: "Handmade cards and gifts" }
+    const hint = { name: "Example Shop", city: "Prahran", country: "Australia", areas: ["Brighton"] }
+
+    async function pageThatTellsWhereItIs(complete: (prompt: string) => string, over: object = {}) {
+      const a = { ...assistant(), complete: async (prompt: string) => complete(prompt) }
+      const { deps, store } = await pageWith({ asker: a })
+      const site = (await store.findSite(hashToken(TOKEN)))!
+      const first = (await store.latestScan(site.id))!
+      await store.addScan(site.id, { scanned_at: "2026-11-24T09:00:00.000Z", score: 70, label: "needs_work", result: { ...first.result, profile_hint: hint, site_summary: summary, ...over } })
+      return { deps, store, site, a }
+    }
+    const answer = (prompt: string) => (prompt.includes("TITLE:") ? JSON.stringify({ categories: ["greeting cards", "gifts"] }) : JSON.stringify({ answers: [] }))
+
+    it("works out who and where the business is from its pages and what it sells from its homepage", async () => {
+      const { deps, store, site } = await pageThatTellsWhereItIs(answer)
+      const started = await call(deps, { action: "ask_start", token: TOKEN })
+      expect(started.status).toBe(200)
+      expect(started.body["profile"]).toEqual({ name: "Example Shop", aliases: [], city: "Prahran", country: "Australia", areas: ["Brighton"], categories: ["greeting cards", "gifts"] })
+      expect(await store.getProfile(site.id)).toMatchObject({ city: "Prahran" })
+      expect(started.body["total"]).toBe(6)
+    })
+
+    it("asks for the details when what it sells cannot be worked out, with what it did find", async () => {
+      const { deps } = await pageThatTellsWhereItIs(() => "not json")
+      const r = await call(deps, { action: "ask_start", token: TOKEN })
+      expect([r.status, r.body["error"]]).toEqual([400, "need_profile"])
+      expect(r.body["hint"]).toMatchObject({ name: "Example Shop", city: "Prahran", categories: [] })
+    })
+
+    it("drops phrases that hold the business name and cleans what the model wrote", async () => {
+      const { deps } = await pageThatTellsWhereItIs((p) => (p.includes("TITLE:") ? JSON.stringify({ categories: ["Example Shop deals", "<b>gifts</b>", "x", "cards"] }) : "{}"))
+      const r = await call(deps, { action: "ask_start", token: TOKEN })
+      expect((r.body["profile"] as { categories: string[] }).categories).toEqual(["b gifts /b", "cards"])
+    })
+
+    it("keeps the caps: a page that asked recently is not asked about again", async () => {
+      let t = Date.parse("2026-11-24T00:00:00Z")
+      const { deps } = await pageThatTellsWhereItIs(answer)
+      const timed = { ...deps, now: () => t }
+      const first = await call(timed, { action: "ask_start", token: TOKEN })
+      expect(first.status).toBe(200)
+      for (let i = 0; i < 6; i++) await call(timed, { action: "ask_step", token: TOKEN, run: first.body["run"], i })
+      expect((await call(timed, { action: "ask_finish", token: TOKEN, run: first.body["run"] })).status).toBe(200)
+      t += 3_600_000
+      expect((await call(timed, { action: "ask_start", token: TOKEN })).body["error"]).toBe("asked_recently")
+    })
+  })
+
+  it("tells the page the score the website had when each question was asked", async () => {
+    let t = Date.parse("2026-11-24T10:00:00Z")
+    const { deps, store } = await pageWith({ asker: assistant(), now: () => t })
+    const site = (await store.findSite(hashToken(TOKEN)))!
+    const first = (await store.latestScan(site.id))!
+    await store.addScan(site.id, { scanned_at: "2026-11-24T08:00:00.000Z", score: 60, label: "needs_work", result: first.result })
+    await store.addScan(site.id, { scanned_at: "2026-11-24T12:00:00.000Z", score: 75, label: "needs_work", result: first.result })
+    await call(deps, { action: "profile", token: TOKEN, profile: PROFILE })
+    await askAll(deps)
+    t = Date.parse("2026-11-25T10:00:00Z")
+    await askAll(deps)
+    const view = await call(deps, { action: "get", token: TOKEN })
+    const history = (view.body["asker"] as { history: { audit_score: number }[]; perSiteHours: number }).history
+    expect(history.map((h) => h.audit_score)).toEqual([60, 75])
+    expect((view.body["asker"] as { perSiteHours: number }).perSiteHours).toBe(12)
   })
 
   it("asks a question at a time, keeps the run, and shows how often the business was named", async () => {
