@@ -24213,10 +24213,16 @@ var FIX_STATES = ["open", "self", "asked_fixer"];
 var hashToken = (token) => (0, import_node_crypto.createHash)("sha256").update(token).digest("hex");
 var newToken = () => (0, import_node_crypto.randomBytes)(24).toString("base64url");
 var StoreError = class extends Error {
+  constructor(message, detail = "") {
+    super(message);
+    this.detail = detail;
+  }
+  detail;
 };
 function supabaseStore(baseUrl, key, doFetch = fetch) {
   const root = `${baseUrl.replace(/\/+$/, "")}/rest/v1`;
-  const headers = { apikey: key, authorization: `Bearer ${key}`, "content-type": "application/json" };
+  const headers = { apikey: key, "content-type": "application/json" };
+  if (!key.startsWith("sb_")) headers["authorization"] = `Bearer ${key}`;
   const call = async (path, init = {}) => {
     const res = await doFetch(`${root}/${path}`, {
       method: init.method ?? "GET",
@@ -24224,7 +24230,14 @@ function supabaseStore(baseUrl, key, doFetch = fetch) {
       body: init.body === void 0 ? void 0 : JSON.stringify(init.body)
     });
     const text = await res.text();
-    if (!res.ok) throw new StoreError(`storage answered ${res.status}`);
+    if (!res.ok) {
+      let code = "";
+      try {
+        code = String(JSON.parse(text).code ?? "");
+      } catch {
+      }
+      throw new StoreError(`storage answered ${res.status}`, `supabase ${res.status}${code ? ` ${code.replace(/[^A-Za-z0-9_.-]/g, "").slice(0, 20)}` : ""}`);
+    }
     return text ? JSON.parse(text) : null;
   };
   const eq = (v) => encodeURIComponent(v);
@@ -24339,7 +24352,10 @@ async function handleSite(req, deps = {}) {
     }
     return fail(400, "bad_action", "Unknown request.");
   } catch (err) {
-    if (err instanceof StoreError) return fail(502, "storage", "We could not reach the place where pages are kept. Try again in a moment.");
+    if (err instanceof StoreError) {
+      const res = fail(502, "storage", "We could not reach the place where pages are kept. Try again in a moment.");
+      return { ...res, body: { ...res.body, detail: err.detail } };
+    }
     return fail(500, "failed", "Something went wrong.");
   }
 }
