@@ -109,13 +109,13 @@ export interface PackageFact {
 }
 
 export interface BusinessCardPackage {
-  id: "business_card"
+  id: "business_card" | "llms_txt"
   platform: "shopify" | "wordpress"
   /** the checks still open that this package is meant to fix */
   covers: string[]
   /** what the package will not fix yet, in the data's own words: description, contactPoint, address */
   missing: string[]
-  jsonld: Record<string, unknown>
+  jsonld?: Record<string, unknown>
   snippetName: string
   renderLine: string
   files: { name: string; content: string }[]
@@ -126,7 +126,7 @@ export interface BusinessCardPackage {
   download?: { name: string; type: string; base64: string }
 }
 
-export type BusinessCard =
+export type PackageResult =
   | { ready: true; package: BusinessCardPackage }
   | { ready: false; reason: "platform" | "nothing_found" | "already_done"; platform?: string }
 
@@ -134,7 +134,7 @@ type Drafts = Record<string, Record<string, unknown>>
 const filled = (v: unknown) => (typeof v === "string" ? v.trim() !== "" : Array.isArray(v) ? v.length > 0 : Boolean(v))
 
 /** The package for this scan, or why there is none. `fixes` is the Fixer's list, `drafts` what it prepared. */
-export function businessCard(platform: string, drafts: Drafts | undefined, fixes: Fix[]): BusinessCard {
+export function businessCard(platform: string, drafts: Drafts | undefined, fixes: Fix[]): PackageResult {
   const covers = COVERS.filter((id) => fixes.some((f) => f.check_id === id && f.status !== "platform_held"))
   if (covers.length === 0) return { ready: false, reason: "already_done" }
   if (platform !== "shopify" && platform !== "wordpress") return { ready: false, reason: "platform", platform }
@@ -174,4 +174,77 @@ export function businessCard(platform: string, drafts: Drafts | undefined, fixes
       files: [{ name: `${SNIPPET_NAME}.liquid`, content: liquidSnippet(jsonld) }], steps: SHOPIFY_STEPS, undo: SHOPIFY_UNDO, facts,
     },
   }
+}
+
+export const LLMS_SLUG = "airtime-llms-txt"
+
+/** A one-file WordPress plugin that answers /llms.txt with the text written from the site's own pages. */
+export function llmsPlugin(text: string): string {
+  // the closing word of the nowdoc must not appear in the text at all, whatever the text is
+  let mark = "AIRTIME_TXT"
+  for (let i = 1; text.includes(mark); i++) mark = `AIRTIME_TXT_${i}`
+  return [
+    "<?php",
+    "/**",
+    " * Plugin Name: Airtime llms.txt",
+    " * Description: Answers /llms.txt with a short introduction of the business for AI assistants. Added by Airtime. To undo it, deactivate and delete this plugin.",
+    " * Version: 1.0.0",
+    " */",
+    "",
+    "if ( ! defined( 'ABSPATH' ) ) {",
+    "\texit;",
+    "}",
+    "",
+    "add_action( 'init', function () {",
+    "\t$path = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) : '';",
+    "\tif ( wp_parse_url( home_url( '/llms.txt' ), PHP_URL_PATH ) !== $path ) {",
+    "\t\treturn;",
+    "\t}",
+    `\t$text = <<<'${mark}'`,
+    text.replace(/\r/g, "").replace(/\n+$/, ""),
+    `${mark};`,
+    "\tstatus_header( 200 );",
+    "\theader( 'Content-Type: text/plain; charset=utf-8' );",
+    "\techo $text . \"\\n\";",
+    "\texit;",
+    "}, 1 );",
+    "",
+  ].join("\n")
+}
+
+export const LLMS_STEPS: Bilingual[] = [
+  b("Read the text in the box first. It was written only from your own pages. You can change any line in the file before you install it.", "Baca dulu teks di kotak. Teks itu ditulis hanya dari halaman Anda sendiri. Anda boleh mengubah baris mana pun di berkas sebelum memasangnya."),
+  b("Download the plugin file below (airtime-llms-txt.zip).", "Unduh berkas plugin di bawah (airtime-llms-txt.zip)."),
+  b("In your WordPress dashboard open Plugins, then Add New Plugin, then Upload Plugin. Choose the zip file and click Install Now.", "Di dashboard WordPress buka Plugins, lalu Add New Plugin, lalu Upload Plugin. Pilih berkas zip dan klik Install Now."),
+  b("Click Activate Plugin. Then open your-site/llms.txt in a browser: you should see the text.", "Klik Activate Plugin. Lalu buka situs-anda/llms.txt di browser: Anda akan melihat teksnya."),
+  b("Press Re-check at the top of this page. When the check passes, the item is marked done on its own.", "Tekan Periksa ulang di bagian atas halaman ini. Begitu pemeriksaannya lulus, item ini ditandai selesai dengan sendirinya."),
+]
+
+export const LLMS_UNDO: Bilingual[] = [
+  b("Open Plugins, find Airtime llms.txt, click Deactivate, then Delete. Nothing else changes.", "Buka Plugins, cari Airtime llms.txt, klik Deactivate, lalu Delete. Tidak ada yang lain yang berubah."),
+]
+
+export function llmsPackage(platform: string, text: string | undefined, fixes: Fix[]): PackageResult {
+  if (!fixes.some((f) => f.check_id === "llms_txt" && f.status !== "platform_held")) return { ready: false, reason: "already_done" }
+  // Shopify cannot answer at /llms.txt, so there is nothing honest to hand over there.
+  if (platform !== "wordpress") return { ready: false, reason: "platform", platform }
+  if (!text) return { ready: false, reason: "nothing_found" }
+  const php = { name: `${LLMS_SLUG}/${LLMS_SLUG}.php`, content: llmsPlugin(text) }
+  return {
+    ready: true,
+    package: {
+      id: "llms_txt", platform: "wordpress", covers: ["llms_txt"], missing: [], snippetName: LLMS_SLUG, renderLine: "",
+      files: [{ name: "llms.txt", content: text.endsWith("\n") ? text : text + "\n" }, php], steps: LLMS_STEPS, undo: LLMS_UNDO, facts: [],
+      download: { name: `${LLMS_SLUG}.zip`, type: "application/zip", base64: toBase64(makeZip([php])) },
+    },
+  }
+}
+
+/** For each open check: the package the Fixer can hand over, or why it cannot. Checks with no entry have no package at all. */
+export function packagesFor(platform: string, drafts: Drafts | undefined, fixes: Fix[], llms: string | undefined): Record<string, PackageResult> {
+  const out: Record<string, PackageResult> = {}
+  const card = businessCard(platform, drafts, fixes)
+  for (const id of COVERS) if (fixes.some((f) => f.check_id === id)) out[id] = card
+  if (fixes.some((f) => f.check_id === "llms_txt")) out["llms_txt"] = llmsPackage(platform, llms, fixes)
+  return out
 }

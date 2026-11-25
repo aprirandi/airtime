@@ -23805,6 +23805,44 @@ function siteSummary(snap) {
     text: clip(page.text, 600)
   };
 }
+var oneLine = (s) => typeof s === "string" ? collapse(s) : "";
+var listOf = (v) => Array.isArray(v) ? v : v && typeof v === "object" ? [v] : [];
+function llmsText(snap, name) {
+  const org = draftFor("organization_completeness", snap, name)?.jsonld ?? {};
+  const description = oneLine(draftFor("jsonld_organization", snap, name)?.jsonld["description"] ?? org["description"]);
+  const host = (() => {
+    try {
+      return new URL(snap.base).host;
+    } catch {
+      return "";
+    }
+  })();
+  const pages = [`- [Home](${snap.base.replace(/\/+$/, "")}/): ${description ? clip(description, 120) : "Start page"}`];
+  const labels = { about: "About us", contact: "Contact", privacy: "Privacy policy" };
+  for (const [key, label] of Object.entries(labels)) {
+    const hit = snap.trust[key]?.[0];
+    const url = hit && hit.status === 200 ? hit.finalUrl || hit.url || "" : "";
+    try {
+      if (url && new URL(url).host === host) pages.push(`- [${label}](${url})`);
+    } catch {
+    }
+  }
+  const contact = [];
+  for (const c of listOf(org["contactPoint"])) {
+    if (oneLine(c["telephone"])) contact.push(`- Phone: ${oneLine(c["telephone"])}`);
+    if (oneLine(c["email"])) contact.push(`- Email: ${oneLine(c["email"])}`);
+  }
+  for (const a of listOf(org["address"])) {
+    const line = [a["streetAddress"], a["addressLocality"], a["addressRegion"], a["postalCode"]].map(oneLine).filter(Boolean).join(", ");
+    if (line) contact.push(`- Address: ${line}`);
+  }
+  if (!description && pages.length < 2 && !contact.length) return "";
+  const out = [`# ${name}`, ""];
+  if (description) out.push(`> ${description}`, "");
+  out.push("## Pages", ...pages, "");
+  if (contact.length) out.push("## Contact", ...[...new Set(contact)], "");
+  return out.join("\n");
+}
 
 // src/audit.ts
 var ENGINE = "airtime-auditor/2";
@@ -23885,6 +23923,7 @@ async function runAudit(fetch, options) {
     fixes: buildFixes(rows, platform, snapshot, siteName(snapshot)),
     fix_drafts: fixDrafts(rows, snapshot, siteName(snapshot)),
     profile_hint: profileHint(snapshot),
+    llms_draft: llmsText(snapshot, siteName(snapshot)),
     site_summary: siteSummary(snapshot),
     prompt_all: allPrompt(gapRows, target, platform, "en", scanned),
     prompt_all_id: allPrompt(gapRows, target, platform, "id", scanned),
@@ -24121,7 +24160,7 @@ async function handleAudit(req, deps = {}) {
   const key = `${parsed.baseUrl}|${platform}`;
   const hit = cache.get(key);
   if (hit && now() - hit.at < CACHE_MS) {
-    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, ...cached } = hit.result;
+    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, llms_draft: _l, ...cached } = hit.result;
     return { status: 200, body: { ...cached, cached: true } };
   }
   const taken = (deps.limiter ?? defaultLimiter).take(req.client, now());
@@ -24130,7 +24169,7 @@ async function handleAudit(req, deps = {}) {
   }
   const scanned = await scanAddress(parsed, platform, deps);
   if (!scanned.ok) return scanned.response;
-  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, ...result } = scanned.result;
+  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, llms_draft: _llms, ...result } = scanned.result;
   cache.set(key, { at: now(), result: scanned.result });
   if (cache.size > 200) cache.delete(cache.keys().next().value);
   return { status: 200, body: { ...result, cached: false } };

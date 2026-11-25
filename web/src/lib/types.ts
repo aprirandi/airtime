@@ -168,6 +168,8 @@ export interface Guide {
 }
 
 export interface BusinessCardPackage {
+  id?: string
+  platform?: string
   covers: string[]
   missing: string[]
   snippetName: string
@@ -179,7 +181,7 @@ export interface BusinessCardPackage {
   download?: { name: string; type: string; base64: string }
 }
 
-export type BusinessCard = { ready: true; package: BusinessCardPackage } | { ready: false; reason: "platform" | "nothing_found" | "already_done" }
+export type PackageResult = { ready: true; package: BusinessCardPackage } | { ready: false; reason: "platform" | "nothing_found" | "already_done"; platform?: string }
 
 export interface BusinessProfile {
   name: string
@@ -219,8 +221,8 @@ export interface SiteView {
   states: Record<string, FixChoice>
   done: string[]
   guides: Record<string, Guide>
-  /** the no-access package for the business card (Shopify) */
-  business_card?: BusinessCard
+  /** per open item: the package the Fixer can hand over without access, or why it cannot */
+  packages?: Record<string, PackageResult>
   /** who and where the pages say the business is, for asking about it without a form */
   hint: { name: string; city: string; country: string; areas: string[] } | null
   asker: {
