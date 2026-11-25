@@ -323,3 +323,35 @@ export function fixDrafts(rows: Row[], snap: FactsSource, name: string): Record<
   }
   return out
 }
+
+export interface ProfileHint {
+  name: string
+  city: string
+  country: string
+  areas: string[]
+}
+
+/** What a page of the site tells us about who and where the business is, to ask AI assistants about it without a form. */
+export function profileHint(snap: FactsSource): ProfileHint {
+  const found = findAddresses(sources(snap))
+  const places = unique((found ? found[0] : []).map((a) => a.locality).filter(Boolean))
+  return { name: siteName(snap), city: places[0] ?? "", country: found ? "Australia" : "", areas: places.slice(1, 4) }
+}
+
+export interface SiteSummary {
+  title: string
+  description: string
+  headings: string[]
+  text: string
+}
+
+/** A few lines of the homepage, kept so that what the business sells can be worked out later. Data, never instructions. */
+export function siteSummary(snap: FactsSource): SiteSummary {
+  const page = snap.homePage
+  return {
+    title: clip(collapse(metaContent(page, "og:title", "twitter:title")), 100),
+    description: clip(collapse(metaContent(page, "description", "og:description")), 300),
+    headings: page.headings.filter(([level]) => level <= 2).map(([, text]) => clip(collapse(text), 80)).filter(Boolean).slice(0, 8),
+    text: clip(page.text, 600),
+  }
+}

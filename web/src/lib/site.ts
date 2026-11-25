@@ -17,7 +17,7 @@ async function call<T = SiteView>(body: Record<string, unknown>, signal?: AbortS
   }
   if (!res.ok) {
     const e = data as { error?: string; message?: string }
-    throw new ScanFailure(e.error ?? "failed", e.message ?? "failed")
+    throw new ScanFailure(e.error ?? "failed", e.message ?? "failed", data)
   }
   return data as T
 }
@@ -32,3 +32,31 @@ export const askStart = (token: string) => call<{ run: string; total: number }>(
 export const askStep = (token: string, run: string, i: number) => call<{ done: number; total: number; quota: boolean }>({ action: "ask_step", token, run, i })
 export const askFinish = (token: string, run: string) => call({ action: "ask_finish", token, run })
 export type { BusinessProfile }
+
+export interface AskProgress {
+  done: number
+  total: number
+}
+
+/** Ask the questions one at a time, three at once, each in its own request, then put the answers together. */
+export async function runAsk(token: string, onProgress: (p: AskProgress) => void): Promise<SiteView> {
+  const { run, total } = await askStart(token)
+  onProgress({ done: 0, total })
+  let next = 0
+  let answered = 0
+  let quota = false
+  await Promise.all(
+    Array.from({ length: 3 }, async () => {
+      while (next < total && !quota) {
+        const i = next++
+        try {
+          quota = (await askStep(token, run, i)).quota
+        } catch {
+          /* an unanswered question counts as not answered; the others go on */
+        }
+        onProgress({ done: ++answered, total })
+      }
+    })
+  )
+  return askFinish(token, run)
+}

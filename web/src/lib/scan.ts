@@ -9,9 +9,12 @@ export type ScanResult = Audit & { cached: boolean }
 
 export class ScanFailure extends Error {
   code: string
-  constructor(code: string, message: string) {
+  /** what the service sent back, when there is more than a message (for example what it found out about the business) */
+  body?: unknown
+  constructor(code: string, message: string, body?: unknown) {
     super(message)
     this.code = code
+    this.body = body
   }
 }
 

@@ -23791,6 +23791,20 @@ function fixDrafts(rows, snap, name) {
   }
   return out;
 }
+function profileHint(snap) {
+  const found = findAddresses(sources(snap));
+  const places = unique((found ? found[0] : []).map((a) => a.locality).filter(Boolean));
+  return { name: siteName(snap), city: places[0] ?? "", country: found ? "Australia" : "", areas: places.slice(1, 4) };
+}
+function siteSummary(snap) {
+  const page = snap.homePage;
+  return {
+    title: clip(collapse(metaContent(page, "og:title", "twitter:title")), 100),
+    description: clip(collapse(metaContent(page, "description", "og:description")), 300),
+    headings: page.headings.filter(([level]) => level <= 2).map(([, text]) => clip(collapse(text), 80)).filter(Boolean).slice(0, 8),
+    text: clip(page.text, 600)
+  };
+}
 
 // src/audit.ts
 var ENGINE = "airtime-auditor/2";
@@ -23870,6 +23884,8 @@ async function runAudit(fetch, options) {
     limited_gaps: limited.map((g) => g.check_id),
     fixes: buildFixes(rows, platform, snapshot, siteName(snapshot)),
     fix_drafts: fixDrafts(rows, snapshot, siteName(snapshot)),
+    profile_hint: profileHint(snapshot),
+    site_summary: siteSummary(snapshot),
     prompt_all: allPrompt(gapRows, target, platform, "en", scanned),
     prompt_all_id: allPrompt(gapRows, target, platform, "id", scanned),
     fetches: snapshot.fetches.map((f) => f.summary())
@@ -24105,7 +24121,7 @@ async function handleAudit(req, deps = {}) {
   const key = `${parsed.baseUrl}|${platform}`;
   const hit = cache.get(key);
   if (hit && now() - hit.at < CACHE_MS) {
-    const { fix_drafts: _d, ...cached } = hit.result;
+    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, ...cached } = hit.result;
     return { status: 200, body: { ...cached, cached: true } };
   }
   const taken = (deps.limiter ?? defaultLimiter).take(req.client, now());
@@ -24114,7 +24130,7 @@ async function handleAudit(req, deps = {}) {
   }
   const scanned = await scanAddress(parsed, platform, deps);
   if (!scanned.ok) return scanned.response;
-  const { fix_drafts: _drafts, ...result } = scanned.result;
+  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, ...result } = scanned.result;
   cache.set(key, { at: now(), result: scanned.result });
   if (cache.size > 200) cache.delete(cache.keys().next().value);
   return { status: 200, body: { ...result, cached: false } };

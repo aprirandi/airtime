@@ -5,10 +5,11 @@
  * interface with a key only the server has; in tests it is memory. The link is the only key to the page, so only a
  * hash of it is stored: someone who reads the database cannot open anyone's page.
  */
+import { businessCard } from "./package"
 import { createHash, randomBytes } from "node:crypto"
 import { fail, MemoryLimiter, parseAddress, PLATFORMS, scanAddress, type ApiResponse, type Deps, type Limiter } from "./api"
 import type { AuditResult } from "./audit"
-import { askQuestion, buildQuestions, finishRun, ProfileError, validateProfile, type Answered, type AskProvider, type AskerResult, type Profile } from "./asker"
+import { askQuestion, buildQuestions, finishRun, inferCategories, ProfileError, validateProfile, type Answered, type AskProvider, type AskerResult, type Profile } from "./asker"
 import { buildGuide, type Guide } from "./guide"
 import { BY_ID } from "./registry"
 
@@ -316,13 +317,24 @@ const defaultRescan = new MemoryLimiter(6, 10 * 60_000)
 
 type Scan = { scanned_at: string; result: AuditResult }
 
+/** The score of the newest scan made at or before this time (the first scan when there is none that early). */
+function scoreAt(scans: ScanSummary[], time: string): number | null {
+  const at = new Date(time).getTime()
+  const before = scans.filter((s) => new Date(s.scanned_at).getTime() <= at)
+  return (before.at(-1) ?? scans[0])?.score ?? null
+}
+
 /** What the page needs. The raw requests made during the scan and the prepared code are left out of `latest`. */
-async function viewOf(store: SiteStore, site: SiteRow, scan: Scan, askerOn = false) {
+async function viewOf(store: SiteStore, site: SiteRow, scan: Scan, asking: { on: boolean; hours: number } = { on: false, hours: 12 }) {
   const [first, history, states, profile, askerRun, askerHistory] = await Promise.all([
     store.firstScan(site.id), store.history(site.id), store.fixStates(site.id),
     store.getProfile(site.id), store.latestAskerRun(site.id), store.askerHistory(site.id),
   ])
-  const { fetches: _fetches, fix_drafts: drafts, ...latest } = scan.result as AuditResult & { fix_drafts?: Record<string, Record<string, unknown>> }
+  const { fetches: _fetches, fix_drafts: drafts, profile_hint: hint, site_summary: _summary, ...latest } = scan.result as AuditResult & {
+    fix_drafts?: Record<string, Record<string, unknown>>
+    profile_hint?: { name: string; city: string; country: string; areas: string[] }
+    site_summary?: unknown
+  }
   const passing = new Set(latest.checks.filter((c) => c.result === "pass").map((c) => c.id))
   const guides: Record<string, Guide> = {}
   for (const fix of latest.fixes) {
@@ -339,7 +351,15 @@ async function viewOf(store: SiteStore, site: SiteRow, scan: Scan, askerOn = fal
     // gaps in the first scan that now pass: found by the check itself, whoever did the work
     done: (first?.gaps ?? []).filter((id) => passing.has(id)),
     guides,
-    asker: { enabled: askerOn, profile, latest: askerRun ? { ran_at: askerRun.ran_at, ...askerRun.result } : null, history: askerHistory },
+    // what the Fixer hands over for the business card when no access is given: a package to install by hand
+    business_card: businessCard(site.platform, drafts, latest.fixes),
+    hint: hint ?? null,
+    asker: {
+      enabled: asking.on, perSiteHours: asking.hours, profile,
+      latest: askerRun ? { ran_at: askerRun.ran_at, ...askerRun.result } : null,
+      // each time we asked, with the score the website had then, so the two can be read side by side
+      history: askerHistory.map((h) => ({ ...h, audit_score: scoreAt(history, h.ran_at) })),
+    },
   }
 }
 
@@ -347,6 +367,7 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
   const store = deps.store
   if (!store) return fail(503, "storage_off", "Saving a page for your website is not switched on yet.")
   const now = deps.now ?? Date.now
+  const asking = { on: Boolean(deps.asker), hours: deps.askerLimits?.perSiteHours ?? 12 }
   try {
     if (req.action === "create") {
       const parsed = parseAddress(req.url)
@@ -361,7 +382,7 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
       const token = (deps.token ?? newToken)()
       const site = await store.createSite({ token_hash: hashToken(token), url: parsed.baseUrl, host: parsed.host, platform, name: parsed.host })
       await store.addScan(site.id, { scanned_at: scanned.result.scanned_at, score: scanned.result.score, label: scanned.result.label, result: scanned.result })
-      return { status: 200, body: { token, ...(await viewOf(store, site, { scanned_at: scanned.result.scanned_at, result: scanned.result }, Boolean(deps.asker))) } }
+      return { status: 200, body: { token, ...(await viewOf(store, site, { scanned_at: scanned.result.scanned_at, result: scanned.result }, asking)) } }
     }
 
     if (typeof req.token !== "string" || req.token.length < 20 || req.token.length > 200) return fail(404, "not_found", "This page does not exist.")
@@ -372,7 +393,7 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
     if (req.action === "get") {
       const scan = await store.latestScan(site.id)
       if (!scan) return fail(404, "not_found", "This page does not exist.")
-      return { status: 200, body: await viewOf(store, site, scan, Boolean(deps.asker)) }
+      return { status: 200, body: await viewOf(store, site, scan, asking) }
     }
     if (req.action === "rescan") {
       const taken = (deps.rescanLimiter ?? defaultRescan).take(hash, now())
@@ -380,7 +401,7 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
       const scanned = await scanAddress({ baseUrl: site.url, host: site.host }, site.platform, deps)
       if (!scanned.ok) return scanned.response
       await store.addScan(site.id, { scanned_at: scanned.result.scanned_at, score: scanned.result.score, label: scanned.result.label, result: scanned.result })
-      return { status: 200, body: await viewOf(store, site, { scanned_at: scanned.result.scanned_at, result: scanned.result }, Boolean(deps.asker)) }
+      return { status: 200, body: await viewOf(store, site, { scanned_at: scanned.result.scanned_at, result: scanned.result }, asking) }
     }
     if (req.action === "fix") {
       if (typeof req.check_id !== "string" || !BY_ID[req.check_id]) return fail(400, "bad_check", "Unknown item.")
@@ -388,7 +409,7 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
       await store.setFixState(site.id, req.check_id, req.state as FixState)
       const scan = await store.latestScan(site.id)
       if (!scan) return fail(404, "not_found", "This page does not exist.")
-      return { status: 200, body: await viewOf(store, site, scan, Boolean(deps.asker)) }
+      return { status: 200, body: await viewOf(store, site, scan, asking) }
     }
     if (req.action === "profile") {
       let profile: Profile
@@ -401,14 +422,13 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
       await store.setProfile(site.id, profile)
       const scan = await store.latestScan(site.id)
       if (!scan) return fail(404, "not_found", "This page does not exist.")
-      return { status: 200, body: await viewOf(store, site, scan, Boolean(deps.asker)) }
+      return { status: 200, body: await viewOf(store, site, scan, asking) }
     }
     // Asking is done a question at a time, each in its own request, because one answer from an assistant can take
     // many seconds and a whole run in one request would not fit in the time a function is allowed to run.
     if (req.action === "ask_start") {
       if (!deps.asker) return fail(503, "asker_off", "Asking AI assistants is not switched on yet.")
-      const profile = await store.getProfile(site.id)
-      if (!profile) return fail(400, "no_profile", "Tell us about your business first.")
+      let profile = await store.getProfile(site.id)
       const limits = deps.askerLimits ?? { perSiteHours: 12, dailyRuns: 3 }
       const at = now()
       const last = (await store.askerHistory(site.id)).at(-1)
@@ -420,9 +440,22 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
       if ((await store.askerRunsSince(new Date(at - 24 * 3_600_000).toISOString())) >= limits.dailyRuns) {
         return fail(429, "busy_today", "A lot of people asked today. Try again tomorrow.")
       }
+      // No form: who and where the business is comes from its own pages, and what it sells is read from its homepage
+      if (!profile) {
+        const scan = await store.latestScan(site.id)
+        const found = scan?.result as (AuditResult & { profile_hint?: { name: string; city: string; country: string; areas: string[] }; site_summary?: Parameters<typeof inferCategories>[0] }) | undefined
+        const hint = found?.profile_hint
+        const categories = hint?.city && found?.site_summary ? await inferCategories(found.site_summary, hint.name, deps.asker) : []
+        if (hint?.city && categories.length) {
+          profile = validateProfile({ name: hint.name, city: hint.city, country: hint.country, areas: hint.areas, categories })
+          await store.setProfile(site.id, profile)
+        } else {
+          return { status: 400, body: { error: "need_profile", message: "We could not tell where your business is or what it sells. Tell us, and we will ask.", hint: { name: hint?.name ?? site.host, city: hint?.city ?? "", country: hint?.country ?? "", areas: hint?.areas ?? [], categories } } }
+        }
+      }
       const questions = buildQuestions(profile)
       const run = await store.startAskerRun(site.id, { ran_at: new Date(at).toISOString(), questions })
-      return { status: 200, body: { run, total: questions.length } }
+      return { status: 200, body: { run, total: questions.length, profile } }
     }
     if (req.action === "ask_step" || req.action === "ask_finish") {
       if (!deps.asker) return fail(503, "asker_off", "Asking AI assistants is not switched on yet.")
@@ -461,7 +494,7 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
       // ask_finish
       const scan = await store.latestScan(site.id)
       if (!scan) return fail(404, "not_found", "This page does not exist.")
-      if (state.status === "done") return { status: 200, body: await viewOf(store, site, scan, true) }
+      if (state.status === "done") return { status: 200, body: await viewOf(store, site, scan, { ...asking, on: true }) }
       if (state.status === "failed") return fail(409, "run_over", "This run is over.")
       const answers = state.questions.map((_, i) => state.answers[i] ?? { answer: "", named: false, failed: true, error: "other" as const })
       const noReading: AskProvider = { model: deps.asker.model, ask: deps.asker.ask, complete: async () => { throw new Error("no time") } }
@@ -471,7 +504,7 @@ export async function handleSite(req: SiteRequest, deps: SiteDeps = {}): Promise
         return fail(503, "asker_unavailable", result.quota ? "The AI assistants are not answering more questions today. Try again tomorrow." : "The AI assistants did not answer. Try again in a moment.")
       }
       await store.finishAskerRun(state.id, "done", result)
-      return { status: 200, body: await viewOf(store, site, scan, true) }
+      return { status: 200, body: await viewOf(store, site, scan, { ...asking, on: true }) }
     }
     return fail(400, "bad_action", "Unknown request.")
   } catch (err) {

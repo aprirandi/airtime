@@ -16,7 +16,19 @@ import { memoryStore } from "../src/sites"
 const bodies = replay.bodies as Record<string, string>
 const maps = replay.scenarios.map((s) => new Map(s.calls.map((c) => [`${c.url}|${c.accept}|${c.ua}`, c])))
 
+// One made-up site that says where it is and what it sells, to try asking without a form
+const AU = "au-demo.example.com"
+const auPages: Record<string, string> = {
+  "/": `<html lang="en"><head><meta property="og:site_name" content="Paper Plane"><meta property="og:title" content="Paper Plane"><meta name="description" content="Greeting cards, wrapping paper and journals for every occasion, chosen by people who love paper."></head><body><h1>Paper Plane</h1><h2>Greeting cards</h2><h2>Journals</h2><p>${"We sell handmade greeting cards, wrapping paper and journals. ".repeat(8)}</p><a href="/pages/about-us">About us</a> <a href="/pages/contact">Contact</a> <a href="/policies/privacy-policy">Privacy policy</a></body></html>`,
+  "/pages/contact": `<html><body><h1>Contact</h1><p>Visit us at 12 Chapel St Prahran VIC 3181 or call (03) 9123 4567. Email hello@paperplane.example.com.</p></body></html>`,
+}
 const fake: Fetcher = async (rawUrl, o) => {
+  if (rawUrl.includes(AU)) {
+    const path = new URL(rawUrl).pathname
+    const html = auPages[path]
+    if (!html) return new Response(rawUrl, { status: 404, finalUrl: rawUrl })
+    return new Response(rawUrl, { status: 200, finalUrl: rawUrl, headers: { "content-type": "text/html; charset=utf-8" }, body: new TextEncoder().encode(html), chain: [], error: "" })
+  }
   const m = rawUrl.match(/^https?:\/\/demo-(\d+)\.example\.com/)
   const n = m ? Number(m[1]) : rawUrl.includes("shop.test") ? currentScenario : -1
   if (m) currentScenario = n
@@ -39,6 +51,7 @@ const assistant = {
   model: "stand-in",
   async ask(q: string) { return `For "${q}" people often pick Kikki K or Milligram.${asked++ % 2 === 0 ? " Example Shop is a good choice too." : ""}` },
   async complete(prompt: string) {
+    if (prompt.includes("TITLE:")) return JSON.stringify({ categories: ["greeting cards", "journals"] })
     const n = prompt.split("ANSWER ").length - 1
     return JSON.stringify({ answers: Array.from({ length: n }, (_, i) => ({ n: i + 1, stores: [{ name: "Kikki K", quote: "pick Kikki K or Milligram" }] })) })
   },
