@@ -241,7 +241,8 @@ export function llmsPackage(platform: string, text: string | undefined, fixes: F
 }
 
 /** For each open check: the package the Fixer can hand over, or why it cannot. Checks with no entry have no package at all. */
-export function packagesFor(platform: string, drafts: Drafts | undefined, fixes: Fix[], llms: string | undefined): Record<string, PackageResult> {
+export function packagesFor(platformGiven: string, drafts: Drafts | undefined, fixes: Fix[], llms: string | undefined): Record<string, PackageResult> {
+  const platform = platformGiven === "woocommerce" ? "wordpress" : platformGiven
   const out: Record<string, PackageResult> = {}
   const card = businessCard(platform, drafts, fixes)
   for (const id of COVERS) if (fixes.some((f) => f.check_id === id)) out[id] = card

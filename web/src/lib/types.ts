@@ -214,7 +214,7 @@ export interface AskerRunView {
 /** A client's page for one website: the latest scan, the first scan as the before, and what they chose per item. */
 export interface SiteView {
   token?: string
-  site: { host: string; url: string; platform: string; name: string; created_at: string }
+  site: { host: string; url: string; platform: string; platform_used?: string; name: string; created_at: string }
   latest: Audit
   baseline: { scanned_at: string; score: number | null; label: string; gaps: string[] } | null
   history: { scanned_at: string; score: number | null; label: string }[]
