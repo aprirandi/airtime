@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { ArrowDown, ArrowUp, Check, Copy, Loader2, Minus, RefreshCw } from "lucide-react"
+import { ArrowDown, ArrowUp, Bot, Check, Copy, Loader2, Minus, RefreshCw } from "lucide-react"
 
 import { AuditView, CopyButton } from "@/components/Audit"
 import { AskerSection, type AskState } from "@/components/AskerSection"
@@ -145,7 +145,8 @@ function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta;
             </Button>
           )}
           {choice !== "asked_fixer" && (
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => onChoose("asked_fixer")}>
+            <Button size="sm" variant="default" disabled={busy} onClick={() => onChoose("asked_fixer")}>
+              <Bot className="size-4" aria-hidden="true" />
               {t("site.btn.fixer")}
             </Button>
           )}
