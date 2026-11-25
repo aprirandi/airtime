@@ -14717,7 +14717,7 @@ var require_util4 = __commonJS({
     var { serializeAMimeType, parseMIMEType } = require_data_url();
     var { types } = require("node:util");
     var { StringDecoder } = require("string_decoder");
-    var { btoa } = require("node:buffer");
+    var { btoa: btoa2 } = require("node:buffer");
     var staticPropertyDescriptors = {
       enumerable: true,
       writable: false,
@@ -14809,9 +14809,9 @@ var require_util4 = __commonJS({
           dataURL += ";base64,";
           const decoder2 = new StringDecoder("latin1");
           for (const chunk of bytes) {
-            dataURL += btoa(decoder2.write(chunk));
+            dataURL += btoa2(decoder2.write(chunk));
           }
-          dataURL += btoa(decoder2.end());
+          dataURL += btoa2(decoder2.end());
           return dataURL;
         }
         case "Text": {
@@ -24429,6 +24429,55 @@ async function inferCategories(summary, name, provider) {
   }
 }
 
+// src/zip.ts
+var TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 3988292384 ^ c >>> 1 : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(data) {
+  let c = 4294967295;
+  for (const b3 of data) c = TABLE[(c ^ b3) & 255] ^ c >>> 8;
+  return (c ^ 4294967295) >>> 0;
+}
+function makeZip(files) {
+  const enc = new TextEncoder();
+  const parts = [];
+  const central = [];
+  let offset = 0;
+  const u16 = (v) => [v & 255, v >>> 8 & 255];
+  const u32 = (v) => [v & 255, v >>> 8 & 255, v >>> 16 & 255, v >>> 24 & 255];
+  for (const f of files) {
+    const name = enc.encode(f.name);
+    const data = enc.encode(f.content);
+    const crc = crc32(data);
+    const common = [...u16(20), ...u16(2048), ...u16(0), ...u16(0), ...u16(33), ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(name.length), ...u16(0)];
+    const local = Uint8Array.from([80, 75, 3, 4, ...common, ...name, ...data]);
+    central.push(Uint8Array.from([80, 75, 1, 2, ...u16(20), ...common, ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(offset), ...name]));
+    parts.push(local);
+    offset += local.length;
+  }
+  const size = central.reduce((n, c) => n + c.length, 0);
+  const end = Uint8Array.from([80, 75, 5, 6, 0, 0, 0, 0, ...u16(files.length), ...u16(files.length), ...u32(size), ...u32(offset), 0, 0]);
+  const all = [...parts, ...central, end];
+  const out = new Uint8Array(all.reduce((n, p) => n + p.length, 0));
+  let at = 0;
+  for (const p of all) {
+    out.set(p, at);
+    at += p.length;
+  }
+  return out;
+}
+function toBase64(bytes) {
+  let s = "";
+  for (let i = 0; i < bytes.length; i += 32768) s += String.fromCharCode(...bytes.subarray(i, i + 32768));
+  return btoa(s);
+}
+
 // src/package.ts
 var SNIPPET_NAME = "airtime-business-card";
 var RENDER_LINE = `{% render '${SNIPPET_NAME}' %}`;
@@ -24472,11 +24521,50 @@ var SHOPIFY_UNDO = [
   b(`Open layout, then theme.liquid, delete the line ${RENDER_LINE}, and click Save. Nothing else changes.`, `Buka layout, lalu theme.liquid, hapus baris ${RENDER_LINE}, dan klik Save. Tidak ada yang lain yang berubah.`),
   b(`If you want, also delete the snippet ${SNIPPET_NAME} from the Snippets list.`, `Kalau mau, hapus juga snippet ${SNIPPET_NAME} dari daftar Snippets.`)
 ];
+var PLUGIN_SLUG = "airtime-business-card";
+function wordpressPlugin(jsonld) {
+  return [
+    "<?php",
+    "/**",
+    " * Plugin Name: Airtime Business Card",
+    " * Description: Adds the business card AI assistants read (name, description, contact, address) to the head of every page. Added by Airtime. To undo it, deactivate and delete this plugin.",
+    " * Version: 1.0.0",
+    " */",
+    "",
+    "if ( ! defined( 'ABSPATH' ) ) {",
+    "	exit;",
+    "}",
+    "",
+    "add_action( 'wp_head', function () {",
+    "	if ( ! is_front_page() ) {",
+    "		return;",
+    "	}",
+    "	$card = <<<'AIRTIME_JSON'",
+    safeJson(jsonld),
+    "AIRTIME_JSON;",
+    '	echo "<script type=\\"application/ld+json\\">\\n" . $card . "\\n</script>\\n";',
+    "}, 1 );",
+    ""
+  ].join("\n");
+}
+var WORDPRESS_STEPS = [
+  b(
+    "If you use Yoast SEO or Rank Math, the steps under How to do it are the tidier way, since they keep one business card. Use this plugin when you do not use one of them, or when those steps do not work for you.",
+    "Kalau Anda memakai Yoast SEO atau Rank Math, langkah di Cara mengerjakannya lebih rapi karena kartu bisnisnya tetap satu. Pakai plugin ini kalau Anda tidak memakai salah satunya, atau langkah itu tidak berhasil."
+  ),
+  b("Download the plugin file below (airtime-business-card.zip).", "Unduh berkas plugin di bawah (airtime-business-card.zip)."),
+  b("In your WordPress dashboard open Plugins, then Add New Plugin, then Upload Plugin. Choose the zip file and click Install Now.", "Di dashboard WordPress buka Plugins, lalu Add New Plugin, lalu Upload Plugin. Pilih berkas zip dan klik Install Now."),
+  b("Click Activate Plugin.", "Klik Activate Plugin."),
+  b("Press Re-check at the top of this page. When the check passes, the item is marked done on its own.", "Tekan Periksa ulang di bagian atas halaman ini. Begitu pemeriksaannya lulus, item ini ditandai selesai dengan sendirinya.")
+];
+var WORDPRESS_UNDO = [
+  b("Open Plugins, find Airtime Business Card, click Deactivate, then Delete. Nothing else changes.", "Buka Plugins, cari Airtime Business Card, klik Deactivate, lalu Delete. Tidak ada yang lain yang berubah.")
+];
 var filled2 = (v) => typeof v === "string" ? v.trim() !== "" : Array.isArray(v) ? v.length > 0 : Boolean(v);
 function businessCard(platform, drafts, fixes) {
   const covers = COVERS.filter((id) => fixes.some((f) => f.check_id === id && f.status !== "platform_held"));
   if (covers.length === 0) return { ready: false, reason: "already_done" };
-  if (platform !== "shopify") return { ready: false, reason: "platform", platform };
+  if (platform !== "shopify" && platform !== "wordpress") return { ready: false, reason: "platform", platform };
   const card = drafts?.["organization_completeness"] ?? drafts?.["jsonld_organization"];
   if (!card) return { ready: false, reason: "nothing_found" };
   const jsonld = { ...card };
@@ -24494,6 +24582,26 @@ function businessCard(platform, drafts, fixes) {
         facts.push(c);
       }
     }
+  }
+  if (platform === "wordpress") {
+    const php = { name: `${PLUGIN_SLUG}/${PLUGIN_SLUG}.php`, content: wordpressPlugin(jsonld) };
+    return {
+      ready: true,
+      package: {
+        id: "business_card",
+        platform,
+        covers: [...covers],
+        missing,
+        jsonld,
+        snippetName: PLUGIN_SLUG,
+        renderLine: "",
+        files: [php],
+        steps: WORDPRESS_STEPS,
+        undo: WORDPRESS_UNDO,
+        facts,
+        download: { name: `${PLUGIN_SLUG}.zip`, type: "application/zip", base64: toBase64(makeZip([php])) }
+      }
+    };
   }
   return {
     ready: true,

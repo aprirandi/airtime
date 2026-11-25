@@ -176,6 +176,7 @@ export interface BusinessCardPackage {
   steps: { en: string; id: string }[]
   undo: { en: string; id: string }[]
   facts: { kind: string; value: string; label: string; label_id: string }[]
+  download?: { name: string; type: string; base64: string }
 }
 
 export type BusinessCard = { ready: true; package: BusinessCardPackage } | { ready: false; reason: "platform" | "nothing_found" | "already_done" }
