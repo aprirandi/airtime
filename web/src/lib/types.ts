@@ -167,6 +167,19 @@ export interface Guide {
   verify?: { command: string; en: string; id: string }
 }
 
+export interface BusinessCardPackage {
+  covers: string[]
+  missing: string[]
+  snippetName: string
+  renderLine: string
+  files: { name: string; content: string }[]
+  steps: { en: string; id: string }[]
+  undo: { en: string; id: string }[]
+  facts: { kind: string; value: string; label: string; label_id: string }[]
+}
+
+export type BusinessCard = { ready: true; package: BusinessCardPackage } | { ready: false; reason: "platform" | "nothing_found" | "already_done" }
+
 export interface BusinessProfile {
   name: string
   aliases: string[]
@@ -205,6 +218,8 @@ export interface SiteView {
   states: Record<string, FixChoice>
   done: string[]
   guides: Record<string, Guide>
+  /** the no-access package for the business card (Shopify) */
+  business_card?: BusinessCard
   /** who and where the pages say the business is, for asking about it without a form */
   hint: { name: string; city: string; country: string; areas: string[] } | null
   asker: {

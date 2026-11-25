@@ -10,7 +10,7 @@ import { fmtDate } from "@/lib/format"
 import { useI18n, type T } from "@/lib/i18n"
 import { ScanFailure } from "@/lib/scan"
 import { getSite, rescanSite, runAsk, setFix } from "@/lib/site"
-import type { Fix, FixChoice, Guide, SiteView } from "@/lib/types"
+import type { BusinessCardPackage, Fix, FixChoice, Guide, SiteView } from "@/lib/types"
 import { FixList, mostImportant, type FixMeta } from "@/components/FixList"
 import { cn } from "@/lib/utils"
 import { FixCard } from "@/pages/Overview"
@@ -57,6 +57,66 @@ function Delta({ now, before, text, same, small }: { now: number; before: number
   )
 }
 
+function PackageCard({ pkg, lang, t }: { pkg: BusinessCardPackage; lang: "en" | "id"; t: T }) {
+  const say = (b: { en: string; id: string }) => (lang === "id" ? b.id : b.en)
+  const file = pkg.files[0]
+  const missing = pkg.missing.map((m) => ({ description: lang === "id" ? "deskripsi" : "description", contactPoint: lang === "id" ? "kontak" : "contact", address: lang === "id" ? "alamat" : "address" })[m] ?? m)
+  const download = () => {
+    if (!file) return
+    const url = URL.createObjectURL(new Blob([file.content], { type: "text/plain" }))
+    const a = document.createElement("a")
+    a.href = url
+    a.download = file.name
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+  return (
+    <div className="space-y-3 rounded-lg border p-3">
+      <div className="text-sm font-medium">{t("site.pkg.title")}</div>
+      <p className="text-muted-foreground text-xs">{t("site.pkg.intro")}</p>
+      {pkg.facts.length > 0 && (
+        <div className="space-y-1 text-xs">
+          <div className="font-medium">{t("site.pkg.facts")}</div>
+          <ul className="list-disc pl-5">
+            {pkg.facts.map((f, i) => (
+              <li key={i}>{lang === "id" ? f.label_id : f.label}: {f.value}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {missing.length > 0 && <p className="text-warning text-xs">{t("site.pkg.missing", { m: missing.join(", ") })}</p>}
+      <ol className="space-y-2 text-sm">
+        {pkg.steps.map((s, i) => (
+          <li key={i} className="flex gap-3">
+            <span className="bg-secondary text-muted-foreground grid size-6 shrink-0 place-items-center rounded-full text-xs font-medium">{i + 1}</span>
+            <span>{say(s)}</span>
+          </li>
+        ))}
+      </ol>
+      {file && (
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-muted-foreground text-xs font-medium">{t("site.pkg.code")} ({file.name})</span>
+            <span className="flex gap-2">
+              <CopyButton text={file.content} label={t("site.copyCode")} t={t} />
+              <Button type="button" size="sm" variant="outline" onClick={download}>{t("site.pkg.download")}</Button>
+            </span>
+          </div>
+          <pre className="bg-muted max-h-64 overflow-auto rounded-lg p-3 text-xs whitespace-pre-wrap break-all">{file.content}</pre>
+        </div>
+      )}
+      <details>
+        <summary className="text-muted-foreground cursor-pointer text-xs">{t("site.pkg.undo")}</summary>
+        <ul className="mt-1 list-disc space-y-1 pl-5 text-xs">
+          {pkg.undo.map((u, i) => (
+            <li key={i}>{say(u)}</li>
+          ))}
+        </ul>
+      </details>
+    </div>
+  )
+}
+
 function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta; view: SiteView; busy: boolean; onChoose: (c: FixChoice) => void }) {
   const { t, lang } = useI18n()
   const done = view.done.includes(fix.check_id)
@@ -98,6 +158,9 @@ function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta;
       )}
       {partial && <p className="text-muted-foreground text-xs">{t("site.lastCheck", { e: partial.evidence })}</p>}
       {choice === "asked_fixer" && !done && <p className="text-muted-foreground text-xs">{t("site.fixerNote")}</p>}
+      {choice === "asked_fixer" && !done && view.business_card?.ready && view.business_card.package.covers.includes(fix.check_id) && (
+        <PackageCard pkg={view.business_card.package} lang={lang} t={t} />
+      )}
       {guide && !done && (
         <details className="group rounded-lg border">
           <summary className="cursor-pointer px-3 py-2 text-sm font-medium">{t("site.how")}</summary>

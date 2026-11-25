@@ -5,6 +5,7 @@
  * interface with a key only the server has; in tests it is memory. The link is the only key to the page, so only a
  * hash of it is stored: someone who reads the database cannot open anyone's page.
  */
+import { businessCard } from "./package"
 import { createHash, randomBytes } from "node:crypto"
 import { fail, MemoryLimiter, parseAddress, PLATFORMS, scanAddress, type ApiResponse, type Deps, type Limiter } from "./api"
 import type { AuditResult } from "./audit"
@@ -350,6 +351,8 @@ async function viewOf(store: SiteStore, site: SiteRow, scan: Scan, asking: { on:
     // gaps in the first scan that now pass: found by the check itself, whoever did the work
     done: (first?.gaps ?? []).filter((id) => passing.has(id)),
     guides,
+    // what the Fixer hands over for the business card when no access is given: a package to install by hand
+    business_card: businessCard(site.platform, drafts, latest.fixes),
     hint: hint ?? null,
     asker: {
       enabled: asking.on, perSiteHours: asking.hours, profile,
