@@ -125,6 +125,7 @@ function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta;
   const choice = view.states[fix.check_id] ?? "open"
   const held = fix.status === "platform_held"
   const guide = view.guides[fix.check_id]
+  const pack = view.packages?.[fix.check_id]
   const prompt = view.latest.checks.find((c) => c.id === fix.check_id)?.[lang === "id" ? "prompt_id" : "prompt"]
   const check = view.latest.checks.find((c) => c.id === fix.check_id)
   const partial = !done && check?.result === "partial" ? check : undefined
@@ -138,7 +139,7 @@ function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta;
         ? { label: t("site.state.asked_fixer"), variant: "secondary" as const }
         : undefined
   return (
-    <FixCard fix={fix} meta={meta} badge={badge} hideSummary={!held}>
+    <FixCard fix={fix} meta={meta} file={held || done ? undefined : pack?.ready ? "ready" : "none"} badge={badge} hideSummary={!held}>
       {!held && !done && (
         <div className="flex flex-wrap gap-2">
           {choice !== "self" && (
@@ -160,9 +161,10 @@ function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta;
         </div>
       )}
       {partial && <p className="text-muted-foreground text-xs">{t("site.lastCheck", { e: partial.evidence })}</p>}
-      {choice === "asked_fixer" && !done && <p className="text-muted-foreground text-xs">{t("site.fixerNote")}</p>}
-      {choice === "asked_fixer" && !done && view.business_card?.ready && view.business_card.package.covers.includes(fix.check_id) && (
-        <PackageCard pkg={view.business_card.package} lang={lang} t={t} />
+      {choice === "asked_fixer" && !done && !pack?.ready && <p className="text-muted-foreground text-xs">{t("site.fixerNote")}</p>}
+      {choice === "asked_fixer" && !done && pack?.ready && <PackageCard pkg={pack.package} lang={lang} t={t} />}
+      {choice === "asked_fixer" && !done && pack && !pack.ready && pack.reason !== "already_done" && (
+        <p className="text-muted-foreground text-xs">{pack.reason === "platform" ? t("site.pkg.noPlatform") : t("site.pkg.noData")}</p>
       )}
       {guide && !done && (
         <details className="group rounded-lg border">
@@ -468,6 +470,11 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
             <div>
               <h2 className="text-lg font-semibold">{t("ov.fixes")}</h2>
               <p className="text-muted-foreground text-sm">{t("site.fixesSub")}</p>
+              {fixes.length > 0 && (
+                <p className="text-sm">
+                  {t("site.pkg.count", { r: fixes.filter((f) => f.status !== "platform_held" && !view.done.includes(f.check_id) && view.packages?.[f.check_id]?.ready).length, n: fixes.filter((f) => f.status !== "platform_held" && !view.done.includes(f.check_id)).length })}
+                </p>
+              )}
             </div>
             {fixes.length === 0 ? (
               <p className="text-muted-foreground text-sm">{t("site.nothing")}</p>

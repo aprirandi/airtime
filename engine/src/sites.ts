@@ -5,7 +5,7 @@
  * interface with a key only the server has; in tests it is memory. The link is the only key to the page, so only a
  * hash of it is stored: someone who reads the database cannot open anyone's page.
  */
-import { businessCard } from "./package"
+import { packagesFor } from "./package"
 import { createHash, randomBytes } from "node:crypto"
 import { fail, MemoryLimiter, parseAddress, PLATFORMS, scanAddress, type ApiResponse, type Deps, type Limiter } from "./api"
 import type { AuditResult } from "./audit"
@@ -330,10 +330,11 @@ async function viewOf(store: SiteStore, site: SiteRow, scan: Scan, asking: { on:
     store.firstScan(site.id), store.history(site.id), store.fixStates(site.id),
     store.getProfile(site.id), store.latestAskerRun(site.id), store.askerHistory(site.id),
   ])
-  const { fetches: _fetches, fix_drafts: drafts, profile_hint: hint, site_summary: _summary, ...latest } = scan.result as AuditResult & {
+  const { fetches: _fetches, fix_drafts: drafts, profile_hint: hint, site_summary: _summary, llms_draft: llms, ...latest } = scan.result as AuditResult & {
     fix_drafts?: Record<string, Record<string, unknown>>
     profile_hint?: { name: string; city: string; country: string; areas: string[] }
     site_summary?: unknown
+    llms_draft?: string
   }
   const passing = new Set(latest.checks.filter((c) => c.result === "pass").map((c) => c.id))
   const guides: Record<string, Guide> = {}
@@ -351,8 +352,8 @@ async function viewOf(store: SiteStore, site: SiteRow, scan: Scan, asking: { on:
     // gaps in the first scan that now pass: found by the check itself, whoever did the work
     done: (first?.gaps ?? []).filter((id) => passing.has(id)),
     guides,
-    // what the Fixer hands over for the business card when no access is given: a package to install by hand
-    business_card: businessCard(site.platform, drafts, latest.fixes),
+    // what the Fixer can hand over per item when no access is given: a package to install by hand, or why there is none
+    packages: packagesFor(site.platform, drafts, latest.fixes, llms),
     hint: hint ?? null,
     asker: {
       enabled: asking.on, perSiteHours: asking.hours, profile,

@@ -355,3 +355,49 @@ export function siteSummary(snap: FactsSource): SiteSummary {
     text: clip(page.text, 600),
   }
 }
+
+const oneLine = (s: unknown) => (typeof s === "string" ? collapse(s) : "")
+const listOf = (v: unknown): Record<string, unknown>[] => (Array.isArray(v) ? v : v && typeof v === "object" ? [v as Record<string, unknown>] : [])
+
+/**
+ * A first llms.txt for the site, written only from what its own pages say: name, description, the About, Contact and
+ * Privacy pages that answered, and the contact details the Fixer found. Plain text, one line per fact. Returns "" when
+ * there is nothing to say beyond a name.
+ */
+export function llmsText(snap: FactsSource, name: string): string {
+  const org = draftFor("organization_completeness", snap, name)?.jsonld ?? {}
+  const description = oneLine(draftFor("jsonld_organization", snap, name)?.jsonld["description"] ?? org["description"])
+  const host = (() => {
+    try {
+      return new URL(snap.base).host
+    } catch {
+      return ""
+    }
+  })()
+  const pages: string[] = [`- [Home](${snap.base.replace(/\/+$/, "")}/): ${description ? clip(description, 120) : "Start page"}`]
+  const labels: Record<string, string> = { about: "About us", contact: "Contact", privacy: "Privacy policy" }
+  for (const [key, label] of Object.entries(labels)) {
+    const hit = snap.trust[key]?.[0] as { status?: number; finalUrl?: string; url?: string } | undefined
+    const url = hit && hit.status === 200 ? hit.finalUrl || hit.url || "" : ""
+    try {
+      if (url && new URL(url).host === host) pages.push(`- [${label}](${url})`)
+    } catch {
+      /* not an address */
+    }
+  }
+  const contact: string[] = []
+  for (const c of listOf(org["contactPoint"])) {
+    if (oneLine(c["telephone"])) contact.push(`- Phone: ${oneLine(c["telephone"])}`)
+    if (oneLine(c["email"])) contact.push(`- Email: ${oneLine(c["email"])}`)
+  }
+  for (const a of listOf(org["address"])) {
+    const line = [a["streetAddress"], a["addressLocality"], a["addressRegion"], a["postalCode"]].map(oneLine).filter(Boolean).join(", ")
+    if (line) contact.push(`- Address: ${line}`)
+  }
+  if (!description && pages.length < 2 && !contact.length) return ""
+  const out = [`# ${name}`, ""]
+  if (description) out.push(`> ${description}`, "")
+  out.push("## Pages", ...pages, "")
+  if (contact.length) out.push("## Contact", ...[...new Set(contact)], "")
+  return out.join("\n")
+}

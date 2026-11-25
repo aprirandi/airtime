@@ -17,7 +17,7 @@ const STATUS_VARIANT: Record<FixStatus, "success" | "warning" | "outline" | "sec
   done: "success",
 }
 
-export function FixCard({ fix, meta, badge, hideSummary, children }: { fix: Fix; meta?: FixMeta; hideSummary?: boolean; badge?: { label: string; variant: "success" | "warning" | "outline" | "secondary" }; children?: React.ReactNode }) {
+export function FixCard({ fix, meta, file, badge, hideSummary, children }: { fix: Fix; meta?: FixMeta; file?: "ready" | "none"; hideSummary?: boolean; badge?: { label: string; variant: "success" | "warning" | "outline" | "secondary" }; children?: React.ReactNode }) {
   const { t, pick, lang } = useI18n()
   return (
     <Card>
@@ -28,7 +28,7 @@ export function FixCard({ fix, meta, badge, hideSummary, children }: { fix: Fix;
             {badge?.label ?? t(`ov.status.${fix.status}`)}
           </Badge>
         </div>
-        {meta && <FixMetaBadges meta={meta} />}
+        {meta && <FixMetaBadges meta={meta} file={file} />}
         <CardDescription>{pick<string>(fix, "why")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">

@@ -99,7 +99,7 @@ export async function handleAudit(req: ApiRequest, deps: Deps = {}): Promise<Api
   const key = `${parsed.baseUrl}|${platform}`
   const hit = cache.get(key)
   if (hit && now() - hit.at < CACHE_MS) {
-    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, ...cached } = hit.result
+    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, llms_draft: _l, ...cached } = hit.result
     return { status: 200, body: { ...cached, cached: true } }
   }
 
@@ -110,7 +110,7 @@ export async function handleAudit(req: ApiRequest, deps: Deps = {}): Promise<Api
 
   const scanned = await scanAddress(parsed, platform, deps)
   if (!scanned.ok) return scanned.response
-  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, ...result } = scanned.result
+  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, llms_draft: _llms, ...result } = scanned.result
   cache.set(key, { at: now(), result: scanned.result })
   if (cache.size > 200) cache.delete(cache.keys().next().value as string)
   return { status: 200, body: { ...result, cached: false } }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Flag, SlidersHorizontal, Wrench, X } from "lucide-react"
+import { Flag, SlidersHorizontal, Wrench, FileCheck2, FileX2, X } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -35,7 +35,7 @@ export function metaOf(fix: Fix, checks: AuditCheck[]): FixMeta {
 const PRIORITY_VARIANT = { high: "destructive", medium: "warning", low: "outline" } as const
 const EFFORT_VARIANT = { easy: "success", medium: "secondary", hard: "outline" } as const
 
-export function FixMetaBadges({ meta }: { meta: FixMeta }) {
+export function FixMetaBadges({ meta, file }: { meta: FixMeta; file?: "ready" | "none" }) {
   const { t } = useI18n()
   if (meta.category === "held") return null
   return (
@@ -46,6 +46,11 @@ export function FixMetaBadges({ meta }: { meta: FixMeta }) {
       <Badge variant={EFFORT_VARIANT[meta.effort]} title={t("fix.effort.hint")}>
         <Wrench className="size-3" /> {t(meta.effort === "medium" ? "fix.badge.medium_effort" : `fix.badge.${meta.effort}`)}
       </Badge>
+      {file && (
+        <Badge variant={file === "ready" ? "success" : "outline"} className={file === "none" ? "border-dashed" : undefined} title={t(`fix.file.${file}.hint`)}>
+          {file === "ready" ? <FileCheck2 className="size-3" /> : <FileX2 className="size-3" />} {t(`fix.file.${file}`)}
+        </Badge>
+      )}
     </div>
   )
 }

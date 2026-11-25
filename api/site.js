@@ -23805,6 +23805,44 @@ function siteSummary(snap) {
     text: clip(page.text, 600)
   };
 }
+var oneLine = (s) => typeof s === "string" ? collapse(s) : "";
+var listOf = (v) => Array.isArray(v) ? v : v && typeof v === "object" ? [v] : [];
+function llmsText(snap, name) {
+  const org = draftFor("organization_completeness", snap, name)?.jsonld ?? {};
+  const description = oneLine(draftFor("jsonld_organization", snap, name)?.jsonld["description"] ?? org["description"]);
+  const host = (() => {
+    try {
+      return new URL(snap.base).host;
+    } catch {
+      return "";
+    }
+  })();
+  const pages = [`- [Home](${snap.base.replace(/\/+$/, "")}/): ${description ? clip(description, 120) : "Start page"}`];
+  const labels = { about: "About us", contact: "Contact", privacy: "Privacy policy" };
+  for (const [key, label] of Object.entries(labels)) {
+    const hit = snap.trust[key]?.[0];
+    const url = hit && hit.status === 200 ? hit.finalUrl || hit.url || "" : "";
+    try {
+      if (url && new URL(url).host === host) pages.push(`- [${label}](${url})`);
+    } catch {
+    }
+  }
+  const contact = [];
+  for (const c of listOf(org["contactPoint"])) {
+    if (oneLine(c["telephone"])) contact.push(`- Phone: ${oneLine(c["telephone"])}`);
+    if (oneLine(c["email"])) contact.push(`- Email: ${oneLine(c["email"])}`);
+  }
+  for (const a of listOf(org["address"])) {
+    const line = [a["streetAddress"], a["addressLocality"], a["addressRegion"], a["postalCode"]].map(oneLine).filter(Boolean).join(", ");
+    if (line) contact.push(`- Address: ${line}`);
+  }
+  if (!description && pages.length < 2 && !contact.length) return "";
+  const out = [`# ${name}`, ""];
+  if (description) out.push(`> ${description}`, "");
+  out.push("## Pages", ...pages, "");
+  if (contact.length) out.push("## Contact", ...[...new Set(contact)], "");
+  return out.join("\n");
+}
 
 // src/audit.ts
 var ENGINE = "airtime-auditor/2";
@@ -23885,6 +23923,7 @@ async function runAudit(fetch2, options) {
     fixes: buildFixes(rows, platform, snapshot, siteName(snapshot)),
     fix_drafts: fixDrafts(rows, snapshot, siteName(snapshot)),
     profile_hint: profileHint(snapshot),
+    llms_draft: llmsText(snapshot, siteName(snapshot)),
     site_summary: siteSummary(snapshot),
     prompt_all: allPrompt(gapRows, target, platform, "en", scanned),
     prompt_all_id: allPrompt(gapRows, target, platform, "id", scanned),
@@ -24121,7 +24160,7 @@ async function handleAudit(req, deps = {}) {
   const key = `${parsed.baseUrl}|${platform}`;
   const hit = cache.get(key);
   if (hit && now() - hit.at < CACHE_MS) {
-    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, ...cached } = hit.result;
+    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, llms_draft: _l, ...cached } = hit.result;
     return { status: 200, body: { ...cached, cached: true } };
   }
   const taken = (deps.limiter ?? defaultLimiter).take(req.client, now());
@@ -24130,7 +24169,7 @@ async function handleAudit(req, deps = {}) {
   }
   const scanned = await scanAddress(parsed, platform, deps);
   if (!scanned.ok) return scanned.response;
-  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, ...result } = scanned.result;
+  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, llms_draft: _llms, ...result } = scanned.result;
   cache.set(key, { at: now(), result: scanned.result });
   if (cache.size > 200) cache.delete(cache.keys().next().value);
   return { status: 200, body: { ...result, cached: false } };
@@ -24620,6 +24659,77 @@ function businessCard(platform, drafts, fixes) {
     }
   };
 }
+var LLMS_SLUG = "airtime-llms-txt";
+function llmsPlugin(text) {
+  let mark = "AIRTIME_TXT";
+  for (let i = 1; text.includes(mark); i++) mark = `AIRTIME_TXT_${i}`;
+  return [
+    "<?php",
+    "/**",
+    " * Plugin Name: Airtime llms.txt",
+    " * Description: Answers /llms.txt with a short introduction of the business for AI assistants. Added by Airtime. To undo it, deactivate and delete this plugin.",
+    " * Version: 1.0.0",
+    " */",
+    "",
+    "if ( ! defined( 'ABSPATH' ) ) {",
+    "	exit;",
+    "}",
+    "",
+    "add_action( 'init', function () {",
+    "	$path = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) : '';",
+    "	if ( wp_parse_url( home_url( '/llms.txt' ), PHP_URL_PATH ) !== $path ) {",
+    "		return;",
+    "	}",
+    `	$text = <<<'${mark}'`,
+    text.replace(/\r/g, "").replace(/\n+$/, ""),
+    `${mark};`,
+    "	status_header( 200 );",
+    "	header( 'Content-Type: text/plain; charset=utf-8' );",
+    '	echo $text . "\\n";',
+    "	exit;",
+    "}, 1 );",
+    ""
+  ].join("\n");
+}
+var LLMS_STEPS = [
+  b("Read the text in the box first. It was written only from your own pages. You can change any line in the file before you install it.", "Baca dulu teks di kotak. Teks itu ditulis hanya dari halaman Anda sendiri. Anda boleh mengubah baris mana pun di berkas sebelum memasangnya."),
+  b("Download the plugin file below (airtime-llms-txt.zip).", "Unduh berkas plugin di bawah (airtime-llms-txt.zip)."),
+  b("In your WordPress dashboard open Plugins, then Add New Plugin, then Upload Plugin. Choose the zip file and click Install Now.", "Di dashboard WordPress buka Plugins, lalu Add New Plugin, lalu Upload Plugin. Pilih berkas zip dan klik Install Now."),
+  b("Click Activate Plugin. Then open your-site/llms.txt in a browser: you should see the text.", "Klik Activate Plugin. Lalu buka situs-anda/llms.txt di browser: Anda akan melihat teksnya."),
+  b("Press Re-check at the top of this page. When the check passes, the item is marked done on its own.", "Tekan Periksa ulang di bagian atas halaman ini. Begitu pemeriksaannya lulus, item ini ditandai selesai dengan sendirinya.")
+];
+var LLMS_UNDO = [
+  b("Open Plugins, find Airtime llms.txt, click Deactivate, then Delete. Nothing else changes.", "Buka Plugins, cari Airtime llms.txt, klik Deactivate, lalu Delete. Tidak ada yang lain yang berubah.")
+];
+function llmsPackage(platform, text, fixes) {
+  if (!fixes.some((f) => f.check_id === "llms_txt" && f.status !== "platform_held")) return { ready: false, reason: "already_done" };
+  if (platform !== "wordpress") return { ready: false, reason: "platform", platform };
+  if (!text) return { ready: false, reason: "nothing_found" };
+  const php = { name: `${LLMS_SLUG}/${LLMS_SLUG}.php`, content: llmsPlugin(text) };
+  return {
+    ready: true,
+    package: {
+      id: "llms_txt",
+      platform: "wordpress",
+      covers: ["llms_txt"],
+      missing: [],
+      snippetName: LLMS_SLUG,
+      renderLine: "",
+      files: [{ name: "llms.txt", content: text.endsWith("\n") ? text : text + "\n" }, php],
+      steps: LLMS_STEPS,
+      undo: LLMS_UNDO,
+      facts: [],
+      download: { name: `${LLMS_SLUG}.zip`, type: "application/zip", base64: toBase64(makeZip([php])) }
+    }
+  };
+}
+function packagesFor(platform, drafts, fixes, llms) {
+  const out = {};
+  const card = businessCard(platform, drafts, fixes);
+  for (const id of COVERS) if (fixes.some((f) => f.check_id === id)) out[id] = card;
+  if (fixes.some((f) => f.check_id === "llms_txt")) out["llms_txt"] = llmsPackage(platform, llms, fixes);
+  return out;
+}
 
 // src/sites.ts
 var import_node_crypto = require("node:crypto");
@@ -25099,7 +25209,7 @@ async function viewOf(store, site, scan, asking = { on: false, hours: 12 }) {
     store.latestAskerRun(site.id),
     store.askerHistory(site.id)
   ]);
-  const { fetches: _fetches, fix_drafts: drafts, profile_hint: hint, site_summary: _summary, ...latest } = scan.result;
+  const { fetches: _fetches, fix_drafts: drafts, profile_hint: hint, site_summary: _summary, llms_draft: llms, ...latest } = scan.result;
   const passing = new Set(latest.checks.filter((c) => c.result === "pass").map((c) => c.id));
   const guides = {};
   for (const fix of latest.fixes) {
@@ -25116,8 +25226,8 @@ async function viewOf(store, site, scan, asking = { on: false, hours: 12 }) {
     // gaps in the first scan that now pass: found by the check itself, whoever did the work
     done: (first?.gaps ?? []).filter((id) => passing.has(id)),
     guides,
-    // what the Fixer hands over for the business card when no access is given: a package to install by hand
-    business_card: businessCard(site.platform, drafts, latest.fixes),
+    // what the Fixer can hand over per item when no access is given: a package to install by hand, or why there is none
+    packages: packagesFor(site.platform, drafts, latest.fixes, llms),
     hint: hint ?? null,
     asker: {
       enabled: asking.on,
