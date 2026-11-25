@@ -47,9 +47,10 @@ export interface AuditOptions extends ScanConfig {
 
 export async function runAudit(fetch: Fetcher, options: AuditOptions) {
   const snapshot = await collect(fetch, options)
-  const rows = rowsFor(snapshot, options.platform)
+  // a client who did not say what the site is built on gets it read from the page, so what the platform controls is not asked of them
+  const platform = options.platform || detectPlatform(snapshot.homeHtml.text)
+  const rows = rowsFor(snapshot, platform)
   const result = scoreRows(rows)
-  const platform = options.platform
   const target = snapshot.base
   const scannedAt = options.scannedAt ?? new Date().toISOString()
   const fixable = gaps(rows)
@@ -84,7 +85,7 @@ export async function runAudit(fetch: Fetcher, options: AuditOptions) {
     fix_drafts: fixDrafts(rows, snapshot, siteName(snapshot)),
     profile_hint: profileHint(snapshot),
     llms_draft: llmsText(snapshot, siteName(snapshot)),
-    platform_guess: detectPlatform(snapshot.homeHtml.text),
+    platform_guess: platform === options.platform ? "" : platform,
     site_summary: siteSummary(snapshot),
     prompt_all: allPrompt(gapRows, target, platform, "en", scanned),
     prompt_all_id: allPrompt(gapRows, target, platform, "id", scanned),

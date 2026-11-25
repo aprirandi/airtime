@@ -145,6 +145,8 @@ describe("platform when the client did not say", () => {
     expect(detectPlatform('<html><head><meta name="generator" content="WordPress 6.5"></head></html>')).toBe("wordpress")
     expect(detectPlatform('<link rel="stylesheet" href="https://x.example/wp-content/themes/a/style.css">')).toBe("wordpress")
     expect(detectPlatform('<script src="https://cdn.shopify.com/s/files/1/a.js"></script>')).toBe("shopify")
+    expect(detectPlatform('<img src="https://static.wixstatic.com/media/a.png">')).toBe("wix")
+    expect(detectPlatform('<meta name="generator" content="Squarespace 7.1">')).toBe("squarespace")
     expect(detectPlatform("<html><body>Hello</body></html>")).toBe("")
   })
   it("treats WooCommerce as WordPress for packages", () => {
