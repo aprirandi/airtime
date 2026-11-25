@@ -23273,6 +23273,14 @@ function coverage(rows) {
   };
 }
 
+// src/platform.ts
+function detectPlatform(html) {
+  const page = html.slice(0, 4e5);
+  if (/<meta[^>]+name=["']generator["'][^>]+content=["']WordPress/i.test(page) || /\/wp-(?:content|includes)\//i.test(page)) return "wordpress";
+  if (/cdn\.shopify\.com|Shopify\.theme|myshopify\.com/i.test(page)) return "shopify";
+  return "";
+}
+
 // src/fixer.generated.json
 var fixer_generated_default = {
   client: {
@@ -23924,6 +23932,7 @@ async function runAudit(fetch, options) {
     fix_drafts: fixDrafts(rows, snapshot, siteName(snapshot)),
     profile_hint: profileHint(snapshot),
     llms_draft: llmsText(snapshot, siteName(snapshot)),
+    platform_guess: detectPlatform(snapshot.homeHtml.text),
     site_summary: siteSummary(snapshot),
     prompt_all: allPrompt(gapRows, target, platform, "en", scanned),
     prompt_all_id: allPrompt(gapRows, target, platform, "id", scanned),
@@ -24160,7 +24169,7 @@ async function handleAudit(req, deps = {}) {
   const key = `${parsed.baseUrl}|${platform}`;
   const hit = cache.get(key);
   if (hit && now() - hit.at < CACHE_MS) {
-    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, llms_draft: _l, ...cached } = hit.result;
+    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, llms_draft: _l, platform_guess: _g, ...cached } = hit.result;
     return { status: 200, body: { ...cached, cached: true } };
   }
   const taken = (deps.limiter ?? defaultLimiter).take(req.client, now());
@@ -24169,7 +24178,7 @@ async function handleAudit(req, deps = {}) {
   }
   const scanned = await scanAddress(parsed, platform, deps);
   if (!scanned.ok) return scanned.response;
-  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, llms_draft: _llms, ...result } = scanned.result;
+  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, llms_draft: _llms, platform_guess: _guess, ...result } = scanned.result;
   cache.set(key, { at: now(), result: scanned.result });
   if (cache.size > 200) cache.delete(cache.keys().next().value);
   return { status: 200, body: { ...result, cached: false } };

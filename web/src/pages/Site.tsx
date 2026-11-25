@@ -17,6 +17,7 @@ import { FixCard } from "@/pages/Overview"
 
 type State = { kind: "loading" } | { kind: "ready"; view: SiteView } | { kind: "error"; code: string; message: string }
 
+const PLATFORM_NAME: Record<string, string> = { wordpress: "WordPress", shopify: "Shopify", woocommerce: "WooCommerce", wix: "Wix", squarespace: "Squarespace" }
 const SCORE_TONE = { strong: "text-success", needs_work: "text-warning", blockers: "text-destructive", none: "" } as const
 
 function Steps({ guide, lang, t }: { guide: Guide; lang: "en" | "id"; t: T }) {
@@ -349,7 +350,7 @@ export function SitePage({ token, tab, go }: { token: string; tab: "audit" | "as
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">{view.site.host}</h1>
-            <p className="text-muted-foreground text-sm">{t("site.checked", { d: fmtDate(audit.scanned_at.slice(0, 10)) })}</p>
+            <p className="text-muted-foreground text-sm">{t("site.checked", { d: fmtDate(audit.scanned_at.slice(0, 10)) })}{view.site.platform_used ? ` · ${PLATFORM_NAME[view.site.platform_used] ?? view.site.platform_used}${view.site.platform ? "" : t("site.detected")}` : ""}</p>
             <p className="text-muted-foreground mt-1 text-xs">{t("site.linkShort")}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">

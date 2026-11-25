@@ -330,21 +330,24 @@ async function viewOf(store: SiteStore, site: SiteRow, scan: Scan, asking: { on:
     store.firstScan(site.id), store.history(site.id), store.fixStates(site.id),
     store.getProfile(site.id), store.latestAskerRun(site.id), store.askerHistory(site.id),
   ])
-  const { fetches: _fetches, fix_drafts: drafts, profile_hint: hint, site_summary: _summary, llms_draft: llms, ...latest } = scan.result as AuditResult & {
+  const { fetches: _fetches, fix_drafts: drafts, profile_hint: hint, site_summary: _summary, llms_draft: llms, platform_guess: guess, ...latest } = scan.result as AuditResult & {
     fix_drafts?: Record<string, Record<string, unknown>>
     profile_hint?: { name: string; city: string; country: string; areas: string[] }
     site_summary?: unknown
     llms_draft?: string
+    platform_guess?: string
   }
   const passing = new Set(latest.checks.filter((c) => c.result === "pass").map((c) => c.id))
+  // what the client said, else what the pages show; the score does not depend on it, the tutorials and packages do
+  const platform = site.platform || guess || ""
   const guides: Record<string, Guide> = {}
   for (const fix of latest.fixes) {
     if (fix.status === "platform_held") continue
-    const g = buildGuide(fix.check_id, site.platform, drafts?.[fix.check_id])
+    const g = buildGuide(fix.check_id, platform, drafts?.[fix.check_id])
     if (g) guides[fix.check_id] = g
   }
   return {
-    site: { host: site.host, url: site.url, platform: site.platform, name: site.name, created_at: site.created_at },
+    site: { host: site.host, url: site.url, platform: site.platform, platform_used: platform, name: site.name, created_at: site.created_at },
     latest,
     baseline: first,
     history,
@@ -353,7 +356,7 @@ async function viewOf(store: SiteStore, site: SiteRow, scan: Scan, asking: { on:
     done: (first?.gaps ?? []).filter((id) => passing.has(id)),
     guides,
     // what the Fixer can hand over per item when no access is given: a package to install by hand, or why there is none
-    packages: packagesFor(site.platform, drafts, latest.fixes, llms),
+    packages: packagesFor(platform, drafts, latest.fixes, llms),
     hint: hint ?? null,
     asker: {
       enabled: asking.on, perSiteHours: asking.hours, profile,

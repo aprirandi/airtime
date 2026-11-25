@@ -23273,6 +23273,14 @@ function coverage(rows) {
   };
 }
 
+// src/platform.ts
+function detectPlatform(html) {
+  const page = html.slice(0, 4e5);
+  if (/<meta[^>]+name=["']generator["'][^>]+content=["']WordPress/i.test(page) || /\/wp-(?:content|includes)\//i.test(page)) return "wordpress";
+  if (/cdn\.shopify\.com|Shopify\.theme|myshopify\.com/i.test(page)) return "shopify";
+  return "";
+}
+
 // src/fixer.generated.json
 var fixer_generated_default = {
   client: {
@@ -23924,6 +23932,7 @@ async function runAudit(fetch2, options) {
     fix_drafts: fixDrafts(rows, snapshot, siteName(snapshot)),
     profile_hint: profileHint(snapshot),
     llms_draft: llmsText(snapshot, siteName(snapshot)),
+    platform_guess: detectPlatform(snapshot.homeHtml.text),
     site_summary: siteSummary(snapshot),
     prompt_all: allPrompt(gapRows, target, platform, "en", scanned),
     prompt_all_id: allPrompt(gapRows, target, platform, "id", scanned),
@@ -24160,7 +24169,7 @@ async function handleAudit(req, deps = {}) {
   const key = `${parsed.baseUrl}|${platform}`;
   const hit = cache.get(key);
   if (hit && now() - hit.at < CACHE_MS) {
-    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, llms_draft: _l, ...cached } = hit.result;
+    const { fix_drafts: _d, profile_hint: _h, site_summary: _s, llms_draft: _l, platform_guess: _g, ...cached } = hit.result;
     return { status: 200, body: { ...cached, cached: true } };
   }
   const taken = (deps.limiter ?? defaultLimiter).take(req.client, now());
@@ -24169,7 +24178,7 @@ async function handleAudit(req, deps = {}) {
   }
   const scanned = await scanAddress(parsed, platform, deps);
   if (!scanned.ok) return scanned.response;
-  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, llms_draft: _llms, ...result } = scanned.result;
+  const { fix_drafts: _drafts, profile_hint: _hint, site_summary: _summary, llms_draft: _llms, platform_guess: _guess, ...result } = scanned.result;
   cache.set(key, { at: now(), result: scanned.result });
   if (cache.size > 200) cache.delete(cache.keys().next().value);
   return { status: 200, body: { ...result, cached: false } };
@@ -24723,7 +24732,8 @@ function llmsPackage(platform, text, fixes) {
     }
   };
 }
-function packagesFor(platform, drafts, fixes, llms) {
+function packagesFor(platformGiven, drafts, fixes, llms) {
+  const platform = platformGiven === "woocommerce" ? "wordpress" : platformGiven;
   const out = {};
   const card = businessCard(platform, drafts, fixes);
   for (const id of COVERS) if (fixes.some((f) => f.check_id === id)) out[id] = card;
@@ -25209,16 +25219,17 @@ async function viewOf(store, site, scan, asking = { on: false, hours: 12 }) {
     store.latestAskerRun(site.id),
     store.askerHistory(site.id)
   ]);
-  const { fetches: _fetches, fix_drafts: drafts, profile_hint: hint, site_summary: _summary, llms_draft: llms, ...latest } = scan.result;
+  const { fetches: _fetches, fix_drafts: drafts, profile_hint: hint, site_summary: _summary, llms_draft: llms, platform_guess: guess, ...latest } = scan.result;
   const passing = new Set(latest.checks.filter((c) => c.result === "pass").map((c) => c.id));
+  const platform = site.platform || guess || "";
   const guides = {};
   for (const fix of latest.fixes) {
     if (fix.status === "platform_held") continue;
-    const g = buildGuide(fix.check_id, site.platform, drafts?.[fix.check_id]);
+    const g = buildGuide(fix.check_id, platform, drafts?.[fix.check_id]);
     if (g) guides[fix.check_id] = g;
   }
   return {
-    site: { host: site.host, url: site.url, platform: site.platform, name: site.name, created_at: site.created_at },
+    site: { host: site.host, url: site.url, platform: site.platform, platform_used: platform, name: site.name, created_at: site.created_at },
     latest,
     baseline: first,
     history,
@@ -25227,7 +25238,7 @@ async function viewOf(store, site, scan, asking = { on: false, hours: 12 }) {
     done: (first?.gaps ?? []).filter((id) => passing.has(id)),
     guides,
     // what the Fixer can hand over per item when no access is given: a package to install by hand, or why there is none
-    packages: packagesFor(site.platform, drafts, latest.fixes, llms),
+    packages: packagesFor(platform, drafts, latest.fixes, llms),
     hint: hint ?? null,
     asker: {
       enabled: asking.on,

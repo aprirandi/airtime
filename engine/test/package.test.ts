@@ -137,3 +137,18 @@ describe("llms.txt for WordPress", () => {
     expect(run("/shop/")).toBe("[fell through]")
   })
 })
+
+import { detectPlatform } from "../src/platform"
+
+describe("platform when the client did not say", () => {
+  it("reads WordPress and Shopify from the homepage, and nothing else", () => {
+    expect(detectPlatform('<html><head><meta name="generator" content="WordPress 6.5"></head></html>')).toBe("wordpress")
+    expect(detectPlatform('<link rel="stylesheet" href="https://x.example/wp-content/themes/a/style.css">')).toBe("wordpress")
+    expect(detectPlatform('<script src="https://cdn.shopify.com/s/files/1/a.js"></script>')).toBe("shopify")
+    expect(detectPlatform("<html><body>Hello</body></html>")).toBe("")
+  })
+  it("treats WooCommerce as WordPress for packages", () => {
+    const r = packagesFor("woocommerce", { organization_completeness: card }, [fix("organization_completeness")], "")
+    expect(r["organization_completeness"]).toMatchObject({ ready: true })
+  })
+})

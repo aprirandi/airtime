@@ -19,7 +19,7 @@ const maps = replay.scenarios.map((s) => new Map(s.calls.map((c) => [`${c.url}|$
 // One made-up site that says where it is and what it sells, to try asking without a form
 const AU = "au-demo.example.com"
 const auPages: Record<string, string> = {
-  "/": `<html lang="en"><head><meta property="og:site_name" content="Paper Plane"><meta property="og:title" content="Paper Plane"><meta name="description" content="Greeting cards, wrapping paper and journals for every occasion, chosen by people who love paper."></head><body><h1>Paper Plane</h1><h2>Greeting cards</h2><h2>Journals</h2><p>${"We sell handmade greeting cards, wrapping paper and journals. ".repeat(8)}</p><a href="/pages/about-us">About us</a> <a href="/pages/contact">Contact</a> <a href="/policies/privacy-policy">Privacy policy</a></body></html>`,
+  "/": `<html lang="en"><head><meta property="og:site_name" content="Paper Plane"><meta property="og:title" content="Paper Plane"><link rel="stylesheet" href="/wp-content/themes/paper/style.css"><meta name="description" content="Greeting cards, wrapping paper and journals for every occasion, chosen by people who love paper."></head><body><h1>Paper Plane</h1><h2>Greeting cards</h2><h2>Journals</h2><p>${"We sell handmade greeting cards, wrapping paper and journals. ".repeat(8)}</p><a href="/pages/about-us">About us</a> <a href="/pages/contact">Contact</a> <a href="/policies/privacy-policy">Privacy policy</a></body></html>`,
   "/pages/contact": `<html><body><h1>Contact</h1><p>Visit us at 12 Chapel St Prahran VIC 3181 or call (03) 9123 4567. Email hello@paperplane.example.com.</p></body></html>`,
 }
 const fake: Fetcher = async (rawUrl, o) => {
