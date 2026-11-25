@@ -63,10 +63,12 @@ function PackageCard({ pkg, lang, t }: { pkg: BusinessCardPackage; lang: "en" | 
   const missing = pkg.missing.map((m) => ({ description: lang === "id" ? "deskripsi" : "description", contactPoint: lang === "id" ? "kontak" : "contact", address: lang === "id" ? "alamat" : "address" })[m] ?? m)
   const download = () => {
     if (!file) return
-    const url = URL.createObjectURL(new Blob([file.content], { type: "text/plain" }))
+    const zip = pkg.download
+    const blob = zip ? new Blob([Uint8Array.from(atob(zip.base64), (c) => c.charCodeAt(0))], { type: zip.type }) : new Blob([file.content], { type: "text/plain" })
+    const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = file.name
+    a.download = zip ? zip.name : file.name
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -99,7 +101,7 @@ function PackageCard({ pkg, lang, t }: { pkg: BusinessCardPackage; lang: "en" | 
             <span className="text-muted-foreground text-xs font-medium">{t("site.pkg.code")} ({file.name})</span>
             <span className="flex gap-2">
               <CopyButton text={file.content} label={t("site.copyCode")} t={t} />
-              <Button type="button" size="sm" variant="outline" onClick={download}>{t("site.pkg.download")}</Button>
+              <Button type="button" size="sm" variant="outline" onClick={download}>{pkg.download ? t("site.pkg.downloadZip") : t("site.pkg.download")}</Button>
             </span>
           </div>
           <pre className="bg-muted max-h-64 overflow-auto rounded-lg p-3 text-xs whitespace-pre-wrap break-all">{file.content}</pre>

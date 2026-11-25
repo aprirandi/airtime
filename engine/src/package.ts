@@ -11,6 +11,7 @@
  */
 import type { Bilingual } from "./guide"
 import type { Fix } from "./fixer"
+import { makeZip, toBase64 } from "./zip"
 
 export const SNIPPET_NAME = "airtime-business-card"
 export const RENDER_LINE = `{% render '${SNIPPET_NAME}' %}`
@@ -56,6 +57,49 @@ export const SHOPIFY_UNDO: Bilingual[] = [
   b(`If you want, also delete the snippet ${SNIPPET_NAME} from the Snippets list.`, `Kalau mau, hapus juga snippet ${SNIPPET_NAME} dari daftar Snippets.`),
 ]
 
+
+export const PLUGIN_SLUG = "airtime-business-card"
+
+/** A one-file WordPress plugin that prints the business card first in the page head. Data sits in a nowdoc: PHP reads it as plain text. */
+export function wordpressPlugin(jsonld: Record<string, unknown>): string {
+  return [
+    "<?php",
+    "/**",
+    " * Plugin Name: Airtime Business Card",
+    " * Description: Adds the business card AI assistants read (name, description, contact, address) to the head of every page. Added by Airtime. To undo it, deactivate and delete this plugin.",
+    " * Version: 1.0.0",
+    " */",
+    "",
+    "if ( ! defined( 'ABSPATH' ) ) {",
+    "\texit;",
+    "}",
+    "",
+    "add_action( 'wp_head', function () {",
+    "\tif ( ! is_front_page() ) {",
+    "\t\treturn;",
+    "\t}",
+    "\t$card = <<<'AIRTIME_JSON'",
+    safeJson(jsonld),
+    "AIRTIME_JSON;",
+    "\techo \"<script type=\\\"application/ld+json\\\">\\n\" . $card . \"\\n</script>\\n\";",
+    "}, 1 );",
+    "",
+  ].join("\n")
+}
+
+export const WORDPRESS_STEPS: Bilingual[] = [
+  b("If you use Yoast SEO or Rank Math, the steps under How to do it are the tidier way, since they keep one business card. Use this plugin when you do not use one of them, or when those steps do not work for you.",
+    "Kalau Anda memakai Yoast SEO atau Rank Math, langkah di Cara mengerjakannya lebih rapi karena kartu bisnisnya tetap satu. Pakai plugin ini kalau Anda tidak memakai salah satunya, atau langkah itu tidak berhasil."),
+  b("Download the plugin file below (airtime-business-card.zip).", "Unduh berkas plugin di bawah (airtime-business-card.zip)."),
+  b("In your WordPress dashboard open Plugins, then Add New Plugin, then Upload Plugin. Choose the zip file and click Install Now.", "Di dashboard WordPress buka Plugins, lalu Add New Plugin, lalu Upload Plugin. Pilih berkas zip dan klik Install Now."),
+  b("Click Activate Plugin.", "Klik Activate Plugin."),
+  b("Press Re-check at the top of this page. When the check passes, the item is marked done on its own.", "Tekan Periksa ulang di bagian atas halaman ini. Begitu pemeriksaannya lulus, item ini ditandai selesai dengan sendirinya."),
+]
+
+export const WORDPRESS_UNDO: Bilingual[] = [
+  b("Open Plugins, find Airtime Business Card, click Deactivate, then Delete. Nothing else changes.", "Buka Plugins, cari Airtime Business Card, klik Deactivate, lalu Delete. Tidak ada yang lain yang berubah."),
+]
+
 export interface PackageFact {
   kind: string
   value: string
@@ -66,7 +110,7 @@ export interface PackageFact {
 
 export interface BusinessCardPackage {
   id: "business_card"
-  platform: "shopify"
+  platform: "shopify" | "wordpress"
   /** the checks still open that this package is meant to fix */
   covers: string[]
   /** what the package will not fix yet, in the data's own words: description, contactPoint, address */
@@ -78,6 +122,8 @@ export interface BusinessCardPackage {
   steps: Bilingual[]
   undo: Bilingual[]
   facts: PackageFact[]
+  /** a file to hand over as it is, when the platform wants a zip */
+  download?: { name: string; type: string; base64: string }
 }
 
 export type BusinessCard =
@@ -91,7 +137,7 @@ const filled = (v: unknown) => (typeof v === "string" ? v.trim() !== "" : Array.
 export function businessCard(platform: string, drafts: Drafts | undefined, fixes: Fix[]): BusinessCard {
   const covers = COVERS.filter((id) => fixes.some((f) => f.check_id === id && f.status !== "platform_held"))
   if (covers.length === 0) return { ready: false, reason: "already_done" }
-  if (platform !== "shopify") return { ready: false, reason: "platform", platform }
+  if (platform !== "shopify" && platform !== "wordpress") return { ready: false, reason: "platform", platform }
   const card = drafts?.["organization_completeness"] ?? drafts?.["jsonld_organization"]
   if (!card) return { ready: false, reason: "nothing_found" }
   const jsonld: Record<string, unknown> = { ...card }
@@ -108,6 +154,17 @@ export function businessCard(platform: string, drafts: Drafts | undefined, fixes
         seen.add(key)
         facts.push(c)
       }
+    }
+  }
+  if (platform === "wordpress") {
+    const php = { name: `${PLUGIN_SLUG}/${PLUGIN_SLUG}.php`, content: wordpressPlugin(jsonld) }
+    return {
+      ready: true,
+      package: {
+        id: "business_card", platform, covers: [...covers], missing, jsonld, snippetName: PLUGIN_SLUG, renderLine: "",
+        files: [php], steps: WORDPRESS_STEPS, undo: WORDPRESS_UNDO, facts,
+        download: { name: `${PLUGIN_SLUG}.zip`, type: "application/zip", base64: toBase64(makeZip([php])) },
+      },
     }
   }
   return {
