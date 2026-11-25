@@ -100,6 +100,12 @@ export const WORDPRESS_UNDO: Bilingual[] = [
   b("Open Plugins, find Airtime Business Card, click Deactivate, then Delete. Nothing else changes.", "Buka Plugins, cari Airtime Business Card, klik Deactivate, lalu Delete. Tidak ada yang lain yang berubah."),
 ]
 
+export interface PackageChoice {
+  key: string
+  label: Bilingual
+  options: { value: "yes" | "no"; label: Bilingual }[]
+}
+
 export interface PackageFact {
   kind: string
   value: string
@@ -109,7 +115,7 @@ export interface PackageFact {
 }
 
 export interface BusinessCardPackage {
-  id: "business_card" | "llms_txt"
+  id: "business_card" | "llms_txt" | "content_signals"
   platform: "shopify" | "wordpress"
   /** the checks still open that this package is meant to fix */
   covers: string[]
@@ -122,6 +128,9 @@ export interface BusinessCardPackage {
   steps: Bilingual[]
   undo: Bilingual[]
   facts: PackageFact[]
+  /** questions only the owner can answer; the file is complete once each has an answer, and `placeholder` is replaced by them */
+  choices?: PackageChoice[]
+  placeholder?: string
   /** a file to hand over as it is, when the platform wants a zip */
   download?: { name: string; type: string; base64: string }
 }
@@ -247,5 +256,76 @@ export function packagesFor(platformGiven: string, drafts: Drafts | undefined, f
   const card = businessCard(platform, drafts, fixes)
   for (const id of COVERS) if (fixes.some((f) => f.check_id === id)) out[id] = card
   if (fixes.some((f) => f.check_id === "llms_txt")) out["llms_txt"] = llmsPackage(platform, llms, fixes)
+  if (fixes.some((f) => f.check_id === "content_signals")) out["content_signals"] = signalsPackage(platform, fixes)
   return out
+}
+
+export const SIGNALS_PLACEHOLDER = "__CONTENT_SIGNAL_VALUES__"
+export const ROBOTS_NAME = "robots.txt.liquid"
+
+/**
+ * Shopify's own robots.txt, written out again with one added line in the group for every crawler. The loop is Shopify's
+ * documented default for this template; the added line is put between two line breaks of its own, so that whatever Shopify
+ * puts after its lines, the new line can never be glued to another one. Deleting the file gives back Shopify's default.
+ */
+export function robotsLiquid(values: string = SIGNALS_PLACEHOLDER): string {
+  return [
+    "{% comment %}",
+    "  Added by Airtime: tells AI companies what they may do with your content (Content-Signal).",
+    `  To undo it, delete this file (${ROBOTS_NAME}). Shopify then goes back to its own default robots.txt.`,
+    "{% endcomment %}",
+    "{%- capture nl %}",
+    "{% endcapture -%}",
+    "{%- for group in robots.default_groups -%}",
+    "  {{- group.user_agent }}",
+    "  {%- if group.user_agent.value == '*' -%}",
+    `    {{- nl }}Content-Signal: ${values}{{ nl }}`,
+    "  {%- endif -%}",
+    "  {%- for rule in group.rules -%}",
+    "    {{ rule }}",
+    "  {%- endfor -%}",
+    "  {%- if group.sitemap != blank -%}",
+    "    {{ group.sitemap }}",
+    "  {%- endif %}",
+    "{% endfor %}",
+    "",
+  ].join("\n")
+}
+
+export const ROBOTS_STEPS: Bilingual[] = [
+  b("Answer the three questions above. They are yours to decide, so nothing is chosen for you. The file appears when all three are answered.", "Jawab tiga pertanyaan di atas. Ini keputusan Anda, jadi tidak ada yang dipilihkan. Berkasnya muncul setelah ketiganya dijawab."),
+  b("In Online Store, Themes, open the three dots (…) of your LIVE theme and choose Edit code. This file only works on the live theme, so a copy cannot be used to try it first.", "Di Online Store, Themes, buka titik tiga (…) tema yang AKTIF dan pilih Edit code. Berkas ini hanya bekerja di tema yang aktif, jadi salinan tidak bisa dipakai untuk mencobanya dulu."),
+  b("Under Templates click Add a new template, choose robots.txt from the list, and confirm. Shopify creates a file called robots.txt.liquid.", "Di bawah Templates klik Add a new template, pilih robots.txt dari daftar, dan konfirmasi. Shopify membuat berkas bernama robots.txt.liquid."),
+  b("Delete everything in that file, paste the code from the box below, and click Save.", "Hapus semua isi berkas itu, tempel kode dari kotak di bawah, lalu klik Save."),
+  b("Open your-site/robots.txt in a browser. Under User-agent: * you should see a line starting with Content-Signal, and all your other lines still there. If anything looks wrong, delete the file (see How to undo it).", "Buka situs-anda/robots.txt di browser. Di bawah User-agent: * harus ada baris yang diawali Content-Signal, dan semua baris Anda yang lain tetap ada. Kalau ada yang terlihat salah, hapus berkasnya (lihat Cara membatalkannya)."),
+  b("Press Re-check at the top of this page. When the check passes, the item is marked done on its own.", "Tekan Periksa ulang di bagian atas halaman ini. Begitu pemeriksaannya lulus, item ini ditandai selesai dengan sendirinya."),
+]
+
+export const ROBOTS_UNDO: Bilingual[] = [
+  b(`Open Edit code, find ${ROBOTS_NAME} under Templates, and delete the file. Shopify goes back to its own default robots.txt.`, `Buka Edit code, cari ${ROBOTS_NAME} di bawah Templates, dan hapus berkasnya. Shopify kembali ke robots.txt bawaannya.`),
+]
+
+const YES_NO: PackageChoice["options"] = [
+  { value: "yes", label: b("Yes", "Ya") },
+  { value: "no", label: b("No", "Tidak") },
+]
+
+export const SIGNAL_CHOICES: PackageChoice[] = [
+  { key: "ai-train", label: b("May AI companies train their models on your content?", "Bolehkah perusahaan AI melatih model mereka dengan konten Anda?"), options: YES_NO },
+  { key: "search", label: b("May your content appear in AI search results?", "Bolehkah konten Anda muncul di hasil pencarian AI?"), options: YES_NO },
+  { key: "ai-input", label: b("May an AI use your content to answer a customer's question?", "Bolehkah AI memakai konten Anda untuk menjawab pertanyaan pelanggan?"), options: YES_NO },
+]
+
+export function signalsPackage(platform: string, fixes: Fix[]): PackageResult {
+  if (!fixes.some((f) => f.check_id === "content_signals" && f.status !== "platform_held")) return { ready: false, reason: "already_done" }
+  // WordPress keeps robots.txt in its SEO plugin, which is a different job; only Shopify has a file for it here.
+  if (platform !== "shopify") return { ready: false, reason: "platform", platform }
+  return {
+    ready: true,
+    package: {
+      id: "content_signals", platform: "shopify", covers: ["content_signals"], missing: [], snippetName: ROBOTS_NAME, renderLine: "",
+      files: [{ name: ROBOTS_NAME, content: robotsLiquid() }], steps: ROBOTS_STEPS, undo: ROBOTS_UNDO, facts: [],
+      choices: SIGNAL_CHOICES, placeholder: SIGNALS_PLACEHOLDER,
+    },
+  }
 }

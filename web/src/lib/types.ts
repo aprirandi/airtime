@@ -178,6 +178,8 @@ export interface BusinessCardPackage {
   steps: { en: string; id: string }[]
   undo: { en: string; id: string }[]
   facts: { kind: string; value: string; label: string; label_id: string }[]
+  choices?: { key: string; label: { en: string; id: string }; options: { value: "yes" | "no"; label: { en: string; id: string } }[] }[]
+  placeholder?: string
   download?: { name: string; type: string; base64: string }
 }
 

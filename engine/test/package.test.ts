@@ -154,3 +154,48 @@ describe("platform when the client did not say", () => {
     expect(r["organization_completeness"]).toMatchObject({ ready: true })
   })
 })
+
+import { robotsLiquid, signalsPackage, SIGNALS_PLACEHOLDER, SIGNAL_CHOICES } from "../src/package"
+
+describe("content signals for Shopify", () => {
+  const f = [{ check_id: "content_signals", status: "needs_owner", confirm: [] }] as never
+  const tpl = robotsLiquid()
+  const count = (re: RegExp) => (tpl.match(re) ?? []).length
+
+  it("is only for Shopify, and only while the item is open", () => {
+    expect(signalsPackage("shopify", f)).toMatchObject({ ready: true })
+    expect(signalsPackage("wordpress", f)).toMatchObject({ ready: false, reason: "platform" })
+    expect(signalsPackage("shopify", [])).toMatchObject({ ready: false, reason: "already_done" })
+    expect(Object.keys(packagesFor("shopify", {}, f, ""))).toEqual(["content_signals"])
+  })
+  it("leaves the three answers to the owner: nothing chosen, one place to put them", () => {
+    const r = signalsPackage("shopify", f)
+    if (!r.ready) throw new Error("not ready")
+    expect(r.package.choices?.map((c) => c.key)).toEqual(["ai-train", "search", "ai-input"])
+    expect(SIGNAL_CHOICES.every((c) => c.options.length === 2)).toBe(true)
+    expect(r.package.files[0]!.content.split(SIGNALS_PLACEHOLDER)).toHaveLength(2)
+    expect(r.package.files[0]!.content).not.toMatch(/=(yes|no)/)
+  })
+  it("has balanced Liquid tags and keeps Shopify's own loop", () => {
+    for (const [open, close] of [[/\{%-?\s*for\b/g, /\{%-?\s*endfor\b/g], [/\{%-?\s*if\b/g, /\{%-?\s*endif\b/g], [/\{%-?\s*comment\b/g, /\{%-?\s*endcomment\b/g], [/\{%-?\s*capture\b/g, /\{%-?\s*endcapture\b/g]] as [RegExp, RegExp][]) {
+      expect(count(open)).toBe(count(close))
+    }
+    expect(tpl).toContain("robots.default_groups")
+    expect(tpl).toContain("{{ rule }}")
+    expect(tpl).toContain("{{ group.sitemap }}")
+    expect(count(/\{\{-?\s*[^}]*\}\}/g)).toBeGreaterThan(0)
+  })
+  it("puts the new line between two line breaks of its own, only for the group of every crawler", () => {
+    expect(tpl).toContain("group.user_agent.value == '*'")
+    expect(tpl).toMatch(/\{\{- nl \}\}Content-Signal: __CONTENT_SIGNAL_VALUES__\{\{ nl \}\}/)
+    expect(count(/Content-Signal:/g)).toBe(1)
+  })
+  it("gives a robots.txt that passes the check once answered", () => {
+    const line = tpl.match(/Content-Signal: (\S.*?)\{\{/)![1]!.replace(SIGNALS_PLACEHOLDER, "ai-train=no, search=yes, ai-input=yes")
+    const robots = `User-agent: *\nContent-Signal: ${line}\nDisallow: /admin\n\nSitemap: https://shop.example/sitemap.xml\n`
+    const s = { robots: { ok: true, text: robots } } as never
+    expect((CHECKS.content_signals!(s) as { result: string }).result).toBe("pass")
+    const two = { robots: { ok: true, text: "User-agent: *\nContent-Signal: search=yes, ai-input=no\n" } } as never
+    expect((CHECKS.content_signals!(two) as { result: string }).result).toBe("partial")
+  })
+})

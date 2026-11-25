@@ -60,7 +60,12 @@ function Delta({ now, before, text, same, small }: { now: number; before: number
 
 function PackageCard({ pkg, lang, t }: { pkg: BusinessCardPackage; lang: "en" | "id"; t: T }) {
   const say = (b: { en: string; id: string }) => (lang === "id" ? b.id : b.en)
-  const file = pkg.files[0]
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const choices = pkg.choices ?? []
+  // a file with questions in it is complete only when the owner has answered every one; nothing is chosen for them
+  const answered = choices.every((c) => answers[c.key])
+  const base = pkg.files[0]
+  const file = base && choices.length && pkg.placeholder ? (answered ? { ...base, content: base.content.split(pkg.placeholder).join(choices.map((c) => `${c.key}=${answers[c.key]}`).join(", ")) } : undefined) : base
   const missing = pkg.missing.map((m) => ({ description: lang === "id" ? "deskripsi" : "description", contactPoint: lang === "id" ? "kontak" : "contact", address: lang === "id" ? "alamat" : "address" })[m] ?? m)
   const download = () => {
     if (!file) return
@@ -88,6 +93,28 @@ function PackageCard({ pkg, lang, t }: { pkg: BusinessCardPackage; lang: "en" | 
         </div>
       )}
       {missing.length > 0 && <p className="text-warning text-xs">{t("site.pkg.missing", { m: missing.join(", ") })}</p>}
+      {choices.length > 0 && (
+        <div className="bg-muted/50 space-y-3 rounded-lg p-3">
+          {choices.map((c) => (
+            <label key={c.key} className="block space-y-1 text-sm">
+              <span className="font-medium">{say(c.label)}</span>
+              <select
+                value={answers[c.key] ?? ""}
+                onChange={(e) => setAnswers((a) => ({ ...a, [c.key]: e.target.value }))}
+                className="border-input bg-background mt-1 block h-9 w-full max-w-xs rounded-md border px-2 text-sm"
+              >
+                <option value="">{t("site.pkg.choose")}</option>
+                {c.options.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {say(o.label)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+          <p className="text-muted-foreground text-xs">{t("site.pkg.chooseHint")}</p>
+        </div>
+      )}
       <ol className="space-y-2 text-sm">
         {pkg.steps.map((s, i) => (
           <li key={i} className="flex gap-3">
@@ -96,6 +123,7 @@ function PackageCard({ pkg, lang, t }: { pkg: BusinessCardPackage; lang: "en" | 
           </li>
         ))}
       </ol>
+      {!file && choices.length > 0 && <p className="text-warning text-xs">{t("site.pkg.answerFirst")}</p>}
       {file && (
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
