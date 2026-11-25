@@ -66,7 +66,7 @@ jobs:
           print("  packages:", "MISSING from the answer (old service?)" if pk is None else {k: ("ready" if v.get("ready") else v.get("reason")) for k, v in pk.items()})
           held = [f["check_id"] for f in latest["fixes"] if f["status"] == "platform_held"]
           print("  platform said:", repr(made["site"].get("platform")), "| used:", made["site"].get("platform_used"), "| audit platform:", repr(latest.get("platform")), "| held by platform:", len(held))
-          print("  fix statuses:", "| fix statuses:", {f["check_id"]: f["status"] for f in latest["fixes"] if f["check_id"] in ("jsonld_organization", "organization_completeness", "llms_txt")})
+          print("  fix statuses:", {f["check_id"]: f["status"] for f in latest["fixes"] if f["check_id"] in ("jsonld_organization", "organization_completeness", "llms_txt")})
           status, got = call({"action": "get", "token": token})
           print("get:", status, "| same score:", got.get("latest", {}).get("score") == latest["score"])
           first = latest["gaps"][0]
