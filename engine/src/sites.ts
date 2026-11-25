@@ -339,7 +339,7 @@ async function viewOf(store: SiteStore, site: SiteRow, scan: Scan, asking: { on:
   }
   const passing = new Set(latest.checks.filter((c) => c.result === "pass").map((c) => c.id))
   // what the client said, else what the pages show; the score does not depend on it, the tutorials and packages do
-  const platform = site.platform || guess || ""
+  const platform = site.platform || (scan.result as { platform?: string }).platform || guess || ""
   const guides: Record<string, Guide> = {}
   for (const fix of latest.fixes) {
     if (fix.status === "platform_held") continue

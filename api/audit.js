@@ -23278,6 +23278,8 @@ function detectPlatform(html) {
   const page = html.slice(0, 4e5);
   if (/<meta[^>]+name=["']generator["'][^>]+content=["']WordPress/i.test(page) || /\/wp-(?:content|includes)\//i.test(page)) return "wordpress";
   if (/cdn\.shopify\.com|Shopify\.theme|myshopify\.com/i.test(page)) return "shopify";
+  if (/<meta[^>]+name=["']generator["'][^>]+content=["']Wix\.com|static\.wixstatic\.com|static\.parastorage\.com/i.test(page)) return "wix";
+  if (/<meta[^>]+name=["']generator["'][^>]+content=["']Squarespace|static1\.squarespace\.com|assets\.squarespace\.com/i.test(page)) return "squarespace";
   return "";
 }
 
@@ -23873,9 +23875,9 @@ function rowsFor(snapshot, platform) {
 }
 async function runAudit(fetch, options) {
   const snapshot = await collect(fetch, options);
-  const rows = rowsFor(snapshot, options.platform);
+  const platform = options.platform || detectPlatform(snapshot.homeHtml.text);
+  const rows = rowsFor(snapshot, platform);
   const result = scoreRows(rows);
-  const platform = options.platform;
   const target = snapshot.base;
   const scannedAt = options.scannedAt ?? (/* @__PURE__ */ new Date()).toISOString();
   const fixable = gaps(rows);
@@ -23932,7 +23934,7 @@ async function runAudit(fetch, options) {
     fix_drafts: fixDrafts(rows, snapshot, siteName(snapshot)),
     profile_hint: profileHint(snapshot),
     llms_draft: llmsText(snapshot, siteName(snapshot)),
-    platform_guess: detectPlatform(snapshot.homeHtml.text),
+    platform_guess: platform === options.platform ? "" : platform,
     site_summary: siteSummary(snapshot),
     prompt_all: allPrompt(gapRows, target, platform, "en", scanned),
     prompt_all_id: allPrompt(gapRows, target, platform, "id", scanned),
