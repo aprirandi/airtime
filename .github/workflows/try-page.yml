@@ -10,6 +10,14 @@ on:
         description: "Address to make a page for (use your own website)"
         required: false
         default: "renosites.com.au"
+      platform:
+        description: "Platform to say (empty = let the service detect it)"
+        required: false
+        default: ""
+      ask:
+        description: "Also try the Asker (spends AI calls): yes or no"
+        required: false
+        default: "no"
       deployed:
         description: "Deployed address"
         required: false
@@ -30,6 +38,8 @@ jobs:
       - name: Create, open, choose, re-check
         env:
           SITE: ${{ github.event.inputs.site || 'renosites.com.au' }}
+          PLATFORM: ${{ github.event.inputs.platform || '' }}
+          ASK: ${{ github.event.inputs.ask || 'no' }}
           DEPLOYED: ${{ github.event.inputs.deployed || 'https://airtime-ai.vercel.app' }}
         run: |
           python3 - <<'PY'
@@ -45,7 +55,7 @@ jobs:
               except urllib.error.HTTPError as e:
                   return e.code, json.load(e)
 
-          status, made = call({"action": "create", "url": os.environ["SITE"], "platform": "wordpress"})
+          status, made = call({"action": "create", "url": os.environ["SITE"], "platform": os.environ["PLATFORM"]})
           print("create:", status, made.get("error", "ok"), made.get("detail", ""))
           if status != 200:
               raise SystemExit(0)
@@ -54,7 +64,9 @@ jobs:
           print("  host:", made["site"]["host"], "| score:", latest["score"], "| fixes:", len(latest["fixes"]), "| guides:", len(made["guides"]))
           pk = made.get("packages")
           print("  packages:", "MISSING from the answer (old service?)" if pk is None else {k: ("ready" if v.get("ready") else v.get("reason")) for k, v in pk.items()})
-          print("  platform:", made["site"].get("platform"), "| fix statuses:", {f["check_id"]: f["status"] for f in latest["fixes"] if f["check_id"] in ("jsonld_organization", "organization_completeness", "llms_txt")})
+          held = [f["check_id"] for f in latest["fixes"] if f["status"] == "platform_held"]
+          print("  platform said:", repr(made["site"].get("platform")), "| used:", made["site"].get("platform_used"), "| audit platform:", repr(latest.get("platform")), "| held by platform:", len(held))
+          print("  fix statuses:", {f["check_id"]: f["status"] for f in latest["fixes"] if f["check_id"] in ("jsonld_organization", "organization_completeness", "llms_txt")})
           status, got = call({"action": "get", "token": token})
           print("get:", status, "| same score:", got.get("latest", {}).get("score") == latest["score"])
           first = latest["gaps"][0]
@@ -64,8 +76,8 @@ jobs:
           print("rescan:", status, "| scans kept:", len(again.get("history", [])), "| baseline score:", (again.get("baseline") or {}).get("score"))
           # the Asker: only when the service has an assistant (the key is set); it spends seven calls of the AI key
           asker = again.get("asker", {})
-          print("asker on:", asker.get("enabled"))
-          if asker.get("enabled"):
+          print("asker on:", asker.get("enabled"), "| trying it:", os.environ["ASK"])
+          if asker.get("enabled") and os.environ["ASK"] == "yes":
               status, saved = call({"action": "profile", "token": token, "profile": {
                   "name": "Renosites", "city": "Melbourne", "categories": "website design, web development"}})
               print("profile:", status, saved.get("error", "ok"))
