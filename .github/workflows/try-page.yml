@@ -52,6 +52,9 @@ jobs:
           token = made["token"]  # never printed
           latest = made["latest"]
           print("  host:", made["site"]["host"], "| score:", latest["score"], "| fixes:", len(latest["fixes"]), "| guides:", len(made["guides"]))
+          pk = made.get("packages")
+          print("  packages:", "MISSING from the answer (old service?)" if pk is None else {k: ("ready" if v.get("ready") else v.get("reason")) for k, v in pk.items()})
+          print("  platform:", made["site"].get("platform"), "| fix statuses:", {f["check_id"]: f["status"] for f in latest["fixes"] if f["check_id"] in ("jsonld_organization", "organization_completeness", "llms_txt")})
           status, got = call({"action": "get", "token": token})
           print("get:", status, "| same score:", got.get("latest", {}).get("score") == latest["score"])
           first = latest["gaps"][0]
