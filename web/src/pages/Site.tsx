@@ -147,10 +147,16 @@ function SiteFix({ fix, meta, view, busy, onChoose }: { fix: Fix; meta: FixMeta;
               {t("site.btn.self")}
             </Button>
           )}
-          {choice !== "asked_fixer" && (
+          {choice !== "asked_fixer" && pack?.ready && (
             <Button size="sm" variant="default" disabled={busy} onClick={() => onChoose("asked_fixer")}>
               <Bot className="size-4" aria-hidden="true" />
               {t("site.btn.fixer")}
+            </Button>
+          )}
+          {choice !== "asked_fixer" && !pack?.ready && (
+            <Button size="sm" variant="outline" disabled title={t("site.btn.fixerSoon.hint")}>
+              <Bot className="size-4" aria-hidden="true" />
+              {t("site.btn.fixerSoon")}
             </Button>
           )}
           {choice !== "open" && (
