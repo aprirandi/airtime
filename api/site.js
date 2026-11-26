@@ -24740,7 +24740,74 @@ function packagesFor(platformGiven, drafts, fixes, llms) {
   const card = businessCard(platform, drafts, fixes);
   for (const id of COVERS) if (fixes.some((f) => f.check_id === id)) out[id] = card;
   if (fixes.some((f) => f.check_id === "llms_txt")) out["llms_txt"] = llmsPackage(platform, llms, fixes);
+  if (fixes.some((f) => f.check_id === "content_signals")) out["content_signals"] = signalsPackage(platform, fixes);
   return out;
+}
+var SIGNALS_PLACEHOLDER = "__CONTENT_SIGNAL_VALUES__";
+var ROBOTS_NAME = "robots.txt.liquid";
+function robotsLiquid(values = SIGNALS_PLACEHOLDER) {
+  return [
+    "{% comment %}",
+    "  Added by Airtime: tells AI companies what they may do with your content (Content-Signal).",
+    `  To undo it, delete this file (${ROBOTS_NAME}). Shopify then goes back to its own default robots.txt.`,
+    "{% endcomment %}",
+    "{%- capture nl %}",
+    "{% endcapture -%}",
+    "{%- for group in robots.default_groups -%}",
+    "  {{- group.user_agent }}",
+    "  {%- if group.user_agent.value == '*' -%}",
+    `    {{- nl }}Content-Signal: ${values}{{ nl }}`,
+    "  {%- endif -%}",
+    "  {%- for rule in group.rules -%}",
+    "    {{ rule }}",
+    "  {%- endfor -%}",
+    "  {%- if group.sitemap != blank -%}",
+    "    {{ group.sitemap }}",
+    "  {%- endif %}",
+    "{% endfor %}",
+    ""
+  ].join("\n");
+}
+var ROBOTS_STEPS = [
+  b("Answer the three questions above. They are yours to decide, so nothing is chosen for you. The file appears when all three are answered.", "Jawab tiga pertanyaan di atas. Ini keputusan Anda, jadi tidak ada yang dipilihkan. Berkasnya muncul setelah ketiganya dijawab."),
+  b("In Online Store, Themes, open the three dots (\u2026) of your LIVE theme and choose Edit code. This file only works on the live theme, so a copy cannot be used to try it first.", "Di Online Store, Themes, buka titik tiga (\u2026) tema yang AKTIF dan pilih Edit code. Berkas ini hanya bekerja di tema yang aktif, jadi salinan tidak bisa dipakai untuk mencobanya dulu."),
+  b("Under Templates click Add a new template, choose robots.txt from the list, and confirm. Shopify creates a file called robots.txt.liquid.", "Di bawah Templates klik Add a new template, pilih robots.txt dari daftar, dan konfirmasi. Shopify membuat berkas bernama robots.txt.liquid."),
+  b("Delete everything in that file, paste the code from the box below, and click Save.", "Hapus semua isi berkas itu, tempel kode dari kotak di bawah, lalu klik Save."),
+  b("Open your-site/robots.txt in a browser. Under User-agent: * you should see a line starting with Content-Signal, and all your other lines still there. If anything looks wrong, delete the file (see How to undo it).", "Buka situs-anda/robots.txt di browser. Di bawah User-agent: * harus ada baris yang diawali Content-Signal, dan semua baris Anda yang lain tetap ada. Kalau ada yang terlihat salah, hapus berkasnya (lihat Cara membatalkannya)."),
+  b("Press Re-check at the top of this page. When the check passes, the item is marked done on its own.", "Tekan Periksa ulang di bagian atas halaman ini. Begitu pemeriksaannya lulus, item ini ditandai selesai dengan sendirinya.")
+];
+var ROBOTS_UNDO = [
+  b(`Open Edit code, find ${ROBOTS_NAME} under Templates, and delete the file. Shopify goes back to its own default robots.txt.`, `Buka Edit code, cari ${ROBOTS_NAME} di bawah Templates, dan hapus berkasnya. Shopify kembali ke robots.txt bawaannya.`)
+];
+var YES_NO = [
+  { value: "yes", label: b("Yes", "Ya") },
+  { value: "no", label: b("No", "Tidak") }
+];
+var SIGNAL_CHOICES = [
+  { key: "ai-train", label: b("May AI companies train their models on your content?", "Bolehkah perusahaan AI melatih model mereka dengan konten Anda?"), options: YES_NO },
+  { key: "search", label: b("May your content appear in AI search results?", "Bolehkah konten Anda muncul di hasil pencarian AI?"), options: YES_NO },
+  { key: "ai-input", label: b("May an AI use your content to answer a customer's question?", "Bolehkah AI memakai konten Anda untuk menjawab pertanyaan pelanggan?"), options: YES_NO }
+];
+function signalsPackage(platform, fixes) {
+  if (!fixes.some((f) => f.check_id === "content_signals" && f.status !== "platform_held")) return { ready: false, reason: "already_done" };
+  if (platform !== "shopify") return { ready: false, reason: "platform", platform };
+  return {
+    ready: true,
+    package: {
+      id: "content_signals",
+      platform: "shopify",
+      covers: ["content_signals"],
+      missing: [],
+      snippetName: ROBOTS_NAME,
+      renderLine: "",
+      files: [{ name: ROBOTS_NAME, content: robotsLiquid() }],
+      steps: ROBOTS_STEPS,
+      undo: ROBOTS_UNDO,
+      facts: [],
+      choices: SIGNAL_CHOICES,
+      placeholder: SIGNALS_PLACEHOLDER
+    }
+  };
 }
 
 // src/sites.ts
